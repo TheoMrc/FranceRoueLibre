@@ -197,8 +197,16 @@ h1 em { color: var(--blue); font-style: normal; }
 .department.selected { fill: rgba(42, 175, 171, .82); stroke: #fff; stroke-width: 2.8; filter: drop-shadow(0 0 11px rgba(52, 211, 153, .72)); }
 [data-theme="light"] .department { fill: rgba(104, 172, 193, .42); stroke: rgba(34, 95, 119, .48); }
 [data-theme="light"] .department:hover, [data-theme="light"] .department:focus { fill: rgba(44, 148, 171, .57); stroke: rgba(13, 67, 91, .8); }
-.map-point { stroke: rgba(239, 253, 255, .9); stroke-width: 1.25; vector-effect: non-scaling-stroke; cursor: pointer; opacity: .86; transition: r .32s ease, opacity .25s ease, stroke-width .25s ease, filter .25s ease; }
-.map-point:hover, .map-point:focus, .map-point.selected { opacity: 1; stroke-width: 2.5; filter: drop-shadow(0 0 8px rgba(52, 211, 153, .78)); }
+.region-outline { display: none; fill: none; stroke: rgba(232, 252, 255, .88); stroke-width: 2; vector-effect: non-scaling-stroke; cursor: pointer; pointer-events: stroke; transition: stroke .35s ease, stroke-width .35s ease, filter .35s ease; }
+.region-outline:hover, .region-outline:focus { stroke: #fff; stroke-width: 3.1; filter: drop-shadow(0 0 8px rgba(56, 189, 248, .7)); outline: none; }
+.region-outline.selected { stroke: var(--green); stroke-width: 3.5; filter: drop-shadow(0 0 10px rgba(52, 211, 153, .78)); }
+.commune-shape { fill: rgba(27, 126, 145, .7); stroke: rgba(224, 253, 255, .72); stroke-width: .58; vector-effect: non-scaling-stroke; cursor: pointer; transition: fill .25s ease, stroke .25s ease, filter .25s ease; }
+.commune-shape:hover, .commune-shape:focus { stroke: #fff; stroke-width: 1.25; filter: drop-shadow(0 0 5px rgba(52, 211, 153, .7)); outline: none; }
+.commune-shape.selected { stroke: #fff; stroke-width: 2.2; filter: drop-shadow(0 0 9px rgba(52, 211, 153, .9)); }
+[data-theme="light"] .region-outline { stroke: rgba(13, 66, 89, .83); }
+[data-theme="light"] .commune-shape { stroke: rgba(23, 83, 105, .68); }
+.map-point { stroke: rgba(239, 253, 255, .9); stroke-width: .8; vector-effect: non-scaling-stroke; cursor: pointer; opacity: .86; transition: r .32s ease, opacity .25s ease, stroke-width .25s ease, filter .25s ease; }
+.map-point:hover, .map-point:focus, .map-point.selected { opacity: 1; stroke-width: 1.7; filter: drop-shadow(0 0 8px rgba(52, 211, 153, .78)); }
 .map-label { fill: var(--text); font-family: "Plus Jakarta Sans", sans-serif; font-size: 10px; font-weight: 700; pointer-events: none; paint-order: stroke; stroke: rgba(3, 17, 26, .9); stroke-width: 3px; }
 .map-tooltip { position: absolute; z-index: 5; max-width: 260px; padding: .6rem .75rem; border: 1px solid var(--line-strong); border-radius: 10px; color: var(--text); background: rgba(3, 18, 28, .92); box-shadow: 0 12px 30px rgba(0, 0, 0, .24); font-size: .68rem; line-height: 1.35; pointer-events: none; transform: translate(12px, 12px); }
 [data-theme="light"] .map-tooltip { background: rgba(255, 255, 255, .96); }

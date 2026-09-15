@@ -23,6 +23,7 @@ const dom = {
   map: document.getElementById('map'),
   mapScene: document.getElementById('mapScene'),
   mapLayer: document.getElementById('mapLayer'),
+  communeLayer: document.getElementById('communeLayer'),
   mapPoints: document.getElementById('mapPoints'),
   mapLabels: document.getElementById('mapLabels'),
   tooltip: document.getElementById('mapTooltip'),
@@ -75,7 +76,14 @@ const data = {
   communePopByDepartment: new Map(),
   projectRows: [],
   projectTotalsByDepartment: new Map(),
-  projectionBounds: null
+  projectionBounds: null,
+  regionPaths: new Map(),
+  regionPathElements: new Map(),
+  communeBoundaries: null,
+  communeFeatures: [],
+  communeFeatureByCode: new Map(),
+  communePathByCode: new Map(),
+  communePathElements: new Map()
 };
 
 const numberFormat = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
@@ -142,8 +150,9 @@ function projectPoint(coords) {
   const [lon, lat] = coords || [];
   const bounds = data.projectionBounds;
   if (!bounds || !Number.isFinite(lon) || !Number.isFinite(lat)) return { x: 450, y: 310 };
-  const x = 24 + ((lon - bounds.minLon) / (bounds.maxLon - bounds.minLon || 1)) * 852;
-  const y = 22 + ((bounds.maxLat - lat) / (bounds.maxLat - bounds.minLat || 1)) * 576;
+  // Correct longitude for the latitude of France so the country keeps its geographic proportions.
+  const x = bounds.offsetX + (lon - bounds.centerLon) * bounds.cosLat * bounds.scale;
+  const y = bounds.offsetY - (lat - bounds.centerLat) * bounds.scale;
   return { x, y };
 }
 
@@ -266,9 +275,91 @@ function setupProjection() {
   data.features.filter(feature => !isOverseasCode(feature.properties?.code)).forEach(feature => walkCoordinates(feature.geometry?.coordinates, coords => points.push(coords)));
   const lons = points.map(point => point[0]);
   const lats = points.map(point => point[1]);
-  data.projectionBounds = { minLon: Math.min(...lons), maxLon: Math.max(...lons), minLat: Math.min(...lats), maxLat: Math.max(...lats) };
+  const minLon = Math.min(...lons); const maxLon = Math.max(...lons);
+  const minLat = Math.min(...lats); const maxLat = Math.max(...lats);
+  const centerLon = (minLon + maxLon) / 2; const centerLat = (minLat + maxLat) / 2;
+  const cosLat = Math.cos(centerLat * Math.PI / 180);
+  const projectedWidth = (maxLon - minLon) * cosLat;
+  const projectedHeight = maxLat - minLat;
+  const scale = Math.min(790 / (projectedWidth || 1), 540 / (projectedHeight || 1));
+  data.projectionBounds = { minLon, maxLon, minLat, maxLat, centerLon, centerLat, cosLat, scale, offsetX: 450, offsetY: 310 };
 }
 
+function coordinateKey(coords) {
+  return Number(coords[0]).toFixed(5) + ',' + Number(coords[1]).toFixed(5);
+}
+
+function regionNameForCode(regionCode) {
+  const known = data.regionByCode.get(String(regionCode));
+  if (known?.name) return known.name;
+  const feature = data.features.find(item => String(item.properties?.region || '') === String(regionCode));
+  return feature?.properties?.nom || String(regionCode);
+}
+
+function addRegionSegment(segments, a, b) {
+  const aKey = coordinateKey(a);
+  const bKey = coordinateKey(b);
+  if (aKey === bKey) return;
+  const key = [aKey, bKey].sort().join('|');
+  const existing = segments.get(key);
+  if (existing) existing.count += 1;
+  else segments.set(key, { aKey, bKey, a, b, count: 1 });
+}
+
+function buildRegionPaths() {
+  data.regionPaths.clear();
+  const grouped = new Map();
+  data.features.forEach(feature => {
+    const regionCode = String(feature.properties?.region || '');
+    if (!regionCode) return;
+    if (!grouped.has(regionCode)) grouped.set(regionCode, new Map());
+    const segments = grouped.get(regionCode);
+    const polygons = feature.geometry?.type === 'Polygon' ? [feature.geometry.coordinates] : feature.geometry?.coordinates || [];
+    polygons.forEach(polygon => polygon.forEach(ring => {
+      if (!Array.isArray(ring) || ring.length < 2) return;
+      for (let index = 0; index < ring.length - 1; index++) addRegionSegment(segments, ring[index], ring[index + 1]);
+      if (coordinateKey(ring[0]) !== coordinateKey(ring[ring.length - 1])) addRegionSegment(segments, ring[ring.length - 1], ring[0]);
+    }));
+  });
+  grouped.forEach((segments, regionCode) => {
+    const boundary = [...segments.values()].filter(segment => segment.count === 1);
+    const adjacency = new Map();
+    const coordinates = new Map();
+    boundary.forEach((segment, index) => {
+      segment.index = index;
+      coordinates.set(segment.aKey, segment.a);
+      coordinates.set(segment.bKey, segment.b);
+      if (!adjacency.has(segment.aKey)) adjacency.set(segment.aKey, []);
+      if (!adjacency.has(segment.bKey)) adjacency.set(segment.bKey, []);
+      adjacency.get(segment.aKey).push({ index, key: segment.bKey });
+      adjacency.get(segment.bKey).push({ index, key: segment.aKey });
+    });
+    const visited = new Set();
+    const paths = [];
+    boundary.forEach(segment => {
+      if (visited.has(segment.index)) return;
+      const keys = [segment.aKey];
+      let current = segment.aKey;
+      let previous = '';
+      let guard = 0;
+      while (guard++ < boundary.length + 4) {
+        const candidates = adjacency.get(current) || [];
+        const next = candidates.find(candidate => !visited.has(candidate.index) && candidate.key !== previous) || candidates.find(candidate => !visited.has(candidate.index));
+        if (!next) break;
+        visited.add(next.index);
+        previous = current;
+        current = next.key;
+        keys.push(current);
+        if (current === keys[0]) break;
+      }
+      if (keys.length >= 4) {
+        const projected = keys.map(key => projectPoint(coordinates.get(key)));
+        paths.push('M' + projected.map(point => point.x.toFixed(2) + ',' + point.y.toFixed(2)).join(' L') + ' Z');
+      }
+    });
+    data.regionPaths.set(regionCode, paths.join(' '));
+  });
+}
 function setupDerivedData() {
   data.features = data.boundaries.features || [];
   data.features.forEach(feature => data.featureByCode.set(String(feature.properties?.code || ''), feature));
@@ -300,6 +391,15 @@ function setupDerivedData() {
     data.projectTotalsByDepartment.set(row.department, bucket);
   });
   setupProjection();
+  buildRegionPaths();
+  data.communeFeatures = data.communeBoundaries?.features || [];
+  data.communeFeatureByCode.clear();
+  data.communePathByCode.clear();
+  data.communeFeatures.forEach(feature => {
+    const code = String(feature.properties?.code || '');
+    data.communeFeatureByCode.set(code, feature);
+    data.communePathByCode.set(code, featurePath(feature));
+  });
 }
 
 function setupFilters() {
@@ -321,11 +421,52 @@ function setupMap() {
     path.setAttribute('role', 'button');
     path.dataset.code = code;
     path.style.setProperty('--i', index);
-    path.addEventListener('click', event => { event.stopPropagation(); selectDepartment(normalizeDepartment(code)); });
-    path.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectDepartment(normalizeDepartment(code)); } });
+    path.addEventListener('click', event => { event.stopPropagation(); state.mode === 'regions' ? selectRegion(regionNameForCode(feature.properties?.region)) : selectDepartment(normalizeDepartment(code)); });
+    path.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); state.mode === 'regions' ? selectRegion(regionNameForCode(feature.properties?.region)) : selectDepartment(normalizeDepartment(code)); } });
     path.addEventListener('pointermove', event => showTooltip(event, path.getAttribute('aria-label') || feature.properties?.nom || code));
     path.addEventListener('pointerleave', hideTooltip);
     dom.mapLayer.appendChild(path);
+  });
+  if (dom.communeLayer && !dom.communeLayer.dataset.bound) {
+    dom.communeLayer.dataset.bound = 'true';
+    dom.communeLayer.addEventListener('click', event => {
+      const path = event.target.closest?.('.commune-shape');
+      if (!path) return;
+      event.stopPropagation();
+      selectCommune(path.dataset.code);
+    });
+    dom.communeLayer.addEventListener('keydown', event => {
+      const path = event.target.closest?.('.commune-shape');
+      if (!path || (event.key !== 'Enter' && event.key !== ' ')) return;
+      event.preventDefault();
+      selectCommune(path.dataset.code);
+    });
+    dom.communeLayer.addEventListener('pointermove', event => {
+      const path = event.target.closest?.('.commune-shape');
+      if (path) showTooltip(event, path.getAttribute('aria-label'));
+    });
+    dom.communeLayer.addEventListener('pointerout', event => {
+      const path = event.target.closest?.('.commune-shape');
+      if (path && !event.relatedTarget?.closest?.('.commune-shape')) hideTooltip();
+    });
+  }
+  data.regionPathElements.clear();
+  data.regionPaths.forEach((pathData, regionCode) => {
+    if (!pathData || !data.regionByCode.has(String(regionCode))) return;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathData);
+    path.setAttribute('class', 'region-outline');
+    path.setAttribute('tabindex', '0');
+    path.setAttribute('role', 'button');
+    path.dataset.regionCode = regionCode;
+    const label = regionNameForCode(regionCode);
+    path.setAttribute('aria-label', 'R\u00e9gion ' + label);
+    path.addEventListener('click', event => { event.stopPropagation(); selectRegion(label); });
+    path.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectRegion(label); } });
+    path.addEventListener('pointermove', event => showTooltip(event, path.getAttribute('aria-label')));
+    path.addEventListener('pointerleave', hideTooltip);
+    dom.mapLayer.appendChild(path);
+    data.regionPathElements.set(regionCode, path);
   });
 }
 
@@ -354,6 +495,15 @@ function resetAll() {
   render();
 }
 
+function selectRegion(name) {
+  if (!name) return;
+  state.region = name;
+  dom.region.value = name;
+  state.selectedDepartment = '';
+  state.selectedCommune = '';
+  state.zoomDelta = 0;
+  render();
+}
 function selectDepartment(code) {
   state.selectedDepartment = normalizeDepartment(code);
   state.selectedCommune = '';
@@ -363,9 +513,10 @@ function selectDepartment(code) {
 
 function selectCommune(code) {
   const commune = data.communeByCode.get(code);
-  if (!commune) return;
+  const feature = data.communeFeatureByCode.get(code);
+  if (!commune && !feature) return;
   state.selectedCommune = code;
-  state.selectedDepartment = normalizeDepartment(commune.department);
+  state.selectedDepartment = normalizeDepartment(commune?.department || feature?.properties?.departement || '');
   state.zoomDelta = 0;
   render();
 }
@@ -389,8 +540,8 @@ function metricLabel() {
 
 function modeCopy() {
   const copy = {
-    projects: { filter: 'Explorer les projets', kicker: 'PROJETS FINANCÉS PAR L’ÉTAT', title: 'Subventions par département', unit: 'Subventions accordées', count: 'Projets', coverage: 'Départements touchés', help: 'Cliquez sur un département pour afficher ses projets et ses communes.', context: 'Source DGCL 2025 · engagements de subventions d’investissement.' },
-    communes: { filter: 'Explorer les budgets communaux', kicker: 'COMPTES LOCAUX · OFGL', title: 'Dépenses par département', unit: 'Dépenses communales', count: 'Communes', coverage: 'Départements couverts', help: 'Cliquez sur un point pour zoomer jusqu’à la commune et inspecter son budget.', context: 'Source OFGL 2025 · dépenses totales des communes, avec montant par habitant.' },
+    projects: { filter: 'Explorer les projets', kicker: 'PROJETS FINANCÉS PAR L’ÉTAT', title: 'Subventions par département', unit: 'Subventions accordées', count: 'Projets', coverage: 'Départements touchés', help: 'Cliquez sur une commune ou un département pour inspecter les projets.', context: 'Source DGCL 2025 · engagements de subventions d’investissement.' },
+    communes: { filter: 'Explorer les budgets communaux', kicker: 'COMPTES LOCAUX \u00b7 OFGL', title: 'D\u00e9penses par commune', unit: 'D\u00e9penses communales', count: 'Communes', coverage: 'D\u00e9partements couverts', help: 'Cliquez sur une commune pour inspecter son budget et zoomer.', context: 'Source OFGL 2025 \u00b7 d\u00e9penses totales des communes, avec montant par habitant.' },
     departments: { filter: 'Explorer les budgets départementaux', kicker: 'COMPTES LOCAUX · OFGL', title: 'Dépenses par département', unit: 'Dépenses départementales', count: 'Départements', coverage: 'Régions couvertes', help: 'Cliquez sur un département pour isoler son budget et ses communes.', context: 'Source OFGL 2025 · dépenses totales des départements, avec montant par habitant.' },
     regions: { filter: 'Explorer les budgets régionaux', kicker: 'COMPTES LOCAUX · OFGL', title: 'Dépenses par région', unit: 'Dépenses régionales', count: 'Régions', coverage: 'Régions affichées', help: 'Filtrez une région ou cliquez dans la liste pour recentrer la lecture.', context: 'Source OFGL 2025 · dépenses totales des régions, avec montant par habitant.' }
   };
@@ -449,8 +600,57 @@ function pointRows() {
   return [...grouped.values()].map(row => ({ ...row, value: state.metric === 'total' ? row.total : (row.population ? row.total / row.population : 0) }));
 }
 
+function communeShapeRows() {
+  if (state.mode === 'communes') return filteredCommunes();
+  if (state.mode === 'projects') {
+    const grouped = new Map();
+    filteredProjects().forEach(row => {
+      if (!row.commune) return;
+      const code = String(row.commune);
+      const feature = data.communeFeatureByCode.get(code);
+      const item = grouped.get(code) || { code, name: row.communeData?.name || feature?.properties?.nom || code, department: row.department, total: 0, population: row.communeData?.population || 0 };
+      item.total += row.amount;
+      if (!item.population && row.communeData?.population) item.population = row.communeData.population;
+      grouped.set(code, item);
+    });
+    return [...grouped.values()].map(row => ({ ...row, perCapita: row.population ? row.total / row.population : 0 }));
+  }
+  return [];
+}
+
+function communeShapeValue(row) {
+  return state.mode === 'projects' ? (state.metric === 'total' ? row.total : row.perCapita) : valueForBudget(row);
+}
+
+function renderCommuneLayer() {
+  if (!dom.communeLayer) return;
+  clearChildren(dom.communeLayer);
+  const visible = state.mode === 'communes' || state.mode === 'projects';
+  dom.communeLayer.style.display = visible ? '' : 'none';
+  if (!visible) return;
+  let rows = communeShapeRows().filter(row => data.communeFeatureByCode.has(row.code));
+  rows.sort((a, b) => communeShapeValue(b) - communeShapeValue(a));
+  const cap = 35000;
+  if (rows.length > cap) rows = rows.slice(0, cap);
+  const scale = valuesForColor(rows.map(communeShapeValue));
+  rows.forEach(row => {
+    const feature = data.communeFeatureByCode.get(row.code);
+    if (!feature) return;
+    const value = communeShapeValue(row);
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', data.communePathByCode.get(row.code) || featurePath(feature));
+    path.setAttribute('class', 'commune-shape' + (state.mode === 'projects' ? ' project-shape' : '') + (row.code === state.selectedCommune ? ' selected' : ''));
+    path.setAttribute('tabindex', '0');
+    path.setAttribute('role', 'button');
+    path.dataset.code = row.code;
+    path.style.fill = colorFor(value, scale);
+    path.setAttribute('aria-label', row.name + ' : ' + formatValue(value, state.metric === 'perCapita'));
+    dom.communeLayer.appendChild(path);
+  });
+}
 function renderPoints() {
   clearChildren(dom.mapPoints); clearChildren(dom.mapLabels);
+  if (state.mode === 'communes' || state.mode === 'projects') return;
   let points = pointRows().filter(row => Number.isFinite(row.lon) && Number.isFinite(row.lat));
   points.sort((a, b) => b.value - a.value);
   const nationalCap = state.mode === 'communes' ? 1150 : 950;
@@ -461,7 +661,7 @@ function renderPoints() {
     const ratio = scale.max > 0 ? Math.max(0, Math.min(1, (Math.log1p(point.value) - Math.log1p(scale.min || 1)) / ((Math.log1p(scale.max) - Math.log1p(scale.min || 1)) || 1))) : 0;
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     circle.setAttribute('cx', projected.x.toFixed(2)); circle.setAttribute('cy', projected.y.toFixed(2));
-    circle.setAttribute('r', (3.2 + ratio * 9.4).toFixed(2));
+    circle.setAttribute('r', (0.45 + ratio * 1.55).toFixed(2));
     circle.setAttribute('fill', colorFor(point.value, scale)); circle.setAttribute('class', 'map-point');
     circle.setAttribute('tabindex', '0'); circle.setAttribute('role', 'button'); circle.dataset.code = point.code;
     circle.setAttribute('aria-label', `${point.name} : ${formatValue(point.value, state.metric === 'perCapita')}`);
@@ -483,6 +683,8 @@ function renderPoints() {
 function focusBounds() {
   if (state.selectedCommune) {
     const commune = data.communeByCode.get(state.selectedCommune);
+    const feature = data.communeFeatureByCode.get(state.selectedCommune);
+    if (feature) return fitProjectedBounds(projectedFeatureBounds(feature), 12);
     if (commune) { const point = projectPoint([commune.lon, commune.lat]); return { centerX: point.x, centerY: point.y, scale: 5.6 }; }
   }
   if (state.selectedDepartment) {
@@ -499,9 +701,9 @@ function focusBounds() {
   return { centerX: 450, centerY: 310, scale: 1 };
 }
 
-function fitProjectedBounds(bounds) {
+function fitProjectedBounds(bounds, maxScale = 7) {
   const width = Math.max(18, bounds.maxX - bounds.minX); const height = Math.max(18, bounds.maxY - bounds.minY);
-  const scale = Math.max(1.12, Math.min(7, Math.min(800 / (width + 70), 540 / (height + 70))));
+  const scale = Math.max(1.12, Math.min(maxScale, Math.min(800 / (width + 70), 540 / (height + 70))));
   return { centerX: (bounds.minX + bounds.maxX) / 2, centerY: (bounds.minY + bounds.maxY) / 2, scale };
 }
 
@@ -517,16 +719,26 @@ function renderMap() {
   const values = mapDepartmentValues();
   const scale = valuesForColor([...values.values()]);
   const selected = normalizeDepartment(state.selectedDepartment);
-  [...dom.mapLayer.children].forEach(path => {
+  dom.mapLayer.querySelectorAll('.department').forEach(path => {
     const code = String(path.dataset.code || '');
     const value = values.get(normalizeDepartment(code)) || values.get(code) || 0;
     path.style.fill = colorFor(value, scale);
-    path.classList.toggle('selected', Boolean(selected && normalizeDepartment(code) === selected));
-    path.style.opacity = isOverseasCode(code) && !selected && !state.region ? '.25' : '1';
+    path.style.stroke = state.mode === 'regions' || state.mode === 'communes' ? 'transparent' : '';
+    path.classList.toggle('selected', Boolean(state.mode !== 'regions' && selected && normalizeDepartment(code) === selected));
+    path.style.opacity = state.mode === 'communes' ? '.16' : (isOverseasCode(code) && !selected && !state.region ? '.25' : '1');
     const name = data.featureByCode.get(code)?.properties?.nom || code;
-    path.setAttribute('aria-label', `${name} : ${formatValue(value, state.metric === 'perCapita')}`);
+    path.setAttribute('aria-label', name + ' : ' + formatValue(value, state.metric === 'perCapita'));
   });
-  setText(dom.mapBadgeText, state.mode === 'communes' ? `${formatCount(pointRows().length)} points communaux` : `${data.features.length} contours administratifs`);
+  data.regionPathElements.forEach((path, regionCode) => {
+    const region = data.regionByCode.get(String(regionCode));
+    const value = region ? valueForBudget(region) : 0;
+    const label = regionNameForCode(regionCode);
+    path.style.display = state.mode === 'regions' ? 'inline' : 'none';
+    path.classList.toggle('selected', Boolean(state.mode === 'regions' && state.region && label === state.region));
+    path.setAttribute('aria-label', 'R\u00e9gion ' + label + ' : ' + formatValue(value, state.metric === 'perCapita'));
+  });
+  const communeMapCount = communeShapeRows().filter(row => data.communeFeatureByCode.has(row.code)).length;
+  setText(dom.mapBadgeText, state.mode === 'regions' ? data.regions.length + ' r\u00e9gions' : state.mode === 'communes' ? formatCount(communeMapCount) + ' communes' : state.mode === 'projects' ? formatCount(communeMapCount) + ' communes avec projets' : data.features.length + ' contours administratifs');
   const shownValues = [...values.values()].filter(value => value > 0);
   setText(dom.legendLow, shownValues.length ? formatValue(Math.min(...shownValues), state.metric === 'perCapita') : 'Faible');
   setText(dom.legendHigh, shownValues.length ? formatValue(Math.max(...shownValues), state.metric === 'perCapita') : 'Élevé');
@@ -535,8 +747,9 @@ function renderMap() {
   setText(dom.mapUnit, copy.unit);
   setText(dom.mapKicker, copy.kicker);
   setText(dom.mapHelp, copy.help);
-  setText(dom.mapSubtitle, state.selectedCommune ? 'Commune sélectionnée · zoom animé' : state.selectedDepartment ? 'Département sélectionné · cliquez sur un point pour descendre au niveau communal' : 'Survolez un territoire, puis cliquez pour zoomer.');
+  setText(dom.mapSubtitle, state.selectedCommune ? 'Commune sélectionnée · zoom animé' : state.selectedDepartment ? 'D\u00e9partement s\u00e9lectionn\u00e9 \u00b7 cliquez sur une commune pour descendre au niveau communal' : 'Survolez un territoire, puis cliquez pour zoomer.');
   renderPoints();
+  renderCommuneLayer();
   requestAnimationFrame(applyTransform);
 }
 
@@ -584,7 +797,11 @@ function renderStats() {
 function selectedContext() {
   if (state.selectedCommune) {
     const commune = data.communeByCode.get(state.selectedCommune);
-    if (commune) return { title: commune.name, kicker: `COMMUNE · ${commune.code}`, name: commune.name };
+    const feature = data.communeFeatureByCode.get(state.selectedCommune);
+    if (commune || feature) {
+      const name = commune?.name || feature?.properties?.nom || state.selectedCommune;
+      return { title: name, kicker: `COMMUNE · ${state.selectedCommune}`, name };
+    }
   }
   if (state.selectedDepartment) {
     const code = normalizeDepartment(state.selectedDepartment); const department = data.deptByCode.get(code); const feature = data.featureByCode.get(code);
@@ -696,11 +913,11 @@ class ThemeManager {
 async function init() {
   new ThemeManager();
   try {
-    const [projectsResponse, boundariesResponse, budgetsResponse] = await Promise.all([
-      fetch('./data/projects-2025.json'), fetch('./data/departments.geojson'), fetch('./data/budgets-2025.json')
+    const [projectsResponse, boundariesResponse, budgetsResponse, communeBoundariesResponse] = await Promise.all([
+      fetch('./data/projects-2025.json'), fetch('./data/departments.geojson'), fetch('./data/budgets-2025.json'), fetch('./data/communes.geojson')
     ]);
-    if (!projectsResponse.ok || !boundariesResponse.ok || !budgetsResponse.ok) throw new Error('Un fichier de données est indisponible.');
-    data.projects = await projectsResponse.json(); data.boundaries = await boundariesResponse.json();
+    if (!projectsResponse.ok || !boundariesResponse.ok || !budgetsResponse.ok || !communeBoundariesResponse.ok) throw new Error('Un fichier de données est indisponible.');
+    data.projects = await projectsResponse.json(); data.boundaries = await boundariesResponse.json(); data.communeBoundaries = await communeBoundariesResponse.json();
     const budgets = await budgetsResponse.json(); data.communes = budgets.communes || []; data.departments = budgets.departments || []; data.regions = budgets.regions || [];
     setupDerivedData(); setupFilters(); setupMap(); setupListeners();
     setText(dom.dataStatus, `${formatCount(data.projects.length)} projets · ${formatCount(data.communes.length)} communes`);

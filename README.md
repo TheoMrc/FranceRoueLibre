@@ -4,10 +4,10 @@ FranceRoueLibre est une cartographie interactive des dépenses publiques. La pre
 
 ## Ce que l’interface montre
 
-- **Projets aidés** : engagements de subventions d’investissement de l’État (DETR, DSIL, DPV et DSID) publiés par la DGCL.
-- **Budgets communaux** : dépenses totales 2025 de chaque commune publiée par l’OFGL, avec une vue par habitant et un point positionné au centre officiel de la commune.
-- **Budgets départementaux** et **budgets régionaux** : mêmes indicateurs OFGL à l’échelon correspondant.
-- Chaque vue possède un bouton **Total / Par habitant**. La sélection d’un département ou d’une commune déclenche un zoom animé ; la carte affiche les points communaux quand le niveau le permet.
+- **Projets aidés** : engagements de subventions d’investissement de l’État (DETR, DSIL, DPV et DSID) publiés par la DGCL ; les communes qui portent ces projets sont colorées par leur contour exact.
+- **Budgets communaux** : dépenses totales 2025 de chaque commune publiée par l’OFGL, avec une vue par habitant et le contour géographique exact de la commune.
+- **Budgets départementaux** et **budgets régionaux** : mêmes indicateurs OFGL à l’échelon correspondant. En mode régional, la carte est découpée par régions et leurs limites sont mises en évidence.
+- Chaque vue possède un bouton **Total / Par habitant**. La sélection d’un territoire déclenche un zoom animé ; la vue communale permet d’inspecter chaque commune et son budget.
 
 Les engagements de subvention DGCL et les dépenses exécutées des comptes OFGL mesurent des réalités différentes. Ils restent séparés dans l’interface afin de ne pas présenter une subvention comme une dépense exécutée.
 
@@ -17,9 +17,9 @@ Les engagements de subvention DGCL et les dépenses exécutées des comptes OFGL
 - Budgets communaux : [OFGL, comptes des communes 2018–2025](https://www.data.gouv.fr/datasets/comptes-des-communes-2018-2025), export 2025 filtré sur « Dépenses totales » et « Budget consolidé ».
 - Budgets départementaux et régionaux : jeux cartographiques OFGL via [l’API ouverte](https://data.ofgl.fr/api/explore/v2.1/catalog/datasets), mêmes filtres et millésime.
 - Coordonnées communales : [API Découpage administratif](https://geo.api.gouv.fr/communes?fields=nom,code,centre&format=json), centre géographique officiel.
-- Contours départementaux : [Etalab, contours administratifs 2025](https://etalab-datasets.geo.data.gouv.fr/contours-administratifs/2025/geojson/), simplification 1000 m.
+- Contours départementaux et communaux : [Etalab, contours administratifs 2025](https://etalab-datasets.geo.data.gouv.fr/contours-administratifs/2025/geojson/), simplification 1000 m.
 
-Les fichiers sources sont conservés dans `sources/`. La commande `node build-data.mjs` produit `dist/data/projects-2025.json`, `dist/data/departments.geojson` et `dist/data/budgets-2025.json`. Le regroupement des lignes OFGL est dédoublonné par code INSEE communal.
+Les fichiers sources sont conservés dans `sources/`. La commande `node build-data.mjs` produit `dist/data/projects-2025.json`, `dist/data/departments.geojson`, `dist/data/communes.geojson` et `dist/data/budgets-2025.json`. Le regroupement des lignes OFGL est dédoublonné par code INSEE communal.
 
 ## Développement local
 
@@ -27,4 +27,4 @@ Le site est statique et peut être servi avec `node serve.mjs` ou tout serveur H
 
 La charte reprend les typographies Space Grotesk, Plus Jakarta Sans et Unica One, les surfaces translucides et les dégradés cobalt/vert du site de référence `C:\GitHub\TheFishWebsite\the_fish_website`. Le bouton de thème reprend également son animation SVG soleil/lune morphée, sans élément animalier.
 
-La carte ouvre une vue métropolitaine lisible et garde les territoires ultramarins accessibles par recherche, filtre et sélection dans les listes. Une vue communale nationale est limitée aux points les plus significatifs pour préserver la fluidité ; le choix d’un département affiche ses communes disponibles.
+La carte ouvre une vue métropolitaine lisible et garde les territoires ultramarins accessibles par recherche, filtre et sélection dans les listes. Le mode communal colore les 34 875 communes présentes dans les budgets avec leurs limites Etalab ; le clic sur une commune recentre la carte et affiche son budget.

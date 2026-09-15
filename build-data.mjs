@@ -50,6 +50,7 @@ const records = dgclRows.map((source, index) => ({
 })).filter(record => record.amount > 0);
 
 const boundaries = JSON.parse(fs.readFileSync('sources/departements-1000m.geojson', 'utf8'));
+const communeBoundaries = JSON.parse(fs.readFileSync('sources/communes-1000m.geojson', 'utf8'));
 const deptMeta = Object.fromEntries(boundaries.features.map(feature => [feature.properties.code, { name: feature.properties.nom, region: feature.properties.region }]));
 deptMeta['67A'] = { name: 'Alsace (non réparti)', region: '44' };
 deptMeta['691'] = { name: 'Métropole de Lyon', region: '84' };
@@ -115,5 +116,6 @@ const regions = readCsvObjects('sources/ofgl-regions-2025.csv').map(source => ({
 fs.mkdirSync('dist/data', { recursive: true });
 fs.writeFileSync('dist/data/projects-2025.json', JSON.stringify(records));
 fs.writeFileSync('dist/data/departments.geojson', JSON.stringify(boundaries));
+fs.writeFileSync('dist/data/communes.geojson', JSON.stringify(communeBoundaries));
 fs.writeFileSync('dist/data/budgets-2025.json', JSON.stringify({ communes, departments, regions }));
 console.log(`${records.length} DGCL projects, ${boundaries.features.length} departmental contours, ${communes.length} commune budgets, ${departments.length} department budgets, ${regions.length} region budgets`);
