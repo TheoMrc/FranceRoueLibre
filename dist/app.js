@@ -179,7 +179,7 @@ function regionForDepartment(code) {
   const department = data.deptByCode.get(normalized);
   if (department?.regionName) return department.regionName;
   const feature = data.featureByCode.get(normalized);
-  return feature ? featureRegionName(feature) : '';
+  return feature ? (featureRegionName(feature) || feature.properties?.nom || '') : '';
 }
 
 function populationForDepartment(code) {
@@ -303,7 +303,8 @@ function setupDerivedData() {
 }
 
 function setupFilters() {
-  const regionNames = [...new Set(data.regions.map(row => row.name).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
+  const projectRegionNames = data.projectRows.map(row => row.regionName).filter(Boolean);
+  const regionNames = [...new Set([...data.regions.map(row => row.name), ...projectRegionNames].filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
   regionNames.forEach(name => addOption(dom.region, name, name));
   const schemes = [...new Set(data.projects.map(row => row.scheme).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
   schemes.forEach(scheme => addOption(dom.scheme, scheme, scheme));
