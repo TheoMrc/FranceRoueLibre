@@ -186,7 +186,7 @@ h1 em { color: var(--blue); font-style: normal; }
 .map-heading .small-label, .inspector-heading .small-label { margin-bottom: .42rem; }
 .card-subtitle { margin: .45rem 0 0; color: var(--muted); font-size: .72rem; }
 .map-unit { padding: .44rem .65rem; border: 1px solid rgba(56, 189, 248, .23); border-radius: 9px; color: var(--blue); background: rgba(56, 189, 248, .08); font-size: .65rem; font-weight: 700; white-space: nowrap; }
-.map-frame { position: relative; min-height: 555px; margin-top: 12px; overflow: hidden; border: 1px solid rgba(119, 199, 222, .13); border-radius: 18px; background: radial-gradient(circle at 49% 43%, rgba(36, 146, 183, .16), transparent 50%), linear-gradient(148deg, rgba(2, 18, 30, .82), rgba(4, 31, 47, .62)); }
+.map-frame { position: relative; overscroll-behavior: contain; min-height: 555px; margin-top: 12px; overflow: hidden; border: 1px solid rgba(119, 199, 222, .13); border-radius: 18px; background: radial-gradient(circle at 49% 43%, rgba(36, 146, 183, .16), transparent 50%), linear-gradient(148deg, rgba(2, 18, 30, .82), rgba(4, 31, 47, .62)); }
 [data-theme="light"] .map-frame { background: radial-gradient(circle at 49% 43%, rgba(36, 146, 183, .12), transparent 50%), linear-gradient(148deg, rgba(234, 247, 252, .92), rgba(214, 235, 244, .72)); }
 .map-frame::before { position: absolute; inset: 0; content: ""; opacity: .4; background-image: linear-gradient(rgba(145, 211, 227, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(145, 211, 227, .05) 1px, transparent 1px); background-size: 45px 45px; mask-image: radial-gradient(ellipse at center, black, transparent 80%); pointer-events: none; }
 .map-halo { position: absolute; top: 18%; left: 24%; width: 52%; height: 61%; border-radius: 50%; background: radial-gradient(ellipse, rgba(11, 135, 171, .16), transparent 67%); filter: blur(16px); pointer-events: none; }
@@ -255,6 +255,11 @@ h1 em { color: var(--blue); font-style: normal; }
 .source-links a { color: var(--blue); text-decoration: none; font-size: .68rem; font-weight: 600; }
 .source-links a:hover { text-decoration: underline; }
 .site-footer { display: flex; justify-content: space-between; gap: 1rem; max-width: 1440px; margin: 0 auto; padding: 0 32px 33px; color: var(--faint); font-size: .64rem; }
+
+@media (min-width: 1101px) {
+  .inspector-card { position: sticky; top: 20px; align-self: start; height: calc(100vh - 40px); min-height: 520px; }
+  .project-list { min-height: 0; flex: 1 1 auto; }
+}
 
 @keyframes page-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes rise-in { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }

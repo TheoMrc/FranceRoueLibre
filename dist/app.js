@@ -486,7 +486,20 @@ function setupListeners() {
   dom.resetView.addEventListener('click', () => { state.selectedDepartment = ''; state.selectedCommune = ''; state.zoomDelta = 0; render(); });
   dom.zoomIn.addEventListener('click', () => { state.zoomDelta = Math.min(5, state.zoomDelta + .35); applyTransform(); });
   dom.zoomOut.addEventListener('click', () => { state.zoomDelta = Math.max(-.7, state.zoomDelta - .35); applyTransform(); });
+  let mapWheelFrame = 0;
+
+  function handleMapWheel(event) {
+    event.preventDefault();
+    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 480 : 1;
+    const delta = event.deltaY * unit;
+    if (!Number.isFinite(delta) || delta === 0) return;
+    state.zoomDelta = Math.max(-.7, Math.min(5, state.zoomDelta - delta / 190));
+    window.cancelAnimationFrame(mapWheelFrame);
+    mapWheelFrame = window.requestAnimationFrame(applyTransform);
+  }
+
   dom.map.addEventListener('click', event => { if (event.target === dom.map) { state.selectedCommune = ''; state.selectedDepartment = ''; state.zoomDelta = 0; render(); } });
+  dom.mapFrame.addEventListener('wheel', handleMapWheel, { passive: false });
 }
 
 function resetAll() {
@@ -565,9 +578,26 @@ function colorFor(value, scale) {
   return `hsl(${hue.toFixed(1)} 70% ${lightness.toFixed(1)}%)`;
 }
 
+function mapRows() {
+  if (state.mode === 'projects') {
+    return data.projectRows.filter(row => {
+      if (state.scheme && row.scheme !== state.scheme) return false;
+      if (!state.search) return true;
+      return [row.title, row.beneficiary, row.scheme, row.communeData?.name, row.departmentName, row.regionName].some(value => matches(value, state.search));
+    });
+  }
+  if (state.mode === 'communes') {
+    return data.communes.filter(row => !state.search || [row.name, row.code, row.departmentName, row.regionName].some(value => matches(value, state.search)));
+  }
+  if (state.mode === 'departments') {
+    return data.departments.filter(row => !state.search || [row.name, row.code, row.regionName].some(value => matches(value, state.search)));
+  }
+  return data.regions.filter(row => !state.search || [row.name, row.code].some(value => matches(value, state.search)));
+}
+
 function mapDepartmentValues() {
   const values = new Map();
-  const rows = currentRows();
+  const rows = mapRows();
   if (state.mode === 'projects') {
     const totals = new Map();
     rows.forEach(row => totals.set(row.department, (totals.get(row.department) || 0) + row.amount));
@@ -742,11 +772,11 @@ function renderMap() {
   const shownValues = [...values.values()].filter(value => value > 0);
   setText(dom.legendLow, shownValues.length ? formatValue(Math.min(...shownValues), state.metric === 'perCapita') : 'Faible');
   setText(dom.legendHigh, shownValues.length ? formatValue(Math.max(...shownValues), state.metric === 'perCapita') : 'Élevé');
-  setText(dom.legendTitle, state.metric === 'perCapita' ? 'Dépense par habitant' : 'Montant dans la sélection');
+  setText(dom.legendTitle, state.metric === 'perCapita' ? 'Dépense par habitant' : 'Montant par territoire');
   setText(dom.mapTitle, copy.title);
   setText(dom.mapUnit, copy.unit);
   setText(dom.mapKicker, copy.kicker);
-  setText(dom.mapHelp, copy.help);
+  setText(dom.mapHelp, copy.help + ' Molette ou pavé tactile sur la carte pour zoomer.');
   setText(dom.mapSubtitle, state.selectedCommune ? 'Commune sélectionnée · zoom animé' : state.selectedDepartment ? 'D\u00e9partement s\u00e9lectionn\u00e9 \u00b7 cliquez sur une commune pour descendre au niveau communal' : 'Survolez un territoire, puis cliquez pour zoomer.');
   renderPoints();
   renderCommuneLayer();
