@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Explorer les projets d’investissement des collectivités soutenus par l’État, département par département.">
-  <title>FranceRoueLibre — Cartographie des financements publics</title>
+  <meta name="description" content="Explorer les dépenses et les projets publics par région, département et commune.">
+  <title>FranceRoueLibre — Cartographie des dépenses publiques</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unica+One&display=swap" rel="stylesheet">
@@ -12,24 +12,100 @@
   <link rel="stylesheet" href="./style.css">
   <script defer src="./app.js"></script>
 </head>
-<body>
+<body class="page-revealed">
   <div class="mesh-gradient" aria-hidden="true"></div>
   <header class="site-header">
     <div class="nav-container">
-      <a class="nav-brand" href="./" aria-label="FranceRoueLibre, accueil"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 44 44"><path d="M7 31 18 12l8 11 11-8"/><circle cx="37" cy="15" r="3"/></svg></span><span class="nav-brand-text">FRANCE<span>ROUE</span>LIBRE</span></a>
-      <nav aria-label="Navigation principale"><a class="nav-link active" href="#explorer">Explorer</a><a class="nav-link" href="#methodologie">Méthodologie</a></nav>
-      <button class="theme-toggle-btn" id="themeToggle" type="button" aria-label="Passer au thème clair" title="Changer de thème"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="6" fill="currentColor"/><path d="M16 2v4M16 26v4M2 16h4M26 16h4M6 6l3 3M23 23l3 3M6 26l3-3M23 9l3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <a class="nav-brand" href="./" aria-label="FranceRoueLibre, accueil">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 44 44"><path d="M7 31 18 12l8 11 11-8"/><circle cx="37" cy="15" r="3"/></svg></span>
+        <span class="nav-brand-text">FRANCE<span>ROUE</span>LIBRE</span>
+      </a>
+      <nav aria-label="Navigation principale"><a class="nav-link active" href="#explorer">Explorer</a><a class="nav-link" href="#methodologie">Données</a></nav>
+      <button class="theme-toggle-btn tbtn-morph" id="themeToggle" type="button" aria-label="Changer de thème" title="Changer de thème">
+        <span class="tbtn-halo" aria-hidden="true"></span>
+        <svg class="tbtn-svg-morph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <mask id="theme-morph-mask"><rect width="32" height="32" fill="white"/><circle class="mask-moon-bite" cx="23" cy="11" r="6.5" fill="black"/></mask>
+          <circle class="morph-core" cx="16" cy="16" r="6" fill="currentColor" mask="url(#theme-morph-mask)"/>
+          <g class="morph-rays" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="16" y1="3" x2="16" y2="6"/><line x1="16" y1="26" x2="16" y2="29"/><line x1="3" y1="16" x2="6" y2="16"/><line x1="26" y1="16" x2="29" y2="16"/>
+            <line x1="6.81" y1="6.81" x2="8.93" y2="8.93"/><line x1="23.07" y1="23.07" x2="25.19" y2="25.19"/><line x1="6.81" y1="25.19" x2="8.93" y2="23.07"/><line x1="23.07" y1="8.93" x2="25.19" y2="6.81"/>
+          </g>
+        </svg>
+      </button>
     </div>
   </header>
+
   <main id="explorer" class="page-shell">
-    <div class="intro-row"><div><p class="eyebrow">FINANCEMENTS PUBLICS · PÉRIMÈTRE 2025</p><h1>Où vont les subventions d’investissement de l’État ?</h1><p class="intro-copy">Explorez les projets soutenus dans chaque territoire et retrouvez leur bénéficiaire, leur dispositif et leur montant.</p></div><div class="scope-note"><span class="scope-line"></span><strong>Premier jeu de données</strong><span>Dotations DETR, DSIL, DPV et DSID · engagements 2025</span></div></div>
-    <section class="explorer" aria-label="Explorer les financements">
-      <div class="filter-bar"><div class="filter-heading"><span class="filter-icon" aria-hidden="true">⌕</span><strong>Explorer les projets</strong></div><label class="search-field"><span class="sr-only">Rechercher un projet ou bénéficiaire</span><input id="search" type="search" placeholder="Projet, bénéficiaire, commune…" autocomplete="off"></label><label class="select-wrap"><span class="sr-only">Région</span><select id="region"><option value="">Toutes les régions</option></select></label><label class="select-wrap"><span class="sr-only">Dispositif</span><select id="scheme"><option value="">Tous les dispositifs</option></select></label><button id="reset" class="reset-btn" type="button">Réinitialiser</button></div>
-      <div class="stats-row"><div class="stat"><span>Subventions accordées</span><strong id="totalAmount">—</strong></div><div class="stat"><span>Projets</span><strong id="projectCount">—</strong></div><div class="stat"><span>Territoires représentés</span><strong id="departmentCount">—</strong></div><div class="stat-context">Montants issus du fichier DGCL 2025. Le coût total des projets est distinct de la subvention accordée.</div></div>
-      <div class="work-grid"><section class="map-card" aria-labelledby="mapTitle"><div class="card-heading"><div><p class="small-label">VUE TERRITORIALE</p><h2 id="mapTitle">Montants par département</h2></div><span class="map-unit">Subventions accordées</span></div><div class="map-layout"><div class="map-frame"><svg id="map" viewBox="0 0 720 650" role="img" aria-label="Carte interactive des départements métropolitains"><title>Subventions d’investissement accordées par département en 2025</title></svg></div><div class="map-aside"><p class="small-label">OUTRE-MER</p><div id="overseas" class="overseas-list"></div><div id="unmapped" class="unmapped-area"></div><div class="legend"><span>Montant relatif dans la sélection</span><div class="legend-scale"></div><div class="legend-labels"><span>Faible</span><span>Élevé</span></div></div><p class="map-help">Sélectionnez un département sur la carte ou dans la liste pour voir ses projets.</p></div></div></section><section class="detail-card" aria-labelledby="detailTitle"><div class="card-heading"><div><p class="small-label">DÉTAIL DES FINANCEMENTS</p><h2 id="detailTitle">Tous les territoires</h2></div><button id="clearDepartment" class="clear-btn" type="button" hidden>Effacer ×</button></div><p id="detailSummary" class="detail-summary">Chargement des projets…</p><div id="projectList" class="project-list" aria-live="polite"></div><div class="list-footer"><span id="listCount"></span><button id="more" class="more-btn" type="button" hidden>Voir plus de projets</button></div></section></div>
+    <section class="intro-row anim-fade" aria-labelledby="pageTitle">
+      <div>
+        <p class="eyebrow">FRANCE · CARTOGRAPHIE OUVERTE · MILLÉSIME 2025</p>
+        <h1 id="pageTitle">Les dépenses publiques, <em>territoire par territoire.</em></h1>
+        <p class="intro-copy">Une carte pour comprendre où se dépensent les fonds publics, du projet financé par l’État jusqu’au budget de la commune.</p>
+      </div>
+      <div class="scope-note"><span class="scope-line"></span><strong id="dataStatus">Données ouvertes</strong><span id="scopeText">DGCL · OFGL · contours Etalab</span></div>
     </section>
-    <section id="methodologie" class="method-card"><div><p class="small-label">À PROPOS DES DONNÉES</p><h2>Ce que montre cette carte</h2></div><div class="method-copy"><p>Les montants sont ceux des <strong>subventions accordées par l’État</strong> à des projets d’investissement de collectivités. Ils sont regroupés selon le territoire du bénéficiaire, qui peut différer du lieu exact de réalisation. Quelques bénéficiaires intercommunaux d’Alsace restent dans une catégorie non répartie quand le fichier ne précise pas leur département. La Métropole de Lyon reste distincte du Rhône. La carte ne couvre pas toutes les dépenses de l’État, des collectivités ou de l’Assurance Maladie.</p><p>Source : <a href="https://www.data.gouv.fr/datasets/projets-finances-par-les-dotations-de-soutien-a-linvestissement-des-collectivites-territoriales" target="_blank" rel="noopener noreferrer">Direction générale des collectivités locales (DGCL) ↗</a>. Contours : <a href="https://etalab-datasets.geo.data.gouv.fr/contours-administratifs/2025/geojson/" target="_blank" rel="noopener noreferrer">Etalab ↗</a>. Licence Ouverte 2.0.</p></div></section>
+
+    <section class="explorer" aria-label="Explorer les dépenses publiques">
+      <div class="mode-bar anim-rise">
+        <div class="mode-tabs" role="tablist" aria-label="Niveau de dépense">
+          <button class="mode-tab active" type="button" role="tab" aria-selected="true" data-mode="projects">Projets aidés</button>
+          <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="communes">Budgets communaux</button>
+          <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="departments">Budgets départementaux</button>
+          <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="regions">Budgets régionaux</button>
+        </div>
+        <div class="metric-toggle" role="group" aria-label="Unité de montant">
+          <button class="metric-btn active" type="button" data-metric="total">Total</button>
+          <button class="metric-btn" type="button" data-metric="perCapita">Par habitant</button>
+        </div>
+      </div>
+
+      <div class="filter-bar anim-rise">
+        <div class="filter-heading"><span class="filter-icon" aria-hidden="true">⌕</span><strong id="filterTitle">Explorer les projets</strong></div>
+        <label class="search-field"><span class="sr-only">Rechercher un projet, une commune ou un territoire</span><input id="search" type="search" placeholder="Projet, bénéficiaire, commune…" autocomplete="off"></label>
+        <label class="select-wrap"><span class="sr-only">Région</span><select id="region"><option value="">Toutes les régions</option></select></label>
+        <label class="select-wrap scheme-filter"><span class="sr-only">Dispositif</span><select id="scheme"><option value="">Tous les dispositifs</option></select></label>
+        <button id="reset" class="reset-btn" type="button">Réinitialiser</button>
+      </div>
+
+      <div class="stats-row anim-rise" aria-live="polite">
+        <div class="stat"><span id="totalLabel">Subventions affichées</span><strong id="totalAmount">—</strong></div>
+        <div class="stat"><span id="countLabel">Projets</span><strong id="projectCount">—</strong></div>
+        <div class="stat"><span id="coverageLabel">Territoires couverts</span><strong id="departmentCount">—</strong></div>
+        <div class="stat-context" id="statsContext">Les engagements DGCL et les comptes OFGL sont affichés dans des vues séparées pour garder une lecture claire.</div>
+      </div>
+
+      <div class="map-workspace">
+        <section class="map-card anim-fade" aria-labelledby="mapTitle">
+          <div class="card-heading map-heading">
+            <div><p class="small-label" id="mapKicker">VUE CARTOGRAPHIQUE</p><h2 id="mapTitle">Montants par département</h2><p id="mapSubtitle" class="card-subtitle">Survolez un territoire, puis cliquez pour zoomer.</p></div>
+            <span class="map-unit" id="mapUnit">Subventions accordées</span>
+          </div>
+          <div class="map-frame" id="mapFrame">
+            <div class="map-halo" aria-hidden="true"></div>
+            <svg id="map" viewBox="0 0 900 620" role="img" aria-label="Carte interactive des territoires français">
+              <title>Carte interactive des dépenses publiques</title>
+              <g id="mapScene"><g id="mapLayer"></g><g id="mapPoints"></g><g id="mapLabels"></g></g>
+            </svg>
+            <div id="mapTooltip" class="map-tooltip" role="status" aria-live="polite" hidden></div>
+            <div class="map-controls" aria-label="Contrôles de carte"><button id="zoomOut" type="button" aria-label="Réduire le zoom">−</button><button id="zoomIn" type="button" aria-label="Augmenter le zoom">+</button><button id="resetView" type="button" aria-label="Recentrer la carte">◎</button></div>
+            <div class="map-badge"><span class="pulse-dot"></span><span id="mapBadgeText">109 contours administratifs</span></div>
+          </div>
+          <div class="map-footer"><div class="legend"><span id="legendTitle">Montant dans la sélection</span><div class="legend-scale"></div><div class="legend-labels"><span id="legendLow">Faible</span><span id="legendHigh">Élevé</span></div></div><p class="map-help" id="mapHelp">Cliquez sur un département pour afficher son détail et ses communes.</p></div>
+        </section>
+
+        <aside class="inspector-card anim-slide" aria-labelledby="inspectorTitle">
+          <div class="card-heading inspector-heading"><div><p class="small-label" id="inspectorKicker">INSPECTEUR</p><h2 id="inspectorTitle">France entière</h2></div><button id="clearSelection" class="clear-btn" type="button" hidden>Effacer ×</button></div>
+          <p id="inspectorSummary" class="detail-summary">Sélectionnez un territoire sur la carte ou dans les résultats.</p>
+          <div id="inspectorStats" class="inspector-stats"></div>
+          <div class="inspector-divider"><span id="listHeading">À la une</span><span id="listCount"></span></div>
+          <div id="projectList" class="project-list" aria-live="polite"></div>
+          <button id="more" class="more-btn" type="button" hidden>Afficher davantage</button>
+        </aside>
+      </div>
+    </section>
+
+    <section id="methodologie" class="method-card anim-rise"><div><p class="small-label">À PROPOS DES DONNÉES</p><h2>Lire la carte avec le bon périmètre</h2></div><div class="method-copy"><p>« Projets aidés » reprend les subventions d’investissement accordées par l’État (DETR, DSIL, DPV et DSID) dans le fichier DGCL 2025. Les trois vues de budget utilisent les comptes 2025 publiés par l’Observatoire des finances et de la gestion publique locales (OFGL) : dépenses totales, avec leur montant par habitant. Ces deux sources mesurent des réalités différentes et restent volontairement séparées.</p><p>Les points communaux sont positionnés au centre géographique officiel de chaque commune. La carte se concentre sur la France métropolitaine à l’ouverture ; les territoires ultramarins restent accessibles par la recherche, les filtres et la liste. Les contours viennent d’Etalab et les données sont sous Licence Ouverte 2.0.</p><p class="source-links"><a href="https://www.data.gouv.fr/datasets/projets-finances-par-les-dotations-de-soutien-a-linvestissement-des-collectivites-territoriales" target="_blank" rel="noopener noreferrer">DGCL · projets financés ↗</a><a href="https://www.data.gouv.fr/datasets/comptes-des-communes-2018-2025" target="_blank" rel="noopener noreferrer">OFGL · comptes des communes ↗</a><a href="https://data.ofgl.fr/api/explore/v2.1/catalog/datasets" target="_blank" rel="noopener noreferrer">OFGL · API ouverte ↗</a><a href="https://etalab-datasets.geo.data.gouv.fr/contours-administratifs/2025/geojson/" target="_blank" rel="noopener noreferrer">Etalab · contours ↗</a></p></div></section>
   </main>
-  <footer class="site-footer"><span>FranceRoueLibre</span><span>Cartographie des financements publics · données ouvertes</span></footer>
+  <footer class="site-footer"><span>FranceRoueLibre</span><span>Cartographie des dépenses publiques · données ouvertes</span></footer>
 </body>
 </html>
