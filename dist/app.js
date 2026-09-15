@@ -1,7 +1,7 @@
 const SOURCE_URL = 'https://www.data.gouv.fr/datasets/projets-finances-par-les-dotations-de-soutien-a-linvestissement-des-collectivites-territoriales';
-const REGION_NAMES = {'01':'Guadeloupe','02':'Martinique','03':'Guyane','04':'La Réunion','06':'Mayotte','11':'Île-de-France','24':'Centre-Val de Loire','27':'Bourgogne-Franche-Comté','28':'Normandie','32':'Hauts-de-France','44':'Grand Est','52':'Pays de la Loire','53':'Bretagne','75':'Nouvelle-Aquitaine','76':'Occitanie','84':'Auvergne-Rhône-Alpes','93':'Provence-Alpes-Côte d’Azur','94':'Corse'};
+const REGION_NAMES = {'01':'Guadeloupe','02':'Martinique','03':'Guyane','04':'La Réunion','06':'Mayotte','11':'Île-de-France','24':'Centre-Val de Loire','27':'Bourgogne-Franche-Comté','28':'Normandie','32':'Hauts-de-France','44':'Grand Est','52':'Pays de la Loire','53':'Bretagne','75':'Nouvelle-Aquitaine','76':'Occitanie','84':'Auvergne-Rhône-Alpes','93':'Provence-Alpes-Côte d’Azur','94':'Corse','975':'Saint-Pierre-et-Miquelon','987':'Polynésie française','988':'Nouvelle-Calédonie'};
 const SCHEME_NAMES = {DETR:'Équipement des territoires ruraux',DSIL:'Soutien à l’investissement local',DPV:'Politique de la ville',DSID:'Soutien à l’investissement des départements'};
-const overseasCodes = new Set(['971','972','973','974','976']);
+const overseasCodes = new Set(['971','972','973','974','976','975','987','988']);
 const amountFormat = new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 const numberFormat = new Intl.NumberFormat('fr-FR');
 const shortFormat = new Intl.NumberFormat('fr-FR',{notation:'compact',maximumFractionDigits:1});
