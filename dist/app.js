@@ -83,13 +83,23 @@ const data = {
   communeFeatures: [],
   communeFeatureByCode: new Map(),
   communePathByCode: new Map(),
-  communePathElements: new Map()
+  communePath2DByCode: new Map(),
+  communeHitGrid: new Map(),
+  departmentPath2DByCode: new Map(),
+  departmentHitGrid: new Map(),
+  hitContext: null,
+  activeCommuneRowsByCode: new Map(),
+  communeHoverElement: null,
+  currentMapDepartmentValues: new Map(),
+  performance: { communeLayerRenderMs: 0, communeSvgElements: 0 }
 };
 
 const numberFormat = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
 const decimalFormat = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
 const lowerText = value => String(value ?? '').toLocaleLowerCase('fr-FR');
 const matches = (value, query) => !query || lowerText(value).includes(lowerText(query));
+const COMMUNE_COLOR_BUCKETS = 12;
+const HIT_GRID_SIZE = 12;
 const normalizeDepartment = code => {
   const value = String(code ?? '');
   if (value === '67A') return '67';
@@ -170,13 +180,95 @@ function featurePath(feature) {
 }
 
 function projectedFeatureBounds(feature) {
-  const points = [];
-  walkCoordinates(feature.geometry?.coordinates, coords => points.push(projectPoint(coords)));
-  if (!points.length) return { minX: 450, maxX: 450, minY: 310, maxY: 310 };
-  return {
-    minX: Math.min(...points.map(point => point.x)), maxX: Math.max(...points.map(point => point.x)),
-    minY: Math.min(...points.map(point => point.y)), maxY: Math.max(...points.map(point => point.y))
-  };
+  let minX = Infinity; let maxX = -Infinity; let minY = Infinity; let maxY = -Infinity;
+  walkCoordinates(feature.geometry?.coordinates, coords => {
+    const point = projectPoint(coords);
+    if (point.x < minX) minX = point.x;
+    if (point.x > maxX) maxX = point.x;
+    if (point.y < minY) minY = point.y;
+    if (point.y > maxY) maxY = point.y;
+  });
+  if (!Number.isFinite(minX)) return { minX: 450, maxX: 450, minY: 310, maxY: 310 };
+  return { minX, maxX, minY, maxY };
+}
+
+function hitGridKey(x, y) {
+  return Math.floor(x / HIT_GRID_SIZE) + ',' + Math.floor(y / HIT_GRID_SIZE);
+}
+
+function registerHitFeature(feature, code, pathData, pathMap, grid) {
+  if (!pathData || typeof Path2D !== 'function') return;
+  pathMap.set(code, new Path2D(pathData));
+  const bounds = projectedFeatureBounds(feature);
+  const minCellX = Math.floor(bounds.minX / HIT_GRID_SIZE);
+  const maxCellX = Math.floor(bounds.maxX / HIT_GRID_SIZE);
+  const minCellY = Math.floor(bounds.minY / HIT_GRID_SIZE);
+  const maxCellY = Math.floor(bounds.maxY / HIT_GRID_SIZE);
+  for (let cellX = minCellX; cellX <= maxCellX; cellX += 1) {
+    for (let cellY = minCellY; cellY <= maxCellY; cellY += 1) {
+      const key = cellX + ',' + cellY;
+      const bucket = grid.get(key) || [];
+      bucket.push(code);
+      grid.set(key, bucket);
+    }
+  }
+}
+
+function buildGeometryHitIndexes() {
+  const canvas = document.createElement('canvas');
+  data.hitContext = canvas.getContext('2d');
+  data.communePath2DByCode.clear();
+  data.communeHitGrid.clear();
+  data.departmentPath2DByCode.clear();
+  data.departmentHitGrid.clear();
+  if (!data.hitContext) return;
+  data.communeFeatures.forEach(feature => {
+    const code = String(feature.properties?.code || '');
+    registerHitFeature(feature, code, data.communePathByCode.get(code), data.communePath2DByCode, data.communeHitGrid);
+  });
+  data.features.forEach(feature => {
+    const code = String(feature.properties?.code || '');
+    registerHitFeature(feature, code, featurePath(feature), data.departmentPath2DByCode, data.departmentHitGrid);
+  });
+}
+
+function scenePointFromEvent(event) {
+  const matrix = dom.mapScene.getScreenCTM();
+  if (!matrix) return null;
+  const point = dom.map.createSVGPoint();
+  point.x = event.clientX;
+  point.y = event.clientY;
+  return point.matrixTransform(matrix.inverse());
+}
+
+function codeAtScenePoint(point, grid, pathMap, activeCodes) {
+  if (!point || !data.hitContext) return '';
+  const candidates = grid.get(hitGridKey(point.x, point.y)) || [];
+  for (let index = candidates.length - 1; index >= 0; index -= 1) {
+    const code = candidates[index];
+    if (activeCodes && !activeCodes.has(code)) continue;
+    const path = pathMap.get(code);
+    if (path && data.hitContext.isPointInPath(path, point.x, point.y, 'evenodd')) return code;
+  }
+  return '';
+}
+
+function communeCodeAtScenePoint(x, y) {
+  return codeAtScenePoint({ x, y }, data.communeHitGrid, data.communePath2DByCode, data.activeCommuneRowsByCode);
+}
+
+function departmentCodeAtScenePoint(x, y) {
+  return codeAtScenePoint({ x, y }, data.departmentHitGrid, data.departmentPath2DByCode);
+}
+
+function updateCommuneHover(code) {
+  const path = data.communeHoverElement;
+  if (!path || !code || !data.activeCommuneRowsByCode.has(code)) {
+    if (path) path.style.display = 'none';
+    return;
+  }
+  path.setAttribute('d', data.communePathByCode.get(code) || '');
+  path.style.display = '';
 }
 
 function featureRegionName(feature) {
@@ -400,6 +492,10 @@ function setupDerivedData() {
     data.communeFeatureByCode.set(code, feature);
     data.communePathByCode.set(code, featurePath(feature));
   });
+  const hitIndexStarted = performance.now();
+  buildGeometryHitIndexes();
+  data.performance.hitIndexBuildMs = performance.now() - hitIndexStarted;
+  document.documentElement.dataset.hitIndexBuildMs = data.performance.hitIndexBuildMs.toFixed(2);
 }
 
 function setupFilters() {
@@ -427,29 +523,6 @@ function setupMap() {
     path.addEventListener('pointerleave', hideTooltip);
     dom.mapLayer.appendChild(path);
   });
-  if (dom.communeLayer && !dom.communeLayer.dataset.bound) {
-    dom.communeLayer.dataset.bound = 'true';
-    dom.communeLayer.addEventListener('click', event => {
-      const path = event.target.closest?.('.commune-shape');
-      if (!path) return;
-      event.stopPropagation();
-      selectCommune(path.dataset.code);
-    });
-    dom.communeLayer.addEventListener('keydown', event => {
-      const path = event.target.closest?.('.commune-shape');
-      if (!path || (event.key !== 'Enter' && event.key !== ' ')) return;
-      event.preventDefault();
-      selectCommune(path.dataset.code);
-    });
-    dom.communeLayer.addEventListener('pointermove', event => {
-      const path = event.target.closest?.('.commune-shape');
-      if (path) showTooltip(event, path.getAttribute('aria-label'));
-    });
-    dom.communeLayer.addEventListener('pointerout', event => {
-      const path = event.target.closest?.('.commune-shape');
-      if (path && !event.relatedTarget?.closest?.('.commune-shape')) hideTooltip();
-    });
-  }
   data.regionPathElements.clear();
   data.regionPaths.forEach((pathData, regionCode) => {
     if (!pathData || !data.regionByCode.has(String(regionCode))) return;
@@ -498,7 +571,57 @@ function setupListeners() {
     mapWheelFrame = window.requestAnimationFrame(applyTransform);
   }
 
-  dom.map.addEventListener('click', event => { if (event.target === dom.map) { state.selectedCommune = ''; state.selectedDepartment = ''; state.zoomDelta = 0; render(); } });
+  let mapHoverFrame = 0;
+  let pendingMapPointer = null;
+
+  function processMapPointer() {
+    mapHoverFrame = 0;
+    const pointer = pendingMapPointer;
+    pendingMapPointer = null;
+    if (!pointer || (state.mode !== 'projects' && state.mode !== 'communes')) return;
+    const hoverStarted = performance.now();
+    const point = scenePointFromEvent(pointer);
+    if (!point) { dom.map.dataset.hoverProcessMs = (performance.now() - hoverStarted).toFixed(3); return; }
+    const communeCode = communeCodeAtScenePoint(point.x, point.y);
+    if (communeCode) {
+      const row = data.activeCommuneRowsByCode.get(communeCode);
+      updateCommuneHover(communeCode);
+      showTooltip(pointer, row.name + ' : ' + formatValue(communeShapeValue(row), state.metric === 'perCapita'));
+      dom.map.dataset.hoverProcessMs = (performance.now() - hoverStarted).toFixed(3);
+      return;
+    }
+    updateCommuneHover('');
+    const departmentCode = departmentCodeAtScenePoint(point.x, point.y);
+    if (departmentCode) {
+      const feature = data.featureByCode.get(departmentCode);
+      const value = data.currentMapDepartmentValues.get(normalizeDepartment(departmentCode)) || data.currentMapDepartmentValues.get(departmentCode) || 0;
+      showTooltip(pointer, (feature?.properties?.nom || departmentCode) + ' : ' + formatValue(value, state.metric === 'perCapita'));
+    } else hideTooltip();
+    dom.map.dataset.hoverProcessMs = (performance.now() - hoverStarted).toFixed(3);
+  }
+
+  dom.map.addEventListener('pointermove', event => {
+    if (state.mode !== 'projects' && state.mode !== 'communes') return;
+    pendingMapPointer = { clientX: event.clientX, clientY: event.clientY };
+    if (!mapHoverFrame) mapHoverFrame = window.requestAnimationFrame(processMapPointer);
+  });
+  dom.map.addEventListener('pointerleave', () => {
+    pendingMapPointer = null;
+    if (mapHoverFrame) window.cancelAnimationFrame(mapHoverFrame);
+    mapHoverFrame = 0;
+    updateCommuneHover('');
+    hideTooltip();
+  });
+  dom.map.addEventListener('click', event => {
+    if (state.mode === 'projects' || state.mode === 'communes') {
+      const point = scenePointFromEvent(event);
+      const communeCode = point ? communeCodeAtScenePoint(point.x, point.y) : '';
+      if (communeCode) { selectCommune(communeCode); return; }
+      const departmentCode = point ? departmentCodeAtScenePoint(point.x, point.y) : '';
+      if (departmentCode) { selectDepartment(departmentCode); return; }
+    }
+    if (event.target === dom.map) { state.selectedCommune = ''; state.selectedDepartment = ''; state.zoomDelta = 0; render(); }
+  });
   dom.mapFrame.addEventListener('wheel', handleMapWheel, { passive: false });
 }
 
@@ -537,10 +660,11 @@ function selectCommune(code) {
 function showTooltip(event, text) {
   if (!text) return;
   const frameRect = dom.mapFrame.getBoundingClientRect();
-  dom.tooltip.textContent = text;
+  if (dom.tooltip.textContent !== text) dom.tooltip.textContent = text;
   dom.tooltip.hidden = false;
-  dom.tooltip.style.left = `${event.clientX - frameRect.left}px`;
-  dom.tooltip.style.top = `${event.clientY - frameRect.top}px`;
+  dom.tooltip.style.left = '0';
+  dom.tooltip.style.top = '0';
+  dom.tooltip.style.transform = `translate3d(${event.clientX - frameRect.left + 12}px, ${event.clientY - frameRect.top + 12}px, 0)`;
 }
 
 function hideTooltip() {
@@ -567,15 +691,23 @@ function valuesForColor(values) {
   return { min: Math.min(...positives), max: Math.max(...positives) };
 }
 
-function colorFor(value, scale) {
-  if (!value || value <= 0) return 'rgba(22, 64, 84, .42)';
+function colorRatio(value, scale) {
+  if (!value || value <= 0) return 0;
   const low = Math.log1p(scale.min);
   const high = Math.log1p(scale.max);
-  const ratio = high === low ? .72 : (Math.log1p(value) - low) / (high - low);
+  return Math.max(0, Math.min(1, high === low ? .72 : (Math.log1p(value) - low) / (high - low)));
+}
+
+function colorForRatio(ratio) {
   const clamped = Math.max(0, Math.min(1, ratio));
   const hue = 205 - clamped * 48;
   const lightness = 35 + clamped * 17;
   return `hsl(${hue.toFixed(1)} 70% ${lightness.toFixed(1)}%)`;
+}
+
+function colorFor(value, scale) {
+  if (!value || value <= 0) return 'rgba(22, 64, 84, .42)';
+  return colorForRatio(colorRatio(value, scale));
 }
 
 function mapRows() {
@@ -654,29 +786,63 @@ function communeShapeValue(row) {
 
 function renderCommuneLayer() {
   if (!dom.communeLayer) return;
+  const renderStarted = performance.now();
   clearChildren(dom.communeLayer);
+  data.activeCommuneRowsByCode.clear();
+  data.communeHoverElement = null;
   const visible = state.mode === 'communes' || state.mode === 'projects';
   dom.communeLayer.style.display = visible ? '' : 'none';
-  if (!visible) return;
+  dom.map.classList.toggle('commune-interaction', visible);
+  if (!visible) {
+    data.performance.communeLayerRenderMs = performance.now() - renderStarted;
+    data.performance.communeSvgElements = 0;
+    return;
+  }
   let rows = communeShapeRows().filter(row => data.communeFeatureByCode.has(row.code));
   rows.sort((a, b) => communeShapeValue(b) - communeShapeValue(a));
   const cap = 35000;
   if (rows.length > cap) rows = rows.slice(0, cap);
   const scale = valuesForColor(rows.map(communeShapeValue));
+  const buckets = Array.from({ length: COMMUNE_COLOR_BUCKETS }, () => []);
   rows.forEach(row => {
-    const feature = data.communeFeatureByCode.get(row.code);
-    if (!feature) return;
-    const value = communeShapeValue(row);
+    data.activeCommuneRowsByCode.set(row.code, row);
+    const ratio = colorRatio(communeShapeValue(row), scale);
+    const bucketIndex = Math.min(COMMUNE_COLOR_BUCKETS - 1, Math.floor(ratio * COMMUNE_COLOR_BUCKETS));
+    buckets[bucketIndex].push(data.communePathByCode.get(row.code));
+  });
+  buckets.forEach((paths, index) => {
+    if (!paths.length) return;
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', data.communePathByCode.get(row.code) || featurePath(feature));
-    path.setAttribute('class', 'commune-shape' + (state.mode === 'projects' ? ' project-shape' : '') + (row.code === state.selectedCommune ? ' selected' : ''));
-    path.setAttribute('tabindex', '0');
-    path.setAttribute('role', 'button');
-    path.dataset.code = row.code;
-    path.style.fill = colorFor(value, scale);
-    path.setAttribute('aria-label', row.name + ' : ' + formatValue(value, state.metric === 'perCapita'));
+    path.setAttribute('d', paths.join(' '));
+    path.setAttribute('class', 'commune-bucket');
+    path.setAttribute('fill-rule', 'evenodd');
+    path.setAttribute('aria-hidden', 'true');
+    path.style.fill = colorForRatio((index + .5) / COMMUNE_COLOR_BUCKETS);
     dom.communeLayer.appendChild(path);
   });
+  if (state.selectedCommune && data.activeCommuneRowsByCode.has(state.selectedCommune)) {
+    const selectedPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    selectedPath.setAttribute('d', data.communePathByCode.get(state.selectedCommune) || '');
+    selectedPath.setAttribute('class', 'commune-selection-shape');
+    selectedPath.setAttribute('aria-hidden', 'true');
+    dom.communeLayer.appendChild(selectedPath);
+  }
+  const hoverPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  hoverPath.setAttribute('class', 'commune-hover-shape');
+  hoverPath.setAttribute('aria-hidden', 'true');
+  hoverPath.style.display = 'none';
+  dom.communeLayer.appendChild(hoverPath);
+  data.communeHoverElement = hoverPath;
+  data.performance.communeLayerRenderMs = performance.now() - renderStarted;
+  data.performance.communeSvgElements = dom.communeLayer.childElementCount;
+  dom.communeLayer.dataset.activeCommunes = String(data.activeCommuneRowsByCode.size);
+  dom.communeLayer.dataset.svgElements = String(data.performance.communeSvgElements);
+  dom.communeLayer.dataset.renderMs = data.performance.communeLayerRenderMs.toFixed(2);
+  window.__frlMapPerformance = {
+    activeCommunes: data.activeCommuneRowsByCode.size,
+    communeSvgElements: data.performance.communeSvgElements,
+    communeLayerRenderMs: Number(data.performance.communeLayerRenderMs.toFixed(2))
+  };
 }
 function renderPoints() {
   clearChildren(dom.mapPoints); clearChildren(dom.mapLabels);
@@ -747,6 +913,7 @@ function applyTransform() {
 function renderMap() {
   const copy = modeCopy();
   const values = mapDepartmentValues();
+  data.currentMapDepartmentValues = values;
   const scale = valuesForColor([...values.values()]);
   const selected = normalizeDepartment(state.selectedDepartment);
   dom.mapLayer.querySelectorAll('.department').forEach(path => {
@@ -756,6 +923,7 @@ function renderMap() {
     path.style.stroke = state.mode === 'regions' || state.mode === 'communes' ? 'transparent' : '';
     path.classList.toggle('selected', Boolean(state.mode !== 'regions' && selected && normalizeDepartment(code) === selected));
     path.style.opacity = state.mode === 'communes' ? '.16' : (isOverseasCode(code) && !selected && !state.region ? '.25' : '1');
+    path.style.pointerEvents = state.mode === 'projects' || state.mode === 'communes' ? 'none' : '';
     const name = data.featureByCode.get(code)?.properties?.nom || code;
     path.setAttribute('aria-label', name + ' : ' + formatValue(value, state.metric === 'perCapita'));
   });

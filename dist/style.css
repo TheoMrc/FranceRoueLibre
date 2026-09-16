@@ -200,11 +200,14 @@ h1 em { color: var(--blue); font-style: normal; }
 .region-outline { display: none; fill: none; stroke: rgba(232, 252, 255, .88); stroke-width: 2; vector-effect: non-scaling-stroke; cursor: pointer; pointer-events: stroke; transition: stroke .35s ease, stroke-width .35s ease, filter .35s ease; }
 .region-outline:hover, .region-outline:focus { stroke: #fff; stroke-width: 3.1; filter: drop-shadow(0 0 8px rgba(56, 189, 248, .7)); outline: none; }
 .region-outline.selected { stroke: var(--green); stroke-width: 3.5; filter: drop-shadow(0 0 10px rgba(52, 211, 153, .78)); }
-.commune-shape { fill: rgba(27, 126, 145, .7); stroke: rgba(224, 253, 255, .72); stroke-width: .58; vector-effect: non-scaling-stroke; cursor: pointer; transition: fill .25s ease, stroke .25s ease, filter .25s ease; }
-.commune-shape:hover, .commune-shape:focus { stroke: #fff; stroke-width: 1.25; filter: drop-shadow(0 0 5px rgba(52, 211, 153, .7)); outline: none; }
-.commune-shape.selected { stroke: #fff; stroke-width: 2.2; filter: drop-shadow(0 0 9px rgba(52, 211, 153, .9)); }
+.commune-bucket { stroke: rgba(224, 253, 255, .64); stroke-width: .48; vector-effect: non-scaling-stroke; pointer-events: none; shape-rendering: geometricPrecision; }
+.commune-hover-shape, .commune-selection-shape { fill: none; vector-effect: non-scaling-stroke; pointer-events: none; }
+.commune-hover-shape { stroke: #fff; stroke-width: 1.35; filter: drop-shadow(0 0 5px rgba(52, 211, 153, .72)); }
+.commune-selection-shape { stroke: var(--green); stroke-width: 2.2; filter: drop-shadow(0 0 9px rgba(52, 211, 153, .9)); }
 [data-theme="light"] .region-outline { stroke: rgba(13, 66, 89, .83); }
-[data-theme="light"] .commune-shape { stroke: rgba(23, 83, 105, .68); }
+[data-theme="light"] .commune-bucket { stroke: rgba(23, 83, 105, .58); }
+#map.commune-interaction { cursor: pointer; }
+#map.commune-interaction #mapScene { pointer-events: none; }
 .map-point { stroke: rgba(239, 253, 255, .9); stroke-width: .8; vector-effect: non-scaling-stroke; cursor: pointer; opacity: .86; transition: r .32s ease, opacity .25s ease, stroke-width .25s ease, filter .25s ease; }
 .map-point:hover, .map-point:focus, .map-point.selected { opacity: 1; stroke-width: 1.7; filter: drop-shadow(0 0 8px rgba(52, 211, 153, .78)); }
 .map-label { fill: var(--text); font-family: "Plus Jakarta Sans", sans-serif; font-size: 10px; font-weight: 700; pointer-events: none; paint-order: stroke; stroke: rgba(3, 17, 26, .9); stroke-width: 3px; }
