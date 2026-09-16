@@ -32,6 +32,7 @@ const dom = {
   legendLow: document.getElementById('legendLow'),
   legendHigh: document.getElementById('legendHigh'),
   mapHelp: document.getElementById('mapHelp'),
+  inspectorCard: document.querySelector('.inspector-card'),
   inspectorKicker: document.getElementById('inspectorKicker'),
   inspectorTitle: document.getElementById('inspectorTitle'),
   inspectorSummary: document.getElementById('inspectorSummary'),
@@ -57,7 +58,7 @@ const state = {
   selectedDepartment: '',
   selectedCommune: '',
   zoomDelta: 0,
-  limit: 12
+  limit: 8
 };
 
 const data = {
@@ -91,15 +92,28 @@ const data = {
   activeCommuneRowsByCode: new Map(),
   communeHoverElement: null,
   currentMapDepartmentValues: new Map(),
+  communeLayerKey: '',
   performance: { communeLayerRenderMs: 0, communeSvgElements: 0 }
 };
 
 const numberFormat = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
 const decimalFormat = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
-const lowerText = value => String(value ?? '').toLocaleLowerCase('fr-FR');
+const lowerText = value => String(value ?? '')
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLocaleLowerCase('fr-FR');
 const matches = (value, query) => !query || lowerText(value).includes(lowerText(query));
 const COMMUNE_COLOR_BUCKETS = 12;
 const HIT_GRID_SIZE = 12;
+const mapMotion = {
+  current: null,
+  from: null,
+  target: null,
+  startedAt: 0,
+  duration: 0,
+  frame: 0,
+  frameCount: 0
+};
 const normalizeDepartment = code => {
   const value = String(code ?? '');
   if (value === '67A') return '67';
@@ -543,23 +557,61 @@ function setupMap() {
   });
 }
 
+function inferSearchMode(query) {
+  const needle = lowerText(query).trim();
+  if (needle.length < 2) return '';
+  const exactCommune = data.communes.some(row => lowerText(row.name) === needle || lowerText(row.code) === needle);
+  const exactDepartment = data.departments.some(row => lowerText(row.name) === needle || lowerText(row.code) === needle);
+  const exactRegion = data.regions.some(row => lowerText(row.name) === needle || lowerText(row.code) === needle);
+  let projectMatchCount = 0;
+  for (const row of data.projectRows) {
+    if ([row.title, row.beneficiary, row.scheme].some(value => matches(value, needle))) projectMatchCount += 1;
+    if (projectMatchCount >= 8) break;
+  }
+  if (projectMatchCount >= 8) return 'projects';
+  if (exactCommune) return 'communes';
+  if (exactDepartment) return 'departments';
+  if (exactRegion) return 'regions';
+  if (projectMatchCount) return 'projects';
+  if (data.communes.some(row => [row.name, row.code].some(value => matches(value, needle)))) return 'communes';
+  if (data.departments.some(row => [row.name, row.code].some(value => matches(value, needle)))) return 'departments';
+  if (data.regions.some(row => [row.name, row.code].some(value => matches(value, needle)))) return 'regions';
+  return '';
+}
+
 function setupListeners() {
   dom.modeTabs.forEach(button => button.addEventListener('click', () => {
     state.mode = button.dataset.mode;
     state.selectedCommune = '';
-    state.limit = 12;
+    state.selectedDepartment = '';
+    state.zoomDelta = 0;
+    state.limit = 8;
     render();
   }));
   dom.metricButtons.forEach(button => button.addEventListener('click', () => { state.metric = button.dataset.metric; render(); }));
-  dom.search.addEventListener('input', event => { state.search = event.target.value.trim(); state.limit = 12; render(); });
-  dom.region.addEventListener('change', event => { state.region = event.target.value; state.selectedDepartment = ''; state.selectedCommune = ''; state.zoomDelta = 0; state.limit = 12; render(); });
-  dom.scheme.addEventListener('change', event => { state.scheme = event.target.value; state.limit = 12; render(); });
+  let searchTimer = 0;
+  dom.search.addEventListener('input', event => {
+    state.search = event.target.value.trim();
+    state.limit = 8;
+    window.clearTimeout(searchTimer);
+    searchTimer = window.setTimeout(() => {
+      const inferredMode = inferSearchMode(state.search);
+      if (inferredMode && inferredMode !== state.mode) {
+        state.mode = inferredMode;
+        state.selectedDepartment = '';
+        state.selectedCommune = '';
+        state.zoomDelta = 0;
+      }
+      render();
+    }, 120);
+  });
+  dom.region.addEventListener('change', event => { state.region = event.target.value; state.selectedDepartment = ''; state.selectedCommune = ''; state.zoomDelta = 0; state.limit = 8; render(); });
+  dom.scheme.addEventListener('change', event => { state.scheme = event.target.value; state.limit = 8; render(); });
   dom.reset.addEventListener('click', resetAll);
   dom.clearSelection.addEventListener('click', () => { state.selectedDepartment = ''; state.selectedCommune = ''; state.zoomDelta = 0; render(); });
   dom.resetView.addEventListener('click', () => { state.selectedDepartment = ''; state.selectedCommune = ''; state.zoomDelta = 0; render(); });
-  dom.zoomIn.addEventListener('click', () => { state.zoomDelta = Math.min(5, state.zoomDelta + .35); applyTransform(); });
-  dom.zoomOut.addEventListener('click', () => { state.zoomDelta = Math.max(-.7, state.zoomDelta - .35); applyTransform(); });
-  let mapWheelFrame = 0;
+  dom.zoomIn.addEventListener('click', () => { state.zoomDelta = Math.min(5, state.zoomDelta + .35); applyTransform(240); });
+  dom.zoomOut.addEventListener('click', () => { state.zoomDelta = Math.max(-.7, state.zoomDelta - .35); applyTransform(240); });
 
   function handleMapWheel(event) {
     event.preventDefault();
@@ -567,8 +619,7 @@ function setupListeners() {
     const delta = event.deltaY * unit;
     if (!Number.isFinite(delta) || delta === 0) return;
     state.zoomDelta = Math.max(-.7, Math.min(5, state.zoomDelta - delta / 190));
-    window.cancelAnimationFrame(mapWheelFrame);
-    mapWheelFrame = window.requestAnimationFrame(applyTransform);
+    applyTransform(150);
   }
 
   let mapHoverFrame = 0;
@@ -626,7 +677,7 @@ function setupListeners() {
 }
 
 function resetAll() {
-  state.region = ''; state.scheme = ''; state.search = ''; state.selectedDepartment = ''; state.selectedCommune = ''; state.zoomDelta = 0; state.limit = 12;
+  state.region = ''; state.scheme = ''; state.search = ''; state.selectedDepartment = ''; state.selectedCommune = ''; state.zoomDelta = 0; state.limit = 8;
   dom.search.value = ''; dom.region.value = ''; dom.scheme.value = '';
   render();
 }
@@ -634,6 +685,8 @@ function resetAll() {
 function selectRegion(name) {
   if (!name) return;
   state.region = name;
+  state.search = '';
+  dom.search.value = '';
   dom.region.value = name;
   state.selectedDepartment = '';
   state.selectedCommune = '';
@@ -641,6 +694,8 @@ function selectRegion(name) {
   render();
 }
 function selectDepartment(code) {
+  state.search = '';
+  dom.search.value = '';
   state.selectedDepartment = normalizeDepartment(code);
   state.selectedCommune = '';
   state.zoomDelta = 0;
@@ -651,6 +706,15 @@ function selectCommune(code) {
   const commune = data.communeByCode.get(code);
   const feature = data.communeFeatureByCode.get(code);
   if (!commune && !feature) return;
+  if (state.selectedCommune === code) {
+    state.selectedCommune = '';
+    state.selectedDepartment = '';
+    state.zoomDelta = 0;
+    render();
+    return;
+  }
+  state.search = '';
+  dom.search.value = '';
   state.selectedCommune = code;
   state.selectedDepartment = normalizeDepartment(commune?.department || feature?.properties?.departement || '');
   state.zoomDelta = 0;
@@ -763,10 +827,15 @@ function pointRows() {
 }
 
 function communeShapeRows() {
-  if (state.mode === 'communes') return filteredCommunes();
+  const keepOnMap = row => {
+    const department = normalizeDepartment(row.department || data.communeByCode.get(row.code)?.department || '');
+    if (!isOverseasCode(department)) return true;
+    return Boolean(state.search || state.region || normalizeDepartment(state.selectedDepartment) === department || state.selectedCommune === row.code);
+  };
+  if (state.mode === 'communes') return mapRows().filter(keepOnMap);
   if (state.mode === 'projects') {
     const grouped = new Map();
-    filteredProjects().forEach(row => {
+    mapRows().filter(keepOnMap).forEach(row => {
       if (!row.commune) return;
       const code = String(row.commune);
       const feature = data.communeFeatureByCode.get(code);
@@ -787,17 +856,40 @@ function communeShapeValue(row) {
 function renderCommuneLayer() {
   if (!dom.communeLayer) return;
   const renderStarted = performance.now();
-  clearChildren(dom.communeLayer);
-  data.activeCommuneRowsByCode.clear();
-  data.communeHoverElement = null;
   const visible = state.mode === 'communes' || state.mode === 'projects';
   dom.communeLayer.style.display = visible ? '' : 'none';
   dom.map.classList.toggle('commune-interaction', visible);
   if (!visible) {
+    clearChildren(dom.communeLayer);
+    data.activeCommuneRowsByCode.clear();
+    data.communeHoverElement = null;
+    data.communeLayerKey = '';
     data.performance.communeLayerRenderMs = performance.now() - renderStarted;
     data.performance.communeSvgElements = 0;
     return;
   }
+  const layerKey = [state.mode, state.metric, state.search, state.scheme, state.region].join('|');
+  if (data.communeLayerKey === layerKey && data.communeHoverElement) {
+    let selectedPath = dom.communeLayer.querySelector('.commune-selection-shape');
+    if (state.selectedCommune && data.activeCommuneRowsByCode.has(state.selectedCommune)) {
+      if (!selectedPath) {
+        selectedPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        selectedPath.setAttribute('class', 'commune-selection-shape');
+        selectedPath.setAttribute('aria-hidden', 'true');
+        dom.communeLayer.insertBefore(selectedPath, data.communeHoverElement);
+      }
+      selectedPath.setAttribute('d', data.communePathByCode.get(state.selectedCommune) || '');
+    } else if (selectedPath) selectedPath.remove();
+    data.performance.communeLayerRenderMs = performance.now() - renderStarted;
+    data.performance.communeSvgElements = dom.communeLayer.childElementCount;
+    dom.communeLayer.dataset.svgElements = String(data.performance.communeSvgElements);
+    dom.communeLayer.dataset.renderMs = data.performance.communeLayerRenderMs.toFixed(2);
+    return;
+  }
+  clearChildren(dom.communeLayer);
+  data.activeCommuneRowsByCode.clear();
+  data.communeHoverElement = null;
+  data.communeLayerKey = layerKey;
   let rows = communeShapeRows().filter(row => data.communeFeatureByCode.has(row.code));
   rows.sort((a, b) => communeShapeValue(b) - communeShapeValue(a));
   const cap = 35000;
@@ -903,11 +995,65 @@ function fitProjectedBounds(bounds, maxScale = 7) {
   return { centerX: (bounds.minX + bounds.maxX) / 2, centerY: (bounds.minY + bounds.maxY) / 2, scale };
 }
 
-function applyTransform() {
+function targetMapTransform() {
   const focus = focusBounds();
   const scale = Math.max(.78, Math.min(12, focus.scale * Math.pow(1.24, state.zoomDelta)));
-  const tx = 450 - focus.centerX * scale; const ty = 310 - focus.centerY * scale;
-  dom.mapScene.setAttribute('transform', `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${scale.toFixed(3)})`);
+  const focused = Boolean(state.selectedCommune || state.selectedDepartment || state.region);
+  const compactViewport = window.innerWidth <= 760;
+  const viewportX = focused && !compactViewport ? 360 : 450;
+  const viewportY = focused && compactViewport ? 185 : 310;
+  const tx = viewportX - focus.centerX * scale; const ty = viewportY - focus.centerY * scale;
+  return { tx, ty, scale };
+}
+
+function writeMapTransform(transform) {
+  dom.mapScene.removeAttribute('transform');
+  dom.mapScene.style.transform = 'none';
+  const width = dom.mapFrame.clientWidth || 900;
+  const height = dom.mapFrame.clientHeight || 620;
+  const unitScale = Math.min(width / 900, height / 620);
+  const offsetX = (width - 900 * unitScale) / 2;
+  const offsetY = (height - 620 * unitScale) / 2;
+  const cssX = (1 - transform.scale) * offsetX + transform.tx * unitScale;
+  const cssY = (1 - transform.scale) * offsetY + transform.ty * unitScale;
+  dom.map.style.transform = `matrix(${transform.scale.toFixed(4)}, 0, 0, ${transform.scale.toFixed(4)}, ${cssX.toFixed(2)}, ${cssY.toFixed(2)})`;
+}
+
+function stepMapMotion(now) {
+  const elapsed = now - mapMotion.startedAt;
+  const progress = mapMotion.duration ? Math.min(1, elapsed / mapMotion.duration) : 1;
+  const eased = 1 - Math.pow(1 - progress, 4);
+  mapMotion.current = {
+    tx: mapMotion.from.tx + (mapMotion.target.tx - mapMotion.from.tx) * eased,
+    ty: mapMotion.from.ty + (mapMotion.target.ty - mapMotion.from.ty) * eased,
+    scale: mapMotion.from.scale + (mapMotion.target.scale - mapMotion.from.scale) * eased
+  };
+  writeMapTransform(mapMotion.current);
+  mapMotion.frameCount += 1;
+  if (progress < 1) {
+    mapMotion.frame = window.requestAnimationFrame(stepMapMotion);
+    return;
+  }
+  mapMotion.frame = 0;
+  const seconds = Math.max(.001, elapsed / 1000);
+  dom.map.dataset.zoomAnimationFps = (mapMotion.frameCount / seconds).toFixed(1);
+}
+
+function applyTransform(duration = 480) {
+  const target = targetMapTransform();
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (!mapMotion.current || reducedMotion || duration <= 0) {
+    mapMotion.current = target;
+    mapMotion.target = target;
+    writeMapTransform(target);
+    return;
+  }
+  mapMotion.from = { ...mapMotion.current };
+  mapMotion.target = target;
+  mapMotion.startedAt = performance.now();
+  mapMotion.duration = duration;
+  mapMotion.frameCount = 0;
+  if (!mapMotion.frame) mapMotion.frame = window.requestAnimationFrame(stepMapMotion);
 }
 
 function renderMap() {
@@ -924,6 +1070,7 @@ function renderMap() {
     path.classList.toggle('selected', Boolean(state.mode !== 'regions' && selected && normalizeDepartment(code) === selected));
     path.style.opacity = state.mode === 'communes' ? '.16' : (isOverseasCode(code) && !selected && !state.region ? '.25' : '1');
     path.style.pointerEvents = state.mode === 'projects' || state.mode === 'communes' ? 'none' : '';
+    path.style.display = isOverseasCode(code) && !state.region && !state.search && selected !== normalizeDepartment(code) ? 'none' : '';
     const name = data.featureByCode.get(code)?.properties?.nom || code;
     path.setAttribute('aria-label', name + ' : ' + formatValue(value, state.metric === 'perCapita'));
   });
@@ -931,7 +1078,9 @@ function renderMap() {
     const region = data.regionByCode.get(String(regionCode));
     const value = region ? valueForBudget(region) : 0;
     const label = regionNameForCode(regionCode);
-    path.style.display = state.mode === 'regions' ? 'inline' : 'none';
+    const regionDepartments = data.features.filter(feature => String(feature.properties?.region || '') === String(regionCode));
+    const overseasRegion = regionDepartments.length > 0 && regionDepartments.every(feature => isOverseasCode(feature.properties?.code));
+    path.style.display = state.mode === 'regions' && (!overseasRegion || state.region === label || state.search) ? 'inline' : 'none';
     path.classList.toggle('selected', Boolean(state.mode === 'regions' && state.region && label === state.region));
     path.setAttribute('aria-label', 'R\u00e9gion ' + label + ' : ' + formatValue(value, state.metric === 'perCapita'));
   });
@@ -948,7 +1097,7 @@ function renderMap() {
   setText(dom.mapSubtitle, state.selectedCommune ? 'Commune sélectionnée · zoom animé' : state.selectedDepartment ? 'D\u00e9partement s\u00e9lectionn\u00e9 \u00b7 cliquez sur une commune pour descendre au niveau communal' : 'Survolez un territoire, puis cliquez pour zoomer.');
   renderPoints();
   renderCommuneLayer();
-  requestAnimationFrame(applyTransform);
+  requestAnimationFrame(() => applyTransform(520));
 }
 
 function scopeRows() {
@@ -1051,6 +1200,10 @@ function budgetItem(row, level) {
 
 function renderInspector() {
   const context = selectedContext(); const rows = scopeRows(); const summary = scopeSummary(rows);
+  const inspectorOpen = Boolean(state.selectedCommune || state.selectedDepartment || state.region || state.search);
+  dom.inspectorCard?.classList.toggle('is-open', inspectorOpen);
+  dom.inspectorCard?.setAttribute('aria-hidden', String(!inspectorOpen));
+  if (dom.inspectorCard) dom.inspectorCard.scrollLeft = 0;
   setText(dom.inspectorKicker, context.kicker); setText(dom.inspectorTitle, context.title);
   dom.clearSelection.hidden = !(state.selectedDepartment || state.selectedCommune || state.region);
   const metricText = state.metric === 'perCapita' ? 'par habitant' : 'au total';
@@ -1059,7 +1212,7 @@ function renderInspector() {
   renderInspectorStats(summary, rows);
   let items = []; let heading = 'À la une'; let countLabel = '';
   if (state.mode === 'projects') { items = [...projectRowsForScope(rows)].sort((a, b) => projectMetric(b) - projectMetric(a)); heading = state.selectedCommune ? 'Projets de la commune' : 'Projets les plus financés'; countLabel = `${formatCount(rows.length)} projets`; }
-  else if (state.mode === 'communes') { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); heading = state.selectedDepartment ? 'Communes du département' : 'Communes les plus dépensières'; countLabel = `${formatCount(rows.length)} communes`; }
+  else if (state.mode === 'communes') { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); heading = state.selectedCommune ? 'Commune sélectionnée' : state.selectedDepartment ? 'Communes du département' : 'Communes les plus dépensières'; countLabel = `${formatCount(rows.length)} communes`; }
   else if (state.mode === 'departments') { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); heading = 'Départements'; countLabel = `${formatCount(rows.length)} départements`; }
   else { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); heading = 'Régions'; countLabel = `${formatCount(rows.length)} régions`; }
   setText(dom.listHeading, heading); setText(dom.listCount, countLabel); clearChildren(dom.projectList);
@@ -1126,5 +1279,5 @@ async function init() {
   }
 }
 
-dom.more.addEventListener('click', () => { state.limit += 12; renderInspector(); });
+dom.more.addEventListener('click', () => { state.limit += 8; renderInspector(); });
 init();
