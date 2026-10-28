@@ -50,6 +50,12 @@ python scripts/build_all.py        # recalcule tout dist/data, dont l’index de
 
 Une source manquante, un chiffre qui ne colle pas, un signal mal calibré : ouvrez une *issue* avec le lien vers la source. Les angles morts listés sur la page Données sont autant de demandes d’ouverture à adresser aux administrations (et à la CADA).
 
+Contact : stonks@francerouelibre.fr (corrections, droit de réponse, données personnelles). Site en ligne : https://francerouelibre.fr
+
+## Licence
+
+Code sous licence MIT (voir `LICENSE`). Les données restent sous la licence de leur producteur, le plus souvent la Licence Ouverte 2.0 d’Etalab. Mentions légales et confidentialité : `dist/mentions.html`.
+
 ---
 
 ## Documentation technique

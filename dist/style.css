@@ -1,3 +1,12 @@
+/* Fonts served from this site (vendor/fonts, SIL Open Font License), not from Google Fonts */
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('vendor/fonts/inter-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url('vendor/fonts/inter-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('vendor/fonts/inter-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Sora'; font-style: normal; font-weight: 400; font-display: swap; src: url('vendor/fonts/sora-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Sora'; font-style: normal; font-weight: 500; font-display: swap; src: url('vendor/fonts/sora-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Sora'; font-style: normal; font-weight: 600; font-display: swap; src: url('vendor/fonts/sora-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Sora'; font-style: normal; font-weight: 700; font-display: swap; src: url('vendor/fonts/sora-latin-700-normal.woff2') format('woff2'); }
+
 /* =============================================================
    FranceRoueLibre – stylesheet
    Visual system adapted from BioDevs: clinical light theme + dark
@@ -525,6 +534,14 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .footer__links { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
 .footer__links a { color: #c6d2dd; font-size: .92rem; }
 .footer__links a:hover { color: #fff; }
+.site-footer .footer__legal { max-width: 46rem; font-size: .84rem; }
+.footer__legal a { color: #c6d2dd; text-decoration: underline; text-underline-offset: 2px; }
+.footer__legal a:hover { color: #fff; }
+.legal { max-width: 46rem; }
+.legal h2 { margin-top: var(--sp-5); font-size: 1.35rem; }
+.legal p, .legal li { margin-top: .6rem; line-height: 1.65; }
+.legal ul { padding-left: 1.2rem; }
+.legal address { font-style: normal; }
 
 
 /* ---------- Secondary pages ---------- */
