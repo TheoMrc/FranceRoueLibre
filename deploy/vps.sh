@@ -1,0 +1,110 @@
+# francerouelibre.fr on this VPS: static site served by nginx from /var/www/francerouelibre/dist.
+# 1. clone or update the GitHub repo (shallow: only the current version, to save disk)
+# 2. Let's Encrypt certificate once the DNS points here (webroot, nginx keeps running)
+# 3. nginx vhost (HTTP only until the certificate exists, then HTTPS with http and www redirected to https://francerouelibre.fr)
+# 4. nginx -t, reload, live check
+set -euo pipefail
+DIR=/var/www/francerouelibre
+REPO=https://github.com/TheoMrc/FranceRoueLibre.git
+CONF=/etc/nginx/sites-available/francerouelibre.fr
+CERT=/etc/letsencrypt/live/francerouelibre.fr/fullchain.pem
+ME=$(id -un)
+
+echo "== repo"
+if [ ! -d "$DIR/.git" ]; then
+  sudo -n mkdir -p "$DIR" && sudo -n chown "$ME":"$ME" "$DIR"
+  git clone --depth 1 --branch main "$REPO" "$DIR"
+else
+  git -C "$DIR" fetch --depth 1 origin main
+  git -C "$DIR" reset --hard origin/main
+fi
+git -C "$DIR" log -1 --oneline
+du -sh "$DIR/dist" "$DIR/.git"
+chmod -R a+rX "$DIR"
+
+write_conf() {
+  local https=$1
+  {
+    echo "# francerouelibre.fr – written by deploy/vps.sh (FranceRoueLibre repo), static files from $DIR/dist"
+    if [ "$https" = 1 ]; then
+      cat <<'NGX'
+server {
+    listen 80; listen [::]:80;
+    server_name francerouelibre.fr www.francerouelibre.fr;
+    location /.well-known/acme-challenge/ { root /var/www/francerouelibre/dist; }
+    location / { return 301 https://francerouelibre.fr$request_uri; }
+}
+server {
+    listen 443 ssl; listen [::]:443 ssl;
+    server_name www.francerouelibre.fr;
+    ssl_certificate     /etc/letsencrypt/live/francerouelibre.fr/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/francerouelibre.fr/privkey.pem;
+    include             /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
+    return 301 https://francerouelibre.fr$request_uri;
+}
+server {
+    listen 443 ssl; listen [::]:443 ssl;
+    server_name francerouelibre.fr;
+    ssl_certificate     /etc/letsencrypt/live/francerouelibre.fr/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/francerouelibre.fr/privkey.pem;
+    include             /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+NGX
+    else
+      cat <<'NGX'
+server {
+    listen 80; listen [::]:80;
+    server_name francerouelibre.fr www.francerouelibre.fr;
+NGX
+    fi
+    cat <<'NGX'
+    root /var/www/francerouelibre/dist;
+    index index.html;
+    charset utf-8;
+    gzip on; gzip_vary on; gzip_proxied any; gzip_comp_level 6; gzip_min_length 512;
+    gzip_types text/plain text/css application/javascript text/javascript application/json application/geo+json image/svg+xml application/wasm;
+    location / { try_files $uri $uri/ =404; expires 10m; }
+    # Let's Encrypt (^~ wins over the dotfile rule below)
+    location ^~ /.well-known/acme-challenge/ { root /var/www/francerouelibre/dist; default_type text/plain; }
+    # Search index: read by HTTP range requests (nginx serves ranges natively); never gzip these
+    location /data/search/db/ { gzip off; add_header Cache-Control "no-cache" always; add_header Strict-Transport-Security "max-age=31536000" always; }
+    location ~ \.geojson$ { default_type application/json; expires 10m; }
+    location ~ /\. { deny all; }
+}
+NGX
+  } | sudo -n tee "$CONF" > /dev/null
+  sudo -n ln -sf "$CONF" /etc/nginx/sites-enabled/francerouelibre.fr
+}
+
+echo "== dns"
+PUBLIC=$(curl -4 -s --max-time 5 https://ifconfig.me || true)
+APEX=$(getent ahostsv4 francerouelibre.fr | awk 'NR==1{print $1}' || true)
+WWW=$(getent ahostsv4 www.francerouelibre.fr | awk 'NR==1{print $1}' || true)
+echo "VPS $PUBLIC · francerouelibre.fr -> ${APEX:-?} · www -> ${WWW:-?}"
+
+echo "== nginx (http)"
+if ! sudo -n test -f "$CERT"; then write_conf 0; sudo -n nginx -t && sudo -n systemctl reload nginx; fi
+
+echo "== certificate"
+if sudo -n test -f "$CERT"; then
+  echo "present"; sudo -n certbot certificates --cert-name francerouelibre.fr 2>/dev/null | grep -E "Domains|Expiry" || true
+elif [ -n "$PUBLIC" ] && [ "$APEX" = "$PUBLIC" ] && [ "$WWW" = "$PUBLIC" ]; then
+  sudo -n certbot certonly --webroot -w "$DIR/dist" -d francerouelibre.fr -d www.francerouelibre.fr --cert-name francerouelibre.fr --non-interactive --agree-tos --keep-until-expiring
+else
+  echo "DNS does not point to this VPS yet: HTTP only for now, run deploy again once it does"
+fi
+
+if sudo -n test -f "$CERT"; then
+  echo "== nginx (https)"; write_conf 1; sudo -n nginx -t && sudo -n systemctl reload nginx
+fi
+
+echo "== live check"
+for u in http://francerouelibre.fr/ http://www.francerouelibre.fr/ https://www.francerouelibre.fr/ https://francerouelibre.fr/ https://francerouelibre.fr/data/search/meta.json; do
+  printf '%s  %s\n' "$(curl -s -o /dev/null -w '%{http_code} %{size_download}B -> %{redirect_url}' --max-time 10 "$u")" "$u"
+done
+printf 'IPv4 %s · IPv6 %s · range request on the search index: %s\n' \
+  "$(curl -4 -s -o /dev/null -w '%{http_code}' --max-time 10 https://francerouelibre.fr/)" \
+  "$(curl -6 -s -o /dev/null -w '%{http_code}' --max-time 10 https://francerouelibre.fr/ || echo none)" \
+  "$(curl -s -o /dev/null -w '%{http_code}' -r 0-15 --max-time 10 https://francerouelibre.fr/data/search/db/frl-search.sqlite3.000)"
