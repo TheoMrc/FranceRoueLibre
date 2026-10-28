@@ -50,7 +50,7 @@
     items = [{ kind: 'go', text }, ...suggestions.filter(s => engine.norm(s.text) !== engine.norm(text)).map(s => ({ kind: 'term', ...s }))];
     active = -1; paint();
   }
-  input.addEventListener('focus', () => { ensure().then(engine => engine.db()).catch(() => {}); }); // opens the index early, for the results page
+  input.addEventListener('focus', () => { ensure().catch(() => {}); }); // loads the suggestion code early (the search itself runs on the server)
   input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(update, 120); });
   input.addEventListener('keydown', event => {
     if (list.hidden) return;

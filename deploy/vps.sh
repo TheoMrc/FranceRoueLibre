@@ -32,6 +32,7 @@ write_conf() {
   local https=$1
   {
     echo "# francerouelibre.fr – written by deploy/vps.sh (FranceRoueLibre repo), static files from $WEB"
+    echo "limit_req_zone \$binary_remote_addr zone=frl_api:10m rate=5r/s;"
     if [ "$https" = 1 ]; then
       cat <<'NGX'
 server {
@@ -77,12 +78,52 @@ NGX
     # Search index: read by HTTP range requests (nginx serves ranges natively); never gzip these
     location /data/search/db/ { gzip off; add_header Cache-Control "no-cache" always; add_header Strict-Transport-Security "max-age=31536000" always; }
     location ~ \.geojson$ { default_type application/json; expires 10m; }
+    # Search API (server/search_api.py, systemd unit francerouelibre-search)
+    location /api/ {
+        limit_req zone=frl_api burst=20 nodelay; limit_req_status 429;
+        proxy_pass http://127.0.0.1:8017; proxy_read_timeout 20s;
+        proxy_set_header Host $host; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
     location ~ /\. { deny all; }
 }
 NGX
   } | sudo -n tee "$CONF" > /dev/null
   sudo -n ln -sf "$CONF" /etc/nginx/sites-enabled/francerouelibre.fr
 }
+
+echo "== search API"
+# The API reads the index as one file: rebuilt from the published parts when meta.json changes.
+LIB=/var/lib/francerouelibre
+DBF=$LIB/frl-search.sqlite3
+[ -d "$LIB" ] || { sudo -n mkdir -p "$LIB" && sudo -n chown "$ME":"$ME" "$LIB"; }
+STAMP=$(md5sum "$WEB/data/search/meta.json" | cut -d' ' -f1)
+if [ ! -f "$DBF" ] || [ "$(cat "$LIB/meta.md5" 2>/dev/null)" != "$STAMP" ]; then
+  cat "$WEB"/data/search/db/frl-search.sqlite3.* > "$DBF.tmp" && mv -f "$DBF.tmp" "$DBF" && echo "$STAMP" > "$LIB/meta.md5"
+  chmod a+r "$DBF"; echo "index rebuilt: $(du -h "$DBF" | cut -f1)"
+fi
+sudo -n tee /etc/systemd/system/francerouelibre-search.service > /dev/null <<UNIT
+[Unit]
+Description=FranceRoueLibre search API (deploy/vps.sh)
+After=network.target
+
+[Service]
+User=www-data
+ExecStart=/usr/bin/python3 $DIR/server/search_api.py --db $DBF --port 8017
+Restart=on-failure
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+MemoryMax=1G
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+sudo -n systemctl daemon-reload
+sudo -n systemctl enable --quiet francerouelibre-search
+sudo -n systemctl restart francerouelibre-search
+curl -s --retry 10 --retry-connrefused --retry-delay 1 --max-time 30 http://127.0.0.1:8017/api/health; echo
+sudo -n systemctl --no-pager --lines=3 status francerouelibre-search | head -5
 
 echo "== dns"
 PUBLIC=$(curl -4 -s --max-time 5 https://ifconfig.me || true)
@@ -110,6 +151,7 @@ echo "== live check"
 for u in http://francerouelibre.fr/ http://www.francerouelibre.fr/ https://www.francerouelibre.fr/ https://francerouelibre.fr/ https://francerouelibre.fr/data/search/meta.json; do
   printf '%s  %s\n' "$(curl -s -o /dev/null -w '%{http_code} %{size_download}B -> %{redirect_url}' --max-time 10 "$u")" "$u"
 done
+printf 'API: %s\n' "$(curl -s --max-time 20 'https://francerouelibre.fr/api/search?q=mise%20en%20place' | head -c 120)"
 printf 'IPv4 %s · IPv6 %s · range request on the search index: %s\n' \
   "$(curl -4 -s -o /dev/null -w '%{http_code}' --max-time 10 https://francerouelibre.fr/)" \
   "$(curl -6 -s -o /dev/null -w '%{http_code}' --max-time 10 https://francerouelibre.fr/ || echo none)" \

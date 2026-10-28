@@ -71,6 +71,22 @@
     $('srResults').hidden = false; clearPanels();
     progress.started = performance.now();
     try {
+      await showProgress(5, 'Recherche sur le serveur');
+      const api = await apiSearch(state.q, state.prefix);
+      if (stale()) return;
+      if (api) {
+        // Searched on the server, next to the index (server/search_api.py): totals, rankings and the largest lines.
+        state.mode = 'api'; state.api = api; state.stats = api.stats;
+        state.rows = api.top.map(row => { state.details.set(row.id, row); return { ...row, whoKey: row.who || row.siren ? `${row.who}|${row.siren}` : null, extraKey: row.extra }; });
+        if (!api.lines && !exact && !from) {
+          const fixed = await correction(state.words, state.prefix);
+          if (stale()) return;
+          if (fixed) {
+            history.replaceState(null, '', `?q=${encodeURIComponent(fixed)}&de=${encodeURIComponent(state.q)}`);
+            return run(fixed, { from: state.q });
+          }
+        }
+      } else {
       await showProgress(3, 'Ouverture de l’index de recherche');
       const meta = await S.meta(); await S.db();
       if (stale()) return;
@@ -109,13 +125,14 @@
           await showProgress(20 + 65 * Math.min(1, (i + part.length) / ids.length), 'Lecture des montants', `${count(Math.min(ids.length, i + part.length))} / ${count(ids.length)} lignes`);
         }
       }
+      }
       await showProgress(88, 'Préparation de la synthèse');
       // Other forms of the last word and close spellings, each with its own number of lines and amount.
       const last = state.words[state.words.length - 1];
       const head = state.words.slice(0, -1).join(' ');
       // With « mot* », the words starting with it are already in the results.
       // Once the word has results, only its other forms are worth showing (close spellings of an existing word are other words).
-      const found = state.rows.length || state.mode === 'frequent';
+      const found = state.rows.length || state.mode === 'frequent' || (state.mode === 'api' && state.api.lines);
       const near = (await S.nearest(last, 30)).filter(entry => !(state.prefix && entry.norm.startsWith(last)) && (entry.family || !found))
         .sort((a, b) => found ? b.lines - a.lines : 0).slice(0, 10);
       const family = near.filter(entry => entry.family);
@@ -123,7 +140,7 @@
       const withHead = word => head ? `${head} ${word}` : word;
       state.related = near.map(entry => ({ q: withHead(entry.display), label: entry.display, lines: entry.lines, amount: entry.amount }));
       state.family = root && !(state.prefix && root === last) ? { q: withHead(`${root}*`), label: `${root}…` } : null;
-      if (state.mode !== 'frequent') await resolveLabels();
+      if (state.mode === 'live' || state.mode === 'broad') await resolveLabels();
       await loadDetails(visibleRows());
       if (stale()) return;
       state.elapsed = performance.now() - progress.started;
@@ -132,6 +149,31 @@
       if (!stale()) showError(error);
       console.error(error);
     }
+  }
+
+  let apiDown = false;
+  async function apiSearch(q, prefix) {
+    if (apiDown) return null;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    try {
+      const response = await fetch(`api/search?q=${encodeURIComponent(q)}${prefix ? '&prefix=1' : ''}`, { signal: controller.signal });
+      if (response.status === 404 || response.status === 405) { apiDown = true; return null; } // no API on this copy of the site
+      if (!response.ok || !/json/.test(response.headers.get('content-type') || '')) return null;
+      const data = await response.json();
+      return Array.isArray(data.stats) && Array.isArray(data.top) ? data : null;
+    } catch (error) { return null; } finally { clearTimeout(timer); }
+  }
+  // Server rankings are per (key, source): filtered by the selected source, then added up across sources.
+  function apiTop(list, label) {
+    const map = new Map();
+    list.filter(item => !state.src || item.src === state.src).forEach(item => {
+      const entry = map.get(item.key) || { id: item.key, src: item.src, n: 0, value: 0, best: 0, label: label(item), siren: item.siren };
+      entry.n += item.n; entry.value += item.value;
+      if (item.value > entry.best) { entry.best = item.value; entry.src = item.src; }
+      map.set(item.key, entry);
+    });
+    return [...map.values()].sort((a, b) => b.value - a.value).slice(0, 10).filter(item => item.label);
   }
 
   // Names of the top beneficiaries / programmes (compact rows only carry dictionary ids).
@@ -161,10 +203,10 @@
       const s = bySrc[src] || (bySrc[src] = { n: 0, amount: 0 }); s.n += n; s.amount += value;
       if (year) { byYear[year] = (byYear[year] || 0) + value; years.push(year); }
     };
-    if (state.mode === 'frequent') state.stats.forEach(row => add(row.src, row.year, row.fw, row.n, row.amount || 0));
+    if (state.mode === 'frequent' || state.mode === 'api') state.stats.forEach(row => add(row.src, row.year, row.fw, row.n, row.amount || 0));
     else state.rows.forEach(row => add(row.src, row.year, row.fw, 1, row.amount || 0));
     const all = {};
-    (state.mode === 'frequent' ? state.stats.map(r => [r.src, r.n]) : state.rows.map(r => [r.src, 1])).forEach(([src, n]) => { all[src] = (all[src] || 0) + n; });
+    (state.mode === 'frequent' || state.mode === 'api' ? state.stats.map(r => [r.src, r.n]) : state.rows.map(r => [r.src, 1])).forEach(([src, n]) => { all[src] = (all[src] || 0) + n; });
     return { bySrc, byYear, lines, amount, fwLines, fwAmount, budgetLines, budgetAmount, all, first: Math.min(...years), last: Math.max(...years) };
   }
   function groupTop(rows, key, label, limit = 10) {
@@ -198,6 +240,7 @@
     const peak = Object.entries(t.byYear).sort((a, b) => b[1] - a[1])[0];
     if (peak && Object.keys(t.byYear).length > 1) facts.push(`l’année la plus élevée est ${peak[0]} (${money(peak[1])})`);
     if (state.mode === 'frequent') facts.push('le mot est très courant : bénéficiaires et liste portent sur les 60 lignes les plus importantes');
+    if (state.mode === 'api' && state.api.lines > state.api.top.length) facts.push(`la liste ci-dessous montre les ${count(state.api.top.length)} lignes les plus importantes`);
     if (facts.length) parts.push(`<p>Dans ces lignes, ${facts.join(' ; ')}.</p>`);
     if (t.fwLines) parts.push(`<p>En plus, ${count(t.fwLines)} accord${t.fwLines > 1 ? 's' : ''}-cadre${t.fwLines > 1 ? 's' : ''} affiche${t.fwLines > 1 ? 'nt' : ''} ${money(t.fwAmount)} de plafonds : ce sont des montants maximums autorisés, pas des dépenses, ils ne sont donc pas additionnés.</p>`);
     if (t.budgetLines) parts.push(`<p>${count(t.budgetLines)} ligne${t.budgetLines > 1 ? 's' : ''} du budget de l’État 2026 (${money(t.budgetAmount)}) contien${t.budgetLines > 1 ? 'nent' : 't'} aussi ce mot dans l’intitulé d’un programme ou d’une dépense : elles portent sur des politiques entières, comptées à part.</p>`);
@@ -226,8 +269,9 @@
   function render() {
     const t = totals();
     const rows = filtered();
-    const whoTop = groupTop(rows, 'whoKey', whoLabel);
-    const extraTop = groupTop(rows, 'extraKey', extraLabel);
+    const api = state.mode === 'api' ? state.api : null;
+    const whoTop = api ? apiTop(api.who, item => item.label) : groupTop(rows, 'whoKey', whoLabel);
+    const extraTop = api ? apiTop(api.extra, item => item.label) : groupTop(rows, 'extraKey', extraLabel);
     $('srSummary').innerHTML = summaryText(t, whoTop, extraTop);
     const chips = Object.keys(t.all).map(Number).sort((a, b) => t.all[b] - t.all[a]);
     $('srSources').innerHTML = chips.length ? [`<button type="button" data-src="0" class="${state.src ? '' : 'active'}">Toutes (${count(Object.values(t.all).reduce((s, n) => s + n, 0))})</button>`,
@@ -249,7 +293,8 @@
     if (!whoTop.length) $('srWho').innerHTML = '<p class="note">–</p>';
     ranking($('srExtra'), extraTop.map(item => ({ label: item.label, value: item.value, sub: `${S.SOURCES[item.src].short} · ${count(item.n)} ligne${item.n > 1 ? 's' : ''}` })), { limit: 10 });
     if (!extraTop.length) $('srExtra').innerHTML = '<p class="note">–</p>';
-    const depts = groupTop(rows, 'dept', id => ({ label: `${state.deptNames?.[id] || ''} (${id})`.trim() }), 10);
+    const deptLabel = id => `${state.deptNames?.[id] || ''} (${id})`.trim();
+    const depts = api ? apiTop(api.depts, item => deptLabel(item.key)) : groupTop(rows, 'dept', id => ({ label: deptLabel(id) }), 10);
     ranking($('srDepts'), depts.map(item => ({ label: item.label, value: item.value, sub: `${count(item.n)} ligne${item.n > 1 ? 's' : ''}` })), { limit: 10 });
     if (!depts.length) $('srDepts').innerHTML = '<p class="note">Département non renseigné pour ces lignes.</p>';
     renderList();
@@ -265,7 +310,7 @@
     const mark = S.highlighter(state.words);
     const groups = sortedGroups();
     const shown = groups.slice(0, state.shown);
-    $('srListTitle').textContent = `Lignes de dépense${state.rows.length ? ` (${count(filtered().length)}${state.mode === 'frequent' ? ' plus importantes' : ''})` : ''}`;
+    $('srListTitle').textContent = `Lignes de dépense${state.rows.length ? ` (${count(filtered().length)}${state.mode === 'frequent' || (state.mode === 'api' && state.api.lines > state.api.top.length) ? ' plus importantes' : ''})` : ''}`;
     $('srList').innerHTML = shown.length ? `<table class="data-table sr-table"><thead><tr><th>Source</th><th>Année</th><th>Libellé</th><th>Bénéficiaire / acheteur</th><th class="num">Montant</th></tr></thead><tbody>${shown.map(row => {
       const d = state.details.get(row.id) || {};
       return `<tr><td><span class="tag tag--src${row.src}">${esc(S.SOURCES[row.src].short)}</span></td><td>${row.year ?? '–'}</td>
