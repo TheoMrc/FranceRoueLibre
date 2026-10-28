@@ -4,9 +4,9 @@
 
 <p align="center"><strong>Ouvrir le capot des comptes publics.</strong></p>
 
-> Les services de l’État eux-mêmes sont dans l’incapacité de dire où part l’argent des Français. L’argent des Français est flambé à la légère, sans études d’impact a priori ni évaluation a posteriori des politiques financées, car les politiques ne sont pas armés intellectuellement : ils font des paris à l’aveugle et des politiques de communication avec de l’argent qui ne sort pas de leurs poches, mais des nôtres.
->
-> FranceRoueLibre est une énième initiative visant à ouvrir le capot des comptes publics.
+**Les services de l’État eux-mêmes sont dans l’incapacité de dire où part l’argent des Français. L’argent des Français est flambé à la légère, sans études d’impact a priori ni évaluation a posteriori des politiques financées, car les politiques ne sont pas armés intellectuellement : ils font des paris à l’aveugle et des politiques de communication avec de l’argent qui ne sort pas de leurs poches, mais des nôtres.**
+
+**FranceRoueLibre est une énième initiative visant à ouvrir le capot des comptes publics.**
 
 ## Ce que montre le site
 
