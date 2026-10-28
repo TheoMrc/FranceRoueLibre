@@ -50,22 +50,89 @@ window.FRLSearch = (() => {
   }
   // Bytes and requests read so far, for the progress display.
   const stats = async () => { try { return workerRef ? await workerRef.worker.getStats() : null; } catch (error) { return null; } };
-  const meta = () => metaPromise || (metaPromise = fetch(new URL('data/search/meta.json', base), { cache: 'no-cache' }).then(r => r.json()));
+  const meta = () => metaPromise || (metaPromise = fetch(new URL('data/search/meta.json', base), { cache: 'no-cache' }).then(r => {
+    if (!r.ok) throw Object.assign(new Error('Index de recherche absent de cette copie du site.'), { code: 'NOINDEX' });
+    return r.json();
+  }));
   const query = async (sql, ...params) => (await db()).query(sql, params); // sql.js exec(sql, [params])
 
   const norm = text => String(text || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const tokens = text => (norm(text).match(/[\p{L}\p{N}]+/gu) || []).filter(token => token.length >= 2);
   // Phrase query; the last word also matches its endings (plural, feminine…) when it is long enough.
   // Words are letters and digits only (see tokens), so they are valid FTS5 barewords; lower case avoids AND/OR/NOT.
-  const ftsQuery = (words, prefix = true) => words.map((word, i) => `${word}${prefix && i === words.length - 1 && word.length >= 4 ? '*' : ''}`).join(' + ');
+  // A trailing * (« transphob* ») asks for every word starting with the last word, whatever its length.
+  const ftsQuery = (words, prefix = true, force = false) => words.map((word, i) => `${word}${prefix && i === words.length - 1 && (force || word.length >= 4) ? '*' : ''}`).join(' + ');
+  const wantsPrefix = text => /\*\s*$/.test(String(text || ''));
+
+  /* ---------- Lexicon: every indexed word with its number of lines and amount (data/search/lexicon/<2 letters>.json) ----------
+     Small static files, read without opening the index: suggestions are instant and work before the database is ready. */
+  const shards = new Map();
+  const shardKey = word => [...word.slice(0, 2)].map(c => c >= 'a' && c <= 'z' ? c : '_').join('');
+  function shard(word) {
+    const key = shardKey(word);
+    if (!shards.has(key)) shards.set(key, fetch(new URL(`data/search/lexicon/${key}.json`, base)).then(r => r.ok ? r.json() : []).catch(() => [])
+      .then(entries => entries.map(([norm, lines, amount, display]) => ({ norm, lines, amount, display: display || norm }))));
+    return shards.get(key);
+  }
+  const lookup = async word => (await shard(word)).find(entry => entry.norm === word) || null;
+  // Words starting with the prefix, most frequent first.
+  const complete = async (prefix, limit = 8) => (await shard(prefix)).filter(entry => entry.norm.startsWith(prefix)).sort((a, b) => b.lines - a.lines).slice(0, limit);
+  const commonPrefix = (a, b) => { let i = 0; while (i < a.length && i < b.length && a[i] === b[i]) i++; return i; };
+  // Optimal string alignment distance, stopped early above max.
+  function distance(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    let prev2 = null, prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+      const row = [i]; let best = i;
+      for (let j = 1; j <= b.length; j++) {
+        let value = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        if (prev2 && i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) value = Math.min(value, prev2[j - 2] + 1);
+        row.push(value); best = Math.min(best, value);
+      }
+      if (best > max) return max + 1;
+      prev2 = prev; prev = row;
+    }
+    return prev[b.length];
+  }
+  /* Words close to a word: other forms of the same family (transphobe → transphobie: same root, different ending) and
+     spelling mistakes (discrimnation → discrimination). Ranked by closeness, then by number of lines. */
+  async function nearest(word, limit = 6) {
+    if (!word || word.length < 3) return [];
+    const max = word.length <= 5 ? 1 : 2;
+    const root = Math.max(5, Math.ceil(0.7 * word.length)); // a family shares at least 70 % of the word
+    const candidates = [];
+    for (const entry of await shard(word)) {
+      if (entry.norm === word) continue;
+      const shared = commonPrefix(word, entry.norm);
+      const family = shared >= root && entry.norm.length - shared <= 5;
+      const d = distance(word, entry.norm, max);
+      if (d > max && !family) continue;
+      candidates.push({ ...entry, family, distance: d, score: Math.min(d, max + 1) - (family ? 1.5 : 0) - 0.15 * Math.log10(entry.lines + 1) });
+    }
+    return candidates.sort((a, b) => a.score - b.score).slice(0, limit);
+  }
+  // The root shared by a word and its family, to search every form at once (transphob*).
+  const familyRoot = (word, others) => {
+    const shared = Math.min(...others.map(other => commonPrefix(word, other.norm)));
+    return shared >= 4 ? word.slice(0, shared) : null;
+  };
 
   async function suggest(text) {
     const words = tokens(text);
     const last = words[words.length - 1];
     if (!last || last.length < 3 || !/[\p{L}\p{N}]$/u.test(text.trim())) return [];
     const head = text.trim().slice(0, text.trim().length - last.length).trim();
-    const rows = await query('SELECT display, df FROM term WHERE norm >= ? AND norm < ? ORDER BY df DESC LIMIT 8', last, `${last}￿`);
-    return rows.map(row => ({ text: `${head ? head + ' ' : ''}${row.display}`, count: row.df }));
+    const join = word => `${head ? head + ' ' : ''}${word}`;
+    const found = await complete(last);
+    const items = found.map(entry => ({ text: join(entry.display), count: entry.lines, amount: entry.amount }));
+    if (items.length < 4) {
+      // Few or no words start like this: offer the closest words that do exist.
+      const close = (await nearest(last, 8)).filter(entry => !found.some(f => f.norm === entry.norm));
+      const sure = close.filter(entry => entry.family || entry.distance <= 1);
+      (sure.length ? sure : close.slice(0, 2)).slice(0, 6 - items.length)
+        .forEach(entry => items.push({ text: join(entry.display), count: entry.lines, amount: entry.amount, near: true }));
+    }
+    return items;
   }
 
   // Accent-insensitive highlighting of the query words (and their endings) in a label.
@@ -78,5 +145,5 @@ window.FRLSearch = (() => {
   }
   const escapeHtml = text => String(text ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 
-  return { SOURCES, db, meta, query, stats, norm, tokens, ftsQuery, suggest, highlighter, escapeHtml };
+  return { SOURCES, db, meta, query, stats, norm, tokens, ftsQuery, wantsPrefix, suggest, lookup, complete, nearest, familyRoot, highlighter, escapeHtml };
 })();

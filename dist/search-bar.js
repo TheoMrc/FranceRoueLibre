@@ -6,6 +6,9 @@
   const results = asset('recherche.html');
   const actions = document.querySelector('.nav__actions');
   if (!actions || document.querySelector('.nav-search')) return;
+  // The search index is optional (it is not shipped with every copy of the site): no index, no search box.
+  fetch(asset('data/search/meta.json'), { method: 'HEAD', cache: 'no-cache' }).then(response => { if (response.ok) setup(); }).catch(() => {});
+  function setup() {
 
   const form = document.createElement('form');
   form.className = 'nav-search';
@@ -20,6 +23,8 @@
   const params = new URLSearchParams(location.search);
   if (location.pathname.endsWith('recherche.html') && params.get('q')) input.value = params.get('q');
 
+  const euros = value => { const a = Math.abs(value), f = (v, d) => v.toLocaleString('fr-FR', { maximumFractionDigits: d });
+    return a >= 1e9 ? `${f(value / 1e9, 2)} Md€` : a >= 1e6 ? `${f(value / 1e6, 1)} M€` : a >= 1e3 ? `${f(value / 1e3, 0)} k€` : `${f(value, 0)} €`; };
   let core = null, timer = 0, active = -1, items = [], seq = 0;
   const ensure = () => core || (core = new Promise((resolve, reject) => {
     if (window.FRLSearch) { resolve(window.FRLSearch); return; }
@@ -31,7 +36,7 @@
   const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); active = -1; };
   const paint = () => {
     list.innerHTML = items.map((item, i) => `<li role="option" id="navOpt${i}" class="${i === active ? 'is-active' : ''}" data-i="${i}" aria-selected="${i === active}">
-      ${item.kind === 'go' ? `<span>Rechercher « <strong>${window.FRLSearch.escapeHtml(item.text)}</strong> »</span>` : `<span>${window.FRLSearch.escapeHtml(item.text)}</span><small>${item.count.toLocaleString('fr-FR')} lignes</small>`}</li>`).join('');
+      ${item.kind === 'go' ? `<span>Rechercher « <strong>${window.FRLSearch.escapeHtml(item.text)}</strong> »</span>` : `<span>${item.near ? '<em class="nav-search__near">proche</em>' : ''}${window.FRLSearch.escapeHtml(item.text)}</span><small>${item.count.toLocaleString('fr-FR')} ligne${item.count > 1 ? 's' : ''}${item.amount ? ` · ${euros(item.amount)}` : ''}</small>`}</li>`).join('');
     list.hidden = !items.length; input.setAttribute('aria-expanded', items.length ? 'true' : 'false');
     if (active >= 0) input.setAttribute('aria-activedescendant', `navOpt${active}`); else input.removeAttribute('aria-activedescendant');
   };
@@ -45,7 +50,7 @@
     items = [{ kind: 'go', text }, ...suggestions.filter(s => engine.norm(s.text) !== engine.norm(text)).map(s => ({ kind: 'term', ...s }))];
     active = -1; paint();
   }
-  input.addEventListener('focus', () => { ensure().then(engine => engine.db()).catch(() => {}); });
+  input.addEventListener('focus', () => { ensure().then(engine => engine.db()).catch(() => {}); }); // opens the index early, for the results page
   input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(update, 120); });
   input.addEventListener('keydown', event => {
     if (list.hidden) return;
@@ -57,4 +62,5 @@
   list.addEventListener('mousedown', event => { const li = event.target.closest('[data-i]'); if (li) { event.preventDefault(); go(items[Number(li.dataset.i)].text); } });
   form.addEventListener('submit', event => { event.preventDefault(); go(input.value); });
   document.addEventListener('click', event => { if (!form.contains(event.target)) close(); });
+  }
 })();

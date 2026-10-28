@@ -25,6 +25,10 @@
       <div class="sr-progress__meta">${detail ? `${esc(detail)} · ` : ''}${stats ? `${mo(stats.totalFetchedBytes)} lus en ${count(stats.totalRequests)} requêtes · ` : ''}${elapsed} s</div></div>`;
   }
   function showError(error) {
+    if (error?.code === 'NOINDEX') {
+      $('srSummary').innerHTML = '<div class="sr-error"><strong>La recherche n’est pas disponible sur cette version du site.</strong><p>L’index de recherche (environ 600 Mo) n’est publié qu’avec la version complète du site, servie par <code>node serve.mjs</code> ou un hébergement statique qui accepte les gros fichiers.</p></div>';
+      return;
+    }
     const advice = error?.code === 'RANGE' || /malformed|disk image/i.test(error?.message || '')
       ? 'Le serveur qui affiche le site ne lit pas l’index correctement. Arrêtez tous les serveurs en cours, relancez <code>node serve.mjs</code>, puis rechargez la page avec Ctrl+F5.'
       : 'Rechargez la page ; si l’erreur persiste, reconstruisez l’index avec <code>python scripts/process_search.py</code>.';
@@ -37,10 +41,25 @@
   }
 
   /* ---------- Search ---------- */
-  async function run(q) {
+  // Words of the query that exist nowhere in the index, replaced by their closest existing word (transphobe → transphobie).
+  async function correction(words, prefix) {
+    let changed = false;
+    const out = [];
+    for (const [i, word] of words.entries()) {
+      const last = i === words.length - 1;
+      const known = await S.lookup(word) || (last && (prefix || word.length >= 4) && (await S.complete(word, 1)).length);
+      const best = known ? null : (await S.nearest(word, 1))[0];
+      out.push(best ? best.display : word);
+      if (best) changed = true;
+    }
+    return changed ? out.join(' ') : null;
+  }
+
+  async function run(q, { exact = false, from = null } = {}) {
     const runId = ++state.run;
     const stale = () => runId !== state.run;
-    state.q = q.trim(); state.words = S.tokens(state.q); state.src = 0; state.shown = PAGE; state.details = new Map();
+    state.q = q.trim(); state.words = S.tokens(state.q); state.prefix = S.wantsPrefix(state.q); state.from = from; state.exact = exact;
+    state.src = 0; state.shown = PAGE; state.details = new Map();
     state.labels = { who: new Map(), extra: new Map() };
     $('srInput').value = state.q;
     document.title = state.q ? `« ${state.q} » — Recherche — FranceRoueLibre` : 'Recherche — FranceRoueLibre';
@@ -55,7 +74,7 @@
       if (stale()) return;
       await showProgress(10, 'Recherche des mots dans l’index');
       const single = state.words.length === 1 ? (await S.query('SELECT norm, display, df FROM term WHERE norm = ?', state.words[0]))[0] : null;
-      if (single && single.df > meta.frequentThreshold) {
+      if (single && single.df > meta.frequentThreshold && !state.prefix) {
         // Very common word: totals and largest lines were precomputed when the index was built.
         state.mode = 'frequent';
         state.stats = await S.query('SELECT src, year, fw, n, amount FROM stat WHERE norm = ?', single.norm);
@@ -65,9 +84,18 @@
         top.forEach(row => { if (row.who || row.siren) state.labels.who.set(`${row.who}|${row.siren}`, { name: row.who, siren: row.siren }); if (row.extra) state.labels.extra.set(row.extra, row.extra); });
       } else {
         state.mode = 'live'; state.stats = null;
-        const match = S.ftsQuery(state.words);
+        const match = S.ftsQuery(state.words, true, state.prefix);
         const ids = (await S.query(`SELECT rowid AS id FROM fts WHERE fts MATCH ? ORDER BY rowid LIMIT ${MAX_ROWS + 1}`, match)).map(row => row.id);
         if (stale()) return;
+        if (!ids.length && !exact && !from) {
+          // Nothing found: if a word is misspelt or in a form that never appears, search its closest existing word instead.
+          const fixed = await correction(state.words, state.prefix);
+          if (stale()) return;
+          if (fixed) {
+            history.replaceState(null, '', `?q=${encodeURIComponent(fixed)}&de=${encodeURIComponent(state.q)}`);
+            return run(fixed, { from: state.q });
+          }
+        }
         if (ids.length > MAX_ROWS) { state.mode = 'broad'; ids.length = MAX_ROWS; }
         state.rows = [];
         await showProgress(20, ids.length ? 'Lecture des montants' : 'Aucune ligne trouvée', `${count(ids.length)} ligne${ids.length > 1 ? 's' : ''} trouvée${ids.length > 1 ? 's' : ''}`);
@@ -80,8 +108,19 @@
         }
       }
       await showProgress(88, 'Préparation de la synthèse');
-      const stem = state.words[0].slice(0, Math.max(4, Math.min(state.words[0].length - 2, 7)));
-      state.related = (await S.query('SELECT display, df FROM term WHERE norm >= ? AND norm < ? ORDER BY df DESC LIMIT 14', stem, `${stem}￿`)).filter(row => S.norm(row.display) !== state.words[0] || state.words.length > 1);
+      // Other forms of the last word and close spellings, each with its own number of lines and amount.
+      const last = state.words[state.words.length - 1];
+      const head = state.words.slice(0, -1).join(' ');
+      // With « mot* », the words starting with it are already in the results.
+      // Once the word has results, only its other forms are worth showing (close spellings of an existing word are other words).
+      const found = state.rows.length || state.mode === 'frequent';
+      const near = (await S.nearest(last, 30)).filter(entry => !(state.prefix && entry.norm.startsWith(last)) && (entry.family || !found))
+        .sort((a, b) => found ? b.lines - a.lines : 0).slice(0, 10);
+      const family = near.filter(entry => entry.family);
+      const root = family.length ? S.familyRoot(last, family) : null;
+      const withHead = word => head ? `${head} ${word}` : word;
+      state.related = near.map(entry => ({ q: withHead(entry.display), label: entry.display, lines: entry.lines, amount: entry.amount }));
+      state.family = root && !(state.prefix && root === last) ? { q: withHead(`${root}*`), label: `${root}…` } : null;
       if (state.mode !== 'frequent') await resolveLabels();
       await loadDetails(visibleRows());
       if (stale()) return;
@@ -142,7 +181,8 @@
   function summaryText(t, whoTop, extraTop) {
     const q = `« ${esc(state.q)} »`;
     if (!t.lines && !t.fwLines && !t.budgetLines) {
-      return `<p class="sr-lead">${q} n’apparaît dans aucun libellé de dépense publique publié en données ouvertes.</p>
+      const advice = state.family || state.related.length ? `<p class="sr-didyoumean">Mots proches qui apparaissent dans les libellés : ${[...(state.family ? [`<a href="?q=${encodeURIComponent(state.family.q)}">toutes les formes de « ${esc(state.family.label)} »</a>`] : []), ...state.related.filter(r => r.lines).slice(0, 4).map(r => `<a href="?q=${encodeURIComponent(r.q)}">${esc(r.label)}</a> (${count(r.lines)} ligne${r.lines > 1 ? 's' : ''}${r.amount ? `, ${money(r.amount)}` : ''})`)].join(' · ')}.</p>` : '';
+      return `${advice}<p class="sr-lead">${q} n’apparaît dans aucun libellé de dépense publique publié en données ouvertes.</p>
         <p>Cela ne veut pas dire qu’aucun argent public n’y est consacré : les libellés sont courts, rédigés par chaque administration, et beaucoup de dépenses (salaires, subventions des collectivités, petits marchés) ne sont pas publiées ligne à ligne.${state.related.length ? ' Essayez un mot proche ci-dessous.' : ''}</p>`;
     }
     const parts = [];
@@ -159,6 +199,8 @@
     if (facts.length) parts.push(`<p>Dans ces lignes, ${facts.join(' ; ')}.</p>`);
     if (t.fwLines) parts.push(`<p>En plus, ${count(t.fwLines)} accord${t.fwLines > 1 ? 's' : ''}-cadre${t.fwLines > 1 ? 's' : ''} affiche${t.fwLines > 1 ? 'nt' : ''} ${money(t.fwAmount)} de plafonds : ce sont des montants maximums autorisés, pas des dépenses, ils ne sont donc pas additionnés.</p>`);
     if (t.budgetLines) parts.push(`<p>${count(t.budgetLines)} ligne${t.budgetLines > 1 ? 's' : ''} du budget de l’État 2026 (${money(t.budgetAmount)}) contien${t.budgetLines > 1 ? 'nent' : 't'} aussi ce mot dans l’intitulé d’un programme ou d’une dépense : elles portent sur des politiques entières, comptées à part.</p>`);
+    if (state.from) parts.unshift(`<p class="sr-didyoumean">Aucun résultat pour « ${esc(state.from)} » : résultats affichés pour le mot le plus proche, <strong>« ${esc(state.q)} »</strong>. <a href="?q=${encodeURIComponent(state.from)}&exact=1">Chercher uniquement « ${esc(state.from)} »</a></p>`);
+    if (state.prefix) parts.push(`<p class="sr-caveat">Le signe * cherche tous les mots qui commencent par « ${esc(state.words[state.words.length - 1])} ».</p>`);
     if (state.mode === 'broad') parts.push(`<p class="sr-warning">Plus de ${count(MAX_ROWS)} lignes correspondent : seules les ${count(MAX_ROWS)} premières sont analysées. Précisez la recherche (deux mots, une expression).</p>`);
     parts.push(`<p class="sr-caveat">Le mot est cherché dans les libellés publiés : un résultat ne signifie pas que tout le montant y est consacré, et certains sont des homonymes. Vérifiez chaque ligne dans sa source. Recherche faite en ${(state.elapsed / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} s.</p>`);
     return parts.join('');
@@ -209,7 +251,10 @@
     ranking($('srDepts'), depts.map(item => ({ label: item.label, value: item.value, sub: `${count(item.n)} ligne${item.n > 1 ? 's' : ''}` })), { limit: 10 });
     if (!depts.length) $('srDepts').innerHTML = '<p class="note">Département non renseigné pour ces lignes.</p>';
     renderList();
-    $('srRelated').innerHTML = state.related.length ? `<h3>Mots proches dans les libellés</h3><div class="sr-chips">${state.related.map(row => `<a class="sr-chip" href="?q=${encodeURIComponent(row.display)}">${esc(row.display)}<small>${count(row.df)}</small></a>`).join('')}</div>` : '';
+    const related = [
+      ...(state.family ? [`<a class="sr-chip sr-chip--family" href="?q=${encodeURIComponent(state.family.q)}">Toutes les formes : ${esc(state.family.label)}</a>`] : []),
+      ...state.related.map(row => `<a class="sr-chip" href="?q=${encodeURIComponent(row.q)}">${esc(row.label)}<small>${count(row.lines)} ligne${row.lines > 1 ? 's' : ''}${row.amount ? ` · ${money(row.amount)}` : ''}</small></a>`)];
+    $('srRelated').innerHTML = related.length ? `<h3>Autres formes et mots proches</h3><div class="sr-chips">${related.join('')}</div>` : '';
     $('srMethod').textContent = 'Méthode : recherche plein texte sans accents ni majuscules dans 1,9 million de lignes publiées (subventions de l’État aux associations 2010–2023, marchés publics 2014–2026, projets DGCL 2025, Fonds vert 2023–2025, aides de minimis 2026, budget vert de l’État 2026). Plusieurs mots sont cherchés comme une expression ; le dernier mot inclut ses terminaisons (pluriel, féminin).';
     resolveNames($('srResults'));
   }
@@ -241,9 +286,10 @@
     $('srSources').addEventListener('click', async event => { const b = event.target.closest('[data-src]'); if (!b) return; state.src = Number(b.dataset.src); state.shown = PAGE; await loadDetails(visibleRows()); render(); });
     $('srSort').addEventListener('change', () => { state.sort = $('srSort').value; refreshList(); });
     $('srMore').addEventListener('click', () => { state.shown += 100; refreshList(); });
-    window.addEventListener('popstate', () => run(new URLSearchParams(location.search).get('q') || ''));
+    const fromUrl = () => { const p = new URLSearchParams(location.search); return run(p.get('q') || '', { exact: p.has('exact'), from: p.get('de') }); };
+    window.addEventListener('popstate', fromUrl);
     fetch('./data/local/departements/_entities.json').then(r => r.json()).then(json => { state.deptNames = Object.fromEntries((json.codes || []).map((code, i) => [code, json.names[i]])); }).catch(() => {});
-    run(new URLSearchParams(location.search).get('q') || '');
+    fromUrl();
   }
   init();
 })();

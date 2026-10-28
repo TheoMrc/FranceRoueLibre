@@ -15,6 +15,8 @@ needs are downloaded. Tables:
   term(norm, display, df)                                          vocabulary for the suggestions
   stat(norm, src, year, fw, n, amount)                             precomputed totals for very frequent words
   top(norm, rank, id)                                              precomputed largest lines for very frequent words
+Next to the index, dist/data/search/lexicon/<2 letters>.json lists every word with its number of lines and the amount
+of those lines: small files read directly by the browser for instant suggestions and « did you mean » corrections.
 Requires: Python's sqlite3 with FTS5, duckdb. Inputs: sources/derived/*.parquet (written by process_subsidies.py and
 process_procurement.py), dist/data/web/projects-2025.json, sources/raw/plf26-budget-vert.csv.gz.
 Run: python scripts/process_search.py
@@ -50,6 +52,46 @@ def clip(value, size):
         return None
     value = ' '.join(str(value).split())
     return value[:size] if value else None
+
+
+def build_lexicon(db):
+    """Every indexed word (letters only, 3+ characters) → [norm, lines, amount, display]. The amount sums the lines
+    that are spending (framework ceilings and State budget lines excluded, as on the results page). Split by the first
+    two letters so the browser downloads only the file of the word being typed (a few Ko)."""
+    out_dir = f'{OUT_DIR}/lexicon'
+    os.makedirs(out_dir, exist_ok=True)
+    for name in os.listdir(out_dir):
+        os.remove(os.path.join(out_dir, name))
+    top = db.execute('SELECT max(id) FROM agg').fetchone()[0]
+    amounts = [0.0] * (top + 1)
+    for line, amount, fw, src in db.execute('SELECT id, amount, fw, src FROM agg'):
+        if amount and not fw and src != 6:
+            amounts[line] = amount
+    display = dict(db.execute('SELECT norm, display FROM term'))
+    db.execute('CREATE VIRTUAL TABLE temp.instances USING fts5vocab(main, fts, instance)')
+    shards = collections.defaultdict(list)
+    current, seen, total = None, set(), 0.0
+
+    def close():
+        if current and len(current) >= 3 and current.isalpha():
+            entry = [current, len(seen), round(total)]
+            if display.get(current, current) != current:
+                entry.append(display[current])
+            key = ''.join(c if 'a' <= c <= 'z' else '_' for c in current[:2])
+            shards[key].append(entry)
+    for word, line in db.execute('SELECT term, doc FROM temp.instances'):
+        if word != current:
+            close()
+            current, seen, total = word, set(), 0.0
+        if line not in seen:
+            seen.add(line)
+            total += amounts[line]
+    close()
+    db.execute('DROP TABLE temp.instances')
+    for key, entries in shards.items():
+        with open(f'{out_dir}/{key}.json', 'w', encoding='utf-8') as file:
+            json.dump(entries, file, ensure_ascii=False, separators=(',', ':'))
+    print(f'· lexique : {sum(map(len, shards.values()))} mots en {len(shards)} fichiers')
 
 
 def build_compact(db):
@@ -184,6 +226,7 @@ def main():
     db.executemany('INSERT INTO term VALUES (?, ?, ?)', terms)
     db.execute('DROP TABLE vocab')
     print(f'· {len(terms)} mots')
+    build_lexicon(db)
 
     # Frequent words: totals and largest lines precomputed (a live query would have to read too many pages).
     db.executescript('''CREATE TABLE stat (norm TEXT, src INTEGER, year INTEGER, fw INTEGER, n INTEGER, amount REAL);
@@ -210,7 +253,10 @@ def main():
 
 
 if __name__ == '__main__':
-    if '--compact-only' in sys.argv:
+    if '--lexicon-only' in sys.argv:
+        # Rebuild only the word lists next to the index (the index itself is left untouched).
+        build_lexicon(sqlite3.connect(DB))
+    elif '--compact-only' in sys.argv:
         # Upgrade an existing index without rebuilding it (adds the compact tables, then splits again).
         connection = sqlite3.connect(DB)
         build_compact(connection)
