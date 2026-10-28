@@ -1,0 +1,1633 @@
+{
+  "source": "https://www.insee.fr/fr/statistiques/8988843",
+  "tables": [
+    "3.101",
+    "3.105"
+  ],
+  "publication": "2026-08-28",
+  "unit": "milliards euros courants",
+  "years": [
+    {
+      "year": 1978,
+      "debt": 74.5,
+      "previousDebt": null,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 44.3
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 3
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 23.7
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 3.5
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1979,
+      "debt": 85.1,
+      "previousDebt": 74.5,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 49.8
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 3.5
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 27.4
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 4.4
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1980,
+      "debt": 95.3,
+      "previousDebt": 85.1,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 55.1
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 4.4
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 30.8
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 5
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1981,
+      "debt": 114.3,
+      "previousDebt": 95.3,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 67.5
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 5.5
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 35.7
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 5.6
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1982,
+      "debt": 151.8,
+      "previousDebt": 114.3,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 95
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 8.1
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 42.4
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 6.3
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1983,
+      "debt": 178.3,
+      "previousDebt": 151.8,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 111.5
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 10.6
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 49
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 7.2
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1984,
+      "debt": 211.2,
+      "previousDebt": 178.3,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 133.7
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 12.1
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 55.8
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 9.6
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1985,
+      "debt": 238.8,
+      "previousDebt": 211.2,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 151.9
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 13.5
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 63.7
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 9.7
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1986,
+      "debt": 261.7,
+      "previousDebt": 238.8,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 170.8
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 16.1
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 68.6
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 6.1
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1987,
+      "debt": 295,
+      "previousDebt": 261.7,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 192.4
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 17.9
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 78.1
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 6.6
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1988,
+      "debt": 318.2,
+      "previousDebt": 295,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 212.7
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 16
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 81.6
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 7.9
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1989,
+      "debt": 351.3,
+      "previousDebt": 318.2,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 239.6
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 18.3
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 85.1
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 8.3
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1990,
+      "debt": 384.1,
+      "previousDebt": 351.3,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 264.6
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 21.1
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 90
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 8.4
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1991,
+      "debt": 409,
+      "previousDebt": 384.1,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 279
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 24
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 95.1
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 10.9
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1992,
+      "debt": 467.7,
+      "previousDebt": 409,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 322.5
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 27.5
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 99.6
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 18.1
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1993,
+      "debt": 546.5,
+      "previousDebt": 467.7,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 382.2
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 33.4
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 104.4
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 26.5
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1994,
+      "debt": 605,
+      "previousDebt": 546.5,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 438.6
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 36.6
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 108.4
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 21.4
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1995,
+      "debt": 701.6383,
+      "previousDebt": 605,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 488.6331
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 68.0751
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 110.9539
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 33.9761
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1996,
+      "debt": 755.5848,
+      "previousDebt": 701.6383,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 533.0557
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 68.1853
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 112.7986
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 41.545
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1997,
+      "debt": 799.3788,
+      "previousDebt": 755.5848,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 568.8525
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 68.6774
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 105.7657
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 56.0826
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1998,
+      "debt": 836.0594,
+      "previousDebt": 799.3788,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 613.6171
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 69.0978
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 106.2073
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 47.1371
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 1999,
+      "debt": 856.9435,
+      "previousDebt": 836.0594,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 637.9655
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 68.5671
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 105.6759
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 44.7337
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 2000,
+      "debt": 880.0048,
+      "previousDebt": 856.9435,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 660.3043
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 68.3893
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 105.7515
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 45.5587
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 2001,
+      "debt": 907.6726,
+      "previousDebt": 880.0048,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 687.9181
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 68.7905
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 106.1163
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 44.8468
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 2002,
+      "debt": 966.8225,
+      "previousDebt": 907.6726,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 748.2817
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 66.4082
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 105.1736
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 46.9578
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 2003,
+      "debt": 1060.4064,
+      "previousDebt": 966.8225,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 812.5786
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 75.1527
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 108.985
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 63.6889
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 2004,
+      "debt": 1134.3469,
+      "previousDebt": 1060.4064,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 853.5259
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 72.7605
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 112.6624
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 95.3974
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 2005,
+      "debt": 1201.4707,
+      "previousDebt": 1134.3469,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 900.9635
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 70.445
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 119.1573
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 110.9042
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 2006,
+      "debt": 1207.3127,
+      "previousDebt": 1201.4707,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 900.4203
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 64.0812
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 126.9398
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 115.8704
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 2007,
+      "debt": 1268.8587,
+      "previousDebt": 1207.3127,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 938.5558
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 72.0636
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 136.9537
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 121.284
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 2008,
+      "debt": 1389.4016,
+      "previousDebt": 1268.8587,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 1046.7636
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 73.9292
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 147.7728
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 120.9368
+        }
+      ],
+      "deficit": null,
+      "adjustments": [],
+      "change": null
+    },
+    {
+      "year": 2009,
+      "debt": 1627.1822,
+      "previousDebt": 1389.4016,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 1174.9976
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 143.4964
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 156.7041
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 151.9843
+        }
+      ],
+      "deficit": 142.8,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": 95.6
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": -8.8
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": -1.8
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": 9.3
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": 0.7
+        }
+      ],
+      "change": 237.8,
+      "stockDifference": -0.0194
+    },
+    {
+      "year": 2010,
+      "debt": 1722.1722,
+      "previousDebt": 1627.1822,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 1252.924
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 130.9276
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 162.7557
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 175.5659
+        }
+      ],
+      "deficit": 142.8,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": -34.4
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": -10.1
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": 2.6
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": -4.8
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": -1.1
+        }
+      ],
+      "change": 95,
+      "stockDifference": -0.01
+    },
+    {
+      "year": 2011,
+      "debt": 1830.1363,
+      "previousDebt": 1722.1722,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 1345.4143
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 111.0994
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 168.3989
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 205.223
+        }
+      ],
+      "deficit": 109.4,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": -5.7
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": -2.6
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": 2.1
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": 8.8
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": -4.1
+        }
+      ],
+      "change": 107.9,
+      "stockDifference": 0.0641
+    },
+    {
+      "year": 2012,
+      "debt": 1915.8352,
+      "previousDebt": 1830.1363,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 1447.2134
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 81.5298
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 175.5732
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 211.5201
+        }
+      ],
+      "deficit": 108,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": -9
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": -9.1
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": -0.9
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": -1.9
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": -1.4
+        }
+      ],
+      "change": 85.7,
+      "stockDifference": -0.0011
+    },
+    {
+      "year": 2013,
+      "debt": 2004.9582,
+      "previousDebt": 1915.8352,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 1528.1272
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 82.6246
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 181.9788
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 212.2276
+        }
+      ],
+      "deficit": 104.7,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": -1.1
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": -4
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": 4.6
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": -11.7
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": -3.4
+        }
+      ],
+      "change": 89.1,
+      "stockDifference": 0.023
+    },
+    {
+      "year": 2014,
+      "debt": 2071.1245,
+      "previousDebt": 2004.9582,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 1604.6265
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 61.9821
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 187.3297
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 217.1862
+        }
+      ],
+      "deficit": 98.5,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": -22
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": -4.7
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": 1.6
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": -7.3
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": 0.7
+        }
+      ],
+      "change": 66.8,
+      "stockDifference": -0.6337
+    },
+    {
+      "year": 2015,
+      "debt": 2134.871,
+      "previousDebt": 2071.1245,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 1655.434
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 63.3432
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 195.2453
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 220.8485
+        }
+      ],
+      "deficit": 85.7,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": 2
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": -17.7
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": 1.1
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": -5.2
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": -2.1
+        }
+      ],
+      "change": 63.8,
+      "stockDifference": -0.0535
+    },
+    {
+      "year": 2016,
+      "debt": 2190.5246,
+      "previousDebt": 2134.871,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 1706.0905
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 60.4856
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 198.4615
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 225.487
+        }
+      ],
+      "deficit": 84,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": 5.6
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": -12.4
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": 1.2
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": -25.1
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": 2.4
+        }
+      ],
+      "change": 55.7,
+      "stockDifference": -0.0464
+    },
+    {
+      "year": 2017,
+      "debt": 2263.2858,
+      "previousDebt": 2190.5246,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 1767.9994
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 69.3092
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 199.5543
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 226.4228
+        }
+      ],
+      "deficit": 77.1,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": 13.2
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": -4.7
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": 1.5
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": -14.2
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": -0.1
+        }
+      ],
+      "change": 72.8,
+      "stockDifference": -0.0388
+    },
+    {
+      "year": 2018,
+      "debt": 2320.7371,
+      "previousDebt": 2263.2858,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 1841.7906
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 69.8855
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 204.0315
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 205.0296
+        }
+      ],
+      "deficit": 54.6,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": 8.9
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": -4.4
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": 0.2
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": -1
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": -0.8
+        }
+      ],
+      "change": 57.5,
+      "stockDifference": -0.0487
+    },
+    {
+      "year": 2019,
+      "debt": 2387.399,
+      "previousDebt": 2320.7371,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 1910.8543
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 73.9074
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 208.2538
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 194.3835
+        }
+      ],
+      "deficit": 58.2,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": 9.8
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": -12.7
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": -0.5
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": 14.4
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": -2.5
+        }
+      ],
+      "change": 66.7,
+      "stockDifference": -0.0381
+    },
+    {
+      "year": 2020,
+      "debt": 2663.852,
+      "previousDebt": 2387.399,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 2089.04
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 73.936
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 227.5453
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 273.3308
+        }
+      ],
+      "deficit": 207.1,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": 79.5
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": -26.4
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": 5.8
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": 12.7
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": -2.2
+        }
+      ],
+      "change": 276.5,
+      "stockDifference": -0.047
+    },
+    {
+      "year": 2021,
+      "debt": 2828.7813,
+      "previousDebt": 2663.852,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 2233.9879
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 76.4106
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 242.8941
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 275.4887
+        }
+      ],
+      "deficit": 165.1,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": -0.8
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": 1.7
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": -6.4
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": 8.8
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": -3.5
+        }
+      ],
+      "change": 164.9,
+      "stockDifference": 0.0293
+    },
+    {
+      "year": 2022,
+      "debt": 2955.6391,
+      "previousDebt": 2828.7813,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 2366.4996
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 74.2621
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 242.9172
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 271.9601
+        }
+      ],
+      "deficit": 125.9,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": -28.4
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": 24.6
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": 1.8
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": 4.8
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": -1.8
+        }
+      ],
+      "change": 126.9,
+      "stockDifference": -0.0422
+    },
+    {
+      "year": 2023,
+      "debt": 3103.248,
+      "previousDebt": 2955.6391,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 2516.153
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 73.015
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 248.539
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 265.541
+        }
+      ],
+      "deficit": 151.9,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": -29.8
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": 28.3
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": 0.1
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": -5.3
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": 2.4
+        }
+      ],
+      "change": 147.6,
+      "stockDifference": 0.0089
+    },
+    {
+      "year": 2024,
+      "debt": 3306.097,
+      "previousDebt": 3103.248,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 2686.511
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 69.618
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 262.573
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 287.394
+        }
+      ],
+      "deficit": 169.1,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": 19.6
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": 20.5
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": -3.9
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": -1.5
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": -1.0
+        }
+      ],
+      "change": 202.8,
+      "stockDifference": 0.049
+    },
+    {
+      "year": 2025,
+      "debt": 3460.1,
+      "previousDebt": 3306.097,
+      "sectors": [
+        {
+          "label": "État",
+          "value": 2822.7
+        },
+        {
+          "label": "Organismes divers d’administration centrale",
+          "value": 69
+        },
+        {
+          "label": "Administrations publiques locales",
+          "value": 275.7
+        },
+        {
+          "label": "Administrations de sécurité sociale",
+          "value": 292.6
+        }
+      ],
+      "deficit": 151.6,
+      "adjustments": [
+        {
+          "label": "Acquisitions nettes d’actifs financiers",
+          "value": -14.2
+        },
+        {
+          "label": "Variation des passifs hors dette de Maastricht",
+          "value": 7.9
+        },
+        {
+          "label": "Changements de volume de la dette",
+          "value": 5.8
+        },
+        {
+          "label": "Solde des comptes à recevoir et à payer",
+          "value": 4.5
+        },
+        {
+          "label": "Écart statistique entre comptes financiers et non financiers",
+          "value": -1.6
+        }
+      ],
+      "change": 154,
+      "stockDifference": 0.003
+    }
+  ]
+}

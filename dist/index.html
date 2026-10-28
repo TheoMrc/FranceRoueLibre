@@ -1,26 +1,52 @@
 <!doctype html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Explorer les dépenses et les projets publics par région, département et commune.">
   <title>FranceRoueLibre — Cartographie des dépenses publiques</title>
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0a1520" media="(prefers-color-scheme: dark)">
+  <script>
+    /* Apply the saved or system theme before first paint (no flash). */
+    (function () {
+      var theme = null;
+      try { theme = localStorage.getItem('frl-theme'); } catch (e) {}
+      if (theme !== 'light' && theme !== 'dark') theme = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="preload" href="./data/web/communes.json" as="fetch" crossorigin>
+  <link rel="preload" href="./data/departments.geojson" as="fetch" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unica+One&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23051c22'/%3E%3Cpath d='M14 42 28 17l10 14 12-9' fill='none' stroke='%2338bdf8' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='50' cy='22' r='5' fill='%2310b981'/%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='11' fill='white'/%3E%3Cpath d=%22M24 4l17 10v20L24 44 7 34V14z%22 stroke=%22%232563eb%22 stroke-width=%223%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M14 17l7 7 5-4 9 11%22 stroke=%22%23e11d48%22 stroke-width=%223.2%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M29 31 H35 V25%22 stroke=%22%23e11d48%22 stroke-width=%223.4%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./vendor/maplibre-gl.css">
   <link rel="stylesheet" href="./style.css">
+  <script defer src="./vendor/maplibre-gl.js"></script>
   <script defer src="./app.js"></script>
+  <script defer src="./national.js"></script>
+  <script defer src="./circuit.js"></script>
 </head>
-<body class="page-revealed">
-  <div class="mesh-gradient" aria-hidden="true"></div>
-  <header class="site-header">
-    <div class="nav-container">
-      <a class="nav-brand" href="./" aria-label="FranceRoueLibre, accueil">
-        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 44 44"><path d="M7 31 18 12l8 11 11-8"/><circle cx="37" cy="15" r="3"/></svg></span>
-        <span class="nav-brand-text">FRANCE<span>ROUE</span>LIBRE</span>
+<body>
+  <header class="site-header" id="siteHeader">
+    <div class="container nav">
+      <a class="brand brand--lockup" href="#top" aria-label="FranceRoueLibre, accueil">
+        <svg class="brand__mark" width="40" height="40" viewBox="0 0 48 48" fill="none" aria-hidden="true"><defs><linearGradient id="g7" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#0e7490"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><path d="M24 4l17 10v20L24 44 7 34V14z" stroke="url(#g7)" stroke-width="3" stroke-linejoin="round"/><path d="M14 17l7 7 5-4 9 11" stroke="#e11d48" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 31 H35 V25" stroke="#e11d48" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="brand__sep" aria-hidden="true"></span>
+        <span class="brand__name"><span>France</span><span class="gradient-text">RoueLibre</span></span>
       </a>
-      <nav aria-label="Navigation principale"><a class="nav-link active" href="#explorer">Explorer</a><a class="nav-link" href="#methodologie">Données</a></nav>
+      <ul class="nav__links">
+        <li><a href="#explorer">Carte</a></li>
+        <li><a href="#circuit">Circuit</a></li>
+        <li><a href="#comptes">Comptes</a></li>
+        <li><a href="aides.html">Aides</a></li>
+        <li><a href="marches.html">Marchés</a></li>
+        <li><a href="signaux.html">Signaux</a></li>
+        <li><a href="donnees.html">Données</a></li>
+      </ul>
+      <div class="nav__actions">
       <button class="theme-toggle-btn tbtn-morph" id="themeToggle" type="button" aria-label="Changer de thème" title="Changer de thème">
         <span class="tbtn-halo" aria-hidden="true"></span>
         <svg class="tbtn-svg-morph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
@@ -32,80 +58,147 @@
           </g>
         </svg>
       </button>
+      </div>
     </div>
   </header>
 
-  <main id="explorer" class="page-shell">
-    <section class="intro-row anim-fade" aria-labelledby="pageTitle">
-      <div>
-        <p class="eyebrow">FRANCE · CARTOGRAPHIE OUVERTE · MILLÉSIME 2025</p>
-        <h1 id="pageTitle">Les dépenses publiques, <em>territoire par territoire.</em></h1>
-        <p class="intro-copy">Une carte pour comprendre où se dépensent les fonds publics, du projet financé par l’État jusqu’au budget de la commune.</p>
+  <main id="top">
+    <section class="hero">
+      <div class="hero__bg" aria-hidden="true"></div>
+      <div class="container hero__grid">
+        <div class="hero__inner">
+          <span class="eyebrow">France · cartographie ouverte · 2012–2025</span>
+          <h1>Les dépenses publiques, <span class="gradient-text">territoire par territoire.</span></h1>
+          <p class="hero__lead">Une carte pour comprendre où se dépensent les fonds publics, du projet financé par l’État jusqu’au budget de la commune.</p>
+          <div class="hero__cta">
+            <a class="btn btn--primary" href="#explorer">Explorer la carte <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h11m-4-4 4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <a class="btn btn--ghost" href="#comptes">Comptes publics</a>
+          </div>
+        </div>
+        <dl class="hero__facts">
+          <div><dt>Sources</dt><dd id="dataStatus">Chargement…</dd></div>
+          <div><dt>Périmètre</dt><dd id="scopeText">DGCL · OFGL · contours Etalab</dd></div>
+        </dl>
       </div>
-      <div class="scope-note"><span class="scope-line"></span><strong id="dataStatus">Données ouvertes</strong><span id="scopeText">DGCL · OFGL · contours Etalab</span></div>
     </section>
 
-    <section class="explorer" aria-label="Explorer les dépenses publiques">
-      <div class="mode-bar anim-rise">
+    <section id="explorer" class="explorer" aria-label="Explorer les dépenses publiques">
+      <div class="explorer__bar">
         <div class="mode-tabs" role="tablist" aria-label="Niveau de dépense">
           <button class="mode-tab active" type="button" role="tab" aria-selected="true" data-mode="projects">Projets aidés</button>
-          <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="communes">Budgets communaux</button>
-          <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="departments">Budgets départementaux</button>
-          <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="regions">Budgets régionaux</button>
+          <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="communes">Communes</button>
+          <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="gfp" hidden>Intercos</button>
+          <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="departments">Départements</button>
+          <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="regions">Régions</button>
         </div>
-        <div class="metric-toggle" role="group" aria-label="Unité de montant">
-          <button class="metric-btn active" type="button" data-metric="total">Total</button>
-          <button class="metric-btn" type="button" data-metric="perCapita">Par habitant</button>
-        </div>
-      </div>
-
-      <div class="filter-bar anim-rise">
-        <div class="filter-heading"><span class="filter-icon" aria-hidden="true">⌕</span><strong id="filterTitle">Explorer les projets</strong></div>
-        <label class="search-field"><span class="sr-only">Rechercher un projet, une commune ou un territoire</span><input id="search" type="search" placeholder="Projet, bénéficiaire, commune…" autocomplete="off"></label>
-        <label class="select-wrap"><span class="sr-only">Région</span><select id="region"><option value="">Toutes les régions</option></select></label>
-        <label class="select-wrap scheme-filter"><span class="sr-only">Dispositif</span><select id="scheme"><option value="">Tous les dispositifs</option></select></label>
-        <button id="reset" class="reset-btn" type="button">Réinitialiser</button>
-      </div>
-
-      <div class="stats-row anim-rise" aria-live="polite">
-        <div class="stat"><span id="totalLabel">Subventions affichées</span><strong id="totalAmount">—</strong></div>
-        <div class="stat"><span id="countLabel">Projets</span><strong id="projectCount">—</strong></div>
-        <div class="stat"><span id="coverageLabel">Territoires couverts</span><strong id="departmentCount">—</strong></div>
-        <div class="stat-context" id="statsContext">Les engagements DGCL et les comptes OFGL sont affichés dans des vues séparées pour garder une lecture claire.</div>
-      </div>
-
-      <div class="map-workspace">
-        <section class="map-card anim-fade" aria-labelledby="mapTitle">
-          <div class="card-heading map-heading">
-            <div><p class="small-label" id="mapKicker">VUE CARTOGRAPHIQUE</p><h2 id="mapTitle">Montants par département</h2><p id="mapSubtitle" class="card-subtitle">Survolez un territoire, puis cliquez pour zoomer.</p></div>
-            <span class="map-unit" id="mapUnit">Subventions accordées</span>
+        <div class="explorer__filters">
+          <label class="search-field"><span class="sr-only">Rechercher un projet, une commune ou un territoire</span><input id="search" type="search" placeholder="Projet, bénéficiaire, commune…" autocomplete="off"></label>
+          <label class="select-wrap"><span class="sr-only">Région</span><select id="region"><option value="">Toutes les régions</option></select></label>
+          <label class="select-wrap scheme-filter"><span class="sr-only">Dispositif</span><select id="scheme"><option value="">Tous les dispositifs</option></select></label>
+        <label class="select-wrap indicator-filter" id="indicatorWrap" hidden><span class="sr-only">Indicateur</span><select id="indicator"><option value="depenses-totales">Dépenses totales</option></select></label>
+          <div class="year-control" id="yearWrap" hidden>
+            <button class="year-play" id="yearPlay" type="button" aria-label="Animer les années"><svg viewBox="0 0 20 20" aria-hidden="true"><path class="i-play" d="M6 4.5v11l9-5.5z"/><path class="i-pause" d="M5.5 4.5h3v11h-3zM11.5 4.5h3v11h-3z"/></svg></button>
+            <label class="year-filter"><span class="sr-only">Exercice</span><select id="mapYear" aria-label="Exercice"></select></label>
           </div>
+          <div class="metric-toggle" role="group" aria-label="Unité de montant">
+            <button class="metric-btn active" type="button" data-metric="total">Total</button>
+            <button class="metric-btn" type="button" data-metric="perCapita">Par habitant</button>
+            <button class="metric-btn" type="button" data-metric="share" title="Part du total national de la vue">% national</button>
+          </div>
+          <button id="reset" class="reset-btn" type="button" aria-label="Réinitialiser les filtres" title="Réinitialiser les filtres"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.5 10a6.5 6.5 0 1 0 1.9-4.6M3.5 3.5v3.2h3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+
+      <div class="explorer__body">
+        <div class="map-pane">
           <div class="map-frame" id="mapFrame">
-            <div class="map-halo" aria-hidden="true"></div>
-            <svg id="map" viewBox="0 0 900 620" role="img" aria-label="Carte interactive des territoires français">
-              <title>Carte interactive des dépenses publiques</title>
-              <g id="mapScene"><g id="mapLayer"></g><g id="communeLayer"></g><g id="mapPoints"></g><g id="mapLabels"></g></g>
-            </svg>
+            <div id="map" class="map" role="region" aria-label="Carte interactive des territoires français"></div>
+            <div class="map-title" aria-live="polite"><span class="map-title__kicker" id="mapKicker">Vue cartographique</span><strong id="mapTitle">Montants par département</strong><span id="mapUnit" class="sr-only">Subventions accordées</span><span id="mapSubtitle" class="sr-only"></span></div>
             <div id="mapTooltip" class="map-tooltip" role="status" aria-live="polite" hidden></div>
-            <div class="map-controls" aria-label="Contrôles de carte"><button id="zoomOut" type="button" aria-label="Réduire le zoom">−</button><button id="zoomIn" type="button" aria-label="Augmenter le zoom">+</button><button id="resetView" type="button" aria-label="Recentrer la carte">◎</button></div>
-            <div class="map-badge"><span class="pulse-dot"></span><span id="mapBadgeText">109 contours administratifs</span></div>
+            <div class="map-controls" aria-label="Contrôles de carte"><button id="zoomIn" type="button" aria-label="Augmenter le zoom">+</button><button id="zoomOut" type="button" aria-label="Réduire le zoom">−</button><button id="resetView" type="button" aria-label="Recentrer la carte"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
+            <div class="map-legend">
+              <span id="legendTitle">Montant par territoire</span>
+              <div class="legend-scale"></div>
+              <div class="legend-labels"><span id="legendLow">Faible</span><span id="legendHigh">Élevé</span></div>
+              <div class="missing-legend" id="missingLegend" hidden><span></span> Aucun compte apparié</div>
+              <div class="map-badge"><span id="mapBadgeText">Chargement de la carte…</span> · <span id="detailStatus">Contours 1 km</span></div>
+            </div>
+            <div class="map-loading" id="mapLoading"><span class="spinner" aria-hidden="true"></span>Chargement des contours…</div>
           </div>
-          <div class="map-footer"><div class="legend"><span id="legendTitle">Montant dans la sélection</span><div class="legend-scale"></div><div class="legend-labels"><span id="legendLow">Faible</span><span id="legendHigh">Élevé</span></div></div><p class="map-help" id="mapHelp">Cliquez sur un département pour afficher son détail et ses communes.</p></div>
-        </section>
+          <p class="map-help" id="mapHelp">Cliquez sur un territoire pour l’inspecter.</p>
+        </div>
 
-        <aside class="inspector-card anim-slide" aria-labelledby="inspectorTitle">
-          <div class="card-heading inspector-heading"><div><p class="small-label" id="inspectorKicker">INSPECTEUR</p><h2 id="inspectorTitle">France entière</h2></div><button id="clearSelection" class="clear-btn" type="button" hidden>Effacer ×</button></div>
+        <aside class="inspector" aria-labelledby="inspectorTitle">
+          <div class="inspector__head"><div><p class="eyebrow" id="inspectorKicker">Inspecteur</p><h2 id="inspectorTitle">France entière</h2></div><button id="clearSelection" class="clear-btn" type="button" hidden>Effacer ×</button></div>
           <p id="inspectorSummary" class="detail-summary">Sélectionnez un territoire sur la carte ou dans les résultats.</p>
           <div id="inspectorStats" class="inspector-stats"></div>
+          <div class="stats-row" aria-live="polite">
+            <div class="stat"><span id="totalLabel">Subventions affichées</span><strong id="totalAmount">—</strong></div>
+            <div class="stat"><span id="countLabel">Projets</span><strong id="projectCount">—</strong></div>
+            <div class="stat"><span id="coverageLabel">Territoires couverts</span><strong id="departmentCount">—</strong></div>
+          </div>
+          <p class="stat-context" id="statsContext">Les engagements DGCL et les comptes OFGL sont affichés dans des vues séparées pour garder une lecture claire.</p>
           <div class="inspector-divider"><span id="listHeading">À la une</span><span id="listCount"></span></div>
           <div id="projectList" class="project-list" aria-live="polite"></div>
           <button id="more" class="more-btn" type="button" hidden>Afficher davantage</button>
+          <span id="filterTitle" hidden></span>
         </aside>
       </div>
     </section>
 
-    <section id="methodologie" class="method-card anim-rise"><div><p class="small-label">À PROPOS DES DONNÉES</p><h2>Lire la carte avec le bon périmètre</h2></div><div class="method-copy"><p>« Projets aidés » reprend les subventions d’investissement accordées par l’État (DETR, DSIL, DPV et DSID) dans le fichier DGCL 2025. Les trois vues de budget utilisent les comptes 2025 publiés par l’Observatoire des finances et de la gestion publique locales (OFGL) : dépenses totales, avec leur montant par habitant. Ces deux sources mesurent des réalités différentes et restent volontairement séparées.</p><p>Les vues « Projets aidés » et « Budgets communaux » colorent le contour géographique officiel de chaque commune et le clic déclenche un zoom animé. La carte se concentre sur la France métropolitaine à l’ouverture ; les territoires ultramarins restent accessibles par la recherche, les filtres et la liste. Les contours viennent d’Etalab et les données sont sous Licence Ouverte 2.0.</p><p class="source-links"><a href="https://www.data.gouv.fr/datasets/projets-finances-par-les-dotations-de-soutien-a-linvestissement-des-collectivites-territoriales" target="_blank" rel="noopener noreferrer">DGCL · projets financés ↗</a><a href="https://www.data.gouv.fr/datasets/comptes-des-communes-2018-2025" target="_blank" rel="noopener noreferrer">OFGL · comptes des communes ↗</a><a href="https://data.ofgl.fr/api/explore/v2.1/catalog/datasets" target="_blank" rel="noopener noreferrer">OFGL · API ouverte ↗</a><a href="https://etalab-datasets.geo.data.gouv.fr/contours-administratifs/2025/geojson/" target="_blank" rel="noopener noreferrer">Etalab · contours ↗</a></p></div></section>
+    <section id="circuit" class="section circuit" aria-labelledby="circuitTitle">
+      <div class="container">
+        <div class="section__head-row">
+          <div class="section__head"><span class="eyebrow" id="circuitEyebrow">Comptes nationaux · Insee · 1960–2025</span><h2 id="circuitTitle">Le circuit de l’argent public</h2><p class="lead">D’où vient chaque euro des administrations publiques, où il va, et comment le déficit de l’année devient de la dette. Chaque flux est un chiffre publié ; les totaux sont recalculés sous la figure.</p></div>
+          <div class="cx-controls">
+            <button class="cx-play" id="circuitPlay" type="button" aria-label="Lancer l’animation"><svg viewBox="0 0 20 20" aria-hidden="true"><path class="i-play" d="M6 4.5v11l9-5.5z"/><path class="i-pause" d="M5.5 4.5h3v11h-3zM11.5 4.5h3v11h-3z"/></svg></button>
+            <div class="cx-year"><strong id="circuitYearLabel">2025</strong><input id="circuitYear" type="range" min="1960" max="2025" step="1" value="2025" aria-label="Année"></div>
+            <label class="cx-unit">Périmètre <select id="circuitScope"><option value="apu">Toutes les administrations (Insee)</option><option value="communes">Communes</option><option value="gfp">Intercommunalités</option><option value="departements">Départements</option><option value="regions">Régions</option><option value="syndicats">Syndicats intercommunaux</option><option value="sdis">Pompiers (SDIS)</option><option value="epl">Établissements publics locaux</option><option value="ccas">Action sociale (CCAS, CIAS)</option></select></label>
+            <label class="cx-unit">Unité <select id="circuitUnit"><option value="md">Md€ courants</option><option value="pib">% du PIB</option><option value="hab">€ par habitant</option></select></label>
+          </div>
+        </div>
+        <div class="cx-summary" id="circuitSummary"></div>
+        <div class="cx-stage">
+          <svg id="circuitSvg" role="img" aria-label="Diagramme des flux de recettes et de dépenses publiques"></svg>
+          <p class="cx-hint">Cliquez sur un pôle de dépense (ou sur le total) pour voir où va l’argent, fonction par fonction.</p>
+          <div class="cx-tooltip" id="circuitTooltip" hidden></div>
+        </div>
+        <div class="cx-bottom">
+          <div id="circuitDebt" class="cx-panel"></div>
+          <div id="circuitChecks" class="cx-panel"></div>
+        </div>
+        <div id="circuitDrill" class="cx-drill" hidden></div>
+      </div>
+    </section>
+
+    <section id="comptes" class="section section--alt national" aria-labelledby="nationalTitle">
+      <div class="container">
+      <div class="national-heading section__head-row"><div><p class="small-label">COMPTES NATIONAUX · INSEE · BASE 2020</p><h2 id="nationalTitle">Le compte public, année par année</h2><p>Recettes, dépenses et solde des administrations publiques, puis dette en fin d’année.</p></div><div class="national-controls"><label>Unité <select id="nationalUnit" aria-label="Unité des montants nationaux"><option value="mixed">Ratios et Md€</option><option value="md">Md€ courants</option><option value="pib">% du PIB</option><option value="hab">€ par habitant</option></select></label><label>Année <select id="nationalYear" aria-label="Année des comptes publics"></select></label></div></div>
+      <div id="nationalContent" aria-live="polite"><p>Chargement des comptes nationaux…</p></div>
+      <div class="history-panel" aria-labelledby="historyTitle"><div class="history-heading"><div><p class="small-label">ÉVOLUTION ANNUELLE · INSEE</p><h3 id="historyTitle">Explorer les années</h3><p>Toutes les années depuis 1960. Survolez pour lire une valeur, cliquez pour choisir l’année.</p></div><label>Indicateur <select id="historyMetric"><option value="balance">Solde (déficit)</option><option value="spending">Dépenses</option><option value="revenue">Recettes</option><option value="debt">Dette brute</option></select></label></div><div class="history-scroll" id="historyScroll"><div id="historyBars" class="history-bars" aria-label="Évolution annuelle"></div></div><p class="history-hint" id="historyHint">Les barres partent de zéro. La dette n’est pas disponible avant 1978 dans cette série.</p></div>
+      <p class="national-note">Le solde est un flux annuel ; la dette est un stock en fin d’année. Sa variation ne correspond pas mécaniquement au déficit. Les chiffres sont arrondis : la différence entre recettes et dépenses peut différer du solde publié.</p>
+      <p class="national-note">Périmètre : ensemble des administrations publiques, comptes consolidés. Les cartes locales ci-dessous et les subventions ne peuvent pas être additionnées à ce total. <a href="https://www.insee.fr/fr/statistiques/2381414" target="_blank" rel="noopener noreferrer">Source et méthodologie Insee ↗</a></p>
+      <section class="reconciliation" aria-labelledby="reconciliationTitle"><p class="small-label">RECONSTRUIRE LE SOLDE · INSEE · TABLEAU 3.201</p><h3 id="reconciliationTitle">Des recettes au déficit</h3><p class="national-note">Comptes des administrations publiques en milliards d’euros courants. Cette présentation simplifiée élimine la plupart des flux imputés de production, tout en conservant certains éléments imputés. Elle conserve le solde de la comptabilité nationale.</p><div id="reconciliationContent" aria-live="polite">Chargement du détail des comptes…</div><p class="national-note">Les sous-totaux sont consolidés entre administrations. Ils comprennent encore certains éléments imputés ; ils ne correspondent pas tous à des paiements observés. Les intérêts incluent ici la correction SIFIM : ils peuvent différer des montants publiés hors correction. Les montants sont arrondis à l’affichage.</p><a href="https://www.insee.fr/fr/statistiques/8988845" target="_blank" rel="noopener noreferrer">Insee · tableau 3.201 et méthode ↗</a></section>
+      <section class="sector-section" aria-labelledby="sectorTitle"><p class="small-label">QUI PORTE LE SOLDE ? · INSEE · TABLEAU 3.215</p><h3 id="sectorTitle">Les comptes par administration</h3><p class="national-note">Les recettes et dépenses de chaque secteur incluent ses transferts vers les autres secteurs. Leurs soldes peuvent être comparés, mais leurs recettes ou dépenses ne s’additionnent pas directement au total consolidé.</p><div id="sectorContent" aria-live="polite">Chargement des comptes par secteur…</div><p class="national-note">État, organismes divers d’administration centrale (ODAC), administrations locales et sécurité sociale sont des sous-secteurs de la comptabilité nationale. Ces montants ne représentent pas les paiements individuels.</p><a href="https://www.insee.fr/fr/statistiques/8988845" target="_blank" rel="noopener noreferrer">Insee · tableau 3.215 et méthode ↗</a></section>
+      <section class="debt-section" aria-labelledby="debtTitle"><p class="small-label">DETTE DE MAASTRICHT · INSEE · TABLEAUX 3.101 ET 3.105</p><h3 id="debtTitle">Du déficit à la variation de dette</h3><p class="national-note">Dette brute consolidée en fin d’année, en milliards d’euros courants. La dette est un stock : sa variation annuelle se calcule à partir du déficit et d’autres opérations financières.</p><div id="debtContent" aria-live="polite">Chargement des données de dette…</div><p class="national-note">Les contributions par administration excluent les dettes détenues par d’autres administrations. La dette de Maastricht ne couvre pas tous les passifs. Les ajustements sont signés et arrondis selon le tableau Insee ; le déficit est indiqué ici comme montant positif à financer.</p><a href="https://www.insee.fr/fr/statistiques/8988843" target="_blank" rel="noopener noreferrer">Insee · dette, déficit et méthode ↗</a></section>
+      <section class="tax-section" aria-labelledby="taxTitle"><div class="tax-heading"><div><p class="small-label">FISCALITÉ · INSEE</p><h3 id="taxTitle">D’où viennent les impôts ?</h3><p>Montants en milliards d’euros courants pour l’année sélectionnée ci-dessus.</p></div><div id="levyRate"></div></div><div id="taxContent" aria-live="polite">Chargement des données fiscales…</div><p class="national-note">Les prélèvements obligatoires comprennent aussi des cotisations sociales et certains impôts de l’Union européenne. Ils sont nets des crédits d’impôt et hors cotisations imputées. Les catégories d’impôts ci-dessus ne sont donc pas le total des prélèvements obligatoires, ni celui de toutes les recettes publiques.</p><p class="source-links"><a href="https://www.insee.fr/fr/statistiques/2381408" target="_blank" rel="noopener noreferrer">Insee · impôts ↗</a><a href="https://www.insee.fr/fr/statistiques/2381412" target="_blank" rel="noopener noreferrer">Insee · prélèvements obligatoires ↗</a></p></section>
+      <details class="coverage"><summary>Ce que couvre le site et ce qui manque</summary><p>Disponible : ratios nationaux 1960–2025 ; comptes communaux 2012–2025 ; comptes de départements et régions 2012–2025 et projets de subventions DGCL pour 2025. Les comptes communaux 2025 ne sont pas tous disponibles dans la source : une absence ne signifie pas une dépense nulle. Les années historiques sont représentées sur les contours 2025, sans correction des changements de limites ; les codes historiques sans correspondance sont exclus et comptés dans la carte.</p><p>À intégrer : intercommunalités, sécurité sociale, détail des impôts par bénéficiaire, dépenses de l’État et marchés publics. Les dépenses consolidées ne sont pas la somme des budgets individuels : les transferts entre administrations doivent être éliminés.</p><a href="https://www.data.gouv.fr/datasets/comptes-des-communes-2018-2025" target="_blank" rel="noopener noreferrer">Disponibilité des comptes communaux OFGL ↗</a></details>
+      </div>
+    </section>
+
+    <section id="methodologie" class="section method" aria-labelledby="methodTitle">
+      <div class="container method__grid">
+        <div class="section__head"><span class="eyebrow">À propos des données</span><h2 id="methodTitle">Lire la carte avec le bon périmètre</h2></div>
+        <div class="method-copy"><p>« Projets aidés » reprend les subventions d’investissement accordées par l’État (DETR, DSIL, DPV et DSID) dans le fichier DGCL 2025. Les vues de budget utilisent les comptes publiés par l’Observatoire des finances et de la gestion publique locales (OFGL) : dépenses totales, avec leur montant par habitant. Les communes, départements et régions sont disponibles de 2012 à 2025. Ces deux sources mesurent des réalités différentes et restent volontairement séparées.</p><p>Les vues « Projets aidés » et « Budgets communaux » colorent le contour géographique officiel de chaque commune et le clic déclenche un zoom animé. La carte se concentre sur la France métropolitaine à l’ouverture ; les territoires ultramarins restent accessibles par la recherche, les filtres et la liste. Les contours viennent d’Etalab et les données sont sous Licence Ouverte 2.0.</p><p class="source-links"><a href="https://www.data.gouv.fr/datasets/projets-finances-par-les-dotations-de-soutien-a-linvestissement-des-collectivites-territoriales" target="_blank" rel="noopener noreferrer">DGCL · projets financés ↗</a><a href="https://data.ofgl.fr/explore/dataset/ofgl-base-communes-consolidee/" target="_blank" rel="noopener noreferrer">OFGL · comptes consolidés des communes ↗</a><a href="https://data.ofgl.fr/api/explore/v2.1/catalog/datasets" target="_blank" rel="noopener noreferrer">OFGL · API ouverte ↗</a><a href="https://etalab-datasets.geo.data.gouv.fr/contours-administratifs/2025/geojson/" target="_blank" rel="noopener noreferrer">Etalab · contours ↗</a></p></div>
+      </div>
+    </section>
   </main>
-  <footer class="site-footer"><span>FranceRoueLibre</span><span>Cartographie des dépenses publiques · données ouvertes</span></footer>
+
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div><div class="footer__brand">FranceRoueLibre</div><p>Cartographie des dépenses publiques · données ouvertes</p></div>
+      <div class="footer__links"><a href="#explorer">Carte</a><a href="#circuit">Circuit</a><a href="#comptes">Comptes</a><a href="aides.html">Aides</a><a href="marches.html">Marchés</a><a href="signaux.html">Signaux</a><a href="donnees.html">Données</a></div>
+    </div>
+  </footer>
 </body>
 </html>

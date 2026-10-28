@@ -1,0 +1,2642 @@
+{
+  "publication": "2026-08-28",
+  "source": "https://www.insee.fr/fr/statistiques/2381408",
+  "levySource": "https://www.insee.fr/fr/statistiques/2381412",
+  "unit": "milliards euros courants",
+  "years": [
+    {
+      "year": 1959,
+      "levyRate": 31.0,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1960,
+      "levyRate": 30.3,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1961,
+      "levyRate": 31.5,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1962,
+      "levyRate": 31.6,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1963,
+      "levyRate": 32.4,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1964,
+      "levyRate": 33.4,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1965,
+      "levyRate": 33.6,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1966,
+      "levyRate": 33.6,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1967,
+      "levyRate": 33.4,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1968,
+      "levyRate": 34.3,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1969,
+      "levyRate": 34.7,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1970,
+      "levyRate": 34.0,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1971,
+      "levyRate": 33.6,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1972,
+      "levyRate": 34.0,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1973,
+      "levyRate": 34.0,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1974,
+      "levyRate": 34.2,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1975,
+      "levyRate": 35.6,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1976,
+      "levyRate": 37.7,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1977,
+      "levyRate": 37.6,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1978,
+      "levyRate": 37.6,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1979,
+      "levyRate": 39.2,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1980,
+      "levyRate": 39.9,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1981,
+      "levyRate": 40.1,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1982,
+      "levyRate": 40.7,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1983,
+      "levyRate": 41.5,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1984,
+      "levyRate": 42.2,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1985,
+      "levyRate": 42.3,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1986,
+      "levyRate": 41.6,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1987,
+      "levyRate": 42.3,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1988,
+      "levyRate": 41.5,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1989,
+      "levyRate": 41.2,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1990,
+      "levyRate": 41.2,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1991,
+      "levyRate": 41.5,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1992,
+      "levyRate": 41.0,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1993,
+      "levyRate": 41.6,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1994,
+      "levyRate": 42.1,
+      "categories": [],
+      "details": []
+    },
+    {
+      "year": 1995,
+      "levyRate": 42.3,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 89.6
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 1.8
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 51.8
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 14.4
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 35.8
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 84.4
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 13.4
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 4.3
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 14.4
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 0.0
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 42.6
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 21.9
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 12.1
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 21.8
+        }
+      ]
+    },
+    {
+      "year": 1996,
+      "levyRate": 43.5,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 96.3
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 1.5
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 53.1
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 15.1
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 38.9
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 92.8
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 14.3
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 4.8
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 15.0
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 3.2
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 43.3
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 24.7
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 13.0
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 22.5
+        }
+      ]
+    },
+    {
+      "year": 1997,
+      "levyRate": 43.6,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 99.2
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 1.7
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 55.1
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 16.1
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 39.8
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 103.0
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 14.7
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 6.1
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 23.2
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 3.8
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 40.4
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 30.1
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 13.6
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 23.0
+        }
+      ]
+    },
+    {
+      "year": 1998,
+      "levyRate": 43.5,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 102.0
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 1.6
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 57.9
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 15.6
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 42.5
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 136.5
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 15.2
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 5.6
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 51.4
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 4.0
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 42.6
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 31.4
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 14.3
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 24.2
+        }
+      ]
+    },
+    {
+      "year": 1999,
+      "levyRate": 44.3,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 106.1
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 1.6
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 59.4
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 16.1
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 43.6
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 148.9
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 15.9
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 6.6
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 54.2
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 4.2
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 46.1
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 36.4
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 14.8
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 24.5
+        }
+      ]
+    },
+    {
+      "year": 2000,
+      "levyRate": 43.4,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 107.3
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 1.8
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 60.6
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 16.4
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 44.4
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 160.8
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 13.5
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 6.9
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 58.3
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 4.5
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 49.5
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 39.7
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 15.2
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 24.2
+        }
+      ]
+    },
+    {
+      "year": 2001,
+      "levyRate": 43.2,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 108.8
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 1.8
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 60.8
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 16.7
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 45.1
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 171.5
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 13.9
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 7.3
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 61.4
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 4.5
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 50.4
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 44.3
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 15.6
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 23.1
+        }
+      ]
+    },
+    {
+      "year": 2002,
+      "levyRate": 42.5,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 110.6
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 1.6
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 65.0
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 18.1
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 45.7
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 163.8
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 14.3
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 7.2
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 63.0
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 4.6
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 47.7
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 38.8
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 16.4
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 24.0
+        }
+      ]
+    },
+    {
+      "year": 2003,
+      "levyRate": 42.3,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 113.7
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 1.6
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 65.3
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 18.8
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 46.9
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 162.8
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 14.8
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 7.4
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 64.7
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 4.7
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 49.8
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 35.4
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 17.2
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 24.1
+        }
+      ]
+    },
+    {
+      "year": 2004,
+      "levyRate": 42.4,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 120.3
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 1.7
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 68.5
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 20.2
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 49.8
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 172.4
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 15.6
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 8.6
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 66.7
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 4.9
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 50.4
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 40.3
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 18.1
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 24.9
+        }
+      ]
+    },
+    {
+      "year": 2005,
+      "levyRate": 42.7,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 126.7
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.0
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 69.9
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 21.8
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 52.4
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 182.0
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 16.9
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 9.0
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 71.5
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 5.2
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 52.5
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 42.9
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 19.4
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 24.6
+        }
+      ]
+    },
+    {
+      "year": 2006,
+      "levyRate": 43.0,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 131.8
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.0
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 73.0
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 22.5
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 54.0
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 198.9
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 18.3
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 8.3
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 76.2
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 5.4
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 57.1
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 48.6
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 20.6
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 24.9
+        }
+      ]
+    },
+    {
+      "year": 2007,
+      "levyRate": 42.3,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 136.7
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.2
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 73.5
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 24.3
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 57.0
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 206.3
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 19.7
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 8.9
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 79.8
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 5.6
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 56.2
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 52.0
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 21.6
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 24.7
+        }
+      ]
+    },
+    {
+      "year": 2008,
+      "levyRate": 42.1,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 137.8
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.1
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 73.7
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 26.0
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 57.7
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 215.4
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 20.1
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 7.9
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 84.0
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 5.9
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 60.6
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 50.7
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 22.5
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 24.2
+        }
+      ]
+    },
+    {
+      "year": 2009,
+      "levyRate": 41.2,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 130.6
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.0
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 72.0
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 27.3
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 60.7
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 184.4
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 20.9
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 7.5
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 81.4
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 5.9
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 57.1
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 27.6
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 24.7
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 23.9
+        }
+      ]
+    },
+    {
+      "year": 2010,
+      "levyRate": 41.4,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 135.8
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.3
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 76.2
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 28.7
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 53.7
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 199.4
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 22.7
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 7.7
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 83.0
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 5.9
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 57.8
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 39.6
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 26.0
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 23.8
+        }
+      ]
+    },
+    {
+      "year": 2011,
+      "levyRate": 42.6,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 140.8
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.7
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 83.0
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 29.7
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 58.0
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 215.9
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 23.9
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 10.4
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 87.8
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 6.2
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 60.5
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 46.8
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 27.3
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 24.1
+        }
+      ]
+    },
+    {
+      "year": 2012,
+      "levyRate": 43.9,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 142.8
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.5
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 86.3
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 31.7
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 60.1
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 232.6
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 26.1
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 9.7
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 91.5
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 6.5
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 68.5
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 47.8
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 28.6
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 23.8
+        }
+      ]
+    },
+    {
+      "year": 2013,
+      "levyRate": 44.8,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 144.9
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.5
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 88.7
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 35.3
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 61.2
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 244.4
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 26.2
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 10.6
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 92.5
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 6.5
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 76.9
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 49.0
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 29.8
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 23.9
+        }
+      ]
+    },
+    {
+      "year": 2014,
+      "levyRate": 44.6,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 148.9
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.5
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 90.7
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 36.3
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 62.7
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 244.8
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 27.7
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 10.5
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 93.3
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 6.6
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 77.9
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 48.4
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 30.6
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 24.0
+        }
+      ]
+    },
+    {
+      "year": 2015,
+      "levyRate": 44.5,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 152.2
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.5
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 97.1
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 36.6
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 64.5
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 250.5
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 28.0
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 12.5
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 95.5
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 6.7
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 78.4
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 50.2
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 31.6
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 26.5
+        }
+      ]
+    },
+    {
+      "year": 2016,
+      "levyRate": 44.6,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 155.0
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.5
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 101.6
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 36.8
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 66.0
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 250.6
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 28.0
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 12.7
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 96.2
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 6.9
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 79.4
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 48.7
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 33.2
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 28.3
+        }
+      ]
+    },
+    {
+      "year": 2017,
+      "levyRate": 45.3,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 162.5
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.5
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 108.1
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 37.9
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 67.6
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 265.3
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 28.6
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 14.5
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 99.1
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 7.1
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 80.5
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 57.8
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 34.0
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 30.0
+        }
+      ]
+    },
+    {
+      "year": 2018,
+      "levyRate": 44.9,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 168.2
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.7
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 114.3
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 38.4
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 70.6
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 288.6
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 22.9
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 14.6
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 124.8
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 7.3
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 83.0
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 54.4
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 35.0
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 32.3
+        }
+      ]
+    },
+    {
+      "year": 2019,
+      "levyRate": 44.0,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 174.4
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.7
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 117.2
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 46.2
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 73.2
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 298.2
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 20.0
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 15.5
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 126.0
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 7.5
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 83.9
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 59.7
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 35.7
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 31.8
+        }
+      ]
+    },
+    {
+      "year": 2020,
+      "levyRate": 44.3,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 162.1
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.5
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 111.1
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 45.3
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 74.4
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 289.7
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 16.5
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 15.4
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 123.2
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 7.3
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 82.3
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 56.0
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 36.4
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 26.7
+        }
+      ]
+    },
+    {
+      "year": 2021,
+      "levyRate": 44.2,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 185.3
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 2.7
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 122.1
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 47.4
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 64.4
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 310.3
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 13.8
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 19.1
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 129.0
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 7.7
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 85.8
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 62.0
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 35.4
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 30.6
+        }
+      ]
+    },
+    {
+      "year": 2022,
+      "levyRate": 45.0,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 199.3
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 3.7
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 119.1
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 52.1
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 75.4
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 350.5
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 8.4
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 19.0
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 141.1
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 8.3
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 96.0
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 78.0
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 37.3
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 30.9
+        }
+      ]
+    },
+    {
+      "year": 2023,
+      "levyRate": 43.2,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 206.3
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 3.4
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 111.8
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 55.1
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 76.9
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 351.3
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 5.9
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 21.4
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 147.4
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 8.7
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 96.9
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 67.5
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 41.1
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 30.3
+        }
+      ]
+    },
+    {
+      "year": 2024,
+      "levyRate": 42.7,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 207.8
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 3.3
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 117.7
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 58.1
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 71.8
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 358.8
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 6.9
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 21.5
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 153.1
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 9.1
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 96.0
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 68.0
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 42.9
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 30.2
+        }
+      ]
+    },
+    {
+      "year": 2025,
+      "levyRate": 43.6,
+      "categories": [
+        {
+          "id": "vat",
+          "label": "TVA",
+          "value": 208.8
+        },
+        {
+          "id": "imports",
+          "label": "Impôts et droits sur les importations",
+          "value": 3.6
+        },
+        {
+          "id": "products",
+          "label": "Autres impôts sur les produits",
+          "value": 128.1
+        },
+        {
+          "id": "payroll",
+          "label": "Impôts sur les salaires et la main-d’œuvre",
+          "value": 60.1
+        },
+        {
+          "id": "production",
+          "label": "Impôts divers sur la production",
+          "value": 72.7
+        },
+        {
+          "id": "income",
+          "label": "Impôts courants sur le revenu",
+          "value": 383.3
+        },
+        {
+          "id": "otherCurrent",
+          "label": "Autres impôts courants",
+          "value": 6.6
+        },
+        {
+          "id": "capital",
+          "label": "Impôts en capital",
+          "value": 21.7
+        }
+      ],
+      "details": [
+        {
+          "parent": "income",
+          "label": "dont CSG hors jeux",
+          "value": 156.6
+        },
+        {
+          "parent": "income",
+          "label": "dont CRDS hors jeux",
+          "value": 9.3
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur le revenu, avant crédits d’impôt",
+          "value": 103.6
+        },
+        {
+          "parent": "income",
+          "label": "dont impôt sur les sociétés, avant crédits d’impôt",
+          "value": 69.5
+        },
+        {
+          "parent": "production",
+          "label": "dont taxe foncière",
+          "value": 44.2
+        },
+        {
+          "parent": "products",
+          "label": "dont accises sur les produits énergétiques (TICPE)",
+          "value": 30.5
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,233 @@
+{
+ "source": "Insee, BDM série 001641586 — Population totale au 1er janvier, France (inclus Mayotte à partir de 2014)",
+ "url": "https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001641586",
+ "retrieved": "2026-10-27",
+ "status": "A = définitif, P = provisoire",
+ "january1": [
+  {
+   "year": 1982,
+   "population": 55572624,
+   "status": "A"
+  },
+  {
+   "year": 1983,
+   "population": 55905460,
+   "status": "A"
+  },
+  {
+   "year": 1984,
+   "population": 56166175,
+   "status": "A"
+  },
+  {
+   "year": 1985,
+   "population": 56444748,
+   "status": "A"
+  },
+  {
+   "year": 1986,
+   "population": 56719935,
+   "status": "A"
+  },
+  {
+   "year": 1987,
+   "population": 57012268,
+   "status": "A"
+  },
+  {
+   "year": 1988,
+   "population": 57325053,
+   "status": "A"
+  },
+  {
+   "year": 1989,
+   "population": 57659542,
+   "status": "A"
+  },
+  {
+   "year": 1990,
+   "population": 57996401,
+   "status": "A"
+  },
+  {
+   "year": 1991,
+   "population": 58280135,
+   "status": "A"
+  },
+  {
+   "year": 1992,
+   "population": 58571237,
+   "status": "A"
+  },
+  {
+   "year": 1993,
+   "population": 58852002,
+   "status": "A"
+  },
+  {
+   "year": 1994,
+   "population": 59070077,
+   "status": "A"
+  },
+  {
+   "year": 1995,
+   "population": 59280577,
+   "status": "A"
+  },
+  {
+   "year": 1996,
+   "population": 59487413,
+   "status": "A"
+  },
+  {
+   "year": 1997,
+   "population": 59691177,
+   "status": "A"
+  },
+  {
+   "year": 1998,
+   "population": 59899347,
+   "status": "A"
+  },
+  {
+   "year": 1999,
+   "population": 60122665,
+   "status": "A"
+  },
+  {
+   "year": 2000,
+   "population": 60508150,
+   "status": "A"
+  },
+  {
+   "year": 2001,
+   "population": 60941410,
+   "status": "A"
+  },
+  {
+   "year": 2002,
+   "population": 61385070,
+   "status": "A"
+  },
+  {
+   "year": 2003,
+   "population": 61824030,
+   "status": "A"
+  },
+  {
+   "year": 2004,
+   "population": 62251062,
+   "status": "A"
+  },
+  {
+   "year": 2005,
+   "population": 62730537,
+   "status": "A"
+  },
+  {
+   "year": 2006,
+   "population": 63186117,
+   "status": "A"
+  },
+  {
+   "year": 2007,
+   "population": 63600690,
+   "status": "A"
+  },
+  {
+   "year": 2008,
+   "population": 63961859,
+   "status": "A"
+  },
+  {
+   "year": 2009,
+   "population": 64304500,
+   "status": "A"
+  },
+  {
+   "year": 2010,
+   "population": 64612939,
+   "status": "A"
+  },
+  {
+   "year": 2011,
+   "population": 64933400,
+   "status": "A"
+  },
+  {
+   "year": 2012,
+   "population": 65241241,
+   "status": "A"
+  },
+  {
+   "year": 2013,
+   "population": 65564756,
+   "status": "A"
+  },
+  {
+   "year": 2014,
+   "population": 66130873,
+   "status": "A"
+  },
+  {
+   "year": 2015,
+   "population": 66422469,
+   "status": "A"
+  },
+  {
+   "year": 2016,
+   "population": 66602645,
+   "status": "A"
+  },
+  {
+   "year": 2017,
+   "population": 66774482,
+   "status": "A"
+  },
+  {
+   "year": 2018,
+   "population": 66992159,
+   "status": "A"
+  },
+  {
+   "year": 2019,
+   "population": 67257982,
+   "status": "A"
+  },
+  {
+   "year": 2020,
+   "population": 67441850,
+   "status": "A"
+  },
+  {
+   "year": 2021,
+   "population": 67697091,
+   "status": "A"
+  },
+  {
+   "year": 2022,
+   "population": 68060207,
+   "status": "A"
+  },
+  {
+   "year": 2023,
+   "population": 68404843,
+   "status": "A"
+  },
+  {
+   "year": 2024,
+   "population": 68638377,
+   "status": "P"
+  },
+  {
+   "year": 2025,
+   "population": 68851996,
+   "status": "P"
+  },
+  {
+   "year": 2026,
+   "population": 69081996,
+   "status": "P"
+  }
+ ]
+}

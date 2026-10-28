@@ -1,0 +1,10 @@
+{
+  "year": 2017,
+  "url": "https://data.ofgl.fr/api/v2/catalog/datasets/ofgl-base-communes-consolidee/attachments/ofgl_base_communes_2017_consolidee_pj_zip",
+  "archive_sha256": "17131f0ea4e998b67b6dbd8f20bd73a8009fbb09265366e8076d22abe21af481",
+  "archive_bytes": 103568706,
+  "archive_member": "ofgl_base_communes_2017_consolidee_pj.csv",
+  "selected_records": 35412,
+  "filter": "Agrégat = Dépenses totales",
+  "retrieved": "2026-10-27"
+}

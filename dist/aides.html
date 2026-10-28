@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Subventions de l’État aux associations, aides aux entreprises et Fonds vert.">
+  <title>Aides et subventions — FranceRoueLibre</title>
+  <script>
+    (function () {
+      var theme = null;
+      try { theme = localStorage.getItem('frl-theme'); } catch (e) {}
+      if (theme !== 'light' && theme !== 'dark') theme = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='11' fill='white'/%3E%3Cpath d=%22M24 4l17 10v20L24 44 7 34V14z%22 stroke=%22%232563eb%22 stroke-width=%223%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M14 17l7 7 5-4 9 11%22 stroke=%22%23e11d48%22 stroke-width=%223.2%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M29 31 H35 V25%22 stroke=%22%23e11d48%22 stroke-width=%223.4%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="./common.js"></script>
+  <script defer src="./aides.js"></script>
+</head>
+<body class="subpage">
+  <header class="site-header" id="siteHeader">
+    <div class="container nav">
+      <a class="brand brand--lockup" href="index.html" aria-label="FranceRoueLibre, accueil">
+        <svg class="brand__mark" width="40" height="40" viewBox="0 0 48 48" fill="none" aria-hidden="true"><defs><linearGradient id="g7" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#0e7490"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><path d="M24 4l17 10v20L24 44 7 34V14z" stroke="url(#g7)" stroke-width="3" stroke-linejoin="round"/><path d="M14 17l7 7 5-4 9 11" stroke="#e11d48" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 31 H35 V25" stroke="#e11d48" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="brand__sep" aria-hidden="true"></span>
+        <span class="brand__name"><span>France</span><span class="gradient-text">RoueLibre</span></span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="index.html#explorer">Carte</a></li>
+        <li><a href="index.html#circuit">Circuit</a></li>
+        <li><a href="index.html#comptes">Comptes</a></li>
+        <li><a href="aides.html" aria-current="page">Aides</a></li>
+        <li><a href="marches.html">Marchés</a></li>
+        <li><a href="signaux.html">Signaux</a></li>
+        <li><a href="donnees.html">Données</a></li>
+      </ul>
+      <div class="nav__actions">
+      <button class="theme-toggle-btn tbtn-morph" id="themeToggle" type="button" aria-label="Changer de thème" title="Changer de thème">
+        <span class="tbtn-halo" aria-hidden="true"></span>
+        <svg class="tbtn-svg-morph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <mask id="theme-morph-mask"><rect width="32" height="32" fill="white"/><circle class="mask-moon-bite" cx="23" cy="11" r="6.5" fill="black"/></mask>
+          <circle class="morph-core" cx="16" cy="16" r="6" fill="currentColor" mask="url(#theme-morph-mask)"/>
+          <g class="morph-rays" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="16" y1="3" x2="16" y2="6"/><line x1="16" y1="26" x2="16" y2="29"/><line x1="3" y1="16" x2="6" y2="16"/><line x1="26" y1="16" x2="29" y2="16"/>
+            <line x1="6.81" y1="6.81" x2="8.93" y2="8.93"/><line x1="23.07" y1="23.07" x2="25.19" y2="25.19"/><line x1="6.81" y1="25.19" x2="8.93" y2="23.07"/><line x1="23.07" y1="8.93" x2="25.19" y2="6.81"/>
+          </g>
+        </svg>
+      </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero hero--page">
+      <div class="hero__bg" aria-hidden="true"></div>
+      <div class="container"><div class="hero__inner">
+        <span class="eyebrow">Subventions et aides publiques</span>
+        <h1>Qui reçoit <span class="gradient-text">l’argent public ?</span></h1>
+        <p class="hero__lead">Subventions de l’État aux associations depuis 2010, aides de minimis aux entreprises, Fonds vert. Chaque bénéficiaire identifié par son SIREN renvoie à l’annuaire officiel des entreprises.</p>
+      </div></div>
+    </section>
+    <section class="section" id="associations" aria-labelledby="assoTitle">
+      <div class="container">
+        <div class="section__head-row"><div class="section__head"><span class="eyebrow">État → associations · annexes « jaunes » aux lois de finances</span><h2 id="assoTitle">Subventions de l’État aux associations</h2><p class="lead">Montants versés par programme budgétaire, publiés deux ans après l’exercice dans l’annexe « Effort financier de l’État en faveur des associations ».</p></div>
+          <div class="chip-select" id="assoYears" role="tablist" aria-label="Année des subventions"></div></div>
+        <div class="kpis" id="assoKpis"></div>
+        <div class="grid-2">
+          <div class="panel"><h3>Montant total par année</h3><div id="assoBars" class="chart"></div><p class="note" id="assoBarsNote"></p></div>
+          <div class="panel"><h3>Par programme budgétaire</h3><div id="assoProgrammes"></div></div>
+        </div>
+        <div class="panel panel--wide">
+          <div class="panel__head"><h3>Bénéficiaires</h3><label class="search-field search-field--inline"><span class="sr-only">Rechercher une association</span><input id="assoSearch" type="search" placeholder="Nom ou SIREN d’une association…" autocomplete="off"></label></div>
+          <div id="assoTable" class="table-wrap"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="entreprises" aria-labelledby="entTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">État et collectivités → entreprises</span><h2 id="entTitle">Aides de minimis aux entreprises</h2><p class="lead">Aides de faible montant (règlement européen « de minimis ») déclarées au registre de transparence : prêts d’honneur, avances remboursables, subventions directes…</p></div>
+        <div class="kpis" id="entKpis"></div>
+        <div class="grid-2">
+          <div class="panel"><h3>Par autorité qui octroie</h3><div id="entAuthorities"></div></div>
+          <div class="panel"><h3>Principaux bénéficiaires</h3><div id="entTop"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="fondsvert" aria-labelledby="fvTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Transition écologique</span><h2 id="fvTitle">Fonds vert</h2><p class="lead" id="fvLead">Projets des collectivités subventionnés par le Fonds d’accélération de la transition écologique.</p></div>
+        <div id="fvContent" class="panel"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div><div class="footer__brand">FranceRoueLibre</div><p>Cartographie des dépenses publiques · données ouvertes</p></div>
+      <div class="footer__links"><a href="index.html#explorer">Carte</a><a href="index.html#circuit">Circuit</a><a href="index.html#comptes">Comptes</a><a href="aides.html">Aides</a><a href="marches.html">Marchés</a><a href="signaux.html">Signaux</a><a href="donnees.html">Données</a></div>
+    </div>
+  </footer>
+</body>
+</html>

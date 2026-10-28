@@ -1,0 +1,2780 @@
+{
+  "source": "https://www.insee.fr/fr/statistiques/8988845",
+  "table": "3.201",
+  "publication": "2026-08-28",
+  "unit": "milliards euros courants",
+  "years": [
+    {
+      "year": 1960,
+      "spending": 16.6931,
+      "revenue": 17.246,
+      "balance": 0.5529,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 6.6171
+        },
+        {
+          "label": "Intérêts",
+          "value": 0.519
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 7.3317
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 2.2253
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 1.5907
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 0.4644
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 14.7326
+        },
+        {
+          "label": "Autres transferts",
+          "value": 0.4583
+        }
+      ]
+    },
+    {
+      "year": 1961,
+      "spending": 18.7974,
+      "revenue": 19.379,
+      "balance": 0.5816,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 7.3579
+        },
+        {
+          "label": "Intérêts",
+          "value": 0.5319
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 8.325
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 2.5826
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 1.7865
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 0.5413
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 16.5565
+        },
+        {
+          "label": "Autres transferts",
+          "value": 0.4947
+        }
+      ]
+    },
+    {
+      "year": 1962,
+      "spending": 21.7347,
+      "revenue": 21.8346,
+      "balance": 0.0999,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 8.3862
+        },
+        {
+          "label": "Intérêts",
+          "value": 0.6042
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 9.695
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 3.0493
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 2.0369
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 0.6252
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 18.6088
+        },
+        {
+          "label": "Autres transferts",
+          "value": 0.5637
+        }
+      ]
+    },
+    {
+      "year": 1963,
+      "spending": 24.8776,
+      "revenue": 25.1256,
+      "balance": 0.248,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 9.6283
+        },
+        {
+          "label": "Intérêts",
+          "value": 0.5978
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 11.0734
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 3.5781
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 2.3232
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 0.7584
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 21.404
+        },
+        {
+          "label": "Autres transferts",
+          "value": 0.64
+        }
+      ]
+    },
+    {
+      "year": 1964,
+      "spending": 27.901,
+      "revenue": 28.4919,
+      "balance": 0.5909,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 10.6347
+        },
+        {
+          "label": "Intérêts",
+          "value": 0.5566
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 12.433
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 4.2767
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 2.5954
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 0.7121
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 24.4538
+        },
+        {
+          "label": "Autres transferts",
+          "value": 0.7306
+        }
+      ]
+    },
+    {
+      "year": 1965,
+      "spending": 30.6828,
+      "revenue": 31.1112,
+      "balance": 0.4284,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 11.4277
+        },
+        {
+          "label": "Intérêts",
+          "value": 0.6222
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 13.8259
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 4.807
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 2.856
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 0.7963
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 26.6406
+        },
+        {
+          "label": "Autres transferts",
+          "value": 0.8183
+        }
+      ]
+    },
+    {
+      "year": 1966,
+      "spending": 33.3917,
+      "revenue": 33.5711,
+      "balance": 0.1794,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 12.3237
+        },
+        {
+          "label": "Intérêts",
+          "value": 0.6059
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 15.3136
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 5.1485
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 3.0899
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 0.7974
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 28.8096
+        },
+        {
+          "label": "Autres transferts",
+          "value": 0.8742
+        }
+      ]
+    },
+    {
+      "year": 1967,
+      "spending": 36.6991,
+      "revenue": 36.2133,
+      "balance": -0.4858,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 13.4401
+        },
+        {
+          "label": "Intérêts",
+          "value": 0.8437
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 16.7539
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 5.6614
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 3.3739
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 0.9272
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 30.9511
+        },
+        {
+          "label": "Autres transferts",
+          "value": 0.9611
+        }
+      ]
+    },
+    {
+      "year": 1968,
+      "spending": 42.082,
+      "revenue": 40.6777,
+      "balance": -1.4043,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 15.3726
+        },
+        {
+          "label": "Intérêts",
+          "value": 1.0042
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 19.3828
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 6.3224
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 4.0101
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 0.9956
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 34.5516
+        },
+        {
+          "label": "Autres transferts",
+          "value": 1.1204
+        }
+      ]
+    },
+    {
+      "year": 1969,
+      "spending": 47.1088,
+      "revenue": 46.9286,
+      "balance": -0.1802,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 17.4817
+        },
+        {
+          "label": "Intérêts",
+          "value": 1.1291
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 21.8907
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 6.6073
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 4.1443
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 1.3346
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 40.0895
+        },
+        {
+          "label": "Autres transferts",
+          "value": 1.3602
+        }
+      ]
+    },
+    {
+      "year": 1970,
+      "spending": 51.7718,
+      "revenue": 51.73,
+      "balance": -0.0418,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 19.6482
+        },
+        {
+          "label": "Intérêts",
+          "value": 1.0672
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 23.811
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 7.2454
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 4.4434
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 1.7517
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 43.9504
+        },
+        {
+          "label": "Autres transferts",
+          "value": 1.5845
+        }
+      ]
+    },
+    {
+      "year": 1971,
+      "spending": 57.2415,
+      "revenue": 56.8199,
+      "balance": -0.4216,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 22.4762
+        },
+        {
+          "label": "Intérêts",
+          "value": 1.0156
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 25.8625
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 7.8872
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 5.1727
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 1.8581
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 48.2423
+        },
+        {
+          "label": "Autres transferts",
+          "value": 1.5468
+        }
+      ]
+    },
+    {
+      "year": 1972,
+      "spending": 63.6202,
+      "revenue": 63.9636,
+      "balance": 0.3434,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 25.1396
+        },
+        {
+          "label": "Intérêts",
+          "value": 0.8866
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 28.8528
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 8.7412
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 5.9148
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 1.8719
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 54.4466
+        },
+        {
+          "label": "Autres transferts",
+          "value": 1.7303
+        }
+      ]
+    },
+    {
+      "year": 1973,
+      "spending": 72.7587,
+      "revenue": 72.6358,
+      "balance": -0.1229,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 28.55
+        },
+        {
+          "label": "Intérêts",
+          "value": 0.9253
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 34.0081
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 9.2753
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 6.2214
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 2.1902
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 62.3285
+        },
+        {
+          "label": "Autres transferts",
+          "value": 1.8957
+        }
+      ]
+    },
+    {
+      "year": 1974,
+      "spending": 85.7034,
+      "revenue": 85.9019,
+      "balance": 0.1985,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 33.9338
+        },
+        {
+          "label": "Intérêts",
+          "value": 1.2166
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 39.7801
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 10.7729
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 7.4173
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 3.0421
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 73.0366
+        },
+        {
+          "label": "Autres transferts",
+          "value": 2.4059
+        }
+      ]
+    },
+    {
+      "year": 1975,
+      "spending": 107.902,
+      "revenue": 101.016,
+      "balance": -6.886,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 41.5854
+        },
+        {
+          "label": "Intérêts",
+          "value": 2.1458
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 51.0268
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 13.144
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 9.0735
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 3.272
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 85.9052
+        },
+        {
+          "label": "Autres transferts",
+          "value": 2.7653
+        }
+      ]
+    },
+    {
+      "year": 1976,
+      "spending": 126.0347,
+      "revenue": 121.5938,
+      "balance": -4.4409,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 48.8213
+        },
+        {
+          "label": "Intérêts",
+          "value": 2.2492
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 60.3313
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 14.6329
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 10.5067
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 2.9502
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 104.8441
+        },
+        {
+          "label": "Autres transferts",
+          "value": 3.2928
+        }
+      ]
+    },
+    {
+      "year": 1977,
+      "spending": 139.4008,
+      "revenue": 135.9071,
+      "balance": -3.4937,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 55.4348
+        },
+        {
+          "label": "Intérêts",
+          "value": 2.8865
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 66.4992
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 14.5803
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 11.4494
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 3.3907
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 117.6719
+        },
+        {
+          "label": "Autres transferts",
+          "value": 3.3951
+        }
+      ]
+    },
+    {
+      "year": 1978,
+      "spending": 161.4724,
+      "revenue": 155.2083,
+      "balance": -6.2641,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 64.5288
+        },
+        {
+          "label": "Intérêts",
+          "value": 3.6013
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 77.2198
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 16.1225
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 13.8943
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 3.5667
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 134.3717
+        },
+        {
+          "label": "Autres transferts",
+          "value": 3.3756
+        }
+      ]
+    },
+    {
+      "year": 1979,
+      "spending": 185.6388,
+      "revenue": 183.72,
+      "balance": -1.9188,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 73.0707
+        },
+        {
+          "label": "Intérêts",
+          "value": 4.5168
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 89.2147
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 18.8366
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 15.6339
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 3.5945
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 160.1013
+        },
+        {
+          "label": "Autres transferts",
+          "value": 4.3903
+        }
+      ]
+    },
+    {
+      "year": 1980,
+      "spending": 214.9636,
+      "revenue": 213.0273,
+      "balance": -1.9363,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 85.6033
+        },
+        {
+          "label": "Intérêts",
+          "value": 5.5151
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 101.8592
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 21.986
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 18.763
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 4.3714
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 185.0718
+        },
+        {
+          "label": "Autres transferts",
+          "value": 4.8211
+        }
+      ]
+    },
+    {
+      "year": 1981,
+      "spending": 255.6971,
+      "revenue": 243.4212,
+      "balance": -12.2759,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 98.9204
+        },
+        {
+          "label": "Intérêts",
+          "value": 8.6749
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 122.6969
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 25.4049
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 21.4912
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 6.5112
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 209.8072
+        },
+        {
+          "label": "Autres transferts",
+          "value": 5.6116
+        }
+      ]
+    },
+    {
+      "year": 1982,
+      "spending": 301.4338,
+      "revenue": 284.8115,
+      "balance": -16.6223,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 115.6276
+        },
+        {
+          "label": "Intérêts",
+          "value": 10.2568
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 145.2543
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 30.2951
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 25.36
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 8.0596
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 244.4667
+        },
+        {
+          "label": "Autres transferts",
+          "value": 6.9252
+        }
+      ]
+    },
+    {
+      "year": 1983,
+      "spending": 338.0497,
+      "revenue": 321.5209,
+      "balance": -16.5288,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 129.6499
+        },
+        {
+          "label": "Intérêts",
+          "value": 14.373
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 162.2673
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 31.7595
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 28.4499
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 9.6415
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 276.1895
+        },
+        {
+          "label": "Autres transferts",
+          "value": 7.24
+        }
+      ]
+    },
+    {
+      "year": 1984,
+      "spending": 374.7335,
+      "revenue": 355.3894,
+      "balance": -19.3441,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 141.5187
+        },
+        {
+          "label": "Intérêts",
+          "value": 16.4787
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 182.8181
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 33.918
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 31.7621
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 9.7088
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 305.4617
+        },
+        {
+          "label": "Autres transferts",
+          "value": 8.4568
+        }
+      ]
+    },
+    {
+      "year": 1985,
+      "spending": 406.1487,
+      "revenue": 383.6276,
+      "balance": -22.5211,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 151.2417
+        },
+        {
+          "label": "Intérêts",
+          "value": 19.1336
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 197.8252
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 37.9482
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 34.0561
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 12.0079
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 328.0703
+        },
+        {
+          "label": "Autres transferts",
+          "value": 9.4933
+        }
+      ]
+    },
+    {
+      "year": 1986,
+      "spending": 431.3257,
+      "revenue": 405.2806,
+      "balance": -26.0451,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 157.35
+        },
+        {
+          "label": "Intérêts",
+          "value": 20.81
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 212.6764
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 40.4893
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 34.476
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 13.3176
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 348.2612
+        },
+        {
+          "label": "Autres transferts",
+          "value": 9.2258
+        }
+      ]
+    },
+    {
+      "year": 1987,
+      "spending": 448.1263,
+      "revenue": 430.8826,
+      "balance": -17.2437,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 163.7547
+        },
+        {
+          "label": "Intérêts",
+          "value": 21.0943
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 221.524
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 41.7533
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 36.1785
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 12.2499
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 371.6937
+        },
+        {
+          "label": "Autres transferts",
+          "value": 10.7605
+        }
+      ]
+    },
+    {
+      "year": 1988,
+      "spending": 477.6125,
+      "revenue": 453.8864,
+      "balance": -23.7261,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 172.9448
+        },
+        {
+          "label": "Intérêts",
+          "value": 21.9066
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 234.6762
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 48.0849
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 38.3847
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 11.4812
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 393.2044
+        },
+        {
+          "label": "Autres transferts",
+          "value": 10.8161
+        }
+      ]
+    },
+    {
+      "year": 1989,
+      "spending": 503.152,
+      "revenue": 485.3829,
+      "balance": -17.7691,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 179.1071
+        },
+        {
+          "label": "Intérêts",
+          "value": 24.4409
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 247.2712
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 52.3328
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 40.1488
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 13.2029
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 420.1889
+        },
+        {
+          "label": "Autres transferts",
+          "value": 11.8423
+        }
+      ]
+    },
+    {
+      "year": 1990,
+      "spending": 538.8227,
+      "revenue": 513.1782,
+      "balance": -25.6445,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 188.2888
+        },
+        {
+          "label": "Intérêts",
+          "value": 28.1337
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 266.375
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 56.0252
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 42.6018
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 14.7643
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 443.8896
+        },
+        {
+          "label": "Autres transferts",
+          "value": 11.9225
+        }
+      ]
+    },
+    {
+      "year": 1991,
+      "spending": 570.8968,
+      "revenue": 539.6429,
+      "balance": -31.2539,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 198.5602
+        },
+        {
+          "label": "Intérêts",
+          "value": 30.5661
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 282.2381
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 59.5324
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 45.379
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 17.0878
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 463.4512
+        },
+        {
+          "label": "Autres transferts",
+          "value": 13.7249
+        }
+      ]
+    },
+    {
+      "year": 1992,
+      "spending": 605.6859,
+      "revenue": 553.6469,
+      "balance": -52.039,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 211.1496
+        },
+        {
+          "label": "Intérêts",
+          "value": 33.6179
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 300.8313
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 60.0871
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 47.2964
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 16.9519
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 475.8738
+        },
+        {
+          "label": "Autres transferts",
+          "value": 13.5248
+        }
+      ]
+    },
+    {
+      "year": 1993,
+      "spending": 641.6271,
+      "revenue": 569.004,
+      "balance": -72.6231,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 224.1051
+        },
+        {
+          "label": "Intérêts",
+          "value": 36.588
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 324.8249
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 56.1091
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 49.8698
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 16.3083
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 489.0529
+        },
+        {
+          "label": "Autres transferts",
+          "value": 13.773
+        }
+      ]
+    },
+    {
+      "year": 1994,
+      "spending": 655.4354,
+      "revenue": 591.4505,
+      "balance": -63.9849,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 227.4986
+        },
+        {
+          "label": "Intérêts",
+          "value": 39.1364
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 330.4998
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 58.3006
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 49.568
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 15.592
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 512.1526
+        },
+        {
+          "label": "Autres transferts",
+          "value": 14.1379
+        }
+      ]
+    },
+    {
+      "year": 1995,
+      "spending": 680.3704,
+      "revenue": 618.3317,
+      "balance": -62.0387,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 236.1071
+        },
+        {
+          "label": "Intérêts",
+          "value": 41.9826
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 343.827
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 58.4537
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 52.5081
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 17.4588
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 532.8996
+        },
+        {
+          "label": "Autres transferts",
+          "value": 15.4652
+        }
+      ]
+    },
+    {
+      "year": 1996,
+      "spending": 698.5235,
+      "revenue": 649.9395,
+      "balance": -48.584,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 247.2934
+        },
+        {
+          "label": "Intérêts",
+          "value": 45.0734
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 347.5183
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 58.6384
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 56.532
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 14.4963
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 563.2925
+        },
+        {
+          "label": "Autres transferts",
+          "value": 15.6187
+        }
+      ]
+    },
+    {
+      "year": 1997,
+      "spending": 716.6467,
+      "revenue": 668.7814,
+      "balance": -47.8653,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 254.6676
+        },
+        {
+          "label": "Intérêts",
+          "value": 45.7963
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 362.3013
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 53.8815
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 57.901
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 13.7936
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 584.3471
+        },
+        {
+          "label": "Autres transferts",
+          "value": 12.7397
+        }
+      ]
+    },
+    {
+      "year": 1998,
+      "spending": 726.7161,
+      "revenue": 694.5214,
+      "balance": -32.1947,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 254.7856
+        },
+        {
+          "label": "Intérêts",
+          "value": 45.5858
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 368.701
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 57.6437
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 58.9108
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 14.1822
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 609.1016
+        },
+        {
+          "label": "Autres transferts",
+          "value": 12.3268
+        }
+      ]
+    },
+    {
+      "year": 1999,
+      "spending": 748.589,
+      "revenue": 727.0447,
+      "balance": -21.5443,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 263.4716
+        },
+        {
+          "label": "Intérêts",
+          "value": 42.9433
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 382.0491
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 60.125
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 60.9428
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 12.9659
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 641.2198
+        },
+        {
+          "label": "Autres transferts",
+          "value": 11.9162
+        }
+      ]
+    },
+    {
+      "year": 2000,
+      "spending": 775.3487,
+      "revenue": 756.0065,
+      "balance": -19.3422,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 275.9813
+        },
+        {
+          "label": "Intérêts",
+          "value": 43.6059
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 390.9951
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 64.7664
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 64.5162
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 13.2927
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 664.3779
+        },
+        {
+          "label": "Autres transferts",
+          "value": 13.8197
+        }
+      ]
+    },
+    {
+      "year": 2001,
+      "spending": 808.2256,
+      "revenue": 786.539,
+      "balance": -21.6866,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 282.5538
+        },
+        {
+          "label": "Intérêts",
+          "value": 46.7064
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 412.2118
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 66.7536
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 67.2425
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 17.2948
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 688.5423
+        },
+        {
+          "label": "Autres transferts",
+          "value": 13.4594
+        }
+      ]
+    },
+    {
+      "year": 2002,
+      "spending": 851.1074,
+      "revenue": 800.9865,
+      "balance": -50.1209,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 297.1606
+        },
+        {
+          "label": "Intérêts",
+          "value": 47.7935
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 437.7529
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 68.4004
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 69.9869
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 16.1312
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 699.4595
+        },
+        {
+          "label": "Autres transferts",
+          "value": 15.4089
+        }
+      ]
+    },
+    {
+      "year": 2003,
+      "spending": 881.7856,
+      "revenue": 815.4686,
+      "balance": -66.317,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 305.6391
+        },
+        {
+          "label": "Intérêts",
+          "value": 46.6581
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 457.9993
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 71.4891
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 69.8501
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 12.6347
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 716.8067
+        },
+        {
+          "label": "Autres transferts",
+          "value": 16.1771
+        }
+      ]
+    },
+    {
+      "year": 2004,
+      "spending": 915.9064,
+      "revenue": 855.6066,
+      "balance": -60.2998,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 315.3205
+        },
+        {
+          "label": "Intérêts",
+          "value": 47.5106
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 477.1429
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 75.9324
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 72.5976
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 13.0412
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 751.1469
+        },
+        {
+          "label": "Autres transferts",
+          "value": 18.8209
+        }
+      ]
+    },
+    {
+      "year": 2005,
+      "spending": 956.1425,
+      "revenue": 894.3411,
+      "balance": -61.8014,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 327.3832
+        },
+        {
+          "label": "Intérêts",
+          "value": 47.8451
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 499.8108
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 81.1034
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 75.5846
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 13.7472
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 785.8053
+        },
+        {
+          "label": "Autres transferts",
+          "value": 19.204
+        }
+      ]
+    },
+    {
+      "year": 2006,
+      "spending": 992.2408,
+      "revenue": 943.1782,
+      "balance": -49.0626,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 336.0179
+        },
+        {
+          "label": "Intérêts",
+          "value": 48.0601
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 524.9023
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 83.2605
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 78.568
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 16.0656
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 830.523
+        },
+        {
+          "label": "Autres transferts",
+          "value": 18.0216
+        }
+      ]
+    },
+    {
+      "year": 2007,
+      "spending": 1039.2876,
+      "revenue": 981.3519,
+      "balance": -57.9357,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 346.2795
+        },
+        {
+          "label": "Intérêts",
+          "value": 52.0952
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 553.2594
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 87.6535
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 82.7659
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 19.0132
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 861.6839
+        },
+        {
+          "label": "Autres transferts",
+          "value": 17.8889
+        }
+      ]
+    },
+    {
+      "year": 2008,
+      "spending": 1080.2205,
+      "revenue": 1010.5304,
+      "balance": -69.6901,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 355.7659
+        },
+        {
+          "label": "Intérêts",
+          "value": 57.1693
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 575.9024
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 91.3829
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 86.136
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 21.2033
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 882.8139
+        },
+        {
+          "label": "Autres transferts",
+          "value": 20.3772
+        }
+      ]
+    },
+    {
+      "year": 2009,
+      "spending": 1122.6072,
+      "revenue": 979.7733,
+      "balance": -142.8339,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 370.4497
+        },
+        {
+          "label": "Intérêts",
+          "value": 49.2815
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 605.7662
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 97.1098
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 88.8315
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 19.6941
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 851.6201
+        },
+        {
+          "label": "Autres transferts",
+          "value": 19.6276
+        }
+      ]
+    },
+    {
+      "year": 2010,
+      "spending": 1151.9618,
+      "revenue": 1009.2013,
+      "balance": -142.7605,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 378.984
+        },
+        {
+          "label": "Intérêts",
+          "value": 50.7079
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 623.4719
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 98.798
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 92.0483
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 19.7561
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 880.0941
+        },
+        {
+          "label": "Autres transferts",
+          "value": 17.3028
+        }
+      ]
+    },
+    {
+      "year": 2011,
+      "spending": 1175.7047,
+      "revenue": 1066.3192,
+      "balance": -109.3855,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 386.6019
+        },
+        {
+          "label": "Intérêts",
+          "value": 55.9957
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 637.8062
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 95.3009
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 94.0133
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 20.1408
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 931.9234
+        },
+        {
+          "label": "Autres transferts",
+          "value": 20.2417
+        }
+      ]
+    },
+    {
+      "year": 2012,
+      "spending": 1208.9531,
+      "revenue": 1100.9659,
+      "balance": -107.9872,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 393.9318
+        },
+        {
+          "label": "Intérêts",
+          "value": 54.9408
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 660.8708
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 99.2097
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 95.2911
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 16.7992
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 969.9871
+        },
+        {
+          "label": "Autres transferts",
+          "value": 18.8885
+        }
+      ]
+    },
+    {
+      "year": 2013,
+      "spending": 1242.3578,
+      "revenue": 1137.646,
+      "balance": -104.7118,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 402.1189
+        },
+        {
+          "label": "Intérêts",
+          "value": 49.426
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 690.3242
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 100.4887
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 97.4557
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 16.1774
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 1003.3498
+        },
+        {
+          "label": "Autres transferts",
+          "value": 20.6631
+        }
+      ]
+    },
+    {
+      "year": 2014,
+      "spending": 1257.6492,
+      "revenue": 1159.1452,
+      "balance": -98.504,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 407.0946
+        },
+        {
+          "label": "Intérêts",
+          "value": 47.3158
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 708.5478
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 94.691
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 98.9661
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 16.2173
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 1023.3779
+        },
+        {
+          "label": "Autres transferts",
+          "value": 20.5839
+        }
+      ]
+    },
+    {
+      "year": 2015,
+      "spending": 1268.0078,
+      "revenue": 1182.3268,
+      "balance": -85.681,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 411.1583
+        },
+        {
+          "label": "Intérêts",
+          "value": 44.7074
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 722.8208
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 89.3213
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 99.8908
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 16.0668
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 1046.3701
+        },
+        {
+          "label": "Autres transferts",
+          "value": 19.9991
+        }
+      ]
+    },
+    {
+      "year": 2016,
+      "spending": 1280.6482,
+      "revenue": 1196.623,
+      "balance": -84.0252,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 414.3783
+        },
+        {
+          "label": "Intérêts",
+          "value": 42.4307
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 733.587
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 90.2522
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 98.882
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 14.8075
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 1060.49
+        },
+        {
+          "label": "Autres transferts",
+          "value": 22.4435
+        }
+      ]
+    },
+    {
+      "year": 2017,
+      "spending": 1321.4446,
+      "revenue": 1244.3869,
+      "balance": -77.0577,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 426.0223
+        },
+        {
+          "label": "Intérêts",
+          "value": 41.0201
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 763.446
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 90.9562
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 102.8251
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 15.0715
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 1106.4969
+        },
+        {
+          "label": "Autres transferts",
+          "value": 19.9934
+        }
+      ]
+    },
+    {
+      "year": 2018,
+      "spending": 1327.6324,
+      "revenue": 1273.0162,
+      "balance": -54.6162,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 430.3725
+        },
+        {
+          "label": "Intérêts",
+          "value": 41.6606
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 760.4591
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 95.1402
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 103.7036
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 15.3796
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 1133.1037
+        },
+        {
+          "label": "Autres transferts",
+          "value": 20.8293
+        }
+      ]
+    },
+    {
+      "year": 2019,
+      "spending": 1346.1547,
+      "revenue": 1287.9292,
+      "balance": -58.2255,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 438.3726
+        },
+        {
+          "label": "Intérêts",
+          "value": 36.8682
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 766.2568
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 104.6571
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 106.2498
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 15.8594
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 1144.86
+        },
+        {
+          "label": "Autres transferts",
+          "value": 20.96
+        }
+      ]
+    },
+    {
+      "year": 2020,
+      "spending": 1430.357,
+      "revenue": 1223.2726,
+      "balance": -207.0844,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 445.3789
+        },
+        {
+          "label": "Intérêts",
+          "value": 29.7241
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 853.7227
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 101.5313
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 99.0743
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 10.8663
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 1092.805
+        },
+        {
+          "label": "Autres transferts",
+          "value": 20.527
+        }
+      ]
+    },
+    {
+      "year": 2021,
+      "spending": 1491.4241,
+      "revenue": 1326.2748,
+      "balance": -165.1493,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 465.2363
+        },
+        {
+          "label": "Intérêts",
+          "value": 34.7999
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 885.7302
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 105.6577
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 107.3545
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 13.9833
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 1170.467
+        },
+        {
+          "label": "Autres transferts",
+          "value": 34.47
+        }
+      ]
+    },
+    {
+      "year": 2022,
+      "spending": 1550.3314,
+      "revenue": 1424.4356,
+      "balance": -125.8958,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 489.7149
+        },
+        {
+          "label": "Intérêts",
+          "value": 50.934
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 894.5974
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 115.0851
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 114.938
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 16.1126
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 1257.808
+        },
+        {
+          "label": "Autres transferts",
+          "value": 35.577
+        }
+      ]
+    },
+    {
+      "year": 2023,
+      "spending": 1608.2708,
+      "revenue": 1456.3505,
+      "balance": -151.9203,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 517.215
+        },
+        {
+          "label": "Intérêts",
+          "value": 53.4099
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 915.0523
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 122.5936
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 120.3956
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 19.9069
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 1283.95
+        },
+        {
+          "label": "Autres transferts",
+          "value": 32.098
+        }
+      ]
+    },
+    {
+      "year": 2024,
+      "spending": 1672.5892,
+      "revenue": 1503.4711,
+      "balance": -169.1181,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 539.4045
+        },
+        {
+          "label": "Intérêts",
+          "value": 60.1309
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 940.4769
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 132.5769
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 127.1359
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 22.2012
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 1322.29
+        },
+        {
+          "label": "Autres transferts",
+          "value": 31.844
+        }
+      ]
+    },
+    {
+      "year": 2025,
+      "spending": 1714.1117,
+      "revenue": 1562.5197,
+      "balance": -151.592,
+      "spendingBreakdown": [
+        {
+          "label": "Fonctionnement",
+          "value": 547.6885
+        },
+        {
+          "label": "Intérêts",
+          "value": 65.7209
+        },
+        {
+          "label": "Prestations et autres transferts",
+          "value": 962.9702
+        },
+        {
+          "label": "Acquisitions nettes d’actifs non financiers",
+          "value": 137.7321
+        }
+      ],
+      "revenueBreakdown": [
+        {
+          "label": "Recettes de production",
+          "value": 130.9351
+        },
+        {
+          "label": "Revenus de la propriété",
+          "value": 22.9816
+        },
+        {
+          "label": "Impôts et cotisations sociales",
+          "value": 1374.056
+        },
+        {
+          "label": "Autres transferts",
+          "value": 34.547
+        }
+      ]
+    }
+  ]
+}

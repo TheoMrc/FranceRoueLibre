@@ -1,0 +1,471 @@
+{
+  "source": "https://www.insee.fr/fr/statistiques/2381414",
+  "publication": "2026-08-28",
+  "unit": "% du PIB",
+  "years": [
+    {
+      "year": 1960,
+      "revenue": 37.0,
+      "spending": 35.8,
+      "balance": 1.2,
+      "debt": null
+    },
+    {
+      "year": 1961,
+      "revenue": 38.3,
+      "spending": 37.2,
+      "balance": 1.2,
+      "debt": null
+    },
+    {
+      "year": 1962,
+      "revenue": 38.6,
+      "spending": 38.4,
+      "balance": 0.2,
+      "debt": null
+    },
+    {
+      "year": 1963,
+      "revenue": 39.6,
+      "spending": 39.2,
+      "balance": 0.4,
+      "debt": null
+    },
+    {
+      "year": 1964,
+      "revenue": 40.5,
+      "spending": 39.7,
+      "balance": 0.8,
+      "debt": null
+    },
+    {
+      "year": 1965,
+      "revenue": 41.0,
+      "spending": 40.4,
+      "balance": 0.6,
+      "debt": null
+    },
+    {
+      "year": 1966,
+      "revenue": 40.8,
+      "spending": 40.6,
+      "balance": 0.2,
+      "debt": null
+    },
+    {
+      "year": 1967,
+      "revenue": 40.7,
+      "spending": 41.3,
+      "balance": -0.5,
+      "debt": null
+    },
+    {
+      "year": 1968,
+      "revenue": 42.0,
+      "spending": 43.4,
+      "balance": -1.4,
+      "debt": null
+    },
+    {
+      "year": 1969,
+      "revenue": 42.1,
+      "spending": 42.3,
+      "balance": -0.2,
+      "debt": null
+    },
+    {
+      "year": 1970,
+      "revenue": 41.5,
+      "spending": 41.5,
+      "balance": 0.0,
+      "debt": null
+    },
+    {
+      "year": 1971,
+      "revenue": 40.8,
+      "spending": 41.1,
+      "balance": -0.3,
+      "debt": null
+    },
+    {
+      "year": 1972,
+      "revenue": 41.2,
+      "spending": 41.0,
+      "balance": 0.2,
+      "debt": null
+    },
+    {
+      "year": 1973,
+      "revenue": 40.8,
+      "spending": 40.9,
+      "balance": -0.1,
+      "debt": null
+    },
+    {
+      "year": 1974,
+      "revenue": 41.4,
+      "spending": 41.3,
+      "balance": 0.1,
+      "debt": null
+    },
+    {
+      "year": 1975,
+      "revenue": 43.2,
+      "spending": 46.2,
+      "balance": -2.9,
+      "debt": null
+    },
+    {
+      "year": 1976,
+      "revenue": 45.1,
+      "spending": 46.7,
+      "balance": -1.6,
+      "debt": null
+    },
+    {
+      "year": 1977,
+      "revenue": 44.7,
+      "spending": 45.9,
+      "balance": -1.1,
+      "debt": null
+    },
+    {
+      "year": 1978,
+      "revenue": 45.0,
+      "spending": 46.8,
+      "balance": -1.8,
+      "debt": 21.6
+    },
+    {
+      "year": 1979,
+      "revenue": 46.6,
+      "spending": 47.1,
+      "balance": -0.5,
+      "debt": 21.6
+    },
+    {
+      "year": 1980,
+      "revenue": 47.6,
+      "spending": 48.0,
+      "balance": -0.4,
+      "debt": 21.3
+    },
+    {
+      "year": 1981,
+      "revenue": 48.2,
+      "spending": 50.7,
+      "balance": -2.4,
+      "debt": 22.6
+    },
+    {
+      "year": 1982,
+      "revenue": 49.2,
+      "spending": 52.0,
+      "balance": -2.9,
+      "debt": 26.2
+    },
+    {
+      "year": 1983,
+      "revenue": 50.0,
+      "spending": 52.6,
+      "balance": -2.6,
+      "debt": 27.7
+    },
+    {
+      "year": 1984,
+      "revenue": 50.8,
+      "spending": 53.6,
+      "balance": -2.8,
+      "debt": 30.2
+    },
+    {
+      "year": 1985,
+      "revenue": 51.2,
+      "spending": 54.2,
+      "balance": -3.0,
+      "debt": 31.9
+    },
+    {
+      "year": 1986,
+      "revenue": 50.2,
+      "spending": 53.4,
+      "balance": -3.2,
+      "debt": 32.4
+    },
+    {
+      "year": 1987,
+      "revenue": 50.8,
+      "spending": 52.8,
+      "balance": -2.0,
+      "debt": 34.8
+    },
+    {
+      "year": 1988,
+      "revenue": 49.4,
+      "spending": 52.0,
+      "balance": -2.6,
+      "debt": 34.7
+    },
+    {
+      "year": 1989,
+      "revenue": 49.1,
+      "spending": 50.9,
+      "balance": -1.8,
+      "debt": 35.5
+    },
+    {
+      "year": 1990,
+      "revenue": 49.2,
+      "spending": 51.6,
+      "balance": -2.5,
+      "debt": 36.8
+    },
+    {
+      "year": 1991,
+      "revenue": 49.8,
+      "spending": 52.7,
+      "balance": -2.9,
+      "debt": 37.8
+    },
+    {
+      "year": 1992,
+      "revenue": 49.4,
+      "spending": 54.0,
+      "balance": -4.6,
+      "debt": 41.7
+    },
+    {
+      "year": 1993,
+      "revenue": 50.1,
+      "spending": 56.5,
+      "balance": -6.4,
+      "debt": 48.2
+    },
+    {
+      "year": 1994,
+      "revenue": 50.4,
+      "spending": 55.9,
+      "balance": -5.5,
+      "debt": 51.6
+    },
+    {
+      "year": 1995,
+      "revenue": 50.9,
+      "spending": 56.1,
+      "balance": -5.1,
+      "debt": 57.8
+    },
+    {
+      "year": 1996,
+      "revenue": 52.1,
+      "spending": 56.0,
+      "balance": -3.9,
+      "debt": 60.6
+    },
+    {
+      "year": 1997,
+      "revenue": 51.9,
+      "spending": 55.6,
+      "balance": -3.7,
+      "debt": 62.0
+    },
+    {
+      "year": 1998,
+      "revenue": 51.6,
+      "spending": 54.0,
+      "balance": -2.4,
+      "debt": 62.1
+    },
+    {
+      "year": 1999,
+      "revenue": 52.1,
+      "spending": 53.7,
+      "balance": -1.5,
+      "debt": 61.4
+    },
+    {
+      "year": 2000,
+      "revenue": 51.3,
+      "spending": 52.6,
+      "balance": -1.3,
+      "debt": 59.7
+    },
+    {
+      "year": 2001,
+      "revenue": 51.4,
+      "spending": 52.8,
+      "balance": -1.4,
+      "debt": 59.3
+    },
+    {
+      "year": 2002,
+      "revenue": 50.7,
+      "spending": 53.9,
+      "balance": -3.2,
+      "debt": 61.3
+    },
+    {
+      "year": 2003,
+      "revenue": 50.3,
+      "spending": 54.4,
+      "balance": -4.1,
+      "debt": 65.4
+    },
+    {
+      "year": 2004,
+      "revenue": 50.4,
+      "spending": 54.0,
+      "balance": -3.6,
+      "debt": 66.9
+    },
+    {
+      "year": 2005,
+      "revenue": 50.8,
+      "spending": 54.3,
+      "balance": -3.5,
+      "debt": 68.2
+    },
+    {
+      "year": 2006,
+      "revenue": 51.1,
+      "spending": 53.8,
+      "balance": -2.7,
+      "debt": 65.4
+    },
+    {
+      "year": 2007,
+      "revenue": 50.6,
+      "spending": 53.6,
+      "balance": -3.0,
+      "debt": 65.5
+    },
+    {
+      "year": 2008,
+      "revenue": 50.8,
+      "spending": 54.3,
+      "balance": -3.5,
+      "debt": 69.8
+    },
+    {
+      "year": 2009,
+      "revenue": 50.6,
+      "spending": 58.0,
+      "balance": -7.4,
+      "debt": 84.1
+    },
+    {
+      "year": 2010,
+      "revenue": 50.6,
+      "spending": 57.7,
+      "balance": -7.2,
+      "debt": 86.3
+    },
+    {
+      "year": 2011,
+      "revenue": 51.7,
+      "spending": 57.0,
+      "balance": -5.3,
+      "debt": 88.7
+    },
+    {
+      "year": 2012,
+      "revenue": 52.7,
+      "spending": 57.9,
+      "balance": -5.2,
+      "debt": 91.7
+    },
+    {
+      "year": 2013,
+      "revenue": 53.7,
+      "spending": 58.6,
+      "balance": -4.9,
+      "debt": 94.6
+    },
+    {
+      "year": 2014,
+      "revenue": 53.8,
+      "spending": 58.4,
+      "balance": -4.6,
+      "debt": 96.2
+    },
+    {
+      "year": 2015,
+      "revenue": 53.7,
+      "spending": 57.6,
+      "balance": -3.9,
+      "debt": 97.0
+    },
+    {
+      "year": 2016,
+      "revenue": 53.6,
+      "spending": 57.4,
+      "balance": -3.8,
+      "debt": 98.2
+    },
+    {
+      "year": 2017,
+      "revenue": 54.3,
+      "spending": 57.7,
+      "balance": -3.4,
+      "debt": 98.8
+    },
+    {
+      "year": 2018,
+      "revenue": 54.0,
+      "spending": 56.4,
+      "balance": -2.3,
+      "debt": 98.5
+    },
+    {
+      "year": 2019,
+      "revenue": 53.0,
+      "spending": 55.3,
+      "balance": -2.4,
+      "debt": 98.2
+    },
+    {
+      "year": 2020,
+      "revenue": 52.8,
+      "spending": 61.7,
+      "balance": -8.9,
+      "debt": 114.9
+    },
+    {
+      "year": 2021,
+      "revenue": 52.9,
+      "spending": 59.5,
+      "balance": -6.6,
+      "debt": 112.8
+    },
+    {
+      "year": 2022,
+      "revenue": 53.7,
+      "spending": 58.4,
+      "balance": -4.7,
+      "debt": 111.4
+    },
+    {
+      "year": 2023,
+      "revenue": 51.4,
+      "spending": 56.8,
+      "balance": -5.4,
+      "debt": 109.5
+    },
+    {
+      "year": 2024,
+      "revenue": 51.2,
+      "spending": 57.0,
+      "balance": -5.8,
+      "debt": 112.6,
+      "status": "semi-définitif"
+    },
+    {
+      "year": 2025,
+      "revenue": 52.2,
+      "spending": 57.3,
+      "balance": -5.1,
+      "debt": 115.7,
+      "status": "provisoire"
+    }
+  ]
+}

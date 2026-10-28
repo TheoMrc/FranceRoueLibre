@@ -1,0 +1,10 @@
+{
+  "year": 2012,
+  "url": "https://data.ofgl.fr/api/v2/catalog/datasets/ofgl-base-communes-consolidee/attachments/ofgl_base_communes_2012_consolidee_pj_zip",
+  "archive_sha256": "996d4f76952a59b81757443e0be8a7625e2ce5f7898d506bd3b5c9c6f75b38f8",
+  "archive_bytes": 106881554,
+  "archive_member": "ofgl_base_communes_2012_consolidee_pj.csv",
+  "selected_records": 36700,
+  "filter": "Agrégat = Dépenses totales",
+  "retrieved": "2026-10-27"
+}

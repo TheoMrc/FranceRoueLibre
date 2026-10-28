@@ -1,0 +1,1688 @@
+{
+  "source": "https://www.insee.fr/fr/statistiques/8988845",
+  "table": "3.215",
+  "publication": "2026-08-28",
+  "unit": "milliards euros courants",
+  "years": [
+    {
+      "year": 1978,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 75.7252,
+          "revenue": 74.2233,
+          "balance": -1.5019
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 16.8081,
+          "revenue": 16.8895,
+          "balance": 0.0814
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 28.0185,
+          "revenue": 23.5821,
+          "balance": -4.4364
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 65.6773,
+          "revenue": 65.2701,
+          "balance": -0.4072
+        }
+      ],
+      "totalSpending": 161.4724,
+      "totalRevenue": 155.2083
+    },
+    {
+      "year": 1979,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 87.4761,
+          "revenue": 86.5484,
+          "balance": -0.9277
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 18.7627,
+          "revenue": 19.6705,
+          "balance": 0.9078
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 32.2635,
+          "revenue": 27.3785,
+          "balance": -4.885
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 76.0481,
+          "revenue": 79.0342,
+          "balance": 2.9861
+        }
+      ],
+      "totalSpending": 185.6388,
+      "totalRevenue": 183.72
+    },
+    {
+      "year": 1980,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 101.0952,
+          "revenue": 99.967,
+          "balance": -1.1282
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 22.1756,
+          "revenue": 23.349,
+          "balance": 1.1734
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 37.2512,
+          "revenue": 32.2697,
+          "balance": -4.9815
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 89.2463,
+          "revenue": 92.2463,
+          "balance": 3.0
+        }
+      ],
+      "totalSpending": 214.9636,
+      "totalRevenue": 213.0273
+    },
+    {
+      "year": 1981,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 119.931,
+          "revenue": 114.2508,
+          "balance": -5.6802
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 26.7383,
+          "revenue": 27.3696,
+          "balance": 0.6313
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 43.3172,
+          "revenue": 36.9657,
+          "balance": -6.3515
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 106.1653,
+          "revenue": 105.2898,
+          "balance": -0.8755
+        }
+      ],
+      "totalSpending": 255.6971,
+      "totalRevenue": 243.4212
+    },
+    {
+      "year": 1982,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 141.279,
+          "revenue": 132.171,
+          "balance": -9.108
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 32.4483,
+          "revenue": 33.2102,
+          "balance": 0.7619
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 51.0111,
+          "revenue": 43.1988,
+          "balance": -7.8123
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 126.2711,
+          "revenue": 125.8072,
+          "balance": -0.4639
+        }
+      ],
+      "totalSpending": 301.4338,
+      "totalRevenue": 284.8115
+    },
+    {
+      "year": 1983,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 158.0779,
+          "revenue": 145.0785,
+          "balance": -12.9994
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 35.5106,
+          "revenue": 36.2505,
+          "balance": 0.7399
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 57.5245,
+          "revenue": 49.8632,
+          "balance": -7.6613
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 140.3559,
+          "revenue": 143.7479,
+          "balance": 3.392
+        }
+      ],
+      "totalSpending": 338.0497,
+      "totalRevenue": 321.5209
+    },
+    {
+      "year": 1984,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 172.9112,
+          "revenue": 157.1747,
+          "balance": -15.7365
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 41.2862,
+          "revenue": 40.6222,
+          "balance": -0.664
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 59.5527,
+          "revenue": 54.2609,
+          "balance": -5.2918
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 152.8447,
+          "revenue": 155.1929,
+          "balance": 2.3482
+        }
+      ],
+      "totalSpending": 374.7335,
+      "totalRevenue": 355.3894
+    },
+    {
+      "year": 1985,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 189.1157,
+          "revenue": 170.3075,
+          "balance": -18.8082
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 43.7929,
+          "revenue": 45.0209,
+          "balance": 1.228
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 65.8528,
+          "revenue": 60.0524,
+          "balance": -5.8004
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 163.3451,
+          "revenue": 164.2046,
+          "balance": 0.8595
+        }
+      ],
+      "totalSpending": 406.1487,
+      "totalRevenue": 383.6276
+    },
+    {
+      "year": 1986,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 198.9615,
+          "revenue": 184.2486,
+          "balance": -14.7129
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 40.0081,
+          "revenue": 38.7401,
+          "balance": -1.268
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 72.713,
+          "revenue": 67.401,
+          "balance": -5.312
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 173.6218,
+          "revenue": 168.8696,
+          "balance": -4.7522
+        }
+      ],
+      "totalSpending": 431.3257,
+      "totalRevenue": 405.2806
+    },
+    {
+      "year": 1987,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 206.6521,
+          "revenue": 194.3957,
+          "balance": -12.2564
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 40.845,
+          "revenue": 40.9286,
+          "balance": 0.0836
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 76.3508,
+          "revenue": 71.7468,
+          "balance": -4.604
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 180.7527,
+          "revenue": 180.2858,
+          "balance": -0.4669
+        }
+      ],
+      "totalSpending": 448.1263,
+      "totalRevenue": 430.8826
+    },
+    {
+      "year": 1988,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 220.652,
+          "revenue": 202.5056,
+          "balance": -18.1464
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 40.29,
+          "revenue": 41.2137,
+          "balance": 0.9237
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 82.7951,
+          "revenue": 77.2784,
+          "balance": -5.5167
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 192.6652,
+          "revenue": 191.6785,
+          "balance": -0.9867
+        }
+      ],
+      "totalSpending": 477.6125,
+      "totalRevenue": 453.8864
+    },
+    {
+      "year": 1989,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 228.5843,
+          "revenue": 213.6443,
+          "balance": -14.94
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 42.0513,
+          "revenue": 44.53,
+          "balance": 2.4787
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 89.2705,
+          "revenue": 83.165,
+          "balance": -6.1055
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 205.8254,
+          "revenue": 206.6231,
+          "balance": 0.7977
+        }
+      ],
+      "totalSpending": 503.152,
+      "totalRevenue": 485.3829
+    },
+    {
+      "year": 1990,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 241.9477,
+          "revenue": 220.5224,
+          "balance": -21.4253
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 45.8251,
+          "revenue": 48.0907,
+          "balance": 2.2656
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 95.6469,
+          "revenue": 90.3801,
+          "balance": -5.2668
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 220.1698,
+          "revenue": 218.9518,
+          "balance": -1.218
+        }
+      ],
+      "totalSpending": 538.8227,
+      "totalRevenue": 513.1782
+    },
+    {
+      "year": 1991,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 252.5263,
+          "revenue": 232.2002,
+          "balance": -20.3261
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 47.4033,
+          "revenue": 49.6585,
+          "balance": 2.2552
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 103.5043,
+          "revenue": 95.479,
+          "balance": -8.0253
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 235.0395,
+          "revenue": 229.8818,
+          "balance": -5.1577
+        }
+      ],
+      "totalSpending": 570.8968,
+      "totalRevenue": 539.6429
+    },
+    {
+      "year": 1992,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 269.7494,
+          "revenue": 231.7513,
+          "balance": -37.9981
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 49.6005,
+          "revenue": 51.9958,
+          "balance": 2.3953
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 109.0125,
+          "revenue": 101.2032,
+          "balance": -7.8093
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 251.8627,
+          "revenue": 243.2358,
+          "balance": -8.6269
+        }
+      ],
+      "totalSpending": 605.6859,
+      "totalRevenue": 553.6469
+    },
+    {
+      "year": 1993,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 291.6201,
+          "revenue": 232.2582,
+          "balance": -59.3619
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 52.5571,
+          "revenue": 54.4519,
+          "balance": 1.8948
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 110.644,
+          "revenue": 106.6444,
+          "balance": -3.9996
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 264.366,
+          "revenue": 253.2096,
+          "balance": -11.1564
+        }
+      ],
+      "totalSpending": 641.6271,
+      "totalRevenue": 569.004
+    },
+    {
+      "year": 1994,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 293.3298,
+          "revenue": 238.0045,
+          "balance": -55.3253
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 49.756,
+          "revenue": 51.6355,
+          "balance": 1.8795
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 116.0777,
+          "revenue": 111.6815,
+          "balance": -4.3962
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 272.1497,
+          "revenue": 266.0068,
+          "balance": -6.1429
+        }
+      ],
+      "totalSpending": 655.4354,
+      "totalRevenue": 591.4505
+    },
+    {
+      "year": 1995,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 292.575,
+          "revenue": 248.277,
+          "balance": -44.298
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 60.5504,
+          "revenue": 55.5744,
+          "balance": -4.976
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 119.6246,
+          "revenue": 115.7301,
+          "balance": -3.8945
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 284.2384,
+          "revenue": 275.3682,
+          "balance": -8.8702
+        }
+      ],
+      "totalSpending": 680.3704,
+      "totalRevenue": 618.3317
+    },
+    {
+      "year": 1996,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 304.4529,
+          "revenue": 262.087,
+          "balance": -42.3659
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 55.3343,
+          "revenue": 54.9392,
+          "balance": -0.3951
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 124.8784,
+          "revenue": 123.8783,
+          "balance": -1.0001
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 294.8681,
+          "revenue": 290.0452,
+          "balance": -4.8229
+        }
+      ],
+      "totalSpending": 698.5235,
+      "totalRevenue": 649.9395
+    },
+    {
+      "year": 1997,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 317.8973,
+          "revenue": 270.5161,
+          "balance": -47.3812
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 56.2066,
+          "revenue": 57.3805,
+          "balance": 1.1739
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 124.1701,
+          "revenue": 125.5559,
+          "balance": 1.3858
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 302.6263,
+          "revenue": 299.5825,
+          "balance": -3.0438
+        }
+      ],
+      "totalSpending": 716.6467,
+      "totalRevenue": 668.7814
+    },
+    {
+      "year": 1998,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 313.2403,
+          "revenue": 278.3158,
+          "balance": -34.9245
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 57.8831,
+          "revenue": 58.2113,
+          "balance": 0.3282
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 127.1873,
+          "revenue": 129.7334,
+          "balance": 2.5461
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 311.916,
+          "revenue": 311.7715,
+          "balance": -0.1445
+        }
+      ],
+      "totalSpending": 726.7161,
+      "totalRevenue": 694.5214
+    },
+    {
+      "year": 1999,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 327.7268,
+          "revenue": 295.288,
+          "balance": -32.4388
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 57.9443,
+          "revenue": 60.2005,
+          "balance": 2.2562
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 132.5085,
+          "revenue": 135.2726,
+          "balance": 2.7641
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 320.7975,
+          "revenue": 326.6717,
+          "balance": 5.8742
+        }
+      ],
+      "totalSpending": 748.589,
+      "totalRevenue": 727.0447
+    },
+    {
+      "year": 2000,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 331.234,
+          "revenue": 299.3643,
+          "balance": -31.8697
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 61.7138,
+          "revenue": 61.8211,
+          "balance": 0.1073
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 141.9041,
+          "revenue": 142.9694,
+          "balance": 1.0653
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 331.7458,
+          "revenue": 343.1007,
+          "balance": 11.3549
+        }
+      ],
+      "totalSpending": 775.3487,
+      "totalRevenue": 756.0065
+    },
+    {
+      "year": 2001,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 345.8704,
+          "revenue": 313.5457,
+          "balance": -32.3247
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 67.383,
+          "revenue": 66.9414,
+          "balance": -0.4416
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 145.2826,
+          "revenue": 146.0855,
+          "balance": 0.8029
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 348.5237,
+          "revenue": 358.8005,
+          "balance": 10.2768
+        }
+      ],
+      "totalSpending": 808.2256,
+      "totalRevenue": 786.539
+    },
+    {
+      "year": 2002,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 367.4725,
+          "revenue": 310.8018,
+          "balance": -56.6707
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 69.9867,
+          "revenue": 72.1925,
+          "balance": 2.2058
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 154.7354,
+          "revenue": 156.0587,
+          "balance": 1.3233
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 367.7929,
+          "revenue": 370.8136,
+          "balance": 3.0207
+        }
+      ],
+      "totalSpending": 851.1074,
+      "totalRevenue": 800.9865
+    },
+    {
+      "year": 2003,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 369.1144,
+          "revenue": 307.6188,
+          "balance": -61.4956
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 71.8057,
+          "revenue": 71.4017,
+          "balance": -0.404
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 163.6191,
+          "revenue": 163.8316,
+          "balance": 0.2125
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 387.2832,
+          "revenue": 382.6533,
+          "balance": -4.6299
+        }
+      ],
+      "totalSpending": 881.7856,
+      "totalRevenue": 815.4686
+    },
+    {
+      "year": 2004,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 391.2669,
+          "revenue": 338.0364,
+          "balance": -53.2305
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 70.6136,
+          "revenue": 77.9756,
+          "balance": 7.362
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 178.0015,
+          "revenue": 175.0315,
+          "balance": -2.97
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 407.094,
+          "revenue": 395.6327,
+          "balance": -11.4613
+        }
+      ],
+      "totalSpending": 915.9064,
+      "totalRevenue": 855.6066
+    },
+    {
+      "year": 2005,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 403.1222,
+          "revenue": 349.4387,
+          "balance": -53.6835
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 75.4565,
+          "revenue": 80.2091,
+          "balance": 4.7526
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 186.6377,
+          "revenue": 183.0528,
+          "balance": -3.5849
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 427.6881,
+          "revenue": 418.4025,
+          "balance": -9.2856
+        }
+      ],
+      "totalSpending": 956.1425,
+      "totalRevenue": 894.3411
+    },
+    {
+      "year": 2006,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 401.2623,
+          "revenue": 347.578,
+          "balance": -53.6843
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 76.8658,
+          "revenue": 84.4678,
+          "balance": 7.602
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 197.5017,
+          "revenue": 193.4189,
+          "balance": -4.0828
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 441.2975,
+          "revenue": 442.4,
+          "balance": 1.1025
+        }
+      ],
+      "totalSpending": 992.2408,
+      "totalRevenue": 943.1782
+    },
+    {
+      "year": 2007,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 406.4593,
+          "revenue": 360.6976,
+          "balance": -45.7617
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 85.9424,
+          "revenue": 79.7986,
+          "balance": -6.1438
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 211.8944,
+          "revenue": 203.6197,
+          "balance": -8.2747
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 463.7182,
+          "revenue": 465.9627,
+          "balance": 2.2445
+        }
+      ],
+      "totalSpending": 1039.2876,
+      "totalRevenue": 981.3519
+    },
+    {
+      "year": 2008,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 427.6621,
+          "revenue": 358.237,
+          "balance": -69.4251
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 83.0571,
+          "revenue": 80.9512,
+          "balance": -2.1059
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 221.7412,
+          "revenue": 211.6104,
+          "balance": -10.1308
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 476.8463,
+          "revenue": 488.818,
+          "balance": 11.9717
+        }
+      ],
+      "totalSpending": 1080.2205,
+      "totalRevenue": 1010.5304
+    },
+    {
+      "year": 2009,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 439.432,
+          "revenue": 320.4185,
+          "balance": -119.0135
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 90.178,
+          "revenue": 89.9544,
+          "balance": -0.2236
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 229.1879,
+          "revenue": 222.7286,
+          "balance": -6.4593
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 498.6148,
+          "revenue": 481.4773,
+          "balance": -17.1375
+        }
+      ],
+      "totalSpending": 1122.6072,
+      "totalRevenue": 979.7733
+    },
+    {
+      "year": 2010,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 491.1496,
+          "revenue": 364.1461,
+          "balance": -127.0035
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 98.5543,
+          "revenue": 110.7229,
+          "balance": 12.1686
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 229.1212,
+          "revenue": 226.9835,
+          "balance": -2.1377
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 517.3166,
+          "revenue": 491.5287,
+          "balance": -25.7879
+        }
+      ],
+      "totalSpending": 1151.9618,
+      "totalRevenue": 1009.2013
+    },
+    {
+      "year": 2011,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 452.7873,
+          "revenue": 360.2054,
+          "balance": -92.5819
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 99.1417,
+          "revenue": 98.484,
+          "balance": -0.6577
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 234.0015,
+          "revenue": 232.5201,
+          "balance": -1.4814
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 533.8749,
+          "revenue": 519.2104,
+          "balance": -14.6645
+        }
+      ],
+      "totalSpending": 1175.7047,
+      "totalRevenue": 1066.3192
+    },
+    {
+      "year": 2012,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 460.7745,
+          "revenue": 375.0647,
+          "balance": -85.7098
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 99.5663,
+          "revenue": 96.5343,
+          "balance": -3.032
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 241.5526,
+          "revenue": 236.8524,
+          "balance": -4.7002
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 551.4472,
+          "revenue": 536.902,
+          "balance": -14.5452
+        }
+      ],
+      "totalSpending": 1208.9531,
+      "totalRevenue": 1100.9659
+    },
+    {
+      "year": 2013,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 477.1626,
+          "revenue": 392.7558,
+          "balance": -84.4068
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 104.4851,
+          "revenue": 103.2781,
+          "balance": -1.207
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 249.5774,
+          "revenue": 241.2964,
+          "balance": -8.281
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 563.7422,
+          "revenue": 552.9252,
+          "balance": -10.817
+        }
+      ],
+      "totalSpending": 1242.3578,
+      "totalRevenue": 1137.646
+    },
+    {
+      "year": 2014,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 481.5501,
+          "revenue": 397.7661,
+          "balance": -83.784
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 107.2054,
+          "revenue": 107.2984,
+          "balance": 0.093
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 249.8682,
+          "revenue": 244.1862,
+          "balance": -5.682
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 575.8547,
+          "revenue": 566.7237,
+          "balance": -9.131
+        }
+      ],
+      "totalSpending": 1257.6492,
+      "totalRevenue": 1159.1452
+    },
+    {
+      "year": 2015,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 476.8168,
+          "revenue": 402.0448,
+          "balance": -74.772
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 108.0864,
+          "revenue": 103.2744,
+          "balance": -4.812
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 246.1611,
+          "revenue": 245.7251,
+          "balance": -0.436
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 578.1187,
+          "revenue": 572.4577,
+          "balance": -5.661
+        }
+      ],
+      "totalSpending": 1268.0078,
+      "totalRevenue": 1182.3268
+    },
+    {
+      "year": 2016,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 483.8242,
+          "revenue": 406.665,
+          "balance": -77.1592
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 100.636,
+          "revenue": 95.897,
+          "balance": -4.739
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 245.2957,
+          "revenue": 247.5537,
+          "balance": 2.258
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 585.9871,
+          "revenue": 581.6021,
+          "balance": -4.385
+        }
+      ],
+      "totalSpending": 1280.6482,
+      "totalRevenue": 1196.623
+    },
+    {
+      "year": 2017,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 505.466,
+          "revenue": 427.2223,
+          "balance": -78.2437
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 103.7405,
+          "revenue": 100.1085,
+          "balance": -3.632
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 250.7708,
+          "revenue": 252.1808,
+          "balance": 1.41
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 598.1367,
+          "revenue": 601.5447,
+          "balance": 3.408
+        }
+      ],
+      "totalSpending": 1321.4446,
+      "totalRevenue": 1244.3869
+    },
+    {
+      "year": 2018,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 494.6456,
+          "revenue": 431.8354,
+          "balance": -62.8102
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 102.0616,
+          "revenue": 99.2646,
+          "balance": -2.797
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 256.0307,
+          "revenue": 257.8067,
+          "balance": 1.776
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 610.3218,
+          "revenue": 619.5368,
+          "balance": 9.215
+        }
+      ],
+      "totalSpending": 1327.6324,
+      "totalRevenue": 1273.0162
+    },
+    {
+      "year": 2019,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 483.8464,
+          "revenue": 417.9843,
+          "balance": -65.8621
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 112.2617,
+          "revenue": 110.3553,
+          "balance": -1.9064
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 268.69,
+          "revenue": 266.1462,
+          "balance": -2.5438
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 623.4936,
+          "revenue": 635.5804,
+          "balance": 12.0868
+        }
+      ],
+      "totalSpending": 1346.1547,
+      "totalRevenue": 1287.9292
+    },
+    {
+      "year": 2020,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 562.7923,
+          "revenue": 385.7925,
+          "balance": -176.9998
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 119.5256,
+          "revenue": 141.6029,
+          "balance": 22.0773
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 266.2978,
+          "revenue": 262.4395,
+          "balance": -3.8583
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 661.8263,
+          "revenue": 613.5227,
+          "balance": -48.3036
+        }
+      ],
+      "totalSpending": 1430.357,
+      "totalRevenue": 1223.2726
+    },
+    {
+      "year": 2021,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 567.736,
+          "revenue": 423.6758,
+          "balance": -144.0602
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 129.9782,
+          "revenue": 129.4917,
+          "balance": -0.4865
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 279.4507,
+          "revenue": 278.559,
+          "balance": -0.8917
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 685.8762,
+          "revenue": 666.1653,
+          "balance": -19.7109
+        }
+      ],
+      "totalSpending": 1491.3811,
+      "totalRevenue": 1326.2318
+    },
+    {
+      "year": 2022,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 608.7094,
+          "revenue": 460.587,
+          "balance": -148.1224
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 133.4475,
+          "revenue": 148.3229,
+          "balance": 14.8754
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 294.9598,
+          "revenue": 293.8106,
+          "balance": -1.1492
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 706.6717,
+          "revenue": 715.1721,
+          "balance": 8.5004
+        }
+      ],
+      "totalSpending": 1550.3314,
+      "totalRevenue": 1424.4356
+    },
+    {
+      "year": 2023,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 597.717,
+          "revenue": 444.801,
+          "balance": -152.916
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 137.6495,
+          "revenue": 136.7465,
+          "balance": -0.903
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 315.7209,
+          "revenue": 305.774,
+          "balance": -9.9469
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 737.0174,
+          "revenue": 748.863,
+          "balance": 11.8456
+        }
+      ],
+      "totalSpending": 1608.2708,
+      "totalRevenue": 1456.3505
+    },
+    {
+      "year": 2024,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 600.7015,
+          "revenue": 449.63,
+          "balance": -151.0715
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 142.6307,
+          "revenue": 141.2379,
+          "balance": -1.3928
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 330.484,
+          "revenue": 312.6901,
+          "balance": -17.7939
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 777.288,
+          "revenue": 778.4281,
+          "balance": 1.1401
+        }
+      ],
+      "totalSpending": 1672.7082,
+      "totalRevenue": 1503.4711
+    },
+    {
+      "year": 2025,
+      "sectors": [
+        {
+          "id": "state",
+          "label": "État",
+          "spending": 607.73,
+          "revenue": 479.6272,
+          "balance": -128.1028
+        },
+        {
+          "id": "odac",
+          "label": "Organismes divers d’administration centrale",
+          "spending": 142.2659,
+          "revenue": 140.1141,
+          "balance": -2.1518
+        },
+        {
+          "id": "local",
+          "label": "Administrations publiques locales",
+          "spending": 335.4818,
+          "revenue": 319.9269,
+          "balance": -15.5549
+        },
+        {
+          "id": "social",
+          "label": "Administrations de sécurité sociale",
+          "spending": 803.164,
+          "revenue": 797.3815,
+          "balance": -5.7825
+        }
+      ],
+      "totalSpending": 1714.1117,
+      "totalRevenue": 1562.5197
+    }
+  ]
+}

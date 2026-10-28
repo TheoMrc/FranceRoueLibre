@@ -1,71 +1,91 @@
+/* FranceRoueLibre – spending explorer.
+   The map is rendered on the GPU with MapLibre GL (vendor/maplibre-gl.js):
+   geometry is tiled in a web worker, zoom and pan run at display rate, and
+   territories are coloured through feature-state instead of DOM nodes. */
+
+const $ = id => document.getElementById(id);
 const dom = {
-  theme: document.getElementById('themeToggle'),
+  theme: $('themeToggle'),
+  header: $('siteHeader'),
+  indicator: $('indicator'),
+  indicatorWrap: $('indicatorWrap'),
+  indicatorNote: $('indicatorNote'),
+  mapYear: $('mapYear'),
+  yearWrap: $('yearWrap'),
+  yearPlay: $('yearPlay'),
   modeTabs: [...document.querySelectorAll('[data-mode]')],
   metricButtons: [...document.querySelectorAll('[data-metric]')],
-  search: document.getElementById('search'),
-  region: document.getElementById('region'),
-  scheme: document.getElementById('scheme'),
+  search: $('search'),
+  region: $('region'),
+  scheme: $('scheme'),
   schemeFilter: document.querySelector('.scheme-filter'),
-  reset: document.getElementById('reset'),
-  totalLabel: document.getElementById('totalLabel'),
-  totalAmount: document.getElementById('totalAmount'),
-  countLabel: document.getElementById('countLabel'),
-  projectCount: document.getElementById('projectCount'),
-  coverageLabel: document.getElementById('coverageLabel'),
-  departmentCount: document.getElementById('departmentCount'),
-  statsContext: document.getElementById('statsContext'),
-  filterTitle: document.getElementById('filterTitle'),
-  mapKicker: document.getElementById('mapKicker'),
-  mapTitle: document.getElementById('mapTitle'),
-  mapSubtitle: document.getElementById('mapSubtitle'),
-  mapUnit: document.getElementById('mapUnit'),
-  mapFrame: document.getElementById('mapFrame'),
-  map: document.getElementById('map'),
-  mapScene: document.getElementById('mapScene'),
-  mapLayer: document.getElementById('mapLayer'),
-  communeLayer: document.getElementById('communeLayer'),
-  mapPoints: document.getElementById('mapPoints'),
-  mapLabels: document.getElementById('mapLabels'),
-  tooltip: document.getElementById('mapTooltip'),
-  mapBadgeText: document.getElementById('mapBadgeText'),
-  legendTitle: document.getElementById('legendTitle'),
-  legendLow: document.getElementById('legendLow'),
-  legendHigh: document.getElementById('legendHigh'),
-  mapHelp: document.getElementById('mapHelp'),
-  inspectorCard: document.querySelector('.inspector-card'),
-  inspectorKicker: document.getElementById('inspectorKicker'),
-  inspectorTitle: document.getElementById('inspectorTitle'),
-  inspectorSummary: document.getElementById('inspectorSummary'),
-  inspectorStats: document.getElementById('inspectorStats'),
-  listHeading: document.getElementById('listHeading'),
-  listCount: document.getElementById('listCount'),
-  projectList: document.getElementById('projectList'),
-  more: document.getElementById('more'),
-  clearSelection: document.getElementById('clearSelection'),
-  zoomIn: document.getElementById('zoomIn'),
-  zoomOut: document.getElementById('zoomOut'),
-  resetView: document.getElementById('resetView'),
-  dataStatus: document.getElementById('dataStatus'),
-  scopeText: document.getElementById('scopeText')
+  reset: $('reset'),
+  totalLabel: $('totalLabel'),
+  totalAmount: $('totalAmount'),
+  countLabel: $('countLabel'),
+  projectCount: $('projectCount'),
+  coverageLabel: $('coverageLabel'),
+  departmentCount: $('departmentCount'),
+  statsContext: $('statsContext'),
+  filterTitle: $('filterTitle'),
+  mapKicker: $('mapKicker'),
+  mapTitle: $('mapTitle'),
+  mapSubtitle: $('mapSubtitle'),
+  mapUnit: $('mapUnit'),
+  mapFrame: $('mapFrame'),
+  map: $('map'),
+  mapLoading: $('mapLoading'),
+  tooltip: $('mapTooltip'),
+  mapBadgeText: $('mapBadgeText'),
+  detailStatus: $('detailStatus'),
+  legendTitle: $('legendTitle'),
+  legendLow: $('legendLow'),
+  legendHigh: $('legendHigh'),
+  missingLegend: $('missingLegend'),
+  mapHelp: $('mapHelp'),
+  inspectorKicker: $('inspectorKicker'),
+  inspectorTitle: $('inspectorTitle'),
+  inspectorSummary: $('inspectorSummary'),
+  inspectorStats: $('inspectorStats'),
+  listHeading: $('listHeading'),
+  listCount: $('listCount'),
+  projectList: $('projectList'),
+  more: $('more'),
+  clearSelection: $('clearSelection'),
+  zoomIn: $('zoomIn'),
+  zoomOut: $('zoomOut'),
+  resetView: $('resetView'),
+  dataStatus: $('dataStatus'),
+  scopeText: $('scopeText')
 };
 
 const state = {
   mode: 'projects',
+  communeYear: 2025,
+  localYear: 2025,
   metric: 'total',
+  indicator: 'depenses-totales',
+  year: 2025,
+  selectedGfp: '',
   region: '',
   scheme: '',
   search: '',
   selectedDepartment: '',
   selectedCommune: '',
-  zoomDelta: 0,
   limit: 8
 };
 
 const data = {
   projects: [],
   communes: [],
+  communeMetadata: new Map(),
+  communeHistory: new Map(),
+  localHistory: new Map(),
+  communeCoverage: null,
+  missingCommunes: [],
   departments: [],
   regions: [],
+  boundaries: null,
   features: [],
   featureByCode: new Map(),
   communeByCode: new Map(),
@@ -73,54 +93,39 @@ const data = {
   regionByName: new Map(),
   regionByCode: new Map(),
   populationByDepartment: new Map(),
-  communeTotalsByDepartment: new Map(),
-  communePopByDepartment: new Map(),
   projectRows: [],
-  projectTotalsByDepartment: new Map(),
-  projectionBounds: null,
-  regionPaths: new Map(),
-  regionPathElements: new Map(),
-  communeBoundaries: null,
-  communeFeatures: [],
+  communeFeatures: null,
   communeFeatureByCode: new Map(),
-  communePathByCode: new Map(),
-  communePath2DByCode: new Map(),
-  communeHitGrid: new Map(),
-  departmentPath2DByCode: new Map(),
-  departmentHitGrid: new Map(),
-  hitContext: null,
+  communeBBox: new Map(),
+  departmentBBox: new Map(),
   activeCommuneRowsByCode: new Map(),
-  communeHoverElement: null,
   currentMapDepartmentValues: new Map(),
   communeLayerKey: '',
-  performance: { communeLayerRenderMs: 0, communeSvgElements: 0 }
+  localIndex: null,
+  localCache: new Map(),
+  gfp: [],
+  gfpByCode: new Map()
 };
+const LEGACY_INDICATOR = 'depenses-totales';
+const LEGACY_YEARS = Array.from({ length: 14 }, (_, i) => 2012 + i);
 
 const numberFormat = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
 const decimalFormat = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
 const lowerText = value => String(value ?? '')
   .normalize('NFD')
-  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/[̀-ͯ]/g, '')
   .toLocaleLowerCase('fr-FR');
 const matches = (value, query) => !query || lowerText(value).includes(lowerText(query));
 const COMMUNE_COLOR_BUCKETS = 12;
-const HIT_GRID_SIZE = 12;
-const mapMotion = {
-  current: null,
-  from: null,
-  target: null,
-  startedAt: 0,
-  duration: 0,
-  frame: 0,
-  frameCount: 0
-};
+const FRANCE_BOUNDS = [[-5.3, 41.3], [9.7, 51.15]];
+const DETAIL_ZOOM = 7;
+const EMPTY = { type: 'FeatureCollection', features: [] };
 const normalizeDepartment = code => {
   const value = String(code ?? '');
   if (value === '67A') return '67';
   if (value === '691') return '69';
   return value;
 };
-const isOverseasCode = code => String(code ?? '').length > 2;
 
 function formatCount(value) {
   return numberFormat.format(Math.round(value || 0));
@@ -140,9 +145,23 @@ function formatValue(value, perCapita = false) {
   return formatCompact(value);
 }
 
-function formatLongValue(value, perCapita = false) {
-  if (!Number.isFinite(value)) return '—';
-  return perCapita ? `${decimalFormat.format(value)} €/habitant` : `${numberFormat.format(Math.round(value))} €`;
+function formatMetric(value) {
+  if (state.metric === 'perCapita') return formatValue(value, true);
+  if (state.metric === 'share') {
+    if (!Number.isFinite(value) || !state.shareBase) return '—';
+    const pct = 100 * value / state.shareBase;
+    if (pct > 0 && pct < .01) return '< 0,01 %';
+    return `${pct.toLocaleString('fr-FR', { maximumFractionDigits: pct < 1 ? 2 : 1 })} %`;
+  }
+  return formatValue(value);
+}
+
+function shareBaseForMode() {
+  if (state.mode === 'projects') return sum(data.projectRows, row => row.amount);
+  if (state.mode === 'communes') return sum(data.communes, row => row.total);
+  if (state.mode === 'departments') return sum(data.departments, row => row.total);
+  if (state.mode === 'gfp') return sum(data.gfp, row => row.total);
+  return sum(data.regions, row => row.total);
 }
 
 function sum(rows, getter) {
@@ -154,7 +173,7 @@ function clearChildren(node) {
 }
 
 function setText(node, value) {
-  if (node) node.textContent = value;
+  if (node && node.textContent !== value) node.textContent = value;
 }
 
 function addOption(select, value, label) {
@@ -164,126 +183,70 @@ function addOption(select, value, label) {
   select.appendChild(option);
 }
 
+async function fetchJson(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`${url} indisponible`);
+  return response.json();
+}
+
+/* ---------- Geometry ---------- */
+
 function walkCoordinates(coords, callback) {
   if (!Array.isArray(coords)) return;
-  if (typeof coords[0] === 'number' && typeof coords[1] === 'number') callback(coords);
+  if (typeof coords[0] === 'number') callback(coords);
   else coords.forEach(item => walkCoordinates(item, callback));
 }
 
-function projectPoint(coords) {
-  const [lon, lat] = coords || [];
-  const bounds = data.projectionBounds;
-  if (!bounds || !Number.isFinite(lon) || !Number.isFinite(lat)) return { x: 450, y: 310 };
-  // Correct longitude for the latitude of France so the country keeps its geographic proportions.
-  const x = bounds.offsetX + (lon - bounds.centerLon) * bounds.cosLat * bounds.scale;
-  const y = bounds.offsetY - (lat - bounds.centerLat) * bounds.scale;
-  return { x, y };
-}
-
-function featurePath(feature) {
-  const geometry = feature.geometry;
-  if (!geometry) return '';
-  const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates || [];
-  return polygons.map(polygon => polygon.map((ring, ringIndex) => {
-    const line = ring.map((coords, pointIndex) => {
-      const point = projectPoint(coords);
-      return `${pointIndex ? 'L' : 'M'}${point.x.toFixed(2)},${point.y.toFixed(2)}`;
-    }).join(' ');
-    return `${line} Z`;
-  }).join(' ')).join(' ');
-}
-
-function projectedFeatureBounds(feature) {
-  let minX = Infinity; let maxX = -Infinity; let minY = Infinity; let maxY = -Infinity;
-  walkCoordinates(feature.geometry?.coordinates, coords => {
-    const point = projectPoint(coords);
-    if (point.x < minX) minX = point.x;
-    if (point.x > maxX) maxX = point.x;
-    if (point.y < minY) minY = point.y;
-    if (point.y > maxY) maxY = point.y;
+function bboxOfGeometry(geometry) {
+  const box = [Infinity, Infinity, -Infinity, -Infinity];
+  walkCoordinates(geometry?.coordinates, ([x, y]) => {
+    if (x < box[0]) box[0] = x;
+    if (y < box[1]) box[1] = y;
+    if (x > box[2]) box[2] = x;
+    if (y > box[3]) box[3] = y;
   });
-  if (!Number.isFinite(minX)) return { minX: 450, maxX: 450, minY: 310, maxY: 310 };
-  return { minX, maxX, minY, maxY };
+  return Number.isFinite(box[0]) ? box : null;
 }
 
-function hitGridKey(x, y) {
-  return Math.floor(x / HIT_GRID_SIZE) + ',' + Math.floor(y / HIT_GRID_SIZE);
+function unionBBox(boxes) {
+  const valid = boxes.filter(Boolean);
+  if (!valid.length) return null;
+  return valid.reduce((acc, box) => [Math.min(acc[0], box[0]), Math.min(acc[1], box[1]), Math.max(acc[2], box[2]), Math.max(acc[3], box[3])]);
 }
 
-function registerHitFeature(feature, code, pathData, pathMap, grid) {
-  if (!pathData || typeof Path2D !== 'function') return;
-  pathMap.set(code, new Path2D(pathData));
-  const bounds = projectedFeatureBounds(feature);
-  const minCellX = Math.floor(bounds.minX / HIT_GRID_SIZE);
-  const maxCellX = Math.floor(bounds.maxX / HIT_GRID_SIZE);
-  const minCellY = Math.floor(bounds.minY / HIT_GRID_SIZE);
-  const maxCellY = Math.floor(bounds.maxY / HIT_GRID_SIZE);
-  for (let cellX = minCellX; cellX <= maxCellX; cellX += 1) {
-    for (let cellY = minCellY; cellY <= maxCellY; cellY += 1) {
-      const key = cellX + ',' + cellY;
-      const bucket = grid.get(key) || [];
-      bucket.push(code);
-      grid.set(key, bucket);
-    }
-  }
+/* Decode the compact geometry written by scripts/web-data.mjs (integer deltas). */
+function decodeFeatures(payload, propertyNames, bboxes) {
+  const scale = payload.scale;
+  return {
+    type: 'FeatureCollection',
+    features: payload.features.map(entry => {
+      const polygons = entry[entry.length - 1];
+      const properties = {};
+      propertyNames.forEach((name, index) => { properties[name] = entry[index]; });
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      const coordinates = polygons.map(polygon => polygon.map(ring => {
+        const points = new Array(ring.length / 2);
+        let x = 0, y = 0;
+        for (let i = 0, j = 0; i < ring.length; i += 2, j++) {
+          x += ring[i]; y += ring[i + 1];
+          const lon = x / scale, lat = y / scale;
+          points[j] = [lon, lat];
+          if (lon < minX) minX = lon; if (lon > maxX) maxX = lon;
+          if (lat < minY) minY = lat; if (lat > maxY) maxY = lat;
+        }
+        return points;
+      }));
+      if (bboxes && Number.isFinite(minX)) bboxes.set(properties.code, [minX, minY, maxX, maxY]);
+      return {
+        type: 'Feature',
+        properties,
+        geometry: coordinates.length === 1 ? { type: 'Polygon', coordinates: coordinates[0] } : { type: 'MultiPolygon', coordinates }
+      };
+    })
+  };
 }
 
-function buildGeometryHitIndexes() {
-  const canvas = document.createElement('canvas');
-  data.hitContext = canvas.getContext('2d');
-  data.communePath2DByCode.clear();
-  data.communeHitGrid.clear();
-  data.departmentPath2DByCode.clear();
-  data.departmentHitGrid.clear();
-  if (!data.hitContext) return;
-  data.communeFeatures.forEach(feature => {
-    const code = String(feature.properties?.code || '');
-    registerHitFeature(feature, code, data.communePathByCode.get(code), data.communePath2DByCode, data.communeHitGrid);
-  });
-  data.features.forEach(feature => {
-    const code = String(feature.properties?.code || '');
-    registerHitFeature(feature, code, featurePath(feature), data.departmentPath2DByCode, data.departmentHitGrid);
-  });
-}
-
-function scenePointFromEvent(event) {
-  const matrix = dom.mapScene.getScreenCTM();
-  if (!matrix) return null;
-  const point = dom.map.createSVGPoint();
-  point.x = event.clientX;
-  point.y = event.clientY;
-  return point.matrixTransform(matrix.inverse());
-}
-
-function codeAtScenePoint(point, grid, pathMap, activeCodes) {
-  if (!point || !data.hitContext) return '';
-  const candidates = grid.get(hitGridKey(point.x, point.y)) || [];
-  for (let index = candidates.length - 1; index >= 0; index -= 1) {
-    const code = candidates[index];
-    if (activeCodes && !activeCodes.has(code)) continue;
-    const path = pathMap.get(code);
-    if (path && data.hitContext.isPointInPath(path, point.x, point.y, 'evenodd')) return code;
-  }
-  return '';
-}
-
-function communeCodeAtScenePoint(x, y) {
-  return codeAtScenePoint({ x, y }, data.communeHitGrid, data.communePath2DByCode, data.activeCommuneRowsByCode);
-}
-
-function departmentCodeAtScenePoint(x, y) {
-  return codeAtScenePoint({ x, y }, data.departmentHitGrid, data.departmentPath2DByCode);
-}
-
-function updateCommuneHover(code) {
-  const path = data.communeHoverElement;
-  if (!path || !code || !data.activeCommuneRowsByCode.has(code)) {
-    if (path) path.style.display = 'none';
-    return;
-  }
-  path.setAttribute('d', data.communePathByCode.get(code) || '');
-  path.style.display = '';
-}
+/* ---------- Data helpers ---------- */
 
 function featureRegionName(feature) {
   return data.regionByCode.get(String(feature.properties?.region ?? ''))?.name || '';
@@ -297,6 +260,17 @@ function regionForDepartment(code) {
   return feature ? (featureRegionName(feature) || feature.properties?.nom || '') : '';
 }
 
+function regionNameForCode(regionCode) {
+  const known = data.regionByCode.get(String(regionCode));
+  if (known?.name) return known.name;
+  const feature = data.features.find(item => String(item.properties?.region || '') === String(regionCode));
+  return feature?.properties?.nom || String(regionCode);
+}
+
+function regionCodeForName(name) {
+  return data.regionByName.get(name)?.code ?? data.regions.find(row => row.name === name)?.code ?? '';
+}
+
 function populationForDepartment(code) {
   return data.populationByDepartment.get(normalizeDepartment(code)) || 0;
 }
@@ -306,13 +280,13 @@ function populationForProject(row) {
 }
 
 function projectMetric(row) {
-  if (state.metric === 'total') return row.amount;
+  if (state.metric !== 'perCapita') return row.amount;
   const population = populationForProject(row);
   return population ? row.amount / population : 0;
 }
 
 function valueForBudget(row) {
-  return state.metric === 'total' ? row.total : row.perCapita;
+  return state.metric !== 'perCapita' ? row.total : row.perCapita;
 }
 
 function aggregateRows(rows, options = {}) {
@@ -331,7 +305,7 @@ function projectRowsForScope(rows) {
 }
 
 function filteredProjects() {
-  const rows = data.projectRows.filter(row => {
+  return data.projectRows.filter(row => {
     if (state.region && row.regionName !== state.region) return false;
     if (state.scheme && row.scheme !== state.scheme) return false;
     if (state.selectedDepartment && normalizeDepartment(row.department) !== normalizeDepartment(state.selectedDepartment)) return false;
@@ -339,7 +313,6 @@ function filteredProjects() {
     if (!state.search) return true;
     return [row.title, row.beneficiary, row.scheme, row.communeData?.name, row.departmentName].some(value => matches(value, state.search));
   });
-  return rows;
 }
 
 function filteredCommunes() {
@@ -355,7 +328,7 @@ function filteredCommunes() {
 function filteredDepartments() {
   return data.departments.filter(row => {
     if (state.region && row.regionName !== state.region) return false;
-    if (state.selectedDepartment && normalizeDepartment(row.code) !== normalizeDepartment(state.selectedDepartment)) return false;
+    if (state.selectedDepartment && !(row.code === '67A' && ['67', '68'].includes(normalizeDepartment(state.selectedDepartment))) && normalizeDepartment(row.code) !== normalizeDepartment(state.selectedDepartment)) return false;
     if (!state.search) return true;
     return [row.name, row.code, row.regionName].some(value => matches(value, state.search));
   });
@@ -373,115 +346,35 @@ function currentRows() {
   if (state.mode === 'communes') return filteredCommunes();
   if (state.mode === 'departments') return filteredDepartments();
   if (state.mode === 'regions') return filteredRegions();
+  if (state.mode === 'gfp') return filteredGfp();
   return filteredProjects();
 }
 
-function setupProjection() {
-  const points = [];
-  data.features.filter(feature => !isOverseasCode(feature.properties?.code)).forEach(feature => walkCoordinates(feature.geometry?.coordinates, coords => points.push(coords)));
-  const lons = points.map(point => point[0]);
-  const lats = points.map(point => point[1]);
-  const minLon = Math.min(...lons); const maxLon = Math.max(...lons);
-  const minLat = Math.min(...lats); const maxLat = Math.max(...lats);
-  const centerLon = (minLon + maxLon) / 2; const centerLat = (minLat + maxLat) / 2;
-  const cosLat = Math.cos(centerLat * Math.PI / 180);
-  const projectedWidth = (maxLon - minLon) * cosLat;
-  const projectedHeight = maxLat - minLat;
-  const scale = Math.min(790 / (projectedWidth || 1), 540 / (projectedHeight || 1));
-  data.projectionBounds = { minLon, maxLon, minLat, maxLat, centerLon, centerLat, cosLat, scale, offsetX: 450, offsetY: 310 };
-}
-
-function coordinateKey(coords) {
-  return Number(coords[0]).toFixed(5) + ',' + Number(coords[1]).toFixed(5);
-}
-
-function regionNameForCode(regionCode) {
-  const known = data.regionByCode.get(String(regionCode));
-  if (known?.name) return known.name;
-  const feature = data.features.find(item => String(item.properties?.region || '') === String(regionCode));
-  return feature?.properties?.nom || String(regionCode);
-}
-
-function addRegionSegment(segments, a, b) {
-  const aKey = coordinateKey(a);
-  const bKey = coordinateKey(b);
-  if (aKey === bKey) return;
-  const key = [aKey, bKey].sort().join('|');
-  const existing = segments.get(key);
-  if (existing) existing.count += 1;
-  else segments.set(key, { aKey, bKey, a, b, count: 1 });
-}
-
-function buildRegionPaths() {
-  data.regionPaths.clear();
-  const grouped = new Map();
-  data.features.forEach(feature => {
-    const regionCode = String(feature.properties?.region || '');
-    if (!regionCode) return;
-    if (!grouped.has(regionCode)) grouped.set(regionCode, new Map());
-    const segments = grouped.get(regionCode);
-    const polygons = feature.geometry?.type === 'Polygon' ? [feature.geometry.coordinates] : feature.geometry?.coordinates || [];
-    polygons.forEach(polygon => polygon.forEach(ring => {
-      if (!Array.isArray(ring) || ring.length < 2) return;
-      for (let index = 0; index < ring.length - 1; index++) addRegionSegment(segments, ring[index], ring[index + 1]);
-      if (coordinateKey(ring[0]) !== coordinateKey(ring[ring.length - 1])) addRegionSegment(segments, ring[ring.length - 1], ring[0]);
-    }));
-  });
-  grouped.forEach((segments, regionCode) => {
-    const boundary = [...segments.values()].filter(segment => segment.count === 1);
-    const adjacency = new Map();
-    const coordinates = new Map();
-    boundary.forEach((segment, index) => {
-      segment.index = index;
-      coordinates.set(segment.aKey, segment.a);
-      coordinates.set(segment.bKey, segment.b);
-      if (!adjacency.has(segment.aKey)) adjacency.set(segment.aKey, []);
-      if (!adjacency.has(segment.bKey)) adjacency.set(segment.bKey, []);
-      adjacency.get(segment.aKey).push({ index, key: segment.bKey });
-      adjacency.get(segment.bKey).push({ index, key: segment.aKey });
-    });
-    const visited = new Set();
-    const paths = [];
-    boundary.forEach(segment => {
-      if (visited.has(segment.index)) return;
-      const keys = [segment.aKey];
-      let current = segment.aKey;
-      let previous = '';
-      let guard = 0;
-      while (guard++ < boundary.length + 4) {
-        const candidates = adjacency.get(current) || [];
-        const next = candidates.find(candidate => !visited.has(candidate.index) && candidate.key !== previous) || candidates.find(candidate => !visited.has(candidate.index));
-        if (!next) break;
-        visited.add(next.index);
-        previous = current;
-        current = next.key;
-        keys.push(current);
-        if (current === keys[0]) break;
-      }
-      if (keys.length >= 4) {
-        const projected = keys.map(key => projectPoint(coordinates.get(key)));
-        paths.push('M' + projected.map(point => point.x.toFixed(2) + ',' + point.y.toFixed(2)).join(' L') + ' Z');
-      }
-    });
-    data.regionPaths.set(regionCode, paths.join(' '));
+function filteredMissingCommunes() {
+  return data.missingCommunes.filter(row => {
+    if (state.region && row.regionName !== state.region) return false;
+    if (state.selectedDepartment && normalizeDepartment(row.department) !== normalizeDepartment(state.selectedDepartment)) return false;
+    if (state.selectedCommune && row.code !== state.selectedCommune) return false;
+    return !state.search || [row.name, row.code, row.departmentName, row.regionName].some(value => matches(value, state.search));
   });
 }
+
 function setupDerivedData() {
   data.features = data.boundaries.features || [];
-  data.features.forEach(feature => data.featureByCode.set(String(feature.properties?.code || ''), feature));
+  data.features.forEach(feature => {
+    const code = String(feature.properties?.code || '');
+    data.featureByCode.set(code, feature);
+    data.departmentBBox.set(code, bboxOfGeometry(feature.geometry));
+  });
   data.communes.forEach(row => data.communeByCode.set(row.code, row));
-  data.departments.forEach(row => data.deptByCode.set(normalizeDepartment(row.code), row));
+  data.departments.forEach(row => { const code = normalizeDepartment(row.code); if (!data.deptByCode.has(code) || row.code === code) data.deptByCode.set(code, row); });
   data.regions.forEach(row => { data.regionByCode.set(String(row.code), row); data.regionByName.set(row.name, row); });
-
   data.communes.forEach(row => {
     const department = normalizeDepartment(row.department);
     data.populationByDepartment.set(department, (data.populationByDepartment.get(department) || 0) + (row.population || 0));
-    data.communeTotalsByDepartment.set(department, (data.communeTotalsByDepartment.get(department) || 0) + row.total);
-    data.communePopByDepartment.set(department, (data.communePopByDepartment.get(department) || 0) + (row.population || 0));
   });
-
   data.projectRows = data.projects.map(row => {
-    const communeData = data.communeByCode.get(row.commune);
+    const communeData = data.communeByCode.get(row.commune) || data.communeMetadata.get(row.commune);
     const department = normalizeDepartment(row.department);
     return {
       ...row,
@@ -491,25 +384,6 @@ function setupDerivedData() {
       communeData
     };
   });
-  data.projectRows.forEach(row => {
-    const bucket = data.projectTotalsByDepartment.get(row.department) || { total: 0 };
-    bucket.total += row.amount;
-    data.projectTotalsByDepartment.set(row.department, bucket);
-  });
-  setupProjection();
-  buildRegionPaths();
-  data.communeFeatures = data.communeBoundaries?.features || [];
-  data.communeFeatureByCode.clear();
-  data.communePathByCode.clear();
-  data.communeFeatures.forEach(feature => {
-    const code = String(feature.properties?.code || '');
-    data.communeFeatureByCode.set(code, feature);
-    data.communePathByCode.set(code, featurePath(feature));
-  });
-  const hitIndexStarted = performance.now();
-  buildGeometryHitIndexes();
-  data.performance.hitIndexBuildMs = performance.now() - hitIndexStarted;
-  document.documentElement.dataset.hitIndexBuildMs = data.performance.hitIndexBuildMs.toFixed(2);
 }
 
 function setupFilters() {
@@ -520,47 +394,10 @@ function setupFilters() {
   schemes.forEach(scheme => addOption(dom.scheme, scheme, scheme));
 }
 
-function setupMap() {
-  clearChildren(dom.mapLayer);
-  data.features.forEach((feature, index) => {
-    const code = String(feature.properties?.code || '');
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', featurePath(feature));
-    path.setAttribute('class', 'department');
-    path.setAttribute('tabindex', '0');
-    path.setAttribute('role', 'button');
-    path.dataset.code = code;
-    path.style.setProperty('--i', index);
-    path.addEventListener('click', event => { event.stopPropagation(); state.mode === 'regions' ? selectRegion(regionNameForCode(feature.properties?.region)) : selectDepartment(normalizeDepartment(code)); });
-    path.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); state.mode === 'regions' ? selectRegion(regionNameForCode(feature.properties?.region)) : selectDepartment(normalizeDepartment(code)); } });
-    path.addEventListener('pointermove', event => showTooltip(event, path.getAttribute('aria-label') || feature.properties?.nom || code));
-    path.addEventListener('pointerleave', hideTooltip);
-    dom.mapLayer.appendChild(path);
-  });
-  data.regionPathElements.clear();
-  data.regionPaths.forEach((pathData, regionCode) => {
-    if (!pathData || !data.regionByCode.has(String(regionCode))) return;
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', pathData);
-    path.setAttribute('class', 'region-outline');
-    path.setAttribute('tabindex', '0');
-    path.setAttribute('role', 'button');
-    path.dataset.regionCode = regionCode;
-    const label = regionNameForCode(regionCode);
-    path.setAttribute('aria-label', 'R\u00e9gion ' + label);
-    path.addEventListener('click', event => { event.stopPropagation(); selectRegion(label); });
-    path.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectRegion(label); } });
-    path.addEventListener('pointermove', event => showTooltip(event, path.getAttribute('aria-label')));
-    path.addEventListener('pointerleave', hideTooltip);
-    dom.mapLayer.appendChild(path);
-    data.regionPathElements.set(regionCode, path);
-  });
-}
-
 function inferSearchMode(query) {
   const needle = lowerText(query).trim();
   if (needle.length < 2) return '';
-  const exactCommune = data.communes.some(row => lowerText(row.name) === needle || lowerText(row.code) === needle);
+  const exactCommune = [...data.communeMetadata.values()].some(row => lowerText(row.name) === needle || lowerText(row.code) === needle);
   const exactDepartment = data.departments.some(row => lowerText(row.name) === needle || lowerText(row.code) === needle);
   const exactRegion = data.regions.some(row => lowerText(row.name) === needle || lowerText(row.code) === needle);
   let projectMatchCount = 0;
@@ -573,186 +410,204 @@ function inferSearchMode(query) {
   if (exactDepartment) return 'departments';
   if (exactRegion) return 'regions';
   if (projectMatchCount) return 'projects';
-  if (data.communes.some(row => [row.name, row.code].some(value => matches(value, needle)))) return 'communes';
+  if ([...data.communeMetadata.values()].some(row => [row.name, row.code].some(value => matches(value, needle)))) return 'communes';
   if (data.departments.some(row => [row.name, row.code].some(value => matches(value, needle)))) return 'departments';
   if (data.regions.some(row => [row.name, row.code].some(value => matches(value, needle)))) return 'regions';
   return '';
 }
 
-function setupListeners() {
-  dom.modeTabs.forEach(button => button.addEventListener('click', () => {
-    state.mode = button.dataset.mode;
-    state.selectedCommune = '';
-    state.selectedDepartment = '';
-    state.zoomDelta = 0;
-    state.limit = 8;
-    render();
-  }));
-  dom.metricButtons.forEach(button => button.addEventListener('click', () => { state.metric = button.dataset.metric; render(); }));
-  let searchTimer = 0;
-  dom.search.addEventListener('input', event => {
-    state.search = event.target.value.trim();
-    state.limit = 8;
-    window.clearTimeout(searchTimer);
-    searchTimer = window.setTimeout(() => {
-      const inferredMode = inferSearchMode(state.search);
-      if (inferredMode && inferredMode !== state.mode) {
-        state.mode = inferredMode;
-        state.selectedDepartment = '';
-        state.selectedCommune = '';
-        state.zoomDelta = 0;
-      }
-      render();
-    }, 120);
-  });
-  dom.region.addEventListener('change', event => { state.region = event.target.value; state.selectedDepartment = ''; state.selectedCommune = ''; state.zoomDelta = 0; state.limit = 8; render(); });
-  dom.scheme.addEventListener('change', event => { state.scheme = event.target.value; state.limit = 8; render(); });
-  dom.reset.addEventListener('click', resetAll);
-  dom.clearSelection.addEventListener('click', () => { state.selectedDepartment = ''; state.selectedCommune = ''; state.zoomDelta = 0; render(); });
-  dom.resetView.addEventListener('click', () => { state.selectedDepartment = ''; state.selectedCommune = ''; state.zoomDelta = 0; render(); });
-  dom.zoomIn.addEventListener('click', () => { state.zoomDelta = Math.min(5, state.zoomDelta + .35); applyTransform(240); });
-  dom.zoomOut.addEventListener('click', () => { state.zoomDelta = Math.max(-.7, state.zoomDelta - .35); applyTransform(240); });
+/* ---------- Indicators (OFGL aggregates) by level and year ---------- */
 
-  function handleMapWheel(event) {
-    event.preventDefault();
-    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 480 : 1;
-    const delta = event.deltaY * unit;
-    if (!Number.isFinite(delta) || delta === 0) return;
-    state.zoomDelta = Math.max(-.7, Math.min(5, state.zoomDelta - delta / 190));
-    applyTransform(150);
+const levelOf = mode => mode === 'departments' ? 'departements' : mode;
+
+function indicatorLabel() {
+  return data.localIndex?.aggregates?.[state.indicator]?.label || 'Dépenses totales';
+}
+
+function yearsFor(mode = state.mode, indicator = state.indicator) {
+  if (mode === 'projects') return [2025];
+  if (indicator === LEGACY_INDICATOR && mode !== 'gfp') return LEGACY_YEARS;
+  return data.localIndex?.levels?.[levelOf(mode)]?.years || [];
+}
+
+function getLocal(level, name) {
+  const key = `${level}/${name}`;
+  if (!data.localCache.has(key)) {
+    const promise = fetchJson(`./data/local/${key}.json`);
+    promise.catch(() => data.localCache.delete(key));
+    data.localCache.set(key, promise);
   }
-
-  let mapHoverFrame = 0;
-  let pendingMapPointer = null;
-
-  function processMapPointer() {
-    mapHoverFrame = 0;
-    const pointer = pendingMapPointer;
-    pendingMapPointer = null;
-    if (!pointer || (state.mode !== 'projects' && state.mode !== 'communes')) return;
-    const hoverStarted = performance.now();
-    const point = scenePointFromEvent(pointer);
-    if (!point) { dom.map.dataset.hoverProcessMs = (performance.now() - hoverStarted).toFixed(3); return; }
-    const communeCode = communeCodeAtScenePoint(point.x, point.y);
-    if (communeCode) {
-      const row = data.activeCommuneRowsByCode.get(communeCode);
-      updateCommuneHover(communeCode);
-      showTooltip(pointer, row.name + ' : ' + formatValue(communeShapeValue(row), state.metric === 'perCapita'));
-      dom.map.dataset.hoverProcessMs = (performance.now() - hoverStarted).toFixed(3);
-      return;
-    }
-    updateCommuneHover('');
-    const departmentCode = departmentCodeAtScenePoint(point.x, point.y);
-    if (departmentCode) {
-      const feature = data.featureByCode.get(departmentCode);
-      const value = data.currentMapDepartmentValues.get(normalizeDepartment(departmentCode)) || data.currentMapDepartmentValues.get(departmentCode) || 0;
-      showTooltip(pointer, (feature?.properties?.nom || departmentCode) + ' : ' + formatValue(value, state.metric === 'perCapita'));
-    } else hideTooltip();
-    dom.map.dataset.hoverProcessMs = (performance.now() - hoverStarted).toFixed(3);
-  }
-
-  dom.map.addEventListener('pointermove', event => {
-    if (state.mode !== 'projects' && state.mode !== 'communes') return;
-    pendingMapPointer = { clientX: event.clientX, clientY: event.clientY };
-    if (!mapHoverFrame) mapHoverFrame = window.requestAnimationFrame(processMapPointer);
-  });
-  dom.map.addEventListener('pointerleave', () => {
-    pendingMapPointer = null;
-    if (mapHoverFrame) window.cancelAnimationFrame(mapHoverFrame);
-    mapHoverFrame = 0;
-    updateCommuneHover('');
-    hideTooltip();
-  });
-  dom.map.addEventListener('click', event => {
-    if (state.mode === 'projects' || state.mode === 'communes') {
-      const point = scenePointFromEvent(event);
-      const communeCode = point ? communeCodeAtScenePoint(point.x, point.y) : '';
-      if (communeCode) { selectCommune(communeCode); return; }
-      const departmentCode = point ? departmentCodeAtScenePoint(point.x, point.y) : '';
-      if (departmentCode) { selectDepartment(departmentCode); return; }
-    }
-    if (event.target === dom.map) { state.selectedCommune = ''; state.selectedDepartment = ''; state.zoomDelta = 0; render(); }
-  });
-  dom.mapFrame.addEventListener('wheel', handleMapWheel, { passive: false });
+  return data.localCache.get(key);
 }
 
-function resetAll() {
-  state.region = ''; state.scheme = ''; state.search = ''; state.selectedDepartment = ''; state.selectedCommune = ''; state.zoomDelta = 0; state.limit = 8;
-  dom.search.value = ''; dom.region.value = ''; dom.scheme.value = '';
-  render();
+function availableIndicator(mode) {
+  if (mode === 'projects') return state.indicator;
+  const aggregates = data.localIndex?.aggregates || {};
+  if (state.indicator === LEGACY_INDICATOR && mode !== 'gfp') return state.indicator;
+  if (aggregates[state.indicator]?.levels.includes(levelOf(mode))) return state.indicator;
+  if (mode !== 'gfp') return LEGACY_INDICATOR;
+  return aggregates[LEGACY_INDICATOR]?.levels.includes('gfp') ? LEGACY_INDICATOR : Object.keys(aggregates).find(slug => aggregates[slug].levels.includes('gfp'));
 }
 
-function selectRegion(name) {
-  if (!name) return;
-  state.region = name;
-  state.search = '';
-  dom.search.value = '';
-  dom.region.value = name;
-  state.selectedDepartment = '';
-  state.selectedCommune = '';
-  state.zoomDelta = 0;
-  render();
-}
-function selectDepartment(code) {
-  state.search = '';
-  dom.search.value = '';
-  state.selectedDepartment = normalizeDepartment(code);
-  state.selectedCommune = '';
-  state.zoomDelta = 0;
-  render();
-}
-
-function selectCommune(code) {
-  const commune = data.communeByCode.get(code);
-  const feature = data.communeFeatureByCode.get(code);
-  if (!commune && !feature) return;
-  if (state.selectedCommune === code) {
-    state.selectedCommune = '';
-    state.selectedDepartment = '';
-    state.zoomDelta = 0;
-    render();
+/* Loads the rows of the current mode × indicator × year into data.communes / departments / regions / gfp. */
+async function loadModeData() {
+  const mode = state.mode;
+  if (mode === 'projects') return;
+  state.indicator = availableIndicator(mode);
+  const years = yearsFor();
+  if (!years.includes(state.year)) state.year = years[years.length - 1];
+  const year = state.year, indicator = state.indicator;
+  const localYears = data.localIndex?.levels?.communes?.years || [];
+  if (indicator === LEGACY_INDICATOR && mode === 'communes' && !(localYears.includes(year) && data.localIndex?.aggregates?.[LEGACY_INDICATOR]?.levels.includes('communes'))) { await setCommuneYear(year); return; }
+  if (indicator === LEGACY_INDICATOR && (mode === 'departments' || mode === 'regions')) { await setLocalYear(year); return; }
+  const level = levelOf(mode);
+  const [values, population, entities, members] = await Promise.all([
+    getLocal(level, indicator), getLocal(level, '_pop'), level === 'communes' ? null : getLocal(level, '_entities'), level === 'gfp' ? getLocal('gfp', '_communes').catch(() => null) : null
+  ]);
+  const yi = values.years.indexOf(year), pi = population.years.indexOf(year);
+  const valueAt = i => values.values[yi]?.[i] ?? null;
+  const popAt = i => population.values[pi]?.[i] || 0;
+  if (level === 'communes') {
+    const rows = [], missing = [];
+    [...data.communeMetadata.values()].forEach((meta, i) => {
+      const value = valueAt(i);
+      if (value == null) { missing.push({ ...meta, total: null, perCapita: null, population: null, missing: true }); return; }
+      const people = popAt(i);
+      rows.push({ ...meta, total: value, population: people, perCapita: people ? value / people : 0 });
+    });
+    data.communes = rows; data.missingCommunes = missing; data.communeCoverage = null; state.communeYear = year;
     return;
   }
-  state.search = '';
-  dom.search.value = '';
-  state.selectedCommune = code;
-  state.selectedDepartment = normalizeDepartment(commune?.department || feature?.properties?.departement || '');
-  state.zoomDelta = 0;
+  const rows = entities.codes.map((code, i) => {
+    const value = valueAt(i);
+    if (value == null) return null;
+    const people = popAt(i);
+    return { code, name: entities.names?.[i] || code, total: value, population: people, perCapita: people ? value / people : 0 };
+  }).filter(Boolean);
+  if (level === 'departements') {
+    rows.forEach(row => { row.regionName = regionForDepartment(row.code); });
+    data.departments = rows; state.localYear = year;
+  } else if (level === 'regions') {
+    data.regions = rows; state.localYear = year;
+  } else {
+    const codes = [...data.communeMetadata.keys()];
+    rows.forEach(row => {
+      row.communes = (members?.members?.[row.code] || []).map(index => codes[index]);
+      const first = data.communeMetadata.get(row.communes[0]);
+      row.regionName = first?.regionName || '';
+      row.department = first?.department || '';
+    });
+    data.gfp = rows;
+    data.gfpByCode = new Map(rows.map(row => [row.code, row]));
+  }
+}
+
+function filteredGfp() {
+  return data.gfp.filter(row => {
+    if (state.region && row.regionName !== state.region) return false;
+    if (state.selectedGfp && row.code !== state.selectedGfp) return false;
+    if (!state.search) return true;
+    return [row.name, row.code].some(value => matches(value, state.search));
+  });
+}
+
+function setupIndicators() {
+  const index = data.localIndex;
+  const gfpTab = document.querySelector('[data-mode="gfp"]');
+  if (gfpTab) gfpTab.hidden = !index?.levels?.gfp;
+  if (!index) return;
+  clearChildren(dom.indicator);
+  const groups = new Map();
+  Object.entries(index.aggregates).forEach(([slug, item]) => {
+    if (!groups.has(item.group)) groups.set(item.group, []);
+    groups.get(item.group).push([slug, item.label]);
+  });
+  ['Dépenses', 'Recettes', 'Dette et équilibre', 'Autres'].forEach(group => {
+    const items = groups.get(group);
+    if (!items) return;
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = group;
+    items.sort((a, b) => a[1].localeCompare(b[1], 'fr')).forEach(([slug, label]) => addOption(optgroup, slug, label));
+    dom.indicator.appendChild(optgroup);
+  });
+  dom.indicator.value = state.indicator;
+}
+
+function syncYearControl() {
+  const years = yearsFor();
+  const signature = years.join(',');
+  if (dom.mapYear.dataset.years !== signature) {
+    clearChildren(dom.mapYear);
+    [...years].reverse().forEach(year => addOption(dom.mapYear, String(year), String(year)));
+    dom.mapYear.dataset.years = signature;
+  }
+  dom.mapYear.value = String(state.year);
+  dom.yearPlay.disabled = years.length < 2;
+}
+
+let yearTimer = 0, yearBusy = false;
+function stopYearPlay() {
+  window.clearInterval(yearTimer); yearTimer = 0;
+  dom.yearPlay.classList.remove('is-playing');
+  dom.yearPlay.setAttribute('aria-label', 'Animer les années');
+}
+
+function toggleYearPlay() {
+  if (yearTimer) { stopYearPlay(); return; }
+  const years = yearsFor();
+  let index = years.indexOf(state.year);
+  if (index >= years.length - 1) index = -1;
+  dom.yearPlay.classList.add('is-playing');
+  dom.yearPlay.setAttribute('aria-label', 'Mettre en pause');
+  const step = async () => {
+    if (yearBusy) return;
+    index += 1;
+    if (index >= years.length) { stopYearPlay(); return; }
+    yearBusy = true;
+    try { state.year = years[index]; await loadModeData(); render(); }
+    finally { yearBusy = false; }
+  };
+  step();
+  yearTimer = window.setInterval(step, 1100);
+}
+
+async function changeView(update) {
+  stopYearPlay();
+  update();
+  setText(dom.statsContext, 'Chargement…');
+  try { await loadModeData(); }
+  catch (error) { console.error(error); setText(dom.statsContext, 'Impossible de charger ces données. Réessayez.'); return; }
   render();
 }
 
-function showTooltip(event, text) {
-  if (!text) return;
-  const frameRect = dom.mapFrame.getBoundingClientRect();
-  if (dom.tooltip.textContent !== text) dom.tooltip.textContent = text;
-  dom.tooltip.hidden = false;
-  dom.tooltip.style.left = '0';
-  dom.tooltip.style.top = '0';
-  dom.tooltip.style.transform = `translate3d(${event.clientX - frameRect.left + 12}px, ${event.clientY - frameRect.top + 12}px, 0)`;
-}
+/* ---------- Colours ---------- */
 
-function hideTooltip() {
-  dom.tooltip.hidden = true;
-}
+const RAMPS = {
+  light: ['#d7eef3', '#8fd0de', '#22a5c0', '#0e7490', '#2563eb', '#1e3a8a'],
+  dark: ['#143246', '#135a73', '#0e86a8', '#2b8fdb', '#5b8ef7', '#c7dcff']
+};
+const MAP_THEME = {
+  light: { background: '#eef4f8', empty: '#dde7ee', line: 'rgba(13, 27, 42, .32)', communeLine: 'rgba(255, 255, 255, .7)', hover: '#0d1b2a', selection: '#f59e0b', missing: '#a58bb0' },
+  dark: { background: '#0c1925', empty: '#16283a', line: 'rgba(214, 232, 245, .38)', communeLine: 'rgba(10, 21, 32, .55)', hover: '#ffffff', selection: '#fbbf24', missing: '#7d6390' }
+};
+/* One duration for the whole theme switch, read from the CSS token so the map crossfade matches the page. */
+const themeDuration = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--theme-transition-duration')) || 700;
+const currentTheme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+const hexToRgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
 
-function metricLabel() {
-  return state.metric === 'perCapita' ? 'par habitant' : 'total';
-}
-
-function modeCopy() {
-  const copy = {
-    projects: { filter: 'Explorer les projets', kicker: 'PROJETS FINANCÉS PAR L’ÉTAT', title: 'Subventions par département', unit: 'Subventions accordées', count: 'Projets', coverage: 'Départements touchés', help: 'Cliquez sur une commune ou un département pour inspecter les projets.', context: 'Source DGCL 2025 · engagements de subventions d’investissement.' },
-    communes: { filter: 'Explorer les budgets communaux', kicker: 'COMPTES LOCAUX \u00b7 OFGL', title: 'D\u00e9penses par commune', unit: 'D\u00e9penses communales', count: 'Communes', coverage: 'D\u00e9partements couverts', help: 'Cliquez sur une commune pour inspecter son budget et zoomer.', context: 'Source OFGL 2025 \u00b7 d\u00e9penses totales des communes, avec montant par habitant.' },
-    departments: { filter: 'Explorer les budgets départementaux', kicker: 'COMPTES LOCAUX · OFGL', title: 'Dépenses par département', unit: 'Dépenses départementales', count: 'Départements', coverage: 'Régions couvertes', help: 'Cliquez sur un département pour isoler son budget et ses communes.', context: 'Source OFGL 2025 · dépenses totales des départements, avec montant par habitant.' },
-    regions: { filter: 'Explorer les budgets régionaux', kicker: 'COMPTES LOCAUX · OFGL', title: 'Dépenses par région', unit: 'Dépenses régionales', count: 'Régions', coverage: 'Régions affichées', help: 'Filtrez une région ou cliquez dans la liste pour recentrer la lecture.', context: 'Source OFGL 2025 · dépenses totales des régions, avec montant par habitant.' }
-  };
-  return copy[state.mode];
+function colorForRatio(ratio) {
+  const ramp = RAMPS[currentTheme()];
+  const position = Math.max(0, Math.min(1, ratio)) * (ramp.length - 1);
+  const index = Math.min(ramp.length - 2, Math.floor(position));
+  const t = position - index;
+  const a = hexToRgb(ramp[index]), b = hexToRgb(ramp[index + 1]);
+  return `rgb(${a.map((value, i) => Math.round(value + (b[i] - value) * t)).join(',')})`;
 }
 
 function valuesForColor(values) {
-  const positives = values.filter(value => Number.isFinite(value) && value > 0);
-  if (!positives.length) return { min: 0, max: 1 };
-  return { min: Math.min(...positives), max: Math.max(...positives) };
+  let min = Infinity, max = -Infinity;
+  for (const value of values) if (Number.isFinite(value) && value > 0) { if (value < min) min = value; if (value > max) max = value; }
+  return Number.isFinite(min) ? { min, max } : { min: 0, max: 1 };
 }
 
 function colorRatio(value, scale) {
@@ -762,16 +617,29 @@ function colorRatio(value, scale) {
   return Math.max(0, Math.min(1, high === low ? .72 : (Math.log1p(value) - low) / (high - low)));
 }
 
-function colorForRatio(ratio) {
-  const clamped = Math.max(0, Math.min(1, ratio));
-  const hue = 205 - clamped * 48;
-  const lightness = 35 + clamped * 17;
-  return `hsl(${hue.toFixed(1)} 70% ${lightness.toFixed(1)}%)`;
+function colorFor(value, scale) {
+  if (!value || value <= 0) return MAP_THEME[currentTheme()].empty;
+  return colorForRatio(colorRatio(value, scale));
 }
 
-function colorFor(value, scale) {
-  if (!value || value <= 0) return 'rgba(22, 64, 84, .42)';
-  return colorForRatio(colorRatio(value, scale));
+/* ---------- Map values ---------- */
+
+function metricLabel() {
+  return state.metric === 'perCapita' ? 'par habitant' : 'total';
+}
+
+function modeCopy() {
+  const label = indicatorLabel();
+  const legacy = state.indicator === LEGACY_INDICATOR;
+  const localContext = `Source OFGL ${state.year} · ${label}, comptes consolidés (budgets principaux et annexes). Montants nets : une valeur négative est possible (atténuations, restitutions).`;
+  const copy = {
+    projects: { filter: 'Explorer les projets', kicker: 'Projets financés par l’État', title: 'Subventions par commune', unit: 'Subventions accordées', count: 'Projets', coverage: 'Départements touchés', help: 'Cliquez sur une commune ou un département pour inspecter les projets.', context: 'Source DGCL 2025 · engagements de subventions d’investissement.' },
+    communes: { filter: 'Explorer les budgets communaux', kicker: `Communes · OFGL ${state.year}`, title: `${label} par commune`, unit: label, count: 'Communes', coverage: 'Départements couverts', help: 'Cliquez sur une commune pour inspecter son budget et zoomer.', context: legacy ? 'Source OFGL · dépenses totales des communes, avec montant par habitant.' : localContext },
+    gfp: { filter: 'Explorer les intercommunalités', kicker: `Intercommunalités · OFGL ${state.year}`, title: `${label} par intercommunalité`, unit: label, count: 'Intercommunalités', coverage: 'Communes membres', help: 'Cliquez sur une intercommunalité pour l’inspecter.', context: `${localContext} Périmètres ${data.localIndex?.levels?.gfp?.membershipYear || ''}; les comptes antérieurs sont rattachés à l’intercommunalité de 2025 qui leur succède.` },
+    departments: { filter: 'Explorer les budgets départementaux', kicker: `Départements · OFGL ${state.year}`, title: `${label} par département`, unit: label, count: 'Départements', coverage: 'Régions couvertes', help: 'Cliquez sur un département pour isoler son budget.', context: legacy ? 'Source OFGL · dépenses totales des départements, avec montant par habitant.' : localContext },
+    regions: { filter: 'Explorer les budgets régionaux', kicker: `Régions · OFGL ${state.year}`, title: `${label} par région`, unit: label, count: 'Régions', coverage: 'Régions affichées', help: 'Cliquez sur une région pour recentrer la lecture.', context: legacy ? 'Source OFGL · dépenses totales des régions, avec montant par habitant.' : localContext }
+  };
+  return copy[state.mode];
 }
 
 function mapRows() {
@@ -788,58 +656,54 @@ function mapRows() {
   if (state.mode === 'departments') {
     return data.departments.filter(row => !state.search || [row.name, row.code, row.regionName].some(value => matches(value, state.search)));
   }
+  if (state.mode === 'gfp') return data.gfp.filter(row => !state.search || [row.name, row.code].some(value => matches(value, state.search)));
   return data.regions.filter(row => !state.search || [row.name, row.code].some(value => matches(value, state.search)));
 }
 
-function mapDepartmentValues() {
+function mapDepartmentValues(rows) {
   const values = new Map();
-  const rows = mapRows();
   if (state.mode === 'projects') {
     const totals = new Map();
     rows.forEach(row => totals.set(row.department, (totals.get(row.department) || 0) + row.amount));
-    totals.forEach((total, code) => values.set(code, state.metric === 'total' ? total : (populationForDepartment(code) ? total / populationForDepartment(code) : 0)));
+    totals.forEach((total, code) => values.set(code, state.metric !== 'perCapita' ? total : (populationForDepartment(code) ? total / populationForDepartment(code) : 0)));
   } else if (state.mode === 'communes') {
     const totals = new Map(); const populations = new Map();
-    rows.forEach(row => { const code = normalizeDepartment(row.department); totals.set(code, (totals.get(code) || 0) + row.total); populations.set(code, (populations.get(code) || 0) + row.population); });
-    totals.forEach((total, code) => values.set(code, state.metric === 'total' ? total : (populations.get(code) ? total / populations.get(code) : 0)));
+    rows.forEach(row => { const code = normalizeDepartment(row.department); totals.set(code, (totals.get(code) || 0) + row.total); populations.set(code, (populations.get(code) || 0) + (row.population || 0)); });
+    totals.forEach((total, code) => values.set(code, state.metric !== 'perCapita' ? total : (populations.get(code) ? total / populations.get(code) : 0)));
   } else if (state.mode === 'departments') {
-    rows.forEach(row => values.set(normalizeDepartment(row.code), valueForBudget(row)));
-  } else {
+    const grouped = new Map();
+    rows.forEach(row => {
+      const codes = row.code === '67A' ? ['67', '68'] : [normalizeDepartment(row.code)];
+      codes.forEach(code => {
+        const item = grouped.get(code) || { total: 0, population: 0 };
+        item.total += row.total; item.population += row.population;
+        grouped.set(code, item);
+      });
+    });
+    grouped.forEach((item, code) => values.set(code, state.metric !== 'perCapita' ? item.total : item.total / item.population));
+  } else if (state.mode === 'regions') {
     const byRegion = new Map(rows.map(row => [String(row.code), valueForBudget(row)]));
     data.features.forEach(feature => { const region = String(feature.properties?.region || ''); if (byRegion.has(region)) values.set(String(feature.properties.code), byRegion.get(region)); });
   }
   return values;
 }
 
-function pointRows() {
-  if (state.mode === 'regions' || state.mode === 'departments') return [];
-  const rows = currentRows();
-  if (state.mode === 'communes') return rows.map(row => ({ code: row.code, name: row.name, department: row.department, total: row.total, population: row.population, value: valueForBudget(row), lon: row.lon, lat: row.lat }));
-  const grouped = new Map();
-  rows.forEach(row => {
-    if (!row.communeData?.lon && row.communeData?.lon !== 0) return;
-    const code = row.commune;
-    const item = grouped.get(code) || { code, name: row.communeData.name, department: row.department, total: 0, population: row.communeData.population || 0, lon: row.communeData.lon, lat: row.communeData.lat };
-    item.total += row.amount;
-    grouped.set(code, item);
-  });
-  return [...grouped.values()].map(row => ({ ...row, value: state.metric === 'total' ? row.total : (row.population ? row.total / row.population : 0) }));
-}
-
-function communeShapeRows() {
-  const keepOnMap = row => {
-    const department = normalizeDepartment(row.department || data.communeByCode.get(row.code)?.department || '');
-    if (!isOverseasCode(department)) return true;
-    return Boolean(state.search || state.region || normalizeDepartment(state.selectedDepartment) === department || state.selectedCommune === row.code);
-  };
-  if (state.mode === 'communes') return mapRows().filter(keepOnMap);
+function communeShapeRows(rows) {
+  if (state.mode === 'gfp') {
+    const shapes = [];
+    rows.forEach(row => row.communes.forEach(code => shapes.push({ code, name: row.name, total: row.total, perCapita: row.perCapita, population: row.population, gfp: row.code })));
+    return shapes;
+  }
+  if (state.mode === 'communes') {
+    const missing = data.missingCommunes.filter(row => !state.search || [row.name, row.code, row.departmentName, row.regionName].some(value => matches(value, state.search)));
+    return [...rows, ...missing];
+  }
   if (state.mode === 'projects') {
     const grouped = new Map();
-    mapRows().filter(keepOnMap).forEach(row => {
+    rows.forEach(row => {
       if (!row.commune) return;
       const code = String(row.commune);
-      const feature = data.communeFeatureByCode.get(code);
-      const item = grouped.get(code) || { code, name: row.communeData?.name || feature?.properties?.nom || code, department: row.department, total: 0, population: row.communeData?.population || 0 };
+      const item = grouped.get(code) || { code, name: row.communeData?.name || data.communeFeatureByCode.get(code)?.properties?.nom || code, department: row.department, total: 0, population: row.communeData?.population || 0 };
       item.total += row.amount;
       if (!item.population && row.communeData?.population) item.population = row.communeData.population;
       grouped.set(code, item);
@@ -850,259 +714,443 @@ function communeShapeRows() {
 }
 
 function communeShapeValue(row) {
-  return state.mode === 'projects' ? (state.metric === 'total' ? row.total : row.perCapita) : valueForBudget(row);
+  return state.mode === 'projects' ? (state.metric !== 'perCapita' ? row.total : row.perCapita) : valueForBudget(row);
 }
 
-function renderCommuneLayer() {
-  if (!dom.communeLayer) return;
-  const renderStarted = performance.now();
-  const visible = state.mode === 'communes' || state.mode === 'projects';
-  dom.communeLayer.style.display = visible ? '' : 'none';
-  dom.map.classList.toggle('commune-interaction', visible);
-  if (!visible) {
-    clearChildren(dom.communeLayer);
-    data.activeCommuneRowsByCode.clear();
-    data.communeHoverElement = null;
-    data.communeLayerKey = '';
-    data.performance.communeLayerRenderMs = performance.now() - renderStarted;
-    data.performance.communeSvgElements = 0;
-    return;
-  }
-  const layerKey = [state.mode, state.metric, state.search, state.scheme, state.region].join('|');
-  if (data.communeLayerKey === layerKey && data.communeHoverElement) {
-    let selectedPath = dom.communeLayer.querySelector('.commune-selection-shape');
-    if (state.selectedCommune && data.activeCommuneRowsByCode.has(state.selectedCommune)) {
-      if (!selectedPath) {
-        selectedPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        selectedPath.setAttribute('class', 'commune-selection-shape');
-        selectedPath.setAttribute('aria-hidden', 'true');
-        dom.communeLayer.insertBefore(selectedPath, data.communeHoverElement);
-      }
-      selectedPath.setAttribute('d', data.communePathByCode.get(state.selectedCommune) || '');
-    } else if (selectedPath) selectedPath.remove();
-    data.performance.communeLayerRenderMs = performance.now() - renderStarted;
-    data.performance.communeSvgElements = dom.communeLayer.childElementCount;
-    dom.communeLayer.dataset.svgElements = String(data.performance.communeSvgElements);
-    dom.communeLayer.dataset.renderMs = data.performance.communeLayerRenderMs.toFixed(2);
-    return;
-  }
-  clearChildren(dom.communeLayer);
-  data.activeCommuneRowsByCode.clear();
-  data.communeHoverElement = null;
-  data.communeLayerKey = layerKey;
-  let rows = communeShapeRows().filter(row => data.communeFeatureByCode.has(row.code));
-  rows.sort((a, b) => communeShapeValue(b) - communeShapeValue(a));
-  const cap = 35000;
-  if (rows.length > cap) rows = rows.slice(0, cap);
-  const scale = valuesForColor(rows.map(communeShapeValue));
-  const buckets = Array.from({ length: COMMUNE_COLOR_BUCKETS }, () => []);
-  rows.forEach(row => {
-    data.activeCommuneRowsByCode.set(row.code, row);
-    const ratio = colorRatio(communeShapeValue(row), scale);
-    const bucketIndex = Math.min(COMMUNE_COLOR_BUCKETS - 1, Math.floor(ratio * COMMUNE_COLOR_BUCKETS));
-    buckets[bucketIndex].push(data.communePathByCode.get(row.code));
-  });
-  buckets.forEach((paths, index) => {
-    if (!paths.length) return;
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', paths.join(' '));
-    path.setAttribute('class', 'commune-bucket');
-    path.setAttribute('fill-rule', 'evenodd');
-    path.setAttribute('aria-hidden', 'true');
-    path.style.fill = colorForRatio((index + .5) / COMMUNE_COLOR_BUCKETS);
-    dom.communeLayer.appendChild(path);
-  });
-  if (state.selectedCommune && data.activeCommuneRowsByCode.has(state.selectedCommune)) {
-    const selectedPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    selectedPath.setAttribute('d', data.communePathByCode.get(state.selectedCommune) || '');
-    selectedPath.setAttribute('class', 'commune-selection-shape');
-    selectedPath.setAttribute('aria-hidden', 'true');
-    dom.communeLayer.appendChild(selectedPath);
-  }
-  const hoverPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  hoverPath.setAttribute('class', 'commune-hover-shape');
-  hoverPath.setAttribute('aria-hidden', 'true');
-  hoverPath.style.display = 'none';
-  dom.communeLayer.appendChild(hoverPath);
-  data.communeHoverElement = hoverPath;
-  data.performance.communeLayerRenderMs = performance.now() - renderStarted;
-  data.performance.communeSvgElements = dom.communeLayer.childElementCount;
-  dom.communeLayer.dataset.activeCommunes = String(data.activeCommuneRowsByCode.size);
-  dom.communeLayer.dataset.svgElements = String(data.performance.communeSvgElements);
-  dom.communeLayer.dataset.renderMs = data.performance.communeLayerRenderMs.toFixed(2);
-  window.__frlMapPerformance = {
-    activeCommunes: data.activeCommuneRowsByCode.size,
-    communeSvgElements: data.performance.communeSvgElements,
-    communeLayerRenderMs: Number(data.performance.communeLayerRenderMs.toFixed(2))
+/* ---------- Map (MapLibre GL) ---------- */
+
+const mapState = {
+  map: null,
+  ready: false,
+  cameraKey: '',
+  hoverCommune: '',
+  hoverDepartment: '',
+  hoverRegion: '',
+  communeStateCodes: new Set(),
+  communeColors: new Map(),
+  departmentColors: new Map(),
+  detailedDepartments: new Set(),
+  detailFeatures: [],
+  detailLoading: false,
+  largeDetail: null,
+  regionsLoaded: null,
+  regionFeatures: []
+};
+
+const fillColorFromState = fallback => ['to-color', ['coalesce', ['feature-state', 'c'], fallback]];
+const hasColor = ['to-boolean', ['feature-state', 'c']];
+const isHover = ['boolean', ['feature-state', 'hover'], false];
+
+function mapPadding() {
+  const width = dom.map.clientWidth;
+  const base = width < 600 ? 28 : 56;
+  return { top: base + (width < 600 ? 40 : 30), bottom: base + (width < 600 ? 50 : 70), left: base, right: base };
+}
+
+function buildMapStyle() {
+  const theme = MAP_THEME[currentTheme()];
+  return {
+    version: 8,
+    transition: { duration: 0, delay: 0 }, // theme changes are crossfaded by applyMapTheme instead
+    sources: {
+      departments: { type: 'geojson', data: data.boundaries, promoteId: 'code', tolerance: .3 },
+      communes: { type: 'geojson', data: data.communeFeatures, promoteId: 'code', maxzoom: 10, tolerance: .45 },
+      'communes-detail': { type: 'geojson', data: EMPTY, promoteId: 'code', maxzoom: 13 },
+      regions: { type: 'geojson', data: EMPTY, promoteId: 'code' },
+      selection: { type: 'geojson', data: EMPTY }
+    },
+    layers: [
+      { id: 'background', type: 'background', paint: { 'background-color': theme.background } },
+      { id: 'dept-fill', type: 'fill', source: 'departments', paint: { 'fill-color': fillColorFromState(theme.empty), 'fill-opacity': 1 } },
+      { id: 'commune-fill', type: 'fill', source: 'communes', paint: { 'fill-color': fillColorFromState('rgba(0,0,0,0)'), 'fill-opacity': ['case', hasColor, 1, 0] } },
+      { id: 'commune-line', type: 'line', source: 'communes', paint: { 'line-color': theme.communeLine, 'line-width': ['interpolate', ['linear'], ['zoom'], 4, .1, 7, .45], 'line-opacity': ['case', hasColor, 1, 0] } },
+      { id: 'commune-detail-fill', type: 'fill', source: 'communes-detail', paint: { 'fill-color': fillColorFromState('rgba(0,0,0,0)'), 'fill-opacity': ['case', hasColor, 1, 0] } },
+      { id: 'commune-detail-line', type: 'line', source: 'communes-detail', paint: { 'line-color': theme.communeLine, 'line-width': ['interpolate', ['linear'], ['zoom'], 4, .1, 7, .45, 12, 1.2], 'line-opacity': ['case', hasColor, 1, 0] } },
+      { id: 'dept-line', type: 'line', source: 'departments', paint: { 'line-color': theme.line, 'line-width': ['interpolate', ['linear'], ['zoom'], 4, .5, 9, 1.4] } },
+      { id: 'region-line', type: 'line', source: 'regions', layout: { visibility: 'none' }, paint: { 'line-color': theme.hover, 'line-opacity': ['case', isHover, 1, .65], 'line-width': ['case', isHover, 2.6, 1.6] } },
+      { id: 'dept-hover', type: 'line', source: 'departments', paint: { 'line-color': theme.hover, 'line-width': 2.2, 'line-opacity': ['case', isHover, 1, 0] } },
+      { id: 'commune-hover', type: 'line', source: 'communes', paint: { 'line-color': theme.hover, 'line-width': 1.8, 'line-opacity': ['case', isHover, 1, 0] } },
+      { id: 'commune-detail-hover', type: 'line', source: 'communes-detail', paint: { 'line-color': theme.hover, 'line-width': 2, 'line-opacity': ['case', isHover, 1, 0] } },
+      { id: 'selection-glow', type: 'line', source: 'selection', paint: { 'line-color': theme.selection, 'line-width': 7, 'line-opacity': .25, 'line-blur': 3 } },
+      { id: 'selection-line', type: 'line', source: 'selection', paint: { 'line-color': theme.selection, 'line-width': 2.4 } }
+    ]
   };
 }
-function renderPoints() {
-  clearChildren(dom.mapPoints); clearChildren(dom.mapLabels);
-  if (state.mode === 'communes' || state.mode === 'projects') return;
-  let points = pointRows().filter(row => Number.isFinite(row.lon) && Number.isFinite(row.lat));
-  points.sort((a, b) => b.value - a.value);
-  const nationalCap = state.mode === 'communes' ? 1150 : 950;
-  if (!state.selectedDepartment && points.length > nationalCap) points = points.slice(0, nationalCap);
-  const scale = valuesForColor(points.map(point => point.value));
-  points.forEach(point => {
-    const projected = projectPoint([point.lon, point.lat]);
-    const ratio = scale.max > 0 ? Math.max(0, Math.min(1, (Math.log1p(point.value) - Math.log1p(scale.min || 1)) / ((Math.log1p(scale.max) - Math.log1p(scale.min || 1)) || 1))) : 0;
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', projected.x.toFixed(2)); circle.setAttribute('cy', projected.y.toFixed(2));
-    circle.setAttribute('r', (0.45 + ratio * 1.55).toFixed(2));
-    circle.setAttribute('fill', colorFor(point.value, scale)); circle.setAttribute('class', 'map-point');
-    circle.setAttribute('tabindex', '0'); circle.setAttribute('role', 'button'); circle.dataset.code = point.code;
-    circle.setAttribute('aria-label', `${point.name} : ${formatValue(point.value, state.metric === 'perCapita')}`);
-    if (point.code === state.selectedCommune) circle.classList.add('selected');
-    circle.addEventListener('click', event => { event.stopPropagation(); selectCommune(point.code); });
-    circle.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectCommune(point.code); } });
-    circle.addEventListener('pointermove', event => showTooltip(event, `${point.name} · ${formatValue(point.value, state.metric === 'perCapita')}`));
-    circle.addEventListener('pointerleave', hideTooltip);
-    dom.mapPoints.appendChild(circle);
-    if (point.code === state.selectedCommune) {
-      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      label.setAttribute('x', (projected.x + 10).toFixed(2)); label.setAttribute('y', (projected.y - 10).toFixed(2)); label.setAttribute('class', 'map-label'); label.textContent = point.name;
-      dom.mapLabels.appendChild(label);
+
+function applyMapTheme() {
+  const map = mapState.map;
+  if (!map || !mapState.ready) return;
+  // The WebGL map cannot interpolate its feature colours: freeze the current frame in a 2D canvas laid over it,
+  // switch the map to the new theme underneath, then fade the snapshot out with the page's duration and easing.
+  const canvas = map.getCanvas();
+  let snapshot = null;
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && canvas.width && canvas.height) {
+    try {
+      map.redraw();
+      snapshot = document.createElement('canvas');
+      snapshot.width = canvas.width; snapshot.height = canvas.height;
+      snapshot.className = 'map-theme-snapshot';
+      snapshot.getContext('2d').drawImage(canvas, 0, 0);
+      document.querySelectorAll('.map-theme-snapshot').forEach(node => node.remove());
+      canvas.parentNode.appendChild(snapshot);
+    } catch (error) { snapshot?.remove(); snapshot = null; }
+  }
+  const theme = MAP_THEME[currentTheme()];
+  map.setPaintProperty('background', 'background-color', theme.background);
+  map.setPaintProperty('commune-line', 'line-color', theme.communeLine);
+  map.setPaintProperty('commune-detail-line', 'line-color', theme.communeLine);
+  map.setPaintProperty('dept-line', 'line-color', theme.line);
+  ['region-line', 'dept-hover', 'commune-hover', 'commune-detail-hover'].forEach(id => map.setPaintProperty(id, 'line-color', theme.hover));
+  ['selection-glow', 'selection-line'].forEach(id => map.setPaintProperty(id, 'line-color', theme.selection));
+  data.communeLayerKey = '';
+  renderMap();
+  if (snapshot) {
+    map.redraw();
+    requestAnimationFrame(() => requestAnimationFrame(() => { snapshot.style.opacity = '0'; }));
+    setTimeout(() => snapshot.remove(), themeDuration() + 100);
+  }
+}
+
+function setHover(source, previous, next) {
+  const map = mapState.map;
+  if (previous === next) return;
+  const sources = source === 'communes' ? ['communes', 'communes-detail'] : [source];
+  for (const id of sources) {
+    if (previous) map.setFeatureState({ source: id, id: previous }, { hover: false });
+    if (next) map.setFeatureState({ source: id, id: next }, { hover: true });
+  }
+}
+
+function hitTest(point) {
+  const map = mapState.map;
+  if (['communes', 'projects', 'gfp'].includes(state.mode)) {
+    const communeHits = map.queryRenderedFeatures(point, { layers: ['commune-detail-fill', 'commune-fill'] });
+    for (const feature of communeHits) {
+      const code = String(feature.properties.code);
+      if (data.activeCommuneRowsByCode.has(code)) return { type: 'commune', code };
     }
+  }
+  const departmentHit = map.queryRenderedFeatures(point, { layers: ['dept-fill'] })[0];
+  if (departmentHit) return { type: 'department', code: String(departmentHit.properties.code), region: String(departmentHit.properties.region || '') };
+  return null;
+}
+
+function tooltipHtml(title, value) {
+  const span = document.createElement('div');
+  const strong = document.createElement('strong'); strong.textContent = title;
+  const detail = document.createElement('span'); detail.textContent = value;
+  span.append(strong, detail);
+  return span;
+}
+
+function showTooltip(point, title, value) {
+  dom.tooltip.replaceChildren(tooltipHtml(title, value));
+  dom.tooltip.hidden = false;
+  const width = dom.mapFrame.clientWidth;
+  const flip = point.x > width - 240;
+  dom.tooltip.style.transform = `translate3d(${Math.round(flip ? point.x - dom.tooltip.offsetWidth - 14 : point.x + 14)}px, ${Math.round(point.y + 14)}px, 0)`;
+}
+
+function hideTooltip() {
+  dom.tooltip.hidden = true;
+}
+
+function handleHover(point) {
+  const hit = hitTest(point);
+  const perCapita = state.metric === 'perCapita';
+  const communeCode = hit?.type === 'commune' ? hit.code : '';
+  const departmentCode = hit?.type === 'department' && state.mode !== 'regions' ? hit.code : '';
+  const regionCode = hit?.type === 'department' && state.mode === 'regions' ? hit.region : '';
+  setHover('communes', mapState.hoverCommune, communeCode); mapState.hoverCommune = communeCode;
+  setHover('departments', mapState.hoverDepartment, departmentCode); mapState.hoverDepartment = departmentCode;
+  setHover('regions', mapState.hoverRegion, regionCode); mapState.hoverRegion = regionCode;
+  dom.map.style.cursor = hit ? 'pointer' : '';
+  if (!hit) { hideTooltip(); return; }
+  if (communeCode) {
+    const row = data.activeCommuneRowsByCode.get(communeCode);
+    const text = row.missing ? (row.ambiguous ? 'Plusieurs comptes sur ce code : données exclues' : 'Aucun compte correspondant pour cet exercice') : formatMetric(communeShapeValue(row));
+    showTooltip(point, row.name, text);
+  } else if (regionCode) {
+    const region = data.regions.find(item => String(item.code) === regionCode);
+    showTooltip(point, regionNameForCode(regionCode), formatMetric(region ? valueForBudget(region) : NaN));
+  } else {
+    const feature = data.featureByCode.get(departmentCode);
+    const value = data.currentMapDepartmentValues.get(normalizeDepartment(departmentCode)) || data.currentMapDepartmentValues.get(departmentCode) || 0;
+    showTooltip(point, departmentLabel(departmentCode, feature?.properties?.nom || departmentCode), formatMetric(value));
+  }
+}
+
+function departmentLabel(code, fallback) {
+  if (state.mode !== 'departments') return fallback;
+  if (['67', '68'].includes(code) && data.departments.some(row => row.code === '67A')) return 'Alsace (compte commun 67 / 68)';
+  if (code === '69') {
+    const institutions = data.departments.filter(row => ['69', '691'].includes(row.code));
+    if (institutions.length > 1) return 'Rhône et Métropole de Lyon';
+  }
+  return fallback;
+}
+
+function handleClick(point) {
+  const hit = hitTest(point);
+  if (!hit) {
+    if (state.selectedCommune || state.selectedDepartment || state.region) clearSelection();
+    return;
+  }
+  if (hit.type === 'commune' && state.mode === 'gfp') selectGfp(data.activeCommuneRowsByCode.get(hit.code)?.gfp);
+  else if (hit.type === 'commune') selectCommune(hit.code);
+  else if (state.mode === 'regions') selectRegion(regionNameForCode(hit.region));
+  else selectDepartment(hit.code);
+}
+
+function initMap() {
+  if (!window.maplibregl) throw new Error('MapLibre GL indisponible');
+  const map = new maplibregl.Map({
+    container: dom.map,
+    style: buildMapStyle(),
+    bounds: FRANCE_BOUNDS,
+    fitBoundsOptions: { padding: mapPadding() },
+    minZoom: 1.5,
+    maxZoom: 13.5,
+    dragRotate: false,
+    pitchWithRotate: false,
+    touchPitch: false,
+    renderWorldCopies: false,
+    attributionControl: false,
+    fadeDuration: 0
   });
-  if (state.mode === 'communes' && !state.selectedDepartment && points.length < currentRows().length) setText(dom.mapHelp, `Les ${formatCount(points.length)} communes les plus dépensières sont affichées. Sélectionnez un département pour voir ses communes.`);
+  map.touchZoomRotate.disableRotation();
+  map.keyboard.disableRotation();
+  map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: 'Contours Etalab · DGCL · OFGL' }), 'bottom-right');
+  mapState.map = map;
+  window.__map = map;
+
+  let hoverFrame = 0, pendingPoint = null;
+  map.on('mousemove', event => {
+    pendingPoint = event.point;
+    if (!hoverFrame) hoverFrame = requestAnimationFrame(() => { hoverFrame = 0; if (mapState.ready && pendingPoint) handleHover(pendingPoint); });
+  });
+  map.on('mouseout', () => {
+    pendingPoint = null;
+    if (!mapState.ready) return;
+    setHover('communes', mapState.hoverCommune, ''); mapState.hoverCommune = '';
+    setHover('departments', mapState.hoverDepartment, ''); mapState.hoverDepartment = '';
+    setHover('regions', mapState.hoverRegion, ''); mapState.hoverRegion = '';
+    hideTooltip();
+  });
+  map.on('movestart', hideTooltip);
+  map.on('click', event => { if (mapState.ready) handleClick(event.point); });
+  map.on('moveend', () => { if (mapState.ready) loadVisibleDetail(); });
+  return new Promise(resolve => map.once('load', () => { mapState.ready = true; resolve(map); }));
+}
+
+/* Colour communes via feature-state; only re-run when the data view changes. */
+function renderCommuneColors(rows) {
+  const map = mapState.map;
+  const visible = ['communes', 'projects', 'gfp'].includes(state.mode);
+  const layerKey = visible ? [state.mode, state.indicator, state.year, state.metric, state.search, state.scheme, currentTheme()].join('|') : 'off';
+  if (data.communeLayerKey === layerKey) return;
+  data.communeLayerKey = layerKey;
+  const started = performance.now();
+  for (const code of mapState.communeStateCodes) {
+    map.removeFeatureState({ source: 'communes', id: code }, 'c');
+    map.removeFeatureState({ source: 'communes-detail', id: code }, 'c');
+  }
+  mapState.communeStateCodes.clear();
+  mapState.communeColors.clear();
+  data.activeCommuneRowsByCode.clear();
+  if (!visible) return;
+  const shapes = communeShapeRows(rows).filter(row => data.communeFeatureByCode.has(row.code));
+  const scale = valuesForColor(shapes.filter(row => !row.missing).map(communeShapeValue));
+  const bucketColors = Array.from({ length: COMMUNE_COLOR_BUCKETS }, (_, index) => colorForRatio((index + .5) / COMMUNE_COLOR_BUCKETS));
+  const missingColor = MAP_THEME[currentTheme()].missing;
+  for (const row of shapes) {
+    data.activeCommuneRowsByCode.set(row.code, row);
+    let color = missingColor;
+    if (!row.missing) {
+      const ratio = colorRatio(communeShapeValue(row), scale);
+      color = bucketColors[Math.min(COMMUNE_COLOR_BUCKETS - 1, Math.floor(ratio * COMMUNE_COLOR_BUCKETS))];
+    }
+    map.setFeatureState({ source: 'communes', id: row.code }, { c: color });
+    map.setFeatureState({ source: 'communes-detail', id: row.code }, { c: color });
+    mapState.communeColors.set(row.code, color);
+    mapState.communeStateCodes.add(row.code);
+  }
+  window.__frlMapPerformance = { activeCommunes: shapes.length, colourUpdateMs: Number((performance.now() - started).toFixed(1)) };
+}
+
+function renderSelection() {
+  const map = mapState.map;
+  let feature = null;
+  if (state.mode === 'gfp' && state.selectedGfp) {
+    const row = data.gfpByCode.get(state.selectedGfp);
+    const features = (row?.communes || []).map(code => mapState.detailFeatures.find(item => item.properties.code === code) || data.communeFeatureByCode.get(code)).filter(Boolean);
+    map.getSource('selection').setData({ type: 'FeatureCollection', features });
+    return;
+  }
+  if (state.selectedCommune) feature = mapState.detailFeatures.find(item => item.properties.code === state.selectedCommune) || data.communeFeatureByCode.get(state.selectedCommune);
+  else if (state.selectedDepartment && state.mode !== 'regions') feature = data.featureByCode.get(normalizeDepartment(state.selectedDepartment));
+  else if (state.region && state.mode === 'regions') {
+    const code = String(regionCodeForName(state.region));
+    feature = mapState.regionFeatures.find(item => String(item.properties.code) === code) || null;
+  }
+  map.getSource('selection').setData(feature ? { type: 'FeatureCollection', features: [feature] } : EMPTY);
 }
 
 function focusBounds() {
+  if (state.mode === 'gfp' && state.selectedGfp) {
+    const box = unionBBox((data.gfpByCode.get(state.selectedGfp)?.communes || []).map(code => data.communeBBox.get(code)));
+    if (box) return { box, maxZoom: 10.5 };
+  }
   if (state.selectedCommune) {
-    const commune = data.communeByCode.get(state.selectedCommune);
-    const feature = data.communeFeatureByCode.get(state.selectedCommune);
-    if (feature) return fitProjectedBounds(projectedFeatureBounds(feature), 12);
-    if (commune) { const point = projectPoint([commune.lon, commune.lat]); return { centerX: point.x, centerY: point.y, scale: 5.6 }; }
+    const box = data.communeBBox.get(state.selectedCommune);
+    if (box) return { box, maxZoom: 11.5 };
+    const commune = data.communeMetadata.get(state.selectedCommune);
+    if (commune) return { box: [commune.lon - .05, commune.lat - .04, commune.lon + .05, commune.lat + .04], maxZoom: 11.5 };
   }
   if (state.selectedDepartment) {
-    const feature = data.featureByCode.get(normalizeDepartment(state.selectedDepartment));
-    if (feature) return fitProjectedBounds(projectedFeatureBounds(feature));
+    const box = data.departmentBBox.get(normalizeDepartment(state.selectedDepartment));
+    if (box) return { box, maxZoom: 9.5 };
   }
   if (state.region) {
-    const features = data.features.filter(feature => featureRegionName(feature) === state.region);
-    if (features.length) {
-      const bounds = features.map(projectedFeatureBounds).reduce((acc, item) => ({ minX: Math.min(acc.minX, item.minX), maxX: Math.max(acc.maxX, item.maxX), minY: Math.min(acc.minY, item.minY), maxY: Math.max(acc.maxY, item.maxY) }));
-      return fitProjectedBounds(bounds);
-    }
+    const box = unionBBox(data.features.filter(feature => featureRegionName(feature) === state.region).map(feature => data.departmentBBox.get(String(feature.properties.code))));
+    if (box) return { box, maxZoom: 9 };
   }
-  return { centerX: 450, centerY: 310, scale: 1 };
+  return { box: [FRANCE_BOUNDS[0][0], FRANCE_BOUNDS[0][1], FRANCE_BOUNDS[1][0], FRANCE_BOUNDS[1][1]], maxZoom: 7 };
 }
 
-function fitProjectedBounds(bounds, maxScale = 7) {
-  const width = Math.max(18, bounds.maxX - bounds.minX); const height = Math.max(18, bounds.maxY - bounds.minY);
-  const scale = Math.max(1.12, Math.min(maxScale, Math.min(800 / (width + 70), 540 / (height + 70))));
-  return { centerX: (bounds.minX + bounds.maxX) / 2, centerY: (bounds.minY + bounds.maxY) / 2, scale };
+function updateCamera(force = false) {
+  const key = [state.mode, state.selectedCommune, state.selectedDepartment, state.region, state.selectedGfp].join('|');
+  if (!force && key === mapState.cameraKey) return;
+  mapState.cameraKey = key;
+  const { box, maxZoom } = focusBounds();
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  mapState.map.fitBounds([[box[0], box[1]], [box[2], box[3]]], { padding: mapPadding(), maxZoom, duration: reduced ? 0 : 900, essential: true });
 }
 
-function targetMapTransform() {
-  const focus = focusBounds();
-  const scale = Math.max(.78, Math.min(12, focus.scale * Math.pow(1.24, state.zoomDelta)));
-  const focused = Boolean(state.selectedCommune || state.selectedDepartment || state.region);
-  const compactViewport = window.innerWidth <= 760;
-  const viewportX = focused && !compactViewport ? 360 : 450;
-  const viewportY = focused && compactViewport ? 185 : 310;
-  const tx = viewportX - focus.centerX * scale; const ty = viewportY - focus.centerY * scale;
-  return { tx, ty, scale };
-}
-
-function writeMapTransform(transform) {
-  dom.mapScene.removeAttribute('transform');
-  dom.mapScene.style.transform = 'none';
-  const width = dom.mapFrame.clientWidth || 900;
-  const height = dom.mapFrame.clientHeight || 620;
-  const unitScale = Math.min(width / 900, height / 620);
-  const offsetX = (width - 900 * unitScale) / 2;
-  const offsetY = (height - 620 * unitScale) / 2;
-  const cssX = (1 - transform.scale) * offsetX + transform.tx * unitScale;
-  const cssY = (1 - transform.scale) * offsetY + transform.ty * unitScale;
-  dom.map.style.transform = `matrix(${transform.scale.toFixed(4)}, 0, 0, ${transform.scale.toFixed(4)}, ${cssX.toFixed(2)}, ${cssY.toFixed(2)})`;
-}
-
-function stepMapMotion(now) {
-  const elapsed = now - mapMotion.startedAt;
-  const progress = mapMotion.duration ? Math.min(1, elapsed / mapMotion.duration) : 1;
-  const eased = 1 - Math.pow(1 - progress, 4);
-  mapMotion.current = {
-    tx: mapMotion.from.tx + (mapMotion.target.tx - mapMotion.from.tx) * eased,
-    ty: mapMotion.from.ty + (mapMotion.target.ty - mapMotion.from.ty) * eased,
-    scale: mapMotion.from.scale + (mapMotion.target.scale - mapMotion.from.scale) * eased
+function setSourceData(sourceId, collection, afterLoad) {
+  const map = mapState.map;
+  const onData = event => {
+    if (event.sourceId !== sourceId || !event.isSourceLoaded) return;
+    map.off('sourcedata', onData);
+    afterLoad?.();
   };
-  writeMapTransform(mapMotion.current);
-  mapMotion.frameCount += 1;
-  if (progress < 1) {
-    mapMotion.frame = window.requestAnimationFrame(stepMapMotion);
-    return;
-  }
-  mapMotion.frame = 0;
-  const seconds = Math.max(.001, elapsed / 1000);
-  dom.map.dataset.zoomAnimationFps = (mapMotion.frameCount / seconds).toFixed(1);
+  map.on('sourcedata', onData);
+  map.getSource(sourceId).setData(collection);
 }
 
-function applyTransform(duration = 480) {
-  const target = targetMapTransform();
-  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  if (!mapMotion.current || reducedMotion || duration <= 0) {
-    mapMotion.current = target;
-    mapMotion.target = target;
-    writeMapTransform(target);
+async function ensureRegions() {
+  if (!mapState.regionsLoaded) {
+    mapState.regionsLoaded = fetchJson('./data/web/regions-detail.json').then(payload => {
+      const collection = decodeFeatures(payload, ['code', 'nom', 'unused']);
+      mapState.regionFeatures = collection.features;
+      mapState.map.getSource('regions').setData(collection);
+      renderSelection();
+    }).catch(error => { mapState.regionsLoaded = null; console.warn(error); });
+  }
+  return mapState.regionsLoaded;
+}
+
+async function ensureLargeDetail() {
+  if (!mapState.largeDetail) {
+    mapState.largeDetail = fetchJson('./data/web/departements-detail.json').then(payload => {
+      const collection = decodeFeatures(payload, ['code', 'nom', 'region']);
+      collection.features.forEach(feature => data.featureByCode.set(String(feature.properties.code), feature));
+      setSourceData('departments', collection, () => {
+        mapState.departmentColors.forEach((color, code) => mapState.map.setFeatureState({ source: 'departments', id: code }, { c: color }));
+      });
+      renderSelection();
+    }).catch(error => { mapState.largeDetail = null; console.warn(error); });
+  }
+  return mapState.largeDetail;
+}
+
+let detailTimer = 0;
+function loadVisibleDetail() {
+  window.clearTimeout(detailTimer);
+  detailTimer = window.setTimeout(loadVisibleDetailNow, 120);
+}
+
+async function loadVisibleDetailNow() {
+  const map = mapState.map;
+  const zoom = map.getZoom();
+  if (zoom >= 6.5) ensureLargeDetail();
+  if (zoom < DETAIL_ZOOM - .5 || mapState.detailLoading || !['communes', 'projects', 'gfp'].includes(state.mode)) {
+    setText(dom.detailStatus, mapState.detailedDepartments.size && zoom >= DETAIL_ZOOM ? 'Contours 50 m' : 'Contours 1 km');
     return;
   }
-  mapMotion.from = { ...mapMotion.current };
-  mapMotion.target = target;
-  mapMotion.startedAt = performance.now();
-  mapMotion.duration = duration;
-  mapMotion.frameCount = 0;
-  if (!mapMotion.frame) mapMotion.frame = window.requestAnimationFrame(stepMapMotion);
+  const bounds = map.getBounds();
+  const view = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
+  const codes = [...data.departmentBBox].filter(([code, box]) => box && !mapState.detailedDepartments.has(code) && box[2] >= view[0] && box[0] <= view[2] && box[3] >= view[1] && box[1] <= view[3]).map(([code]) => code);
+  if (!codes.length) { setText(dom.detailStatus, 'Contours 50 m'); return; }
+  mapState.detailLoading = true;
+  setText(dom.detailStatus, 'Chargement des contours détaillés…');
+  try {
+    const results = await Promise.all(codes.map(code => fetchJson(`./data/web/communes-detail/${encodeURIComponent(code)}.json`).then(payload => ({ code, payload })).catch(error => { console.warn(error); return { code, payload: null }; })));
+    for (const { code, payload } of results) {
+      mapState.detailedDepartments.add(code);
+      if (!payload) continue;
+      const collection = decodeFeatures(payload, ['code', 'nom', 'departement']);
+      for (const feature of collection.features) if (data.communeFeatureByCode.has(feature.properties.code)) mapState.detailFeatures.push(feature);
+    }
+    setSourceData('communes-detail', { type: 'FeatureCollection', features: mapState.detailFeatures }, () => {
+      // Feature-state does not survive a GeoJSON data swap: re-colour the detailed shapes.
+      mapState.communeColors.forEach((color, code) => map.setFeatureState({ source: 'communes-detail', id: code }, { c: color }));
+    });
+    // Coarse 1 km shapes are hidden wherever the 50 m shapes now exist.
+    const hideCoarse = ['!', ['in', ['get', 'departement'], ['literal', [...mapState.detailedDepartments]]]];
+    ['commune-fill', 'commune-line', 'commune-hover'].forEach(id => map.setFilter(id, hideCoarse));
+    if (state.selectedCommune) renderSelection();
+    setText(dom.detailStatus, 'Contours 50 m');
+  } finally {
+    mapState.detailLoading = false;
+  }
+  loadVisibleDetail();
 }
 
 function renderMap() {
   const copy = modeCopy();
-  const values = mapDepartmentValues();
-  data.currentMapDepartmentValues = values;
-  const scale = valuesForColor([...values.values()]);
-  const selected = normalizeDepartment(state.selectedDepartment);
-  dom.mapLayer.querySelectorAll('.department').forEach(path => {
-    const code = String(path.dataset.code || '');
-    const value = values.get(normalizeDepartment(code)) || values.get(code) || 0;
-    path.style.fill = colorFor(value, scale);
-    path.style.stroke = state.mode === 'regions' || state.mode === 'communes' ? 'transparent' : '';
-    path.classList.toggle('selected', Boolean(state.mode !== 'regions' && selected && normalizeDepartment(code) === selected));
-    path.style.opacity = state.mode === 'communes' ? '.16' : (isOverseasCode(code) && !selected && !state.region ? '.25' : '1');
-    path.style.pointerEvents = state.mode === 'projects' || state.mode === 'communes' ? 'none' : '';
-    path.style.display = isOverseasCode(code) && !state.region && !state.search && selected !== normalizeDepartment(code) ? 'none' : '';
-    const name = data.featureByCode.get(code)?.properties?.nom || code;
-    path.setAttribute('aria-label', name + ' : ' + formatValue(value, state.metric === 'perCapita'));
-  });
-  data.regionPathElements.forEach((path, regionCode) => {
-    const region = data.regionByCode.get(String(regionCode));
-    const value = region ? valueForBudget(region) : 0;
-    const label = regionNameForCode(regionCode);
-    const regionDepartments = data.features.filter(feature => String(feature.properties?.region || '') === String(regionCode));
-    const overseasRegion = regionDepartments.length > 0 && regionDepartments.every(feature => isOverseasCode(feature.properties?.code));
-    path.style.display = state.mode === 'regions' && (!overseasRegion || state.region === label || state.search) ? 'inline' : 'none';
-    path.classList.toggle('selected', Boolean(state.mode === 'regions' && state.region && label === state.region));
-    path.setAttribute('aria-label', 'R\u00e9gion ' + label + ' : ' + formatValue(value, state.metric === 'perCapita'));
-  });
-  const communeMapCount = communeShapeRows().filter(row => data.communeFeatureByCode.has(row.code)).length;
-  setText(dom.mapBadgeText, state.mode === 'regions' ? data.regions.length + ' r\u00e9gions' : state.mode === 'communes' ? formatCount(communeMapCount) + ' communes' : state.mode === 'projects' ? formatCount(communeMapCount) + ' communes avec projets' : data.features.length + ' contours administratifs');
-  const shownValues = [...values.values()].filter(value => value > 0);
-  setText(dom.legendLow, shownValues.length ? formatValue(Math.min(...shownValues), state.metric === 'perCapita') : 'Faible');
-  setText(dom.legendHigh, shownValues.length ? formatValue(Math.max(...shownValues), state.metric === 'perCapita') : 'Élevé');
-  setText(dom.legendTitle, state.metric === 'perCapita' ? 'Dépense par habitant' : 'Montant par territoire');
   setText(dom.mapTitle, copy.title);
   setText(dom.mapUnit, copy.unit);
   setText(dom.mapKicker, copy.kicker);
-  setText(dom.mapHelp, copy.help + ' Molette ou pavé tactile sur la carte pour zoomer.');
-  setText(dom.mapSubtitle, state.selectedCommune ? 'Commune sélectionnée · zoom animé' : state.selectedDepartment ? 'D\u00e9partement s\u00e9lectionn\u00e9 \u00b7 cliquez sur une commune pour descendre au niveau communal' : 'Survolez un territoire, puis cliquez pour zoomer.');
-  renderPoints();
-  renderCommuneLayer();
-  requestAnimationFrame(() => applyTransform(520));
+  setText(dom.mapHelp, copy.help);
+  setText(dom.legendTitle, state.metric === 'perCapita' ? 'Montant par habitant' : state.metric === 'share' ? 'Part du total national' : 'Montant par territoire');
+  if (!mapState.ready) return;
+  const map = mapState.map;
+  const rows = mapRows();
+  const values = mapDepartmentValues(rows);
+  data.currentMapDepartmentValues = values;
+  const scale = valuesForColor(values.values());
+  data.features.forEach(feature => {
+    const code = String(feature.properties.code);
+    const value = values.get(normalizeDepartment(code)) || values.get(code) || 0;
+    const color = colorFor(value, scale);
+    mapState.departmentColors.set(code, color);
+    map.setFeatureState({ source: 'departments', id: code }, { c: color });
+  });
+  const communesVisible = ['communes', 'projects', 'gfp'].includes(state.mode);
+  // Behind commune colours, departments stay neutral so the communes read clearly.
+  map.setPaintProperty('dept-fill', 'fill-color', communesVisible ? MAP_THEME[currentTheme()].empty : fillColorFromState(MAP_THEME[currentTheme()].empty));
+  map.setLayoutProperty('region-line', 'visibility', state.mode === 'regions' ? 'visible' : 'none');
+  map.setPaintProperty('dept-line', 'line-opacity', state.mode === 'regions' ? .18 : state.mode === 'communes' ? .55 : 1);
+  ['commune-fill', 'commune-line', 'commune-detail-fill', 'commune-detail-line', 'commune-hover', 'commune-detail-hover'].forEach(id => map.setLayoutProperty(id, 'visibility', communesVisible ? 'visible' : 'none'));
+  if (state.mode === 'regions') ensureRegions();
+  renderCommuneColors(rows);
+  renderSelection();
+
+  const shownValues = communesVisible
+    ? [...data.activeCommuneRowsByCode.values()].filter(row => !row.missing).map(communeShapeValue).filter(value => value > 0)
+    : [...values.values()].filter(value => value > 0);
+  let low = Infinity, high = -Infinity;
+  for (const value of shownValues) { if (value < low) low = value; if (value > high) high = value; }
+  setText(dom.legendLow, shownValues.length ? formatMetric(low) : 'Faible');
+  setText(dom.legendHigh, shownValues.length ? formatMetric(high) : 'Élevé');
+  const communeMapCount = [...data.activeCommuneRowsByCode.values()].filter(row => !row.missing).length;
+  setText(dom.mapBadgeText, state.mode === 'regions' ? `${data.regions.length} régions` : state.mode === 'communes' ? `${formatCount(communeMapCount)} communes` : state.mode === 'projects' ? `${formatCount(communeMapCount)} communes avec projets` : state.mode === 'gfp' ? `${formatCount(data.gfp.length)} intercommunalités` : `${data.features.length} départements`);
+  updateCamera();
+  loadVisibleDetail();
 }
 
-function scopeRows() {
-  return currentRows();
-}
+/* ---------- Stats & inspector ---------- */
 
 function scopeSummary(rows) {
   if (state.mode === 'projects') {
@@ -1115,109 +1163,118 @@ function scopeSummary(rows) {
       : state.selectedDepartment
         ? populationForDepartment(state.selectedDepartment)
         : [...uniqueCommunes].reduce((value, code) => value + (data.communeByCode.get(code)?.population || 0), 0) || [...uniqueDepartments].reduce((value, code) => value + populationForDepartment(code), 0);
-    const aggregate = { total, population, perCapita: population ? total / population : 0 };
-    return { ...aggregate, count: scoped.length, coverage: new Set(scoped.map(row => row.department)).size };
+    return { total, population, perCapita: population ? total / population : 0, count: scoped.length, coverage: new Set(scoped.map(row => row.department)).size };
   }
   if (state.mode === 'communes') {
     const aggregate = aggregateRows(rows, { getTotal: row => row.total, getPopulation: row => row.population });
     return { ...aggregate, count: rows.length, coverage: new Set(rows.map(row => normalizeDepartment(row.department))).size };
   }
-  if (state.mode === 'departments') {
-    const aggregate = aggregateRows(rows, { getTotal: row => row.total, getPopulation: row => row.perCapita ? row.total / row.perCapita : 0 });
-    return { ...aggregate, count: rows.length, coverage: new Set(rows.map(row => row.regionName)).size };
+  if (state.mode === 'gfp') {
+    const aggregate = aggregateRows(rows, { getTotal: row => row.total, getPopulation: row => row.population });
+    return { ...aggregate, count: rows.length, coverage: sum(rows, row => row.communes.length) };
   }
   const aggregate = aggregateRows(rows, { getTotal: row => row.total, getPopulation: row => row.perCapita ? row.total / row.perCapita : 0 });
+  if (state.mode === 'departments') return { ...aggregate, count: rows.length, coverage: new Set(rows.map(row => row.regionName)).size };
   return { ...aggregate, count: rows.length, coverage: rows.length };
 }
 
-function renderStats() {
+function renderStats(rows, summary) {
   const copy = modeCopy();
-  const rows = scopeRows(); const summary = scopeSummary(rows);
-  setText(dom.totalLabel, state.metric === 'perCapita' ? 'Dépense par habitant' : (state.mode === 'projects' ? 'Subventions affichées' : 'Dépenses affichées'));
-  setText(dom.totalAmount, formatValue(state.metric === 'perCapita' ? summary.perCapita : summary.total, state.metric === 'perCapita'));
-  setText(dom.countLabel, copy.count); setText(dom.projectCount, formatCount(summary.count));
+  setText(dom.totalLabel, state.metric === 'perCapita' ? 'Par habitant' : state.metric === 'share' ? 'Part du total national' : (state.mode === 'projects' ? 'Subventions affichées' : indicatorLabel()));
+  const noMatchedAccount = state.mode === 'communes' && !rows.length && filteredMissingCommunes().length > 0;
+  setText(dom.totalAmount, noMatchedAccount ? '—' : formatMetric(state.metric === 'perCapita' ? summary.perCapita : summary.total));
+  setText(dom.countLabel, state.mode === 'communes' ? 'Comptes disponibles' : copy.count); setText(dom.projectCount, formatCount(summary.count));
   setText(dom.coverageLabel, copy.coverage); setText(dom.departmentCount, formatCount(summary.coverage));
-  setText(dom.statsContext, copy.context);
+  const localContext = `OFGL ${state.localYear} · comptes consolidés par collectivité. Rhône : département et Métropole de Lyon réunis sur la carte. Depuis 2021, l’Alsace est affichée sur ses deux contours avec le même montant non réparti. Paris et les collectivités uniques ont des compétences élargies. Avant 2016, les anciennes régions sont regroupées sur les contours actuels sans consolidation entre elles.`;
+  setText(dom.statsContext, state.mode === 'communes' && data.communeCoverage ? `OFGL ${state.communeYear} · ${formatCount(filteredMissingCommunes().length)} contours sans compte apparié dans la sélection · ${formatCount(data.communeCoverage.unmatched)} lignes historiques sans contour 2025 et ${formatCount(data.communeCoverage.ambiguousRecords || 0)} lignes à code ambigu exclues. Données manquantes ≠ zéro.` : (state.mode === 'departments' || state.mode === 'regions') && state.indicator === LEGACY_INDICATOR ? localContext : copy.context);
   setText(dom.filterTitle, copy.filter);
 }
 
 function selectedContext() {
+  if (state.mode === 'gfp' && state.selectedGfp) {
+    const row = data.gfpByCode.get(state.selectedGfp);
+    if (row) return { title: row.name, kicker: `Intercommunalité · ${row.code}`, name: row.name };
+  }
   if (state.selectedCommune) {
-    const commune = data.communeByCode.get(state.selectedCommune);
+    const commune = data.communeByCode.get(state.selectedCommune) || data.communeMetadata.get(state.selectedCommune);
     const feature = data.communeFeatureByCode.get(state.selectedCommune);
     if (commune || feature) {
       const name = commune?.name || feature?.properties?.nom || state.selectedCommune;
-      return { title: name, kicker: `COMMUNE · ${state.selectedCommune}`, name };
+      return { title: name, kicker: `Commune · ${state.selectedCommune}`, name };
     }
   }
   if (state.selectedDepartment) {
-    const code = normalizeDepartment(state.selectedDepartment); const department = data.deptByCode.get(code); const feature = data.featureByCode.get(code);
-    return { title: department?.name || feature?.properties?.nom || code, kicker: `DÉPARTEMENT · ${code}`, name: department?.name || feature?.properties?.nom || code };
+    const code = normalizeDepartment(state.selectedDepartment);
+    if (state.mode === 'departments' && ['67', '68'].includes(code) && data.departments.some(row => row.code === '67A')) return { title: 'Alsace', kicker: 'Collectivité · 67 / 68', name: 'Alsace' };
+    const department = data.deptByCode.get(code); const feature = data.featureByCode.get(code);
+    return { title: department?.name || feature?.properties?.nom || code, kicker: `Département · ${code}`, name: department?.name || feature?.properties?.nom || code };
   }
-  if (state.region) return { title: state.region, kicker: 'RÉGION SÉLECTIONNÉE', name: state.region };
-  return { title: 'France entière', kicker: 'VUE NATIONALE', name: 'France entière' };
+  if (state.region) return { title: state.region, kicker: 'Région sélectionnée', name: state.region };
+  return { title: 'France entière', kicker: 'Vue nationale', name: 'France entière' };
 }
 
 function renderInspectorStats(summary, rows) {
   clearChildren(dom.inspectorStats);
+  const noMatchedAccount = state.mode === 'communes' && !rows.length && filteredMissingCommunes().length > 0;
   const cards = [
-    [state.metric === 'perCapita' ? 'Par habitant' : 'Dépense totale', formatValue(state.metric === 'perCapita' ? summary.perCapita : summary.total, state.metric === 'perCapita')],
+    [state.metric === 'perCapita' ? 'Par habitant' : state.metric === 'share' ? 'Part nationale' : state.mode === 'projects' ? 'Subventions' : 'Montant', noMatchedAccount ? '—' : formatMetric(state.metric === 'perCapita' ? summary.perCapita : summary.total)],
     [modeCopy().count, formatCount(summary.count)],
-    [state.mode === 'projects' ? 'Territoires' : 'Population estimée', state.mode === 'projects' ? formatCount(summary.coverage) : (summary.population ? `${formatCount(summary.population)} hab.` : '—')]
+    [state.mode === 'projects' ? 'Territoires' : 'Population', state.mode === 'projects' ? formatCount(summary.coverage) : (summary.population ? `${formatCount(summary.population)} hab.` : '—')]
   ];
   cards.forEach(([label, value]) => {
     const card = document.createElement('div'); card.className = 'inspector-stat';
     const labelNode = document.createElement('span'); labelNode.textContent = label;
-    const valueNode = document.createElement('strong'); valueNode.textContent = value;
+    const valueNode = document.createElement('strong'); valueNode.textContent = value; valueNode.title = value;
     card.append(labelNode, valueNode); dom.inspectorStats.appendChild(card);
   });
 }
 
-function projectItem(row) {
+function listItem(onSelect, title, meta, amount) {
   const item = document.createElement('article'); item.className = 'project-item clickable'; item.tabIndex = 0; item.setAttribute('role', 'button');
-  item.addEventListener('click', () => row.commune ? selectCommune(row.commune) : selectDepartment(row.department));
-  item.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); item.click(); } });
-  const copy = document.createElement('div'); const name = document.createElement('p'); name.className = 'project-name'; name.textContent = row.title || row.beneficiary || 'Projet sans intitulé';
-  const meta = document.createElement('p'); meta.className = 'project-meta'; meta.textContent = [row.communeData?.name, row.departmentName, row.scheme].filter(Boolean).join(' · ');
-  copy.append(name, meta);
-  const amount = document.createElement('div'); amount.className = 'project-amount'; amount.textContent = formatValue(projectMetric(row), state.metric === 'perCapita');
-  item.append(copy, amount); return item;
+  item.addEventListener('click', onSelect);
+  item.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelect(); } });
+  const copy = document.createElement('div');
+  const name = document.createElement('p'); name.className = 'project-name'; name.textContent = title;
+  const metaNode = document.createElement('p'); metaNode.className = 'project-meta'; metaNode.textContent = meta;
+  copy.append(name, metaNode);
+  const amountNode = document.createElement('div'); amountNode.className = 'project-amount'; amountNode.textContent = amount;
+  item.append(copy, amountNode);
+  return item;
+}
+
+function projectItem(row) {
+  return listItem(() => row.commune && (data.communeFeatureByCode.has(row.commune) || data.communeByCode.has(row.commune)) ? selectCommune(row.commune) : selectDepartment(row.department),
+    row.title || row.beneficiary || 'Projet sans intitulé',
+    [row.communeData?.name, row.departmentName, row.scheme].filter(Boolean).join(' · '),
+    formatMetric(projectMetric(row)));
 }
 
 function budgetItem(row, level) {
-  const item = document.createElement('article'); item.className = 'project-item clickable'; item.tabIndex = 0; item.setAttribute('role', 'button');
-  item.addEventListener('click', () => {
-    if (level === 'commune') selectCommune(row.code);
-    else if (level === 'department') selectDepartment(row.code);
-    else { state.region = row.name; dom.region.value = row.name; state.selectedDepartment = ''; state.selectedCommune = ''; state.zoomDelta = 0; render(); }
-  });
-  item.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); item.click(); } });
-  const copy = document.createElement('div'); const name = document.createElement('p'); name.className = 'project-name'; name.textContent = row.name;
+  if (level === 'gfp') return listItem(() => selectGfp(row.code), row.name, `${formatCount(row.communes.length)} communes · ${row.population ? formatCount(row.population) + ' hab.' : ''}`, formatMetric(valueForBudget(row)));
   const detail = level === 'commune' ? `${row.departmentName || row.department} · ${row.population ? formatCount(row.population) + ' hab.' : 'population non renseignée'}` : level === 'department' ? `${row.code} · ${row.regionName}` : `${row.code} · comptes consolidés`;
-  const meta = document.createElement('p'); meta.className = 'project-meta'; meta.textContent = detail; copy.append(name, meta);
-  const amount = document.createElement('div'); amount.className = 'project-amount'; amount.textContent = formatValue(valueForBudget(row), state.metric === 'perCapita'); item.append(copy, amount); return item;
+  const amount = row.missing ? (row.ambiguous ? 'Code ambigu' : 'Non apparié') : formatMetric(valueForBudget(row));
+  return listItem(() => level === 'commune' ? selectCommune(row.code) : level === 'department' ? selectDepartment(row.code) : selectRegion(row.name), row.name, detail, amount);
 }
 
-function renderInspector() {
-  const context = selectedContext(); const rows = scopeRows(); const summary = scopeSummary(rows);
-  const inspectorOpen = Boolean(state.selectedCommune || state.selectedDepartment || state.region || state.search);
-  dom.inspectorCard?.classList.toggle('is-open', inspectorOpen);
-  dom.inspectorCard?.setAttribute('aria-hidden', String(!inspectorOpen));
-  if (dom.inspectorCard) dom.inspectorCard.scrollLeft = 0;
+function renderInspector(rows, summary) {
+  const context = selectedContext();
   setText(dom.inspectorKicker, context.kicker); setText(dom.inspectorTitle, context.title);
-  dom.clearSelection.hidden = !(state.selectedDepartment || state.selectedCommune || state.region);
-  const metricText = state.metric === 'perCapita' ? 'par habitant' : 'au total';
-  const scopeText = state.selectedCommune ? `Budget et données disponibles pour ${context.name}.` : state.selectedDepartment ? `${formatCount(summary.count)} lignes rattachées au département ${context.name}.` : state.region ? `${formatCount(summary.count)} lignes dans la région ${context.name}.` : `${formatCount(summary.count)} lignes dans la vue actuelle.`;
-  setText(dom.inspectorSummary, `${scopeText} Lecture ${metricText}.`);
+  dom.clearSelection.hidden = !(state.selectedDepartment || state.selectedCommune || state.region || state.selectedGfp);
+  const metricText = state.metric === 'perCapita' ? 'par habitant' : state.metric === 'share' ? 'en part du total national' : 'au total';
+  const scopeText = state.mode === 'gfp' && state.selectedGfp ? `Comptes consolidés de ${context.name}.` : state.selectedCommune ? `Budget et données disponibles pour ${context.name}.` : state.selectedDepartment ? `${formatCount(summary.count)} lignes rattachées au département ${context.name}.` : state.region ? `${formatCount(summary.count)} lignes dans la région ${context.name}.` : `${formatCount(summary.count)} lignes dans la vue actuelle.`;
+  const missing = state.mode === 'communes' ? filteredMissingCommunes() : [];
+  setText(dom.inspectorSummary, missing.length && state.selectedCommune ? (missing[0].ambiguous ? `Plusieurs comptes partagent ce code en ${state.communeYear} : ils sont exclus pour éviter un double compte.` : `Aucun compte correspondant pour ${context.name} en ${state.communeYear}. Une absence ne signifie pas zéro.`) : `${scopeText} Lecture ${metricText}.`);
   renderInspectorStats(summary, rows);
   let items = []; let heading = 'À la une'; let countLabel = '';
   if (state.mode === 'projects') { items = [...projectRowsForScope(rows)].sort((a, b) => projectMetric(b) - projectMetric(a)); heading = state.selectedCommune ? 'Projets de la commune' : 'Projets les plus financés'; countLabel = `${formatCount(rows.length)} projets`; }
-  else if (state.mode === 'communes') { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); heading = state.selectedCommune ? 'Commune sélectionnée' : state.selectedDepartment ? 'Communes du département' : 'Communes les plus dépensières'; countLabel = `${formatCount(rows.length)} communes`; }
+  else if (state.mode === 'communes') { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); if (state.search || state.selectedCommune) items.push(...missing); heading = state.selectedCommune ? 'Commune sélectionnée' : state.selectedDepartment ? 'Communes du département' : 'Communes les plus dépensières'; countLabel = `${formatCount(rows.length)} comptes${missing.length ? ` · ${formatCount(missing.length)} non apparié${missing.length > 1 ? 's' : ''}` : ''}`; }
   else if (state.mode === 'departments') { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); heading = 'Départements'; countLabel = `${formatCount(rows.length)} départements`; }
+  else if (state.mode === 'gfp') { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); heading = 'Intercommunalités'; countLabel = `${formatCount(rows.length)} intercommunalités`; }
   else { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); heading = 'Régions'; countLabel = `${formatCount(rows.length)} régions`; }
   setText(dom.listHeading, heading); setText(dom.listCount, countLabel); clearChildren(dom.projectList);
-  const visible = items.slice(0, state.limit);
-  visible.forEach(row => dom.projectList.appendChild(state.mode === 'projects' ? projectItem(row) : budgetItem(row, state.mode === 'communes' ? 'commune' : state.mode === 'departments' ? 'department' : 'region')));
+  const fragment = document.createDocumentFragment();
+  items.slice(0, state.limit).forEach(row => fragment.appendChild(state.mode === 'projects' ? projectItem(row) : budgetItem(row, state.mode === 'communes' ? 'commune' : state.mode === 'departments' ? 'department' : state.mode === 'gfp' ? 'gfp' : 'region')));
+  dom.projectList.appendChild(fragment);
   dom.more.hidden = items.length <= state.limit;
   dom.more.textContent = `Afficher davantage (${formatCount(items.length - state.limit)} restant${items.length - state.limit > 1 ? 's' : ''})`;
 }
@@ -1225,59 +1282,207 @@ function renderInspector() {
 function renderTabs() {
   dom.modeTabs.forEach(button => { const active = button.dataset.mode === state.mode; button.classList.toggle('active', active); button.setAttribute('aria-selected', String(active)); });
   dom.metricButtons.forEach(button => button.classList.toggle('active', button.dataset.metric === state.metric));
+  dom.yearWrap.hidden = state.mode === 'projects';
+  dom.indicatorWrap.hidden = state.mode === 'projects' || !data.localIndex;
+  if (!dom.indicatorWrap.hidden) {
+    dom.indicator.querySelectorAll('option').forEach(option => { option.disabled = option.value !== LEGACY_INDICATOR && !data.localIndex.aggregates[option.value]?.levels.includes(levelOf(state.mode)); });
+    dom.indicator.value = state.indicator;
+  }
+  if (state.mode !== 'projects') syncYearControl();
+  dom.missingLegend.hidden = state.mode !== 'communes';
   dom.schemeFilter.hidden = state.mode !== 'projects';
   dom.scheme.disabled = state.mode !== 'projects';
   dom.search.placeholder = state.mode === 'projects' ? 'Projet, bénéficiaire, commune…' : state.mode === 'communes' ? 'Commune, code INSEE, département…' : 'Territoire, code…';
 }
 
 function render() {
-  renderTabs(); renderStats(); renderMap(); renderInspector();
+  state.shareBase = shareBaseForMode();
+  renderTabs();
+  const rows = currentRows();
+  const summary = scopeSummary(rows);
+  renderStats(rows, summary);
+  renderMap();
+  renderInspector(rows, summary);
 }
+
+/* ---------- Interaction ---------- */
+
+function selectGfp(code) {
+  if (!code) return;
+  state.search = ''; dom.search.value = '';
+  state.selectedGfp = state.selectedGfp === code ? '' : code;
+  state.selectedCommune = ''; state.selectedDepartment = ''; state.limit = 8;
+  render();
+}
+
+function clearSelection() {
+  state.selectedDepartment = ''; state.selectedCommune = ''; state.region = ''; state.selectedGfp = ''; dom.region.value = '';
+  render();
+}
+
+function resetAll() {
+  state.region = ''; state.scheme = ''; state.search = ''; state.selectedDepartment = ''; state.selectedCommune = ''; state.selectedGfp = ''; state.limit = 8;
+  dom.search.value = ''; dom.region.value = ''; dom.scheme.value = '';
+  render();
+  if (mapState.ready) updateCamera(true);
+}
+
+function selectRegion(name) {
+  if (!name) return;
+  state.region = name; state.search = ''; dom.search.value = ''; dom.region.value = name;
+  state.selectedDepartment = ''; state.selectedCommune = ''; state.limit = 8;
+  render();
+}
+
+function selectDepartment(code) {
+  state.search = ''; dom.search.value = '';
+  state.selectedDepartment = normalizeDepartment(code);
+  state.selectedCommune = ''; state.limit = 8;
+  render();
+}
+
+function selectCommune(code) {
+  const commune = data.communeByCode.get(code) || data.communeMetadata.get(code);
+  const feature = data.communeFeatureByCode.get(code);
+  if (!commune && !feature) return;
+  if (state.selectedCommune === code) { state.selectedCommune = ''; state.selectedDepartment = ''; render(); return; }
+  state.search = ''; dom.search.value = '';
+  state.selectedCommune = code;
+  state.selectedDepartment = normalizeDepartment(commune?.department || feature?.properties?.departement || '');
+  state.limit = 8;
+  render();
+}
+
+function setupListeners() {
+  dom.modeTabs.forEach(button => button.addEventListener('click', () => {
+    if (state.mode === button.dataset.mode) return;
+    changeView(() => { state.mode = button.dataset.mode; state.selectedCommune = ''; state.selectedDepartment = ''; state.selectedGfp = ''; state.limit = 8; });
+  }));
+  dom.indicator.addEventListener('change', () => changeView(() => { state.indicator = dom.indicator.value; state.limit = 8; }));
+  dom.mapYear.addEventListener('change', () => changeView(() => { state.year = Number(dom.mapYear.value); }));
+  dom.yearPlay.addEventListener('click', toggleYearPlay);
+  dom.metricButtons.forEach(button => button.addEventListener('click', () => { state.metric = button.dataset.metric; render(); }));
+  let searchTimer = 0;
+  dom.search.addEventListener('input', event => {
+    window.clearTimeout(searchTimer);
+    searchTimer = window.setTimeout(() => {
+      state.search = event.target.value.trim();
+      state.limit = 8;
+      const inferredMode = inferSearchMode(state.search);
+      if (inferredMode && inferredMode !== state.mode && state.mode !== 'gfp') { changeView(() => { state.mode = inferredMode; state.selectedDepartment = ''; state.selectedCommune = ''; }); return; }
+      render();
+    }, 180);
+  });
+  dom.region.addEventListener('change', event => { state.region = event.target.value; state.selectedDepartment = ''; state.selectedCommune = ''; state.limit = 8; render(); });
+  dom.scheme.addEventListener('change', event => { state.scheme = event.target.value; state.limit = 8; render(); });
+  dom.reset.addEventListener('click', resetAll);
+  dom.clearSelection.addEventListener('click', clearSelection);
+  dom.resetView.addEventListener('click', () => { state.selectedDepartment = ''; state.selectedCommune = ''; state.selectedGfp = ''; state.region = ''; dom.region.value = ''; render(); if (mapState.ready) updateCamera(true); });
+  dom.zoomIn.addEventListener('click', () => mapState.map?.zoomIn({ duration: 300 }));
+  dom.zoomOut.addEventListener('click', () => mapState.map?.zoomOut({ duration: 300 }));
+  dom.more.addEventListener('click', () => { state.limit += 8; render(); });
+  window.addEventListener('frl-theme', applyMapTheme);
+}
+
+/* ---------- Theme & header ---------- */
 
 class ThemeManager {
   constructor() {
-    this.themeTransitionMs = 800;
-    this.transitionTimer = null;
     this.toggleBtn = dom.theme;
-    let saved = '';
-    try { saved = localStorage.getItem('thefishwebsite_theme') || ''; } catch (error) { saved = ''; }
-    this.currentTheme = saved || document.documentElement.getAttribute('data-theme') || 'dark';
-    this.init();
+    this.timer = 0;
+    this.toggleBtn?.addEventListener('click', () => this.apply(currentTheme() === 'dark' ? 'light' : 'dark'));
   }
-  init() {
-    this.applyTheme(this.currentTheme, false);
-    if (this.toggleBtn) {
-      this.toggleBtn.dataset.themeBound = 'true';
-      this.toggleBtn.addEventListener('click', () => this.applyTheme(this.currentTheme === 'dark' ? 'light' : 'dark', true));
-    }
-  }
-  applyTheme(theme, animate = false) {
-    this.currentTheme = theme;
+  apply(theme) {
     const root = document.documentElement;
-    if (!animate) { root.setAttribute('data-theme', theme); try { localStorage.setItem('thefishwebsite_theme', theme); } catch (error) { /* storage may be unavailable */ } return; }
-    root.classList.add('theme-transitioning'); root.setAttribute('data-theme', theme);
-    try { localStorage.setItem('thefishwebsite_theme', theme); } catch (error) { /* storage may be unavailable */ }
-    window.clearTimeout(this.transitionTimer); this.transitionTimer = window.setTimeout(() => root.classList.remove('theme-transitioning'), this.themeTransitionMs);
+    root.classList.add('theme-transitioning');
+    root.setAttribute('data-theme', theme);
+    try { localStorage.setItem('frl-theme', theme); } catch (error) { /* storage may be unavailable */ }
+    window.dispatchEvent(new Event('frl-theme'));
+    window.clearTimeout(this.timer);
+    this.timer = window.setTimeout(() => root.classList.remove('theme-transitioning'), themeDuration() + 50);
   }
+}
+
+function setupHeader() {
+  const update = () => dom.header?.classList.toggle('is-scrolled', window.scrollY > 8);
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+  // The map fills the viewport below the sticky toolbar, whatever its wrapped height.
+  const bar = document.querySelector('.explorer__bar');
+  if (bar && typeof ResizeObserver === 'function') {
+    new ResizeObserver(() => document.documentElement.style.setProperty('--bar-h', `${Math.ceil(bar.getBoundingClientRect().height)}px`)).observe(bar);
+  }
+}
+
+/* ---------- Data loading ---------- */
+
+async function setCommuneYear(year) {
+  if (!data.communeHistory.has(year)) {
+    const payload = await fetchJson(`./data/commune-spending-${year}.json`);
+    if (payload.year !== year || !Array.isArray(payload.rows)) throw new Error('Exercice communal invalide');
+    data.communeHistory.set(year, payload);
+  }
+  const payload = data.communeHistory.get(year);
+  data.communes = payload.rows.filter(row => data.communeMetadata.has(row[0])).map(([code, total, population, perCapita]) => ({
+    ...data.communeMetadata.get(code), total, population, perCapita
+  }));
+  const present = new Set(payload.rows.map(row => row[0]));
+  const ambiguous = new Set(payload.ambiguousCodes || []);
+  data.missingCommunes = [...data.communeMetadata.values()].filter(row => !present.has(row.code)).map(row => ({ ...row, total: null, perCapita: null, population: null, missing: true, ambiguous: ambiguous.has(row.code) }));
+  data.communeCoverage = payload;
+  state.communeYear = year;
+}
+
+async function setLocalYear(year) {
+  if (!data.localHistory.has(year)) {
+    const payload = await fetchJson(`./data/local-spending-${year}.json`);
+    if (payload.year !== year || !Array.isArray(payload.departments) || !Array.isArray(payload.regions)) throw new Error('Exercice local invalide');
+    data.localHistory.set(year, payload);
+  }
+  const payload = data.localHistory.get(year);
+  data.departments = payload.departments;
+  data.regions = payload.regions;
+  state.localYear = year;
 }
 
 async function init() {
   new ThemeManager();
+  setupHeader();
   try {
-    const [projectsResponse, boundariesResponse, budgetsResponse, communeBoundariesResponse] = await Promise.all([
-      fetch('./data/projects-2025.json'), fetch('./data/departments.geojson'), fetch('./data/budgets-2025.json'), fetch('./data/communes.geojson')
+    const [meta, projects, boundaries, communeGeometry, localIndex] = await Promise.all([
+      fetchJson('./data/web/communes-meta.json'),
+      fetchJson('./data/web/projects-2025.json'),
+      fetchJson('./data/departments.geojson'),
+      fetchJson('./data/web/communes.json'),
+      fetchJson('./data/local/index.json').catch(() => null)
     ]);
-    if (!projectsResponse.ok || !boundariesResponse.ok || !budgetsResponse.ok || !communeBoundariesResponse.ok) throw new Error('Un fichier de données est indisponible.');
-    data.projects = await projectsResponse.json(); data.boundaries = await boundariesResponse.json(); data.communeBoundaries = await communeBoundariesResponse.json();
-    const budgets = await budgetsResponse.json(); data.communes = budgets.communes || []; data.departments = budgets.departments || []; data.regions = budgets.regions || [];
-    setupDerivedData(); setupFilters(); setupMap(); setupListeners();
+    data.localIndex = localIndex;
+    meta.rows.forEach(([code, name, department, lon, lat]) => {
+      const [departmentName, regionName] = meta.departments[department] || ['', ''];
+      data.communeMetadata.set(code, { code, name, department, departmentName, regionName, lon, lat });
+    });
+    data.projects = projects.rows.map(([scheme, department, beneficiary, commune, title, amount]) => ({ scheme: projects.schemes[scheme], department, beneficiary, commune, title, amount }));
+    data.boundaries = boundaries;
+    data.communeFeatures = decodeFeatures(communeGeometry, ['code', 'nom', 'departement'], data.communeBBox);
+    data.communeFeatures.features.forEach(feature => data.communeFeatureByCode.set(feature.properties.code, feature));
+    await Promise.all([setCommuneYear(2025), setLocalYear(2025)]);
+    setupDerivedData();
+    setupFilters();
+    setupIndicators();
+    setupListeners();
     setText(dom.dataStatus, `${formatCount(data.projects.length)} projets · ${formatCount(data.communes.length)} communes`);
-    setText(dom.scopeText, 'DGCL · OFGL · contours Etalab · données 2025');
+    setText(dom.scopeText, 'DGCL · OFGL · contours Etalab · 2012–2025');
     render();
+    await initMap();
+    render();
+    dom.mapLoading.classList.add('is-done');
   } catch (error) {
-    console.error(error); setText(dom.dataStatus, 'Données indisponibles'); setText(dom.scopeText, 'Rechargez la page pour réessayer.'); setText(dom.inspectorSummary, 'Impossible de charger les données locales.');
+    console.error(error);
+    setText(dom.dataStatus, 'Données indisponibles');
+    setText(dom.scopeText, 'Rechargez la page pour réessayer.');
+    setText(dom.inspectorSummary, 'Impossible de charger les données locales.');
+    dom.mapLoading.textContent = 'Impossible de charger la carte.';
   }
 }
 
-dom.more.addEventListener('click', () => { state.limit += 8; renderInspector(); });
 init();
