@@ -40,7 +40,7 @@ def connection():
     global _db
     if _db is None:
         _db = sqlite3.connect(f'file:{DB_PATH}?mode=ro&immutable=1', uri=True, check_same_thread=False)
-        _db.execute('PRAGMA cache_size = -262144')  # 256 Mo of page cache
+        _db.execute('PRAGMA cache_size = -65536')  # 64 Mo of page cache (the VPS hosts other sites)
         _db.execute('PRAGMA temp_store = MEMORY')
     return _db
 
@@ -59,35 +59,101 @@ def fts_query(q, prefix):
     return ' + '.join(w + ('*' if i == last and (prefix or len(w) >= 4) else '') for i, w in enumerate(words))
 
 
+try:
+    import numpy as np
+except ImportError:  # without NumPy the aggregations run in SQLite (about 10 times slower on very common words)
+    np = None
+COLS = None
+
+
+def load_columns(db):
+    """The compact table agg (1.9 M lines: source, year, amount, framework flag, département, beneficiary, programme)
+    held in memory as NumPy columns, about 60 Mo: a search then only asks SQLite for the matching ids, and every
+    total and ranking is a vectorised group-by (np.unique + np.bincount) instead of a SQL GROUP BY.
+    Read in blocks of 50 000 lines straight into the arrays, so loading never needs more memory than the columns."""
+    size = db.execute('SELECT max(id) FROM agg').fetchone()[0] + 1  # columns indexed directly by line id
+    cols = dict(src=np.zeros(size, np.int16), year=np.zeros(size, np.int16), amount=np.zeros(size, np.float64),
+                fw=np.zeros(size, np.int8), dept=np.full(size, -1, np.int16), who=np.full(size, -1, np.int64),
+                extra=np.full(size, -1, np.int64))
+    codes = [c for (c,) in db.execute('SELECT DISTINCT dept FROM agg WHERE dept IS NOT NULL ORDER BY 1')]
+    code_index = {c: i for i, c in enumerate(codes)}
+    cursor = db.execute('SELECT id, src, year, coalesce(amount, 0), fw, dept, coalesce(who, -1), coalesce(extra, -1) FROM agg')
+    while rows := cursor.fetchmany(50000):
+        ids, src, year, amount, fw, dept, who, extra = zip(*rows)
+        at = np.asarray(ids)
+        cols['src'][at], cols['year'][at], cols['amount'][at], cols['fw'][at] = src, year, amount, fw
+        cols['dept'][at] = [code_index.get(d, -1) for d in dept]
+        cols['who'][at], cols['extra'][at] = who, extra
+    cols['codes'] = codes
+    return cols
+
+
+def group(keys, values, limit=None):
+    """Distinct keys with their count and sum of values, largest sums first."""
+    if not len(keys):
+        return []
+    uniq, inverse, counts = np.unique(keys, return_inverse=True, return_counts=True)
+    sums = np.bincount(inverse, weights=values)
+    order = np.argsort(-sums) if limit is None else np.argsort(-sums)[:limit]
+    return [(int(uniq[i]), int(counts[i]), float(sums[i])) for i in order]
+
+
+def aggregate_numpy(ids):
+    c = COLS
+    src, year, fw, amount = c['src'][ids], c['year'][ids], c['fw'][ids], c['amount'][ids]
+    stats = [dict(src=k // 100000, year=(k // 10) % 10000, fw=k % 10, n=n, amount=v)
+             for k, n, v in group(src.astype(np.int64) * 100000 + year.astype(np.int64) * 10 + fw, amount)]
+    spend = (fw == 0) & (src != 6)
+
+    def ranking(column):
+        keys = c[column][ids]
+        mask = spend & (keys >= 0)
+        return [(k // 8, k % 8, n, v) for k, n, v in group(keys[mask] * 8 + src[mask], amount[mask], RANK * 3)]
+    depts = [(c['codes'][k], s, n, v) for k, s, n, v in ranking('dept')]
+    candidates = ids[fw == 0]
+    top_ids = candidates[np.argsort(-amount[fw == 0], kind='stable')[:TOP]] if len(candidates) else candidates
+    return stats, ranking('who'), ranking('extra'), depts, [int(i) for i in top_ids]
+
+
+def aggregate_sql(db):
+    stats = [dict(src=s, year=y, fw=f, n=n, amount=a or 0) for s, y, f, n, a in db.execute(
+        'SELECT src, year, fw, count(*), sum(amount) FROM m CROSS JOIN agg USING (id) GROUP BY 1, 2, 3')]
+    spending = 'FROM m CROSS JOIN agg USING (id) WHERE fw = 0 AND src != 6'
+
+    def ranking(column):
+        return db.execute(f'SELECT {column}, src, count(*), sum(amount) AS v {spending} AND {column} IS NOT NULL '
+                          f'GROUP BY 1, 2 ORDER BY v DESC LIMIT {RANK * 3}').fetchall()
+    top = [r[0] for r in db.execute(f'SELECT id FROM m CROSS JOIN agg USING (id) WHERE fw = 0 ORDER BY amount DESC LIMIT {TOP}')]
+    return stats, ranking('who'), ranking('extra'), ranking('dept'), top
+
+
 @functools.lru_cache(maxsize=512)
 def search(match):
     db = connection()
     started = time.monotonic()
     db.set_progress_handler(lambda: 1 if time.monotonic() - started > TIME_LIMIT else 0, 20000)
     try:
-        db.execute('CREATE TEMP TABLE IF NOT EXISTS m (id INTEGER PRIMARY KEY)')
-        db.execute('DELETE FROM m')
-        db.execute('INSERT INTO m SELECT rowid FROM fts WHERE fts MATCH ?', (match,))
-        lines = db.execute('SELECT count(*) FROM m').fetchone()[0]
-        stats = [dict(src=s, year=y, fw=f, n=n, amount=a or 0) for s, y, f, n, a in db.execute(
-            'SELECT src, year, fw, count(*), sum(amount) FROM m CROSS JOIN agg USING (id) GROUP BY 1, 2, 3')]
-        spending = 'FROM m CROSS JOIN agg USING (id) WHERE fw = 0 AND src != 6'
-
-        def ranking(column):
-            return db.execute(f'SELECT {column}, src, count(*), sum(amount) AS v {spending} AND {column} IS NOT NULL '
-                              f'GROUP BY 1, 2 ORDER BY v DESC LIMIT {RANK * 3}').fetchall()
-        who_rows, extra_rows, dept_rows = ranking('who'), ranking('extra'), ranking('dept')
-        names = dict(((i, (n, s)) for i, n, s in db.execute(
-            f'SELECT id, name, siren FROM who WHERE id IN ({",".join(str(r[0]) for r in who_rows) or "NULL"})')))
+        if COLS is not None:
+            ids = np.fromiter((r[0] for r in db.execute('SELECT rowid FROM fts WHERE fts MATCH ?', (match,))), dtype=np.int64)
+            lines = len(ids)
+            stats, who_rows, extra_rows, dept_rows, top_ids = aggregate_numpy(ids)
+        else:
+            db.execute('CREATE TEMP TABLE IF NOT EXISTS m (id INTEGER PRIMARY KEY)')
+            db.execute('DELETE FROM m')
+            db.execute('INSERT INTO m SELECT rowid FROM fts WHERE fts MATCH ?', (match,))
+            lines = db.execute('SELECT count(*) FROM m').fetchone()[0]
+            stats, who_rows, extra_rows, dept_rows, top_ids = aggregate_sql(db)
+        names = {i: (n, s) for i, n, s in db.execute(
+            f'SELECT id, name, siren FROM who WHERE id IN ({",".join(str(r[0]) for r in who_rows) or "NULL"})')}
         labels = dict(db.execute(
             f'SELECT id, label FROM extra WHERE id IN ({",".join(str(r[0]) for r in extra_rows) or "NULL"})'))
-        who = [dict(key=k, label=names.get(k, ('', ''))[0] or names.get(k, ('', ''))[1], siren=names.get(k, ('', ''))[1], src=s, n=n, value=v or 0)
+        who = [dict(key=k, label=names[k][0] or names[k][1], siren=names[k][1], src=s, n=n, value=v or 0)
                for k, s, n, v in who_rows if k in names]
         extra = [dict(key=k, label=labels[k], src=s, n=n, value=v or 0) for k, s, n, v in extra_rows if k in labels]
         depts = [dict(key=k, src=s, n=n, value=v or 0) for k, s, n, v in dept_rows]
         top = [dict(id=i, src=s, year=y, amount=a, fw=f, dept=d, title=t, who=w, siren=sn, extra=e) for i, s, y, a, f, d, t, w, sn, e in db.execute(
-            f'SELECT d.id, d.src, d.year, d.amount, d.fw, d.dept, d.title, d.who, d.siren, d.extra FROM doc d WHERE d.id IN '
-            f'(SELECT id FROM m CROSS JOIN agg USING (id) WHERE fw = 0 ORDER BY amount DESC LIMIT {TOP}) ORDER BY d.amount DESC')]
+            f'SELECT id, src, year, amount, fw, dept, title, who, siren, extra FROM doc WHERE id IN ({",".join(map(str, top_ids)) or "NULL"}) '
+            'ORDER BY amount DESC')]
         return dict(lines=lines, stats=stats, who=who, extra=extra, depts=depts, top=top, topSize=TOP)
     finally:
         db.set_progress_handler(None, 0)
@@ -139,7 +205,13 @@ def main():
     parser.add_argument('--port', type=int, default=8017)
     args = parser.parse_args()
     DB_PATH = args.db
-    connection().execute('SELECT 1 FROM agg LIMIT 1')
+    global COLS
+    if np is not None:
+        started = time.monotonic()
+        COLS = load_columns(connection())
+        print(f'columns in memory: {len(COLS["src"]) - 1} lines in {time.monotonic() - started:.1f} s', flush=True)
+    else:
+        print('NumPy not installed: aggregations run in SQLite', flush=True)
     ThreadingHTTPServer.daemon_threads = True
     ThreadingHTTPServer(('127.0.0.1', args.port), Handler).serve_forever()
 

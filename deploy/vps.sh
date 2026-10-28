@@ -101,6 +101,12 @@ if [ ! -f "$DBF" ] || [ "$(cat "$LIB/meta.md5" 2>/dev/null)" != "$STAMP" ]; then
   cat "$WEB"/data/search/db/frl-search.sqlite3.* > "$DBF.tmp" && mv -f "$DBF.tmp" "$DBF" && echo "$STAMP" > "$LIB/meta.md5"
   chmod a+r "$DBF"; echo "index rebuilt: $(du -h "$DBF" | cut -f1)"
 fi
+# NumPy (vectorised totals, 4 to 5 times faster on very common words) in a private virtualenv: nothing is installed
+# system-wide, so the other sites of the VPS are not affected. Without it the API falls back to SQL aggregations.
+PY=/usr/bin/python3
+if [ -x "$LIB/venv/bin/python" ] && "$LIB/venv/bin/python" -c 'import numpy' 2>/dev/null; then PY=$LIB/venv/bin/python
+elif python3 -m venv "$LIB/venv" 2>/dev/null && "$LIB/venv/bin/pip" install -q --disable-pip-version-check numpy; then PY=$LIB/venv/bin/python
+else echo "NumPy unavailable (python3-venv missing?): SQL aggregations"; fi
 sudo -n tee /etc/systemd/system/francerouelibre-search.service > /dev/null <<UNIT
 [Unit]
 Description=FranceRoueLibre search API (deploy/vps.sh)
@@ -108,13 +114,17 @@ After=network.target
 
 [Service]
 User=www-data
-ExecStart=/usr/bin/python3 $DIR/server/search_api.py --db $DBF --port 8017
+ExecStart=$PY $DIR/server/search_api.py --db $DBF --port 8017
 Restart=on-failure
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=yes
 PrivateTmp=yes
-MemoryMax=1G
+# Shares the VPS with other sites: at most one CPU core, 512 Mo of memory, lower priority
+MemoryMax=512M
+CPUQuota=100%
+Nice=10
+IOWeight=50
 
 [Install]
 WantedBy=multi-user.target
@@ -123,7 +133,7 @@ sudo -n systemctl daemon-reload
 sudo -n systemctl enable --quiet francerouelibre-search
 sudo -n systemctl restart francerouelibre-search
 curl -s --retry 10 --retry-connrefused --retry-delay 1 --max-time 30 http://127.0.0.1:8017/api/health; echo
-sudo -n systemctl --no-pager --lines=3 status francerouelibre-search | head -5
+sudo -n systemctl --no-pager --lines=3 status francerouelibre-search | grep -E "Active|Memory|columns|NumPy|CPU"
 
 echo "== dns"
 PUBLIC=$(curl -4 -s --max-time 5 https://ifconfig.me || true)
