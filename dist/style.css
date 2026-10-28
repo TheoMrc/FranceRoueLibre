@@ -774,3 +774,14 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
   .nav-search:focus-within input { width: calc(100vw - 7rem); }
   .nav-search:focus-within .nav-search__icon { right: calc(100vw - 7rem - 2rem); }
 }
+
+.sr-progress { max-width: 720px; padding: 1rem 1.2rem; border-radius: var(--r-md); background: var(--c-surface); }
+.sr-progress__head { display: flex; justify-content: space-between; gap: 1rem; color: var(--c-ink); font-weight: 600; }
+.sr-progress__head strong { font-variant-numeric: tabular-nums; }
+.sr-progress__track { height: 8px; margin: .6rem 0 .45rem; border-radius: var(--r-pill); background: var(--c-line); overflow: hidden; }
+.sr-progress__track span { display: block; height: 100%; border-radius: inherit; background: var(--brand-gradient); transition: width .25s ease; }
+.sr-progress__meta { color: var(--c-muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
+.sr-error { max-width: 720px; padding: 1rem 1.2rem; border-radius: var(--r-md); background: rgba(225, 29, 72, .08); color: var(--c-ink); }
+.sr-error p { margin-top: .4rem; color: var(--c-body); }
+.sr-error .more-btn { width: auto; margin-top: .8rem; padding: .55rem 1.2rem; }
+#srPanels[hidden] { display: none; }

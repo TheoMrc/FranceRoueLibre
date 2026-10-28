@@ -21,20 +21,36 @@ window.FRLSearch = (() => {
     });
   }
 
+  let workerRef = null;
+  // Checks that the server honours HTTP Range requests (an old preview server returned whole files, which corrupts reads).
+  async function preflight(info) {
+    const first = info.chunks ? new URL(`${info.chunks.urlPrefix}${'0'.repeat(info.chunks.suffixLength)}`, base) : new URL('data/search/frl-search.sqlite3', base);
+    first.searchParams.set('v', info.size);
+    const response = await fetch(first, { headers: { Range: 'bytes=0-15' }, cache: 'no-store' });
+    if (response.status !== 206) throw Object.assign(new Error('Le serveur ne gère pas les requêtes partielles (Range).'), { code: 'RANGE' });
+    const head = new TextDecoder().decode(await response.arrayBuffer());
+    if (!head.startsWith('SQLite format 3')) throw Object.assign(new Error('Fichier d’index illisible.'), { code: 'FORMAT' });
+  }
   function db() {
     if (!dbPromise) {
       // The index is split into files of 45 Mo (dist/data/search/db/) so that it fits in Git and on any static host.
-      dbPromise = Promise.all([loadScript(new URL('vendor/sqljs-httpvfs/index.js', base).href), meta()]).then(([, info]) => window.createDbWorker(
-        [{ from: 'inline', config: info.chunks
-          ? { serverMode: 'chunked', urlPrefix: new URL(info.chunks.urlPrefix, base).href, serverChunkSize: info.chunks.serverChunkSize, databaseLengthBytes: info.chunks.databaseLengthBytes, suffixLength: info.chunks.suffixLength, requestChunkSize: 4096 }
-          : { serverMode: 'full', url: new URL('data/search/frl-search.sqlite3', base).href, requestChunkSize: 4096 } }],
-        new URL('vendor/sqljs-httpvfs/sqlite.worker.js', base).href, new URL('vendor/sqljs-httpvfs/sql-wasm.wasm', base).href, 1e10
-      )).then(worker => worker.db);
+      dbPromise = Promise.all([loadScript(new URL('vendor/sqljs-httpvfs/index.js', base).href), meta()]).then(async ([, info]) => {
+        await preflight(info);
+        const cacheBust = String(info.size); // a new index never mixes with pages of an old one cached by the browser
+        workerRef = await window.createDbWorker(
+          [{ from: 'inline', config: info.chunks
+            ? { serverMode: 'chunked', urlPrefix: new URL(info.chunks.urlPrefix, base).href, serverChunkSize: info.chunks.serverChunkSize, databaseLengthBytes: info.chunks.databaseLengthBytes, suffixLength: info.chunks.suffixLength, requestChunkSize: 4096, cacheBust }
+            : { serverMode: 'full', url: new URL('data/search/frl-search.sqlite3', base).href, requestChunkSize: 4096, cacheBust } }],
+          new URL('vendor/sqljs-httpvfs/sqlite.worker.js', base).href, new URL('vendor/sqljs-httpvfs/sql-wasm.wasm', base).href, 1e10);
+        return workerRef.db;
+      });
       dbPromise.catch(() => { dbPromise = null; });
     }
     return dbPromise;
   }
-  const meta = () => metaPromise || (metaPromise = fetch(new URL('data/search/meta.json', base)).then(r => r.json()));
+  // Bytes and requests read so far, for the progress display.
+  const stats = async () => { try { return workerRef ? await workerRef.worker.getStats() : null; } catch (error) { return null; } };
+  const meta = () => metaPromise || (metaPromise = fetch(new URL('data/search/meta.json', base), { cache: 'no-cache' }).then(r => r.json()));
   const query = async (sql, ...params) => (await db()).query(sql, params); // sql.js exec(sql, [params])
 
   const norm = text => String(text || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -62,5 +78,5 @@ window.FRLSearch = (() => {
   }
   const escapeHtml = text => String(text ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 
-  return { SOURCES, db, meta, query, norm, tokens, ftsQuery, suggest, highlighter, escapeHtml };
+  return { SOURCES, db, meta, query, stats, norm, tokens, ftsQuery, suggest, highlighter, escapeHtml };
 })();

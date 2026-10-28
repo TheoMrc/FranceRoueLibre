@@ -35,7 +35,7 @@ OUT_DIR = 'dist/data/search'
 DB = f'{OUT_DIR}/frl-search.sqlite3'
 DERIVED = 'sources/derived'
 SOURCES = {1: 'Subventions aux associations', 2: 'Marchés publics', 3: 'Projets aidés par l’État (DGCL)', 4: 'Fonds vert', 5: 'Aides aux entreprises (de minimis)', 6: 'Budget de l’État (PLF 2026)'}
-FREQUENT = 1500          # words found in more lines than this get precomputed totals and top lines
+FREQUENT = 500          # words found in more lines than this get precomputed totals and top lines
 TOP = 60
 CHUNK = 45 * 1024 * 1024  # bytes per file of the split index (a multiple of the 4 096-byte page size)
 WORD = re.compile(r"[^\W\d_]{3,}", re.UNICODE)
@@ -50,6 +50,43 @@ def clip(value, size):
         return None
     value = ' '.join(str(value).split())
     return value[:size] if value else None
+
+
+def build_compact(db):
+    """Compact copy of what the results page aggregates (source, year, amount, place, beneficiary, programme), with the
+    beneficiary and programme texts stored once in dictionaries. About 200 lines fit in one 4 Ko page instead of ~15 in
+    doc, so a search reads 10 times fewer pages; the labels (doc.title) are fetched only for the lines on screen."""
+    db.executescript('''
+        DROP TABLE IF EXISTS agg; DROP TABLE IF EXISTS who; DROP TABLE IF EXISTS extra;
+        CREATE TABLE who (id INTEGER PRIMARY KEY, name TEXT, siren TEXT);
+        INSERT INTO who (name, siren) SELECT DISTINCT who, siren FROM doc WHERE who IS NOT NULL OR siren IS NOT NULL;
+        CREATE INDEX temp_who ON who (name, siren);
+        CREATE TABLE extra (id INTEGER PRIMARY KEY, label TEXT);
+        INSERT INTO extra (label) SELECT DISTINCT extra FROM doc WHERE extra IS NOT NULL;
+        CREATE INDEX temp_extra ON extra (label);
+        CREATE TABLE agg (id INTEGER PRIMARY KEY, src INTEGER, year INTEGER, amount INTEGER, fw INTEGER, dept TEXT, who INTEGER, extra INTEGER);
+        INSERT INTO agg SELECT d.id, d.src, d.year, CAST(round(d.amount) AS INTEGER), d.fw, d.dept, w.id, e.id FROM doc d
+            LEFT JOIN who w ON w.name IS d.who AND w.siren IS d.siren LEFT JOIN extra e ON e.label = d.extra;
+        DROP INDEX temp_who; DROP INDEX temp_extra;''')
+    print(f"· table compacte : {db.execute('SELECT count(*) FROM agg').fetchone()[0]} lignes, {db.execute('SELECT count(*) FROM who').fetchone()[0]} bénéficiaires")
+
+
+def split(size):
+    """Split the database into 45 MiB files (multiples of the page size) for Git and static hosting."""
+    chunk_dir = f'{OUT_DIR}/db'
+    os.makedirs(chunk_dir, exist_ok=True)
+    for name in os.listdir(chunk_dir):
+        os.remove(os.path.join(chunk_dir, name))
+    index = 0
+    with open(DB, 'rb') as handle:
+        while True:
+            block = handle.read(CHUNK)
+            if not block:
+                break
+            with open(f'{chunk_dir}/frl-search.sqlite3.{index:03d}', 'wb') as out:
+                out.write(block)
+            index += 1
+    return index
 
 
 def main():
@@ -131,6 +168,8 @@ def main():
         INSERT INTO fts (rowid, title, who, extra) SELECT id, title, who, extra FROM doc;
         INSERT INTO fts (fts) VALUES ('optimize');''')
 
+    build_compact(db)
+
     # Vocabulary with a readable (accented) spelling: the most frequent original form of each normalised word.
     forms = collections.defaultdict(collections.Counter)
     for title, who, extra in db.execute('SELECT title, who, extra FROM doc'):
@@ -160,22 +199,9 @@ def main():
     db.commit()
     db.execute('VACUUM')
     db.close()
-    # Split into 45 MiB chunks (multiples of the page size) so the index can live in a Git repository (GitHub: < 100 Mo par fichier)
-    # and be served by any static host; the browser reads them through sql.js-httpvfs "chunked" mode.
+    # Split into 45 MiB files so the index fits in Git (GitHub: < 100 Mo per file) and works on any static host.
     size = os.path.getsize(DB)
-    chunk_dir = f'{OUT_DIR}/db'
-    os.makedirs(chunk_dir, exist_ok=True)
-    for name in os.listdir(chunk_dir):
-        os.remove(os.path.join(chunk_dir, name))
-    with open(DB, 'rb') as handle:
-        index = 0
-        while True:
-            block = handle.read(CHUNK)
-            if not block:
-                break
-            with open(f'{chunk_dir}/frl-search.sqlite3.{index:03d}', 'wb') as out:
-                out.write(block)
-            index += 1
+    index = split(size)
     meta = {'sources': SOURCES, 'lines': total, 'frequentThreshold': FREQUENT, 'size': size, 'pageSize': 4096,
             'chunks': {'serverMode': 'chunked', 'urlPrefix': 'data/search/db/frl-search.sqlite3.', 'serverChunkSize': CHUNK, 'databaseLengthBytes': size, 'suffixLength': 3, 'count': index},
             'note': 'Recherche dans les libellés publiés (objet du marché, objet de la subvention, titre du projet, nom du bénéficiaire, programme). Un mot trouvé dans un libellé ne signifie pas que tout le montant y est consacré.'}
@@ -184,4 +210,19 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    if '--compact-only' in sys.argv:
+        # Upgrade an existing index without rebuilding it (adds the compact tables, then splits again).
+        connection = sqlite3.connect(DB)
+        build_compact(connection)
+        connection.commit()
+        connection.execute('VACUUM')
+        connection.close()
+        meta_path = f'{OUT_DIR}/meta.json'
+        info = json.load(open(meta_path, encoding='utf-8'))
+        size = os.path.getsize(DB)
+        info['size'] = size
+        info['chunks'].update({'databaseLengthBytes': size, 'count': split(size)})
+        json.dump(info, open(meta_path, 'w', encoding='utf-8'), ensure_ascii=False)
+        print(f'✓ index mis à jour : {size / 1e6:.0f} Mo en {info["chunks"]["count"]} fichiers')
+    else:
+        main()
