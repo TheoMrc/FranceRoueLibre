@@ -41,7 +41,7 @@ window.FRLSearch = (() => {
           [{ from: 'inline', config: info.chunks
             ? { serverMode: 'chunked', urlPrefix: new URL(info.chunks.urlPrefix, base).href, serverChunkSize: info.chunks.serverChunkSize, databaseLengthBytes: info.chunks.databaseLengthBytes, suffixLength: info.chunks.suffixLength, requestChunkSize: 4096, cacheBust }
             : { serverMode: 'full', url: new URL('data/search/frl-search.sqlite3', base).href, requestChunkSize: 4096, cacheBust } }],
-          new URL('vendor/sqljs-httpvfs/sqlite.worker.js', base).href, new URL('vendor/sqljs-httpvfs/sql-wasm.wasm', base).href, 1e10);
+          new URL('vendor/sqljs-httpvfs/sqlite.worker.js?v=3', base).href, new URL('vendor/sqljs-httpvfs/sql-wasm.wasm', base).href, 1e10);
         return workerRef.db;
       });
       dbPromise.catch(() => { dbPromise = null; });
