@@ -62,6 +62,12 @@ def fix_text(value):
     return MOJIBAKE.sub(repair, value)
 
 
+def derived(name, con, sql):
+    """Normalised rows kept for the full-text search index (scripts/process_search.py); local build artefacts, not versioned."""
+    os.makedirs('sources/derived', exist_ok=True)
+    con.execute(f"COPY ({sql}) TO 'sources/derived/{name}.parquet' (FORMAT parquet, COMPRESSION zstd)")
+
+
 def write(name, value):
     os.makedirs(OUT, exist_ok=True)
     with open(f'{OUT}/{name}', 'w', encoding='utf-8') as handle:
@@ -102,6 +108,7 @@ def main():
         for code, label in KNOWN_PROGRAMMES.items():
             labels.setdefault(code, label)
         con.execute("UPDATE j SET programme = regexp_extract(programme, '(\\d{3})', 1) WHERE programme IS NOT NULL")
+        derived('associations', con, "SELECT year, siren, name, amount, object, programme, dept, city FROM j WHERE amount IS NOT NULL")
         years = [r[0] for r in con.execute('SELECT DISTINCT year FROM j ORDER BY 1').fetchall()]
         per_year = [dict(zip(['year', 'lines', 'amount', 'beneficiaries', 'withoutSiren', 'amountWithoutSiren', 'closed', 'amountClosed'], r)) for r in con.execute("""
             SELECT year, count(*), sum(amount), count(DISTINCT siren), count(*) FILTER (WHERE siren IS NULL), coalesce(sum(amount) FILTER (WHERE siren IS NULL), 0),
@@ -137,6 +144,7 @@ def main():
     if os.path.exists(path):
         con.execute(f"""CREATE TABLE m AS SELECT regime, nom_beneficiaire AS name, identifiant_beneficiaire AS id, TRY_CAST(montant_esb AS DOUBLE) AS amount,
             instrument_aide AS instrument, secteur_aide AS sector, commune_beneficiaire AS city, TRY_CAST(left(date_octroi, 4) AS INTEGER) AS year, autorite, operateur FROM {csv(path)}""")
+        derived('minimis', con, 'SELECT year, id, name, amount, instrument, sector, city, autorite FROM m')
         summary = {
             'perYear': [list(r) for r in con.execute('SELECT year, count(*), sum(amount), count(DISTINCT id) FROM m GROUP BY 1 ORDER BY 1').fetchall()],
             'byAuthority': [list(r) for r in con.execute('SELECT autorite, count(*), sum(amount) FROM m GROUP BY 1 ORDER BY 3 DESC LIMIT 40').fetchall()],
@@ -169,6 +177,7 @@ def main():
             {pick('raison_sociale_beneficiaire', 'nom_beneficiaire_principal')} AS name, {pick('nom_du_projet')} AS project FROM {src}""")
     if parts:
         con.execute('CREATE TABLE fv AS ' + ' UNION ALL '.join(parts))
+        derived('fonds-vert', con, 'SELECT year, programme, amount, measure, dept, commune, siren, name, project FROM fv')
         main = "programme = '380'"
         write('fonds-vert.json', {
             'source': 'Fonds vert — liste des projets subventionnés (data.gouv.fr)',

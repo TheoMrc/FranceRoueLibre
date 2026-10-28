@@ -74,6 +74,9 @@ def main():
     # "nature"; the 2022 format always says "Marché" there and flags them in "techniques" ("Accord-cadre").
     con.execute("""ALTER TABLE m ADD COLUMN framework BOOLEAN;
         UPDATE m SET framework = coalesce(nature ILIKE '%accord%cadre%', false) OR coalesce(techniques ILIKE '%accord%cadre%', false)""")
+    os.makedirs('sources/derived', exist_ok=True)
+    con.execute(f"""COPY (SELECT year, buyer_siren, buyer_name, supplier, amount, object, cpv, procedure, framework, bids FROM m WHERE {'plausible AND year BETWEEN 2014 AND 2026'})
+                   TO 'sources/derived/decp.parquet' (FORMAT parquet, COMPRESSION zstd)""")
     names = {}
     # Local authorities first (official names from OFGL), then names published in DECP v3.
     meta_path = 'dist/data/web/communes-meta.json'
@@ -98,6 +101,8 @@ def main():
             print(f'· noms {file}: {error}')
     for siren, value in con.execute("SELECT buyer_siren, arg_max(buyer_name, notified) FROM m WHERE buyer_name IS NOT NULL AND buyer_name <> '' GROUP BY 1").fetchall():
         names.setdefault(siren, value)
+    with open('sources/derived/buyer-names.json', 'w', encoding='utf-8') as handle:
+        json.dump(names, handle, ensure_ascii=False)
     quality_extra = {'implausibleBids': implausible_bids}
     quality = dict(zip(['raw', 'unique', 'implausible', 'noDate', 'noBuyer', 'noBidCount'], con.execute("""
         SELECT (SELECT count(*) FROM raw), count(*), count(*) FILTER (WHERE NOT plausible), count(*) FILTER (WHERE notified IS NULL),

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Chercher un mot dans toutes les dépenses publiques publiées : subventions, marchés publics, projets aidés, Fonds vert, budget de l’État.">
+  <title>Recherche — FranceRoueLibre</title>
+  <script>
+    (function () {
+      var theme = null;
+      try { theme = localStorage.getItem('frl-theme'); } catch (e) {}
+      if (theme !== 'light' && theme !== 'dark') theme = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='11' fill='white'/%3E%3Cpath d=%22M24 4l17 10v20L24 44 7 34V14z%22 stroke=%22%232563eb%22 stroke-width=%223%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M14 17l7 7 5-4 9 11%22 stroke=%22%23e11d48%22 stroke-width=%223.2%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M29 31 H35 V25%22 stroke=%22%23e11d48%22 stroke-width=%223.4%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="./common.js"></script>
+  <script defer src="./search-core.js"></script>
+  <script defer src="./recherche.js"></script>
+  <script defer src="./search-bar.js"></script>
+</head>
+<body class="subpage">
+  <header class="site-header" id="siteHeader">
+    <div class="container nav">
+      <a class="brand brand--lockup" href="index.html" aria-label="FranceRoueLibre, accueil">
+        <svg class="brand__mark" width="40" height="40" viewBox="0 0 48 48" fill="none" aria-hidden="true"><defs><linearGradient id="g7" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#0e7490"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><path d="M24 4l17 10v20L24 44 7 34V14z" stroke="url(#g7)" stroke-width="3" stroke-linejoin="round"/><path d="M14 17l7 7 5-4 9 11" stroke="#e11d48" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 31 H35 V25" stroke="#e11d48" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="brand__sep" aria-hidden="true"></span>
+        <span class="brand__name"><span>France</span><span class="gradient-text">RoueLibre</span></span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="index.html#explorer">Carte</a></li>
+        <li><a href="index.html#circuit">Circuit</a></li>
+        <li><a href="index.html#comptes">Comptes</a></li>
+        <li><a href="aides.html">Aides</a></li>
+        <li><a href="marches.html">Marchés</a></li>
+        <li><a href="signaux.html">Signaux</a></li>
+        <li><a href="donnees.html">Données</a></li>
+      </ul>
+      <div class="nav__actions">
+      <button class="theme-toggle-btn tbtn-morph" id="themeToggle" type="button" aria-label="Changer de thème" title="Changer de thème">
+        <span class="tbtn-halo" aria-hidden="true"></span>
+        <svg class="tbtn-svg-morph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <mask id="theme-morph-mask"><rect width="32" height="32" fill="white"/><circle class="mask-moon-bite" cx="23" cy="11" r="6.5" fill="black"/></mask>
+          <circle class="morph-core" cx="16" cy="16" r="6" fill="currentColor" mask="url(#theme-morph-mask)"/>
+          <g class="morph-rays" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="16" y1="3" x2="16" y2="6"/><line x1="16" y1="26" x2="16" y2="29"/><line x1="3" y1="16" x2="6" y2="16"/><line x1="26" y1="16" x2="29" y2="16"/>
+            <line x1="6.81" y1="6.81" x2="8.93" y2="8.93"/><line x1="23.07" y1="23.07" x2="25.19" y2="25.19"/><line x1="6.81" y1="25.19" x2="8.93" y2="23.07"/><line x1="23.07" y1="8.93" x2="25.19" y2="6.81"/>
+          </g>
+        </svg>
+      </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero hero--page">
+      <div class="hero__bg" aria-hidden="true"></div>
+      <div class="container"><div class="hero__inner">
+        <span class="eyebrow">Recherche dans les dépenses publiques</span>
+        <h1 id="srTitle">Chercher <span class="gradient-text">n’importe quel mot.</span></h1>
+        <p class="hero__lead" id="srLead">Un mot, une expression, un nom : il est cherché dans 1,9 million de lignes de dépenses publiées (objet des marchés publics, objet des subventions, titre des projets, nom des bénéficiaires, intitulés du budget de l’État).</p>
+        <form class="sr-form" id="srForm" role="search"><label class="sr-only" for="srInput">Mot ou expression</label>
+          <input id="srInput" name="q" type="search" placeholder="discrimination, égalité femmes-hommes, LGBT, photovoltaïque…" autocomplete="off" spellcheck="false">
+          <button class="btn btn--primary" type="submit">Rechercher</button></form>
+        <div class="sr-examples" id="srExamples"></div>
+      </div></div>
+    </section>
+    <section class="section" id="srResults" hidden aria-live="polite">
+      <div class="container">
+        <div class="sr-summary" id="srSummary"></div>
+        <div class="sr-filters"><div class="chip-select" id="srSources" role="group" aria-label="Source"></div><label class="cx-unit">Trier <select id="srSort"><option value="amount">par montant</option><option value="year">par année</option></select></label></div>
+        <div class="kpis" id="srKpis"></div>
+        <div class="grid-2">
+          <div class="panel"><h3>Montants par année</h3><div id="srYears" class="chart"></div><p class="note" id="srYearsNote"></p></div>
+          <div class="panel"><h3 id="srWhoTitle">Principaux bénéficiaires</h3><div id="srWho"></div></div>
+        </div>
+        <div class="grid-2">
+          <div class="panel"><h3 id="srExtraTitle">Programmes, mesures et familles d’achat</h3><div id="srExtra"></div></div>
+          <div class="panel"><h3>Départements</h3><div id="srDepts"></div><p class="note">Département du bénéficiaire ou du projet, quand la source le précise.</p></div>
+        </div>
+        <div class="panel"><h3 id="srListTitle">Lignes de dépense</h3><div id="srList" class="table-wrap"></div><button class="more-btn" id="srMore" type="button" hidden>Afficher plus</button></div>
+        <div class="sr-related" id="srRelated"></div>
+        <p class="note" id="srMethod"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div><div class="footer__brand">FranceRoueLibre</div><p>Cartographie des dépenses publiques · données ouvertes</p></div>
+      <div class="footer__links"><a href="index.html#explorer">Carte</a><a href="index.html#circuit">Circuit</a><a href="index.html#comptes">Comptes</a><a href="aides.html">Aides</a><a href="marches.html">Marchés</a><a href="signaux.html">Signaux</a><a href="donnees.html">Données</a></div>
+    </div>
+  </footer>
+</body>
+</html>
