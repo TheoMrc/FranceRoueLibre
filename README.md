@@ -1,8 +1,60 @@
-# FranceRoueLibre
+<p align="center"><img src="docs/logo.svg" width="72" alt=""></p>
 
-FranceRoueLibre rassemble les données ouvertes sur l’argent public — recettes, dépenses, déficit, dette, subventions, marchés — pour permettre de reproduire les chiffres publiés, de repérer ce qui manque et de signaler les anomalies à vérifier.
+<h1 align="center">FranceRoueLibre</h1>
 
-## Pages
+<p align="center"><strong>Ouvrir le capot des comptes publics.</strong></p>
+
+> Les services de l’État eux-mêmes sont dans l’incapacité de dire où part l’argent des Français. L’argent des Français est flambé à la légère, sans études d’impact a priori ni évaluation a posteriori des politiques financées, car les politiques ne sont pas armés intellectuellement : ils font des paris à l’aveugle et des politiques de communication avec de l’argent qui ne sort pas de leurs poches, mais des nôtres.
+>
+> FranceRoueLibre est une énième initiative visant à ouvrir le capot des comptes publics.
+
+## Ce que montre le site
+
+| Page | Contenu |
+|---|---|
+| **Carte** | Comptes des 34 875 communes, des intercommunalités, départements et régions (2012–2025) : dépenses, recettes, impôts, dotations, dette, épargne. En total, par habitant ou en part nationale, année par année. |
+| **Circuit** | D’où vient chaque euro et où il va : recettes → dépenses → déficit → dette, de 1960 à 2025 (Insee), ou pour chaque niveau local (OFGL). Un clic sur un pôle de dépense détaille l’argent par fonction (retraites, santé, enseignement…) et par nature (salaires, achats, prestations). |
+| **Comptes** | Comptes nationaux en Md€, % du PIB ou € par habitant : recettes, dépenses, comptes par administration, passage du déficit à la dette, impôts. |
+| **Aides** | Subventions de l’État aux associations (2010–2023), aides aux entreprises, Fonds vert, bénéficiaire par bénéficiaire. |
+| **Marchés** | 1,4 million de marchés publics (2014–2026) : acheteurs, concurrence, achats par type de produit, zoom énergies renouvelables. |
+| **Recherche** | N’importe quel mot (« discrimination », « LGBT », « photovoltaïque »…) cherché dans 1,9 million de lignes de dépenses publiées, avec synthèse, montants, bénéficiaires et lignes surlignées. |
+| **Signaux** | Règles simples appliquées à toutes les données : marchés à offre unique, sans mise en concurrence, avenants qui font exploser les prix, montants calés sous les seuils, subventions à des structures fermées, communes en difficulté, retards de paiement… |
+| **Données** | Les 59 sources utilisées, et surtout ce qui n’est **pas** publié (hôpitaux, ARS, établissements scolaires, bénéficiaires des niches fiscales, prix unitaires des achats…). |
+
+**Un signal n’est ni une preuve ni une accusation** : c’est une question à poser à l’organisme concerné, avec la source pour la vérifier. Les données publiques contiennent des erreurs de saisie et des changements de périmètre ; chaque chiffre renvoie à sa source.
+
+## Principes
+
+- **Seulement des données ouvertes** (Insee, Eurostat, OFGL, DGFiP, data.gouv.fr, data.economie.gouv.fr…), téléchargées par script avec leur URL, leur date et leur empreinte SHA-256.
+- **Des chiffres reproductibles** : chaque total affiché est recalculé à partir des postes publiés et l’écart est montré (0,000 quand tout concorde).
+- **Pas d’addition trompeuse** : plafonds d’accords-cadres, montants aberrants et périmètres différents sont séparés, jamais additionnés en silence.
+- **Indépendant** : ce site n’est ni édité ni cautionné par l’État ou une administration.
+
+## Lancer le site
+
+```
+node serve.mjs          # puis http://127.0.0.1:4173
+```
+
+Le site est statique (`dist/`). Un serveur HTTP qui gère les requêtes partielles (`Range`) suffit : la recherche lit sa base SQLite par petits morceaux, sans la télécharger en entier.
+
+## Mettre à jour les données
+
+```
+node scripts/fetch-sources.mjs     # télécharge ≈ 50 jeux ouverts dans sources/raw/ (Node 18+)
+pip install duckdb                 # une fois
+python scripts/build_all.py        # recalcule tout dist/data, dont l’index de recherche
+```
+
+## Contribuer
+
+Une source manquante, un chiffre qui ne colle pas, un signal mal calibré : ouvrez une *issue* avec le lien vers la source. Les angles morts listés sur la page Données sont autant de demandes d’ouverture à adresser aux administrations (et à la CADA).
+
+---
+
+## Documentation technique
+
+### Pages en détail
 
 - **Accueil** (`index.html`) : carte des projets aidés et des comptes locaux (communes, intercommunalités, départements, régions) avec les 54 à 68 agrégats OFGL par niveau (dépenses, recettes, impôts, dotations, dette, épargne), années 2012–2025 animables, unités total / par habitant / part nationale ; « Le circuit de l’argent public », diagramme animé des recettes → dépenses → déficit → dette pour toutes les administrations (Insee, 1960–2025) ou pour chaque niveau local (OFGL), avec contrôles de cohérence ; un clic sur un pôle de dépense (fonctionnement, prestations, investissement, intérêts) détaille où va l’argent par fonction et sous-fonction (Eurostat/Insee COFOG, 1995–2024) ; comptes nationaux détaillés en Md€, % du PIB ou € par habitant.
 - **Aides** (`aides.html`) : subventions de l’État aux associations (annexes « jaunes » 2010–2023), aides de minimis aux entreprises, Fonds vert.
@@ -11,7 +63,7 @@ FranceRoueLibre rassemble les données ouvertes sur l’argent public — recett
 - **Recherche** (`recherche.html`, et la barre de recherche de l’en-tête) : n’importe quel mot ou expression cherché sans accents dans 1,9 million de lignes de dépenses publiées (objet des subventions aux associations 2010–2023, objet des marchés publics 2014–2026, projets DGCL 2025, Fonds vert, aides de minimis, intitulés du budget vert 2026), avec suggestions, synthèse rédigée automatiquement, montants par source, année, bénéficiaire, programme et département, et la liste des lignes surlignées.
 - **Données** (`donnees.html`) : inventaire des sources et angles morts (hôpitaux, ARS, CPTS, établissements scolaires, aides fiscales…).
 
-## Mettre à jour les données
+### Détails des traitements
 
 ```
 node scripts/fetch-sources.mjs     # télécharge ≈ 50 jeux ouverts dans sources/raw/ (Node 18+, reprise automatique)
@@ -21,11 +73,11 @@ python scripts/build_all.py        # recalcule dist/data/local, aides, marches, 
 
 `fetch-sources.mjs` découpe les très gros exports par année, vérifie chaque fichier contre le nombre de lignes annoncé par l’API et recommence s’il est incomplet ; `sources/raw/manifest.json` conserve l’URL, la date, la taille et l’empreinte SHA-256 de chaque fichier. `sources/raw/` n’est pas versionné. Les traitements (`scripts/process_*.py`) utilisent DuckDB et lisent directement les fichiers compressés.
 
-La recherche repose sur une base SQLite plein texte (FTS5) d’environ 550 Mo, `dist/data/search/frl-search.sqlite3`, construite par `python scripts/process_search.py` (inclus dans `build_all.py`, après les autres traitements dont il réutilise les tables de `sources/derived/`). Le navigateur la lit par petits morceaux grâce aux requêtes HTTP partielles (`Range`, gérées par `serve.mjs`) et à [sql.js-httpvfs](https://github.com/phiresky/sql.js-httpvfs) (licence Apache 2.0, dans `dist/vendor/sqljs-httpvfs`) : une recherche télécharge quelques centaines de kilo-octets, pas la base entière. Ce fichier n’est pas versionné (trop gros pour Git) ; pour un hébergement public, il faudra le découper en morceaux (mode « chunked » de sql.js-httpvfs).
+La recherche repose sur une base SQLite plein texte (FTS5) d’environ 550 Mo, `dist/data/search/frl-search.sqlite3`, construite par `python scripts/process_search.py` (inclus dans `build_all.py`, après les autres traitements dont il réutilise les tables de `sources/derived/`). Le navigateur la lit par petits morceaux grâce aux requêtes HTTP partielles (`Range`, gérées par `serve.mjs`) et à [sql.js-httpvfs](https://github.com/phiresky/sql.js-httpvfs) (licence Apache 2.0, dans `dist/vendor/sqljs-httpvfs`) : une recherche télécharge quelques centaines de kilo-octets, pas la base entière. La base est découpée en fichiers de 45 Mo dans `dist/data/search/db/` (mode « chunked » de sql.js-httpvfs) : elle tient dans Git (limite GitHub de 100 Mo par fichier) et fonctionne sur n’importe quel hébergement statique. Le fichier entier `frl-search.sqlite3` n’est pas versionné.
 
 Deux fichiers de référence sont versionnés dans `sources/` : `eurostat-cofog-fr.json` (dépenses par fonction et par nature, [Eurostat gov_10a_exp](https://ec.europa.eu/eurostat/databrowser/view/gov_10a_exp/default/table?lang=fr), extrait via l’API Eurostat pour la France, secteur S13, 1995–2024) et `cpv-2008-fr.json` (libellés français des 9 454 codes CPV, point SPARQL de l’Office des publications de l’UE).
 
-## Données
+### Données
 
 - Projets : [DGCL sur data.gouv.fr](https://www.data.gouv.fr/datasets/projets-finances-par-les-dotations-de-soutien-a-linvestissement-des-collectivites-territoriales), fichier 2025 téléchargé le 15 septembre 2026, Licence Ouverte 2.0.
 - Budgets communaux : [OFGL, comptes consolidés des communes 2018–2025](https://data.ofgl.fr/explore/dataset/ofgl-base-communes-consolidee/), export filtré sur « Dépenses totales », téléchargé le 27 octobre 2026. Les budgets principaux et annexes sont consolidés au sein de chaque commune.
@@ -35,43 +87,43 @@ Deux fichiers de référence sont versionnés dans `sources/` : `eurostat-cofog-
 
 Les fichiers sources sont conservés dans `sources/`. La commande `node build-data.mjs` produit `dist/data/departments.geojson`, `dist/data/budgets-2025.json`, les millésimes annuels et, via `scripts/web-data.mjs`, les fichiers compacts chargés par le site dans `dist/data/web/` (projets, métadonnées communales et contours encodés en entiers différentiels, environ trois fois plus légers que le GeoJSON). Le regroupement des lignes OFGL est dédoublonné par code INSEE communal.
 
-## Développement local
+### Développement local
 
 Le site est statique et peut être servi avec `node serve.mjs` ou tout serveur HTTP statique. Il faut passer par un serveur HTTP pour que les fichiers JSON soient chargés correctement ; ouvrir `dist/index.html` en `file://` peut bloquer les requêtes locales.
 
-La charte reprend celle du site BioDevs (`C:\GitHub\BioDevs\BioDevs\site`) : typographies Sora et Inter, thème clair par défaut avec thème sombre, dégradé sarcelle → bleu, sections pleine largeur séparées par leur fond plutôt que par des cadres, et le bouton de thème soleil/lune morphé.
+La charte reprend celle du site BioDevs : typographies Sora et Inter, thème clair par défaut avec thème sombre, dégradé sarcelle → bleu, sections pleine largeur séparées par leur fond plutôt que par des cadres, et le bouton de thème soleil/lune morphé.
 
 La carte est rendue par MapLibre GL (copie locale dans `dist/vendor/`, licence BSD) : les contours sont découpés en tuiles dans un worker et affichés par le GPU, ce qui rend le zoom (molette, pavé tactile, pincement, boutons + et −) et le déplacement fluides. Les couleurs sont appliquées par état d’entité, sans créer un nœud par commune. Les contours à 50 m des communes sont chargés par département visible à partir du zoom 7, ceux à 100 m des départements et régions au besoin. Ils décrivent des limites administratives, pas un fond de carte routier ou des images aériennes. La carte ouvre sur la France métropolitaine ; les territoires ultramarins restent accessibles par recherche, filtre et sélection dans les listes.
 
-## Comptes publics nationaux
+### Comptes publics nationaux
 
 La section « Comptes publics » présente les ratios de recettes, dépenses, solde et dette brute des administrations publiques pour 1960–2025, en pourcentage du PIB ; la dette commence en 1978. Les valeurs proviennent du tableau [Insee, Dépenses et recettes publiques](https://www.insee.fr/fr/statistiques/2381414), publié le 28 août 2026 (comptes nationaux, base 2020). Les données 2024 sont semi-définitives et celles de 2025 provisoires. L'extrait versionné `sources/national-ratios-insee.json` est recopié lors du build ; il ne se met pas à jour automatiquement. Les valeurs sont arrondies à un dixième de point : leur différence peut ne pas reproduire exactement le solde publié.
 
 Le solde annuel est un flux et la dette en fin d'année un stock ; la variation de la dette n'est pas nécessairement égale au déficit. Les comptes nationaux sont consolidés entre administrations. Les budgets locaux et les subventions de la carte sont d'autres périmètres : ils ne doivent pas être additionnés aux totaux nationaux. L'OFGL signale que certains comptes communaux 2025 manquent encore. Les séries territoriales antérieures et les détails sur la fiscalité, l'État, la sécurité sociale et les marchés publics ne sont pas encore intégrés.
 
-## Millésimes communaux
+### Millésimes communaux
 
 Le build transforme les extraits versionnés OFGL de 2012 à 2025 en quatorze fichiers chargés à la demande. Les archives 2012–2017 ont été filtrées par `scripts/extract-ofgl-archive.py` ; les fichiers manifestes conservent les URL et empreintes SHA-256 des archives sources. La carte joint les comptes à la géographie de 2025 par code INSEE historique exact. Les lignes sans code correspondant à un contour et aux métadonnées de 2025 sont exclues et leur nombre est indiqué dans la vue ; les fusions et modifications de limites ne sont pas retraitées même lorsqu’un code a été conservé. Les comparaisons dans le temps sont donc à interpréter avec prudence. La population et le montant par habitant proviennent directement de l’OFGL pour chaque exercice. Les comptes indisponibles ne sont pas remplacés par zéro. En 2025, l’extrait contient 34 778 comptes et l’OFGL indique 97 comptes manquants. La consolidation à l’intérieur de chaque commune ne supprime pas les flux entre collectivités ; le total affiché ne représente pas les dépenses locales consolidées en comptabilité nationale.
 
 Vérifier le build avec `node build-data.mjs` puis `node --test tests/commune-history.test.mjs`.
 
-## Fiscalité nationale
+### Fiscalité nationale
 
 Le graphique fiscal reprend les huit catégories du tableau [Insee « Impôts »](https://www.insee.fr/fr/statistiques/2381408), publiées le 28 août 2026 en milliards d’euros courants, pour les années 1995 à 2025. Certains impôts sont présentés séparément comme détails déjà inclus dans leur catégorie. Le [taux de prélèvements obligatoires](https://www.insee.fr/fr/statistiques/2381412), du même millésime de publication, inclut aussi les cotisations sociales effectives et certains impôts au profit de l’Union européenne ; il est net des crédits d’impôt et hors cotisations sociales imputées. Il ne correspond donc ni à la somme des seuls impôts, ni à l’ensemble des recettes publiques. Les données 2024 sont semi-définitives et celles de 2025 provisoires. L’extrait `sources/national-taxes-insee.json` est versionné ; il ne s’actualise pas automatiquement.
 
-## Rapprochement des recettes et des dépenses
+### Rapprochement des recettes et des dépenses
 
 Le tableau [Insee 3.201](https://www.insee.fr/fr/statistiques/8988845) présente les recettes et dépenses consolidées de l'ensemble des administrations publiques. Pour 1960–2025, l’interface additionne ses quatre sous-totaux de recettes et ses quatre sous-totaux de dépenses et compare leur différence au solde publié. Le fichier source original est conservé dans `sources/insee-apu-3201-2026-08.xlsx` ; `scripts/extract-national-accounts.py` (Python et openpyxl) produit l’extrait versionné `sources/national-accounts-3201.json`, ensuite copié par le build. Les contrôles de l’extracteur vérifient les deux décompositions et le solde à 0,001 Md€ près avant arrondi d’affichage. Les comptes 2025 restent provisoires et les valeurs peuvent différer des publications antérieures, notamment après révision.
 
 Cette présentation simplifiée élimine la plupart des flux imputés de production tout en conservant certaines imputations, notamment des cotisations sociales et crédits d’impôt. Elle conserve le solde de la comptabilité nationale ; les montants ne sont donc pas un relevé exhaustif des paiements individuels. Les transferts entre administrations sont consolidés : les comptes des sous-secteurs ne peuvent pas être simplement additionnés.
 
-## Comptes par sous-secteur et écarts
+### Comptes par sous-secteur et écarts
 
 Les recettes et dépenses de l’État, des ODAC, des administrations publiques locales et de la sécurité sociale proviennent du tableau [Insee 3.215](https://www.insee.fr/fr/statistiques/8988845), publié le 28 août 2026. Le fichier original `sources/insee-apu-3215-2026-08.xlsx` et l’extracteur `scripts/extract-national-sectors.py` permettent de reproduire l’extrait versionné. Les soldes affichés sont calculés comme recettes moins dépenses. Les transferts entre sous-secteurs apparaissent dans leurs comptes respectifs et sont éliminés dans le total consolidé ; il est donc incorrect d’additionner directement leurs dépenses pour obtenir le total APU.
 
 Pour 2024, le total des dépenses publié dans le tableau 3.215 est supérieur de 0,119 Md€ à celui du tableau 3.201, tandis que les recettes totales correspondent. La somme des soldes sectoriels correspond au solde de 3.201 et diffère de celui calculé à partir des totaux 3.215 du même montant. L’interface montre cet écart de sources sans lui attribuer de cause : il ne démontre pas une dépense manquante.
 
-## Du déficit à la variation de dette
+### Du déficit à la variation de dette
 
 Les tableaux [Insee 3.101 et 3.105](https://www.insee.fr/fr/statistiques/8988843) fournissent la dette brute de Maastricht et la contribution de chaque sous-secteur pour 1978–2025, ainsi que le passage du déficit à la variation de dette pour 2009–2025. Les cinq ajustements signés publiés incluent les acquisitions nettes d’actifs, les passifs hors dette de Maastricht, les changements de volume, les comptes à recevoir ou à payer et l’écart statistique. Le déficit est affiché comme montant positif à financer. Les valeurs du tableau 3.105 sont arrondies au dixième de milliard ; les sommes peuvent différer après arrondi. La dette de Maastricht est brute, consolidée et évaluée en valeur nominale : elle ne comprend pas tous les passifs des administrations.
 
@@ -80,13 +132,13 @@ Les classeurs `sources/insee-dette-3101-2026-08.xlsx` et `sources/insee-dette-31
 
 Les contours de 2025 sans compte apparié au millésime choisi sont affichés dans une couleur distincte et restent recherchables et sélectionnables. Une absence de correspondance peut provenir d’un compte indisponible ou, pour les exercices antérieurs, de changements de codes et de contours ; elle ne vaut pas zéro. Ces contours sont exclus des sommes et le nombre de comptes appariés reste distinct du nombre de contours sans compte. La couche de ces contours est regroupée en un seul tracé SVG pour préserver les performances de la carte.
 
-## Millésimes départementaux et régionaux
+### Millésimes départementaux et régionaux
 
 Les tableaux annuels 2012–2025 proviennent des comptes consolidés OFGL des [départements](https://data.ofgl.fr/explore/dataset/ofgl-base-departements-consolidee/) et [régions](https://data.ofgl.fr/explore/dataset/ofgl-base-regions-consolidee/), extraits le 27 octobre 2026. Le build versionne et transforme les exports filtrés sur « Dépenses totales » et charge les années à la demande. Les montants sont consolidés au sein de chaque collectivité mais pas entre collectivités ; leur somme n’est pas le total national des dépenses publiques locales.
 
 Sur le contour du Rhône, la carte regroupe les comptes du département et de la Métropole de Lyon, et leur ratio par habitant utilise la somme des populations. Depuis 2021, le compte unique de la Collectivité européenne d’Alsace est coloré sur les deux contours 67 et 68 sans être compté deux fois dans les totaux. Pour 2012–2020, les comptes du Bas-Rhin et du Haut-Rhin sont identifiés par SIREN. Le compte de Paris devient celui de la Ville de Paris en 2019 ; les collectivités territoriales uniques de Corse, Guyane et Martinique figurent dans la vue régionale et exercent des compétences élargies. Ces changements limitent les comparaisons entre années et territoires.
 
-## Historique et visualisation
+### Historique et visualisation
 
 L’histogramme national permet de sélectionner une année de 1960 à 2025 et de comparer dépenses, recettes ou dette en pourcentage du PIB ; les barres sont accessibles au clavier et les valeurs manquantes restent indisponibles. Les comptes nationaux détaillés remontent à 1960, les comptes par sous-secteur et la dette brute à 1978, le pont entre déficit et variation de dette à 2009 et les catégories fiscales à 1995. Le taux de prélèvements obligatoires est disponible à partir de 1959 dans la source. Les classeurs Insee de référence sont conservés et `scripts/extract-national-history.py` régénère les ratios et les impôts. Les séries sont exprimées en euros courants ou en points de PIB, selon le graphique : les euros courants ne corrigent pas l’inflation.
 
