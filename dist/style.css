@@ -541,7 +541,8 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .legal h2 { margin-top: var(--sp-5); font-size: 1.35rem; }
 .legal p, .legal li { margin-top: .6rem; line-height: 1.65; }
 .legal ul { padding-left: 1.2rem; }
-.legal address { font-style: normal; }
+.legal address { font-style: normal; line-height: 1.65; margin-top: .6rem; }
+.legal a { color: var(--c-blue-600); text-decoration: underline; text-underline-offset: 2px; }
 
 
 /* ---------- Secondary pages ---------- */
