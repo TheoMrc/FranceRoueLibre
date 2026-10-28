@@ -1,0 +1,36 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Sora;font-weight:700;src:url(../dist/vendor/fonts/sora-latin-700-normal.woff2)}
+@font-face{font-family:Sora;font-weight:600;src:url(../dist/vendor/fonts/sora-latin-600-normal.woff2)}
+@font-face{font-family:Inter;font-weight:400;src:url(../dist/vendor/fonts/inter-latin-400-normal.woff2)}
+@font-face{font-family:Inter;font-weight:500;src:url(../dist/vendor/fonts/inter-latin-500-normal.woff2)}
+@font-face{font-family:Inter;font-weight:600;src:url(../dist/vendor/fonts/inter-latin-600-normal.woff2)}
+*{margin:0;box-sizing:border-box}
+body{width:1200px;height:630px;overflow:hidden;font-family:Inter,sans-serif;color:#0f1b2d;
+ background:radial-gradient(900px 500px at 105% -10%,#dbeafe 0%,transparent 60%),radial-gradient(700px 420px at -10% 110%,#e0f2fe 0%,transparent 60%),#ffffff;position:relative}
+.grid{position:absolute;inset:0;background-image:linear-gradient(#e6edf5 1px,transparent 1px),linear-gradient(90deg,#e6edf5 1px,transparent 1px);background-size:48px 48px;opacity:.55;
+ mask-image:linear-gradient(90deg,transparent 0%,#000 55%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 55%)}
+.wrap{position:absolute;inset:0;padding:64px 72px;display:flex;flex-direction:column}
+.lock{display:flex;align-items:center;gap:20px}
+.sep{width:2px;height:58px;background:#cbd5e1}
+.name{font-family:Sora;font-weight:700;font-size:30px;line-height:1.02;letter-spacing:-.01em}
+.name span{display:block}.name .b{background:linear-gradient(90deg,#0e7490,#2563eb);-webkit-background-clip:text;color:transparent}
+h1{font-family:Sora;font-weight:700;font-size:74px;line-height:1.04;letter-spacing:-.03em;margin-top:58px;max-width:760px}
+h1 em{font-style:normal;background:linear-gradient(90deg,#0e7490,#2563eb);-webkit-background-clip:text;color:transparent}
+p{font-size:27px;line-height:1.4;color:#475569;margin-top:22px;max-width:690px}
+.foot{margin-top:auto;display:flex;gap:14px;align-items:center;font-size:21px;font-weight:600;color:#334155}
+.pill{padding:9px 18px;border-radius:999px;background:#eef2f7}
+.url{margin-left:auto;font-family:Sora;font-weight:600;font-size:26px;color:#2563eb}
+.chart{position:absolute;right:56px;top:150px;width:380px;height:300px}
+</style></head><body><div class="grid"></div>
+<svg class="chart" viewBox="0 0 380 300" fill="none">
+ <g fill="#e2e8f0"><rect x="10" y="60" width="44" height="220" rx="6"/><rect x="74" y="95" width="44" height="185" rx="6"/><rect x="138" y="80" width="44" height="200" rx="6"/><rect x="202" y="140" width="44" height="140" rx="6"/><rect x="266" y="170" width="44" height="110" rx="6"/></g>
+ <path d="M24 44 L96 116 L160 82 L248 196 L330 236" stroke="#e11d48" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+ <path d="M282 246 H338 V190" stroke="#e11d48" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+<div class="wrap">
+ <div class="lock"><svg width="66" height="66" viewBox="0 0 48 48"><path d="M24 4l17 10v20L24 44 7 34V14z" fill="#fff" stroke="#2563eb" stroke-width="3.2" stroke-linejoin="round"/><path d="M14 17l7 7 5-4 9 11" fill="none" stroke="#e11d48" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 31H35V25" fill="none" stroke="#e11d48" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+ <div class="sep"></div><div class="name"><span>France</span><span class="b">RoueLibre</span></div></div>
+ <h1>Où part <em>l’argent public</em> ?</h1>
+ <p>Dépenses, aides, marchés publics et dette, territoire par territoire. Uniquement des données ouvertes.</p>
+ <div class="foot"><span class="pill">Carte des communes</span><span class="pill">Aides</span><span class="pill">Marchés</span><span class="pill">Recherche</span><span class="url">francerouelibre.fr</span></div>
+</div></body></html>
