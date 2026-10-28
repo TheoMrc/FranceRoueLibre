@@ -3,7 +3,7 @@
   const { money, count, esc, load, sirenLink, bars, lazy, resolveNames } = FRL;
   const $ = id => document.getElementById(id);
   const buyerLink = siren => `<a href="https://annuaire-entreprises.data.gouv.fr/entreprise/${esc(siren)}" target="_blank" rel="noopener noreferrer" data-siren-name="${esc(siren)}">${esc(siren)}</a>`;
-  const supplierLink = id => id ? `<a href="https://annuaire-entreprises.data.gouv.fr/etablissement/${esc(id)}" target="_blank" rel="noopener noreferrer">${esc(id)}</a>` : '—';
+  const supplierLink = id => id ? `<a href="https://annuaire-entreprises.data.gouv.fr/etablissement/${esc(id)}" target="_blank" rel="noopener noreferrer">${esc(id)}</a>` : '–';
 
   /* Selectable ranking: rows of buttons with a bar; keeps the DOM so bars glide between years. */
   function selectList(container, rows, { selected = null, limit = 40, onSelect }) {
@@ -84,7 +84,7 @@
     if (!cpvTop) { $('prTop').innerHTML = '<p class="note">Chargement…</p>'; cpvTop = await load('./data/marches/cpv-top.json').catch(() => ({ groups: {}, cpvLabels: {} })); }
     const rows = [...(cpvTop.groups[state.group] || [])].sort((a, b) => b[3] - a[3]);
     $('prTop').innerHTML = rows.length ? `<table class="data-table"><thead><tr><th>Année</th><th>Acheteur</th><th>Objet</th><th>Produit</th><th>Titulaire</th><th class="num">Offres</th><th class="num">Montant</th></tr></thead><tbody>${rows.map(([year, buyer, supplier, amount, object, code, bids]) =>
-      `<tr><td>${year}</td><td>${buyerLink(buyer)}</td><td class="muted">${esc(object || '')}</td><td class="muted">${esc(cpvTop.cpvLabels[code] || code || '')}</td><td>${supplierLink(supplier)}</td><td class="num">${bids ?? '—'}</td><td class="num">${money(amount)}</td></tr>`).join('')}</tbody></table>` : '<p class="note">Aucun marché hors accord-cadre dans cette sous-famille.</p>';
+      `<tr><td>${year}</td><td>${buyerLink(buyer)}</td><td class="muted">${esc(object || '')}</td><td class="muted">${esc(cpvTop.cpvLabels[code] || code || '')}</td><td>${supplierLink(supplier)}</td><td class="num">${bids ?? '–'}</td><td class="num">${money(amount)}</td></tr>`).join('')}</tbody></table>` : '<p class="note">Aucun marché hors accord-cadre dans cette sous-famille.</p>';
     resolveNames($('prTop'));
   }
 
@@ -114,7 +114,7 @@
     $('enTopTitle').textContent = `Plus gros marchés · ${name}`;
     const rows = energy.top[tech] || [];
     $('enTop').innerHTML = `<table class="data-table"><thead><tr><th>Année</th><th>Acheteur</th><th>Objet</th><th>Titulaire</th><th class="num">Offres</th><th class="num">Montant</th></tr></thead><tbody>${rows.map(([year, buyer, supplier, amount, object, bids]) =>
-      `<tr><td>${year}</td><td>${buyerLink(buyer)}</td><td class="muted">${esc(object || '')}</td><td>${supplierLink(supplier)}</td><td class="num">${bids ?? '—'}</td><td class="num">${money(amount)}</td></tr>`).join('') || '<tr><td colspan="6">Aucun marché</td></tr>'}</tbody></table>`;
+      `<tr><td>${year}</td><td>${buyerLink(buyer)}</td><td class="muted">${esc(object || '')}</td><td>${supplierLink(supplier)}</td><td class="num">${bids ?? '–'}</td><td class="num">${money(amount)}</td></tr>`).join('') || '<tr><td colspan="6">Aucun marché</td></tr>'}</tbody></table>`;
     resolveNames($('enTop'));
   }
 

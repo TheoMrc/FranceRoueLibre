@@ -6,7 +6,7 @@ The two extracts overlap; contracts are de-duplicated on (buyer SIRET, contract 
 Outputs:
   summary.json   totals per year, by procedure, by CPV division, competition statistics, data-quality counters
   buyers.json    the largest buyers with competition indicators
-  signals.json   transparent screening rules — leads to check, never findings
+  signals.json   transparent screening rules: leads to check, never findings
   cpv.json       contracts and framework ceilings per year and CPV group (3 digits), with French CPV labels
   cpv-top.json   the largest contracts of each CPV group (2019+)
   energie.json   renewable-energy zoom: DECP contracts by technology, State support (budget vert, programme 345), Fonds vert

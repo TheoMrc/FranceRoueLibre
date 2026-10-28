@@ -180,7 +180,7 @@ def main():
         derived('fonds-vert', con, 'SELECT year, programme, amount, measure, dept, commune, siren, name, project FROM fv')
         main = "programme = '380'"
         write('fonds-vert.json', {
-            'source': 'Fonds vert — liste des projets subventionnés (data.gouv.fr)',
+            'source': 'Fonds vert : liste des projets subventionnés (data.gouv.fr)',
             'perYear': [list(r) for r in con.execute(f'SELECT year, count(*), sum(amount) FROM fv WHERE {main} GROUP BY 1 ORDER BY 1').fetchall()],
             'programme113': [list(r) for r in con.execute("SELECT year, count(*), sum(amount) FROM fv WHERE programme = '113' GROUP BY 1 ORDER BY 1").fetchall()],
             'byMeasure': [list(r) for r in con.execute(f'SELECT measure, count(*), sum(amount) FROM fv WHERE {main} GROUP BY 1 ORDER BY 3 DESC LIMIT 40').fetchall()],

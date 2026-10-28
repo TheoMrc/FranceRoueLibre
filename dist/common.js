@@ -21,18 +21,18 @@
 const FRL = (() => {
   const nf0 = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
   const money = value => {
-    if (value == null || !Number.isFinite(value)) return '—';
+    if (value == null || !Number.isFinite(value)) return '–';
     const a = Math.abs(value);
     if (a >= 1e9) return `${(value / 1e9).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} Md€`;
     if (a >= 1e6) return `${(value / 1e6).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} M€`;
     if (a >= 1e3) return `${(value / 1e3).toLocaleString('fr-FR', { maximumFractionDigits: 0 })} k€`;
     return `${nf0.format(value)} €`;
   };
-  const count = value => value == null ? '—' : nf0.format(value);
-  const pct = (value, digits = 1) => value == null || !Number.isFinite(value) ? '—' : `${(100 * value).toLocaleString('fr-FR', { maximumFractionDigits: digits })} %`;
+  const count = value => value == null ? '–' : nf0.format(value);
+  const pct = (value, digits = 1) => value == null || !Number.isFinite(value) ? '–' : `${(100 * value).toLocaleString('fr-FR', { maximumFractionDigits: digits })} %`;
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const load = path => fetch(path).then(response => { if (!response.ok) throw new Error(path); return response.json(); });
-  const sirenLink = (siren, label) => siren ? `<a href="https://annuaire-entreprises.data.gouv.fr/entreprise/${esc(String(siren).slice(0, 9))}" target="_blank" rel="noopener noreferrer">${esc(label || siren)}</a>` : esc(label || '—');
+  const sirenLink = (siren, label) => siren ? `<a href="https://annuaire-entreprises.data.gouv.fr/entreprise/${esc(String(siren).slice(0, 9))}" target="_blank" rel="noopener noreferrer">${esc(label || siren)}</a>` : esc(label || '–');
 
   /* Vertical bar chart, animated on value change. data: [{label, value, highlight}] */
   function bars(container, data, { format = money, height = 220, onSelect = null } = {}) {

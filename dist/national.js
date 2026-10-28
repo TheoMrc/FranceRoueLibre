@@ -57,15 +57,15 @@ return Promise.allSettled([
   };
   let unit = unitSelect?.value || 'mixed';
   const money = (value, year) => {
-    if (value == null || !Number.isFinite(value)) return '—';
-    if (unit === 'pib') { const base = gdp(year); return base ? `${(100 * value / base).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: Math.abs(100 * value / base) < 1 ? 2 : 1 })} % du PIB` : '—'; }
-    if (unit === 'hab') { const people = population(year); return people ? `${Math.round(value * 1e9 / people).toLocaleString('fr-FR')} €/hab.` : '—'; }
+    if (value == null || !Number.isFinite(value)) return '–';
+    if (unit === 'pib') { const base = gdp(year); return base ? `${(100 * value / base).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: Math.abs(100 * value / base) < 1 ? 2 : 1 })} % du PIB` : '–'; }
+    if (unit === 'hab') { const people = population(year); return people ? `${Math.round(value * 1e9 / people).toLocaleString('fr-FR')} €/hab.` : '–'; }
     return billions(value);
   };
   const amountFor = (year, key) => key === 'debt' ? debts?.years.find(item => item.year === year)?.debt ?? null : reconciliation?.years.find(item => item.year === year)?.[key] ?? null;
   // Top tiles and history chart: % of GDP by default, otherwise the chosen unit.
   const headline = (row, key) => {
-    if (unit === 'mixed' || unit === 'pib') return row[key] == null ? '—' : ratio(row[key]);
+    if (unit === 'mixed' || unit === 'pib') return row[key] == null ? '–' : ratio(row[key]);
     return money(amountFor(row.year, key), row.year);
   };
   for (const row of data.years) {
@@ -204,7 +204,7 @@ return Promise.allSettled([
       const changeValue = debt.change == null ? stockChange : debt.change;
       const bridge = debt.deficit == null ? '<p>Le détail du passage du déficit à la dette est disponible à partir de 2009 dans cette source.</p>' : `<ul><li><span>Déficit à financer</span><strong>${signed(debt.deficit)}</strong></li>${debt.adjustments.map(item => `<li><span>${item.label}</span><strong>${signed(item.value)}</strong></li>`).join('')}</ul><div class="recon-total"><span>Variation de dette publiée</span><strong>${signed(debt.change)}</strong></div>`;
       const mismatch = Math.abs(debt.stockDifference ?? 0) > .11 ? `<p class="sector-warning">Écart entre la variation des stocks (tableau 3.101) et la variation publiée (3.105) : ${preciseBillions(debt.stockDifference)}. Écart de sources à expliquer.</p>` : '';
-      debtContent.innerHTML = `<div class="debt-summary"><div><span>Dette fin ${row.year - 1}</span><strong>${debt.previousDebt == null ? '—' : money(debt.previousDebt, row.year - 1)}</strong></div><div><span>${changeLabel}</span><strong>${changeValue == null ? '—' : signed(changeValue)}</strong></div><div><span>Dette fin ${row.year}</span><strong>${money(debt.debt, row.year)}</strong></div></div><div class="recon-grid"><div class="recon-column"><h4>Passage du déficit à la dette</h4>${bridge}</div><div class="recon-column"><h4>Contribution à la dette en fin d’année</h4><div class="debt-bars">${debt.sectors.map(item => `<div><div class="tax-line"><span>${item.label}</span><strong>${money(item.value, row.year)}</strong></div><div class="tax-track" aria-hidden="true"><div class="tax-bar" style="width:${100 * item.value / debtMax}%"></div></div></div>`).join('')}</div></div></div>${mismatch}`;
+      debtContent.innerHTML = `<div class="debt-summary"><div><span>Dette fin ${row.year - 1}</span><strong>${debt.previousDebt == null ? '–' : money(debt.previousDebt, row.year - 1)}</strong></div><div><span>${changeLabel}</span><strong>${changeValue == null ? '–' : signed(changeValue)}</strong></div><div><span>Dette fin ${row.year}</span><strong>${money(debt.debt, row.year)}</strong></div></div><div class="recon-grid"><div class="recon-column"><h4>Passage du déficit à la dette</h4>${bridge}</div><div class="recon-column"><h4>Contribution à la dette en fin d’année</h4><div class="debt-bars">${debt.sectors.map(item => `<div><div class="tax-line"><span>${item.label}</span><strong>${money(item.value, row.year)}</strong></div><div class="tax-track" aria-hidden="true"><div class="tax-bar" style="width:${100 * item.value / debtMax}%"></div></div></div>`).join('')}</div></div></div>${mismatch}`;
     } else debtContent.textContent = 'Détail de la dette indisponible pour cet exercice.';
     const tax = taxes?.years.find(item => item.year === row.year);
     if (!tax) {

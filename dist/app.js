@@ -140,7 +140,7 @@ function formatCompact(value) {
 }
 
 function formatValue(value, perCapita = false) {
-  if (!Number.isFinite(value)) return '—';
+  if (!Number.isFinite(value)) return '–';
   if (perCapita) return `${decimalFormat.format(value)} €/hab.`;
   return formatCompact(value);
 }
@@ -148,7 +148,7 @@ function formatValue(value, perCapita = false) {
 function formatMetric(value) {
   if (state.metric === 'perCapita') return formatValue(value, true);
   if (state.metric === 'share') {
-    if (!Number.isFinite(value) || !state.shareBase) return '—';
+    if (!Number.isFinite(value) || !state.shareBase) return '–';
     const pct = 100 * value / state.shareBase;
     if (pct > 0 && pct < .01) return '< 0,01 %';
     return `${pct.toLocaleString('fr-FR', { maximumFractionDigits: pct < 1 ? 2 : 1 })} %`;
@@ -1182,7 +1182,7 @@ function renderStats(rows, summary) {
   const copy = modeCopy();
   setText(dom.totalLabel, state.metric === 'perCapita' ? 'Par habitant' : state.metric === 'share' ? 'Part du total national' : (state.mode === 'projects' ? 'Subventions affichées' : indicatorLabel()));
   const noMatchedAccount = state.mode === 'communes' && !rows.length && filteredMissingCommunes().length > 0;
-  setText(dom.totalAmount, noMatchedAccount ? '—' : formatMetric(state.metric === 'perCapita' ? summary.perCapita : summary.total));
+  setText(dom.totalAmount, noMatchedAccount ? '–' : formatMetric(state.metric === 'perCapita' ? summary.perCapita : summary.total));
   setText(dom.countLabel, state.mode === 'communes' ? 'Comptes disponibles' : copy.count); setText(dom.projectCount, formatCount(summary.count));
   setText(dom.coverageLabel, copy.coverage); setText(dom.departmentCount, formatCount(summary.coverage));
   const localContext = `OFGL ${state.localYear} · comptes consolidés par collectivité. Rhône : département et Métropole de Lyon réunis sur la carte. Depuis 2021, l’Alsace est affichée sur ses deux contours avec le même montant non réparti. Paris et les collectivités uniques ont des compétences élargies. Avant 2016, les anciennes régions sont regroupées sur les contours actuels sans consolidation entre elles.`;
@@ -1217,9 +1217,9 @@ function renderInspectorStats(summary, rows) {
   clearChildren(dom.inspectorStats);
   const noMatchedAccount = state.mode === 'communes' && !rows.length && filteredMissingCommunes().length > 0;
   const cards = [
-    [state.metric === 'perCapita' ? 'Par habitant' : state.metric === 'share' ? 'Part nationale' : state.mode === 'projects' ? 'Subventions' : 'Montant', noMatchedAccount ? '—' : formatMetric(state.metric === 'perCapita' ? summary.perCapita : summary.total)],
+    [state.metric === 'perCapita' ? 'Par habitant' : state.metric === 'share' ? 'Part nationale' : state.mode === 'projects' ? 'Subventions' : 'Montant', noMatchedAccount ? '–' : formatMetric(state.metric === 'perCapita' ? summary.perCapita : summary.total)],
     [modeCopy().count, formatCount(summary.count)],
-    [state.mode === 'projects' ? 'Territoires' : 'Population', state.mode === 'projects' ? formatCount(summary.coverage) : (summary.population ? `${formatCount(summary.population)} hab.` : '—')]
+    [state.mode === 'projects' ? 'Territoires' : 'Population', state.mode === 'projects' ? formatCount(summary.coverage) : (summary.population ? `${formatCount(summary.population)} hab.` : '–')]
   ];
   cards.forEach(([label, value]) => {
     const card = document.createElement('div'); card.className = 'inspector-stat';

@@ -100,7 +100,7 @@ test('debt bridge updates with the selected year', async () => {
 test('early years show available figures and explicitly identify absent series', async () => {
   const elements = await renderFixture();
   elements.nationalYear.value = 1970; elements.nationalYear.change();
-  assert.match(elements.nationalContent.innerHTML, /Dette brute<\/span><strong>—/);
+  assert.match(elements.nationalContent.innerHTML, /Dette brute<\/span><strong>–/);
   assert.match(elements.taxContent.textContent, /1995/);
   assert.match(elements.reconciliationContent.innerHTML, /Recettes/);
   elements.nationalYear.value = 2014; elements.nationalYear.change();

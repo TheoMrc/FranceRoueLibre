@@ -2,16 +2,16 @@
 (() => {
   const { money, count, pct, esc, load, sirenLink, resolveNames } = FRL;
   const $ = id => document.getElementById(id);
-  const fmtDate = value => value ? new Date(value).toLocaleDateString('fr-FR') : '—';
-  const days = value => value == null ? '—' : `${Math.round(value).toLocaleString('fr-FR')} j`;
-  const years = value => value == null ? '—' : `${value.toLocaleString('fr-FR', { maximumFractionDigits: value < 100 ? 1 : 0 })} ans`;
+  const fmtDate = value => value ? new Date(value).toLocaleDateString('fr-FR') : '–';
+  const days = value => value == null ? '–' : `${Math.round(value).toLocaleString('fr-FR')} j`;
+  const years = value => value == null ? '–' : `${value.toLocaleString('fr-FR', { maximumFractionDigits: value < 100 ? 1 : 0 })} ans`;
   const buyer = (siren, name) => name ? sirenLink(siren, name) : `<a href="https://annuaire-entreprises.data.gouv.fr/entreprise/${esc(siren)}" target="_blank" rel="noopener noreferrer" data-siren-name="${esc(siren)}">${esc(siren)}</a>`;
-  const supplier = siret => siret ? `<a href="https://annuaire-entreprises.data.gouv.fr/etablissement/${esc(siret)}" target="_blank" rel="noopener noreferrer" data-siren-name="${esc(String(siret).slice(0, 9))}">${esc(siret)}</a>` : '—';
+  const supplier = siret => siret ? `<a href="https://annuaire-entreprises.data.gouv.fr/etablissement/${esc(siret)}" target="_blank" rel="noopener noreferrer" data-siren-name="${esc(String(siret).slice(0, 9))}">${esc(siret)}</a>` : '–';
   const commune = (insee, name, dept) => `${esc(name || insee)} <span class="muted">${esc(dept || '')}</span>`;
 
   const contractColumns = [
     ['Acheteur', r => buyer(r[0], r[1])], ['Titulaire', r => supplier(r[2])], ['Montant', r => money(r[3]), 'num'], ['Notifié', r => fmtDate(r[4])],
-    ['Procédure', r => `${esc(r[5] || '—')}${r[9] ? ' <span class="tag">accord-cadre</span>' : ''}`], ['Offres', r => r[7] ?? '—', 'num'], ['Objet', r => `<span class="muted">${esc(r[8] || '')}</span>`]
+    ['Procédure', r => `${esc(r[5] || '–')}${r[9] ? ' <span class="tag">accord-cadre</span>' : ''}`], ['Offres', r => r[7] ?? '–', 'num'], ['Objet', r => `<span class="muted">${esc(r[8] || '')}</span>`]
   ];
 
   const families = [];

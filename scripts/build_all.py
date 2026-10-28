@@ -14,6 +14,6 @@ STEPS = ['process_spending.py', 'process_local.py', 'process_subsidies.py', 'pro
 sys.path.insert(0, str(Path(__file__).parent))
 for step in STEPS:
     started = time.time()
-    print(f'— {step}')
+    print(f'· {step}')
     runpy.run_path(str(Path(__file__).parent / step), run_name='__main__')
     print(f'  {time.time() - started:.1f} s')

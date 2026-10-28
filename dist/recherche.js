@@ -9,8 +9,8 @@
   const MAX_ROWS = 30000, BATCH = 600, PAGE = 50;
   const state = { q: '', words: [], rows: [], mode: 'live', src: 0, sort: 'amount', shown: PAGE, stats: null, related: [], deptNames: null, details: new Map(), labels: { who: new Map(), extra: new Map() }, run: 0 };
 
-  const pct = (part, whole) => whole ? `${Math.round(100 * part / whole)} %` : '—';
-  const sirenLink = (siren, html) => /^\d{9}$/.test(siren || '') ? `<a href="https://annuaire-entreprises.data.gouv.fr/entreprise/${siren}" target="_blank" rel="noopener noreferrer"${html ? '' : ` data-siren-name="${siren}"`}>${html || siren}</a>` : (html || '—');
+  const pct = (part, whole) => whole ? `${Math.round(100 * part / whole)} %` : '–';
+  const sirenLink = (siren, html) => /^\d{9}$/.test(siren || '') ? `<a href="https://annuaire-entreprises.data.gouv.fr/entreprise/${siren}" target="_blank" rel="noopener noreferrer"${html ? '' : ` data-siren-name="${siren}"`}>${html || siren}</a>` : (html || '–');
   const spending = row => !row.fw && row.src !== 6; // frameworks publish ceilings; budget lines are whole policies
   const mo = bytes => `${(bytes / 1e6).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} Mo`;
 
@@ -62,7 +62,7 @@
     state.src = 0; state.shown = PAGE; state.details = new Map();
     state.labels = { who: new Map(), extra: new Map() };
     $('srInput').value = state.q;
-    document.title = state.q ? `« ${state.q} » — Recherche — FranceRoueLibre` : 'Recherche — FranceRoueLibre';
+    document.title = state.q ? `« ${state.q} » · Recherche · FranceRoueLibre` : 'Recherche · FranceRoueLibre';
     if (!state.words.length) { document.body.classList.remove('has-query'); $('srResults').hidden = true; $('srTitle').innerHTML = 'Chercher <span class="gradient-text">n’importe quel mot.</span>'; return; }
     document.body.classList.add('has-query');
     $('srTitle').innerHTML = `« ${esc(state.q)} »`;
@@ -235,7 +235,7 @@
       ['Montant des lignes trouvées', money(t.amount), `${count(t.lines)} lignes${state.mode === 'frequent' ? ' (mot exact)' : ''}`],
       ['Plafonds d’accords-cadres', money(t.fwAmount), `${count(t.fwLines)} accords-cadres, non additionnés`],
       ['Budget de l’État 2026', money(t.budgetAmount), `${count(t.budgetLines)} lignes (politiques entières)`],
-      ['Période', Number.isFinite(t.first) ? (t.first === t.last ? String(t.first) : `${t.first}–${t.last}`) : '—', `recherche en ${(state.elapsed / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} s`]
+      ['Période', Number.isFinite(t.first) ? (t.first === t.last ? String(t.first) : `${t.first}–${t.last}`) : '–', `recherche en ${(state.elapsed / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} s`]
     ].map(([label, value, sub]) => `<div class="kpi"><span>${label}</span><strong>${value}</strong><small>${sub}</small></div>`).join('');
     const years = Object.keys(t.byYear).map(Number).sort((a, b) => a - b);
     if (years.length) {
@@ -244,9 +244,9 @@
       $('srYearsNote').textContent = 'Hors plafonds d’accords-cadres et lignes du budget de l’État. Les années couvertes diffèrent selon les sources (associations 2010–2023 avec des trous, marchés 2014–2026, Fonds vert 2023–2025).';
     } else { $('srYears').innerHTML = '<p class="note">Aucun montant daté.</p>'; $('srYearsNote').textContent = ''; }
     ranking($('srWho'), whoTop.map(item => ({ label: item.label, html: sirenLink(item.siren, /^\d{9}$/.test(item.label) ? null : esc(item.label)), value: item.value, sub: `${S.SOURCES[item.src].short} · ${count(item.n)} ligne${item.n > 1 ? 's' : ''}` })), { limit: 10 });
-    if (!whoTop.length) $('srWho').innerHTML = '<p class="note">—</p>';
+    if (!whoTop.length) $('srWho').innerHTML = '<p class="note">–</p>';
     ranking($('srExtra'), extraTop.map(item => ({ label: item.label, value: item.value, sub: `${S.SOURCES[item.src].short} · ${count(item.n)} ligne${item.n > 1 ? 's' : ''}` })), { limit: 10 });
-    if (!extraTop.length) $('srExtra').innerHTML = '<p class="note">—</p>';
+    if (!extraTop.length) $('srExtra').innerHTML = '<p class="note">–</p>';
     const depts = groupTop(rows, 'dept', id => ({ label: `${state.deptNames?.[id] || ''} (${id})`.trim() }), 10);
     ranking($('srDepts'), depts.map(item => ({ label: item.label, value: item.value, sub: `${count(item.n)} ligne${item.n > 1 ? 's' : ''}` })), { limit: 10 });
     if (!depts.length) $('srDepts').innerHTML = '<p class="note">Département non renseigné pour ces lignes.</p>';
@@ -266,9 +266,9 @@
     $('srListTitle').textContent = `Lignes de dépense${state.rows.length ? ` (${count(filtered().length)}${state.mode === 'frequent' ? ' plus importantes' : ''})` : ''}`;
     $('srList').innerHTML = shown.length ? `<table class="data-table sr-table"><thead><tr><th>Source</th><th>Année</th><th>Libellé</th><th>Bénéficiaire / acheteur</th><th class="num">Montant</th></tr></thead><tbody>${shown.map(row => {
       const d = state.details.get(row.id) || {};
-      return `<tr><td><span class="tag tag--src${row.src}">${esc(S.SOURCES[row.src].short)}</span></td><td>${row.year ?? '—'}</td>
+      return `<tr><td><span class="tag tag--src${row.src}">${esc(S.SOURCES[row.src].short)}</span></td><td>${row.year ?? '–'}</td>
         <td>${mark(d.title)}${d.extra ? `<small class="sr-extra">${mark(d.extra)}</small>` : ''}</td>
-        <td>${/^\d{9}$/.test(d.siren || '') ? sirenLink(d.siren, d.who ? mark(d.who) : null) : (d.who ? mark(d.who) : '—')}</td>
+        <td>${/^\d{9}$/.test(d.siren || '') ? sirenLink(d.siren, d.who ? mark(d.who) : null) : (d.who ? mark(d.who) : '–')}</td>
         <td class="num">${money(row.amount)}${row.repeat.length > 1 ? `<small class="sr-extra">× ${row.repeat.length} lignes identiques</small>` : ''}${row.fw ? '<small class="sr-extra">plafond</small>' : ''}</td></tr>`;
     }).join('')}</tbody></table>` : '<p class="note">Aucune ligne.</p>';
     $('srMore').hidden = shown.length >= groups.length;

@@ -69,7 +69,7 @@
     $('entKpis').innerHTML = [
       ['Montant déclaré (équivalent-subvention)', money(total), `${count(lines)} aides`],
       [`Année ${last?.[0] ?? ''}`, money(last?.[2]), `${count(last?.[1])} aides · ${count(last?.[3])} bénéficiaires`],
-      ['Instrument principal', esc(data.byInstrument[0]?.[0] || '—'), money(data.byInstrument[0]?.[2])]
+      ['Instrument principal', esc(data.byInstrument[0]?.[0] || '–'), money(data.byInstrument[0]?.[2])]
     ].map(([label, value, sub]) => `<div class="kpi"><span>${label}</span><strong>${value}</strong><small>${sub}</small></div>`).join('');
     ranking($('entAuthorities'), data.byAuthority.map(([label, n, amount]) => ({ label: label || 'Non renseigné', value: amount, sub: `${count(n)} aides` })), { limit: 12 });
     ranking($('entTop'), data.top.map(([id, name, amount, n, city]) => ({ label: name, html: sirenLink(id, name), value: amount, sub: `${count(n)} aide(s)${city ? ' · ' + city : ''}` })), { limit: 12 });

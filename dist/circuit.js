@@ -1,4 +1,4 @@
-/* Le circuit de l'argent public — animated Sankey built from Insee national accounts.
+/* Le circuit de l'argent public: animated Sankey built from Insee national accounts.
    Left: where the money comes from (taxes by category, social contributions, other revenue, borrowing).
    Middle: all general government (APU, consolidated). Right: what it is spent on.
    Bottom: how the year's deficit turns into the change in Maastricht debt.
@@ -96,7 +96,7 @@
   }
 
   function display(value) {
-    if (value == null || !Number.isFinite(value)) return '—';
+    if (value == null || !Number.isFinite(value)) return '–';
     if (unit === 'pib') return `${fmt(value, Math.abs(value) < 1 ? 2 : 1)} % du PIB`;
     if (unit === 'hab') return `${Math.round(value).toLocaleString('fr-FR')} €/hab.`;
     return `${fmt(value)} Md€`;
@@ -313,7 +313,7 @@
 
   function drawChecks(flows) {
     if (flows.local) {
-      checks.innerHTML = `<h3>Reproduire les chiffres · ${SCOPE_LABELS[scope]} · ${flows.year}</h3><table class="sector-table"><thead><tr><th>Contrôle</th><th>Recalculé</th><th>Publié (OFGL)</th><th>Écart</th></tr></thead><tbody>${flows.checks.map(([label, computed, published]) => `<tr><th scope="row">${label}</th><td>${fmt(computed, 3)} Md€</td><td>${published == null ? '—' : fmt(published, 3) + ' Md€'}</td><td class="${published != null && Math.abs(computed - published) > .001 ? 'is-gap' : 'is-ok'}">${published == null ? '—' : fmt(computed - published, 3)}</td></tr>`).join('')}</tbody></table>${flows.reversed != null ? `<p class="national-note"><strong>Fiscalité reversée (net) : ${flows.reversed >= 0 ? '+' : '−'}${fmt(Math.abs(flows.reversed), 3)} Md€.</strong> L’OFGL la présente à part, hors des totaux : ce sont surtout les attributions de compensation et dotations de solidarité versées par les intercommunalités à leurs communes (positif pour les communes, négatif pour les intercommunalités). L’inclure dans les recettes compterait deux fois le même impôt.</p>` : ''}<p class="national-note">Montants consolidés au sein de chaque collectivité (budget principal et budgets annexes), non consolidés entre collectivités : les flux entre niveaux (fiscalité reversée, participations) apparaissent des deux côtés. Un écart non nul signale un poste que les agrégats publiés ne décomposent pas.</p>`;
+      checks.innerHTML = `<h3>Reproduire les chiffres · ${SCOPE_LABELS[scope]} · ${flows.year}</h3><table class="sector-table"><thead><tr><th>Contrôle</th><th>Recalculé</th><th>Publié (OFGL)</th><th>Écart</th></tr></thead><tbody>${flows.checks.map(([label, computed, published]) => `<tr><th scope="row">${label}</th><td>${fmt(computed, 3)} Md€</td><td>${published == null ? '–' : fmt(published, 3) + ' Md€'}</td><td class="${published != null && Math.abs(computed - published) > .001 ? 'is-gap' : 'is-ok'}">${published == null ? '–' : fmt(computed - published, 3)}</td></tr>`).join('')}</tbody></table>${flows.reversed != null ? `<p class="national-note"><strong>Fiscalité reversée (net) : ${flows.reversed >= 0 ? '+' : '−'}${fmt(Math.abs(flows.reversed), 3)} Md€.</strong> L’OFGL la présente à part, hors des totaux : ce sont surtout les attributions de compensation et dotations de solidarité versées par les intercommunalités à leurs communes (positif pour les communes, négatif pour les intercommunalités). L’inclure dans les recettes compterait deux fois le même impôt.</p>` : ''}<p class="national-note">Montants consolidés au sein de chaque collectivité (budget principal et budgets annexes), non consolidés entre collectivités : les flux entre niveaux (fiscalité reversée, participations) apparaissent des deux côtés. Un écart non nul signale un poste que les agrégats publiés ne décomposent pas.</p>`;
       return;
     }
     const account = data.accounts.get(flows.year);
