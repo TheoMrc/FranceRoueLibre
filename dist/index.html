@@ -5,14 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Explorer les dépenses et les projets publics par région, département et commune.">
   <title>FranceRoueLibre — Cartographie des dépenses publiques</title>
-  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0a1520" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#ffffff">
   <script>
     /* Apply the saved or system theme before first paint (no flash). */
     (function () {
       var theme = null;
       try { theme = localStorage.getItem('frl-theme'); } catch (e) {}
-      if (theme !== 'light' && theme !== 'dark') theme = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      if (theme !== 'light' && theme !== 'dark') theme = 'light'; // light by default, dark only when chosen with the toggle
       document.documentElement.setAttribute('data-theme', theme);
     })();
   </script>

@@ -9,7 +9,7 @@
     (function () {
       var theme = null;
       try { theme = localStorage.getItem('frl-theme'); } catch (e) {}
-      if (theme !== 'light' && theme !== 'dark') theme = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      if (theme !== 'light' && theme !== 'dark') theme = 'light'; // light by default, dark only when chosen with the toggle
       document.documentElement.setAttribute('data-theme', theme);
     })();
   </script>
