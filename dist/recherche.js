@@ -30,7 +30,9 @@
       return;
     }
     const advice = error?.code === 'RANGE' || /malformed|disk image/i.test(error?.message || '')
-      ? 'Le serveur qui affiche le site ne lit pas l’index correctement. Arrêtez tous les serveurs en cours, relancez <code>node serve.mjs</code>, puis rechargez la page avec Ctrl+F5.'
+      ? (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+        ? 'Le serveur local ne lit pas l’index correctement. Arrêtez tous les serveurs en cours, relancez <code>node serve.mjs</code>, puis rechargez la page avec Ctrl+F5.'
+        : 'L’index de recherche était peut-être en cours de mise à jour. Réessayez dans une minute ; si l’erreur persiste, rechargez la page avec Ctrl+F5.')
       : 'Rechargez la page ; si l’erreur persiste, reconstruisez l’index avec <code>python scripts/process_search.py</code>.';
     $('srSummary').innerHTML = `<div class="sr-error"><strong>La recherche a échoué.</strong><p>${esc(error?.message || String(error))}</p><p>${advice}</p><button class="more-btn" type="button" id="srRetry">Réessayer</button></div>`;
     $('srRetry').addEventListener('click', () => run(state.q));

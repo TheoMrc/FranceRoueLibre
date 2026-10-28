@@ -1,10 +1,13 @@
-# francerouelibre.fr on this VPS: static site served by nginx from /var/www/francerouelibre/dist.
-# 1. clone or update the GitHub repo (shallow: only the current version, to save disk)
+# francerouelibre.fr on this VPS: static site served by nginx from /var/www/francerouelibre-web.
+# 1. clone or update the GitHub repo in /var/www/francerouelibre (shallow: only the current version, to save disk),
+#    then copy dist/ to the served folder with rsync: only changed files are written, each one to a temporary name then
+#    renamed at the end, so visitors never read a half-written file (the 600 Mo search index above all)
 # 2. Let's Encrypt certificate once the DNS points here (webroot, nginx keeps running)
 # 3. nginx vhost (HTTP only until the certificate exists, then HTTPS with http and www redirected to https://francerouelibre.fr)
 # 4. nginx -t, reload, live check
 set -euo pipefail
 DIR=/var/www/francerouelibre
+WEB=/var/www/francerouelibre-web
 REPO=https://github.com/TheoMrc/FranceRoueLibre.git
 CONF=/etc/nginx/sites-available/francerouelibre.fr
 CERT=/etc/letsencrypt/live/francerouelibre.fr/fullchain.pem
@@ -20,12 +23,15 @@ else
 fi
 git -C "$DIR" log -1 --oneline
 du -sh "$DIR/dist" "$DIR/.git"
-chmod -R a+rX "$DIR"
+echo "== publish (only changed files, swapped at the end)"
+command -v rsync >/dev/null || sudo -n apt-get install -y -q rsync
+[ -d "$WEB" ] || { sudo -n mkdir -p "$WEB" && sudo -n chown "$ME":"$ME" "$WEB"; }
+rsync -a --checksum --delete --delay-updates --chmod=Da+rx,Fa+r --itemize-changes "$DIR/dist/" "$WEB/" | { grep -v '^\.' || true; } | awk 'NR<=20; END {print NR " changed"}'
 
 write_conf() {
   local https=$1
   {
-    echo "# francerouelibre.fr – written by deploy/vps.sh (FranceRoueLibre repo), static files from $DIR/dist"
+    echo "# francerouelibre.fr – written by deploy/vps.sh (FranceRoueLibre repo), static files from $WEB"
     if [ "$https" = 1 ]; then
       cat <<'NGX'
 server {
@@ -60,7 +66,7 @@ server {
 NGX
     fi
     cat <<'NGX'
-    root /var/www/francerouelibre/dist;
+    root /var/www/francerouelibre-web;
     index index.html;
     charset utf-8;
     gzip on; gzip_vary on; gzip_proxied any; gzip_comp_level 6; gzip_min_length 512;
