@@ -23,8 +23,11 @@ window.FRLSearch = (() => {
 
   function db() {
     if (!dbPromise) {
-      dbPromise = loadScript(new URL('vendor/sqljs-httpvfs/index.js', base).href).then(() => window.createDbWorker(
-        [{ from: 'inline', config: { serverMode: 'full', url: new URL('data/search/frl-search.sqlite3', base).href, requestChunkSize: 4096 } }],
+      // The index is split into files of 45 Mo (dist/data/search/db/) so that it fits in Git and on any static host.
+      dbPromise = Promise.all([loadScript(new URL('vendor/sqljs-httpvfs/index.js', base).href), meta()]).then(([, info]) => window.createDbWorker(
+        [{ from: 'inline', config: info.chunks
+          ? { serverMode: 'chunked', urlPrefix: new URL(info.chunks.urlPrefix, base).href, serverChunkSize: info.chunks.serverChunkSize, databaseLengthBytes: info.chunks.databaseLengthBytes, suffixLength: info.chunks.suffixLength, requestChunkSize: 4096 }
+          : { serverMode: 'full', url: new URL('data/search/frl-search.sqlite3', base).href, requestChunkSize: 4096 } }],
         new URL('vendor/sqljs-httpvfs/sqlite.worker.js', base).href, new URL('vendor/sqljs-httpvfs/sql-wasm.wasm', base).href, 1e10
       )).then(worker => worker.db);
       dbPromise.catch(() => { dbPromise = null; });

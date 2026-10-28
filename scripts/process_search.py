@@ -37,6 +37,7 @@ DERIVED = 'sources/derived'
 SOURCES = {1: 'Subventions aux associations', 2: 'Marchés publics', 3: 'Projets aidés par l’État (DGCL)', 4: 'Fonds vert', 5: 'Aides aux entreprises (de minimis)', 6: 'Budget de l’État (PLF 2026)'}
 FREQUENT = 1500          # words found in more lines than this get precomputed totals and top lines
 TOP = 60
+CHUNK = 45 * 1024 * 1024  # bytes per file of the split index (a multiple of the 4 096-byte page size)
 WORD = re.compile(r"[^\W\d_]{3,}", re.UNICODE)
 
 
@@ -159,10 +160,27 @@ def main():
     db.commit()
     db.execute('VACUUM')
     db.close()
-    meta = {'sources': SOURCES, 'lines': total, 'frequentThreshold': FREQUENT, 'size': os.path.getsize(DB), 'pageSize': 4096,
+    # Split into 45 MiB chunks (multiples of the page size) so the index can live in a Git repository (GitHub: < 100 Mo par fichier)
+    # and be served by any static host; the browser reads them through sql.js-httpvfs "chunked" mode.
+    size = os.path.getsize(DB)
+    chunk_dir = f'{OUT_DIR}/db'
+    os.makedirs(chunk_dir, exist_ok=True)
+    for name in os.listdir(chunk_dir):
+        os.remove(os.path.join(chunk_dir, name))
+    with open(DB, 'rb') as handle:
+        index = 0
+        while True:
+            block = handle.read(CHUNK)
+            if not block:
+                break
+            with open(f'{chunk_dir}/frl-search.sqlite3.{index:03d}', 'wb') as out:
+                out.write(block)
+            index += 1
+    meta = {'sources': SOURCES, 'lines': total, 'frequentThreshold': FREQUENT, 'size': size, 'pageSize': 4096,
+            'chunks': {'serverMode': 'chunked', 'urlPrefix': 'data/search/db/frl-search.sqlite3.', 'serverChunkSize': CHUNK, 'databaseLengthBytes': size, 'suffixLength': 3, 'count': index},
             'note': 'Recherche dans les libellés publiés (objet du marché, objet de la subvention, titre du projet, nom du bénéficiaire, programme). Un mot trouvé dans un libellé ne signifie pas que tout le montant y est consacré.'}
     json.dump(meta, open(f'{OUT_DIR}/meta.json', 'w', encoding='utf-8'), ensure_ascii=False)
-    print(f'✓ recherche : {total} lignes, {meta["size"] / 1e6:.0f} Mo')
+    print(f'✓ recherche : {total} lignes, {size / 1e6:.0f} Mo en {index} fichiers de 45 Mo (dist/data/search/db/)')
 
 
 if __name__ == '__main__':
