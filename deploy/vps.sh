@@ -131,7 +131,11 @@ WantedBy=multi-user.target
 UNIT
 sudo -n systemctl daemon-reload
 sudo -n systemctl enable --quiet francerouelibre-search
-sudo -n systemctl restart francerouelibre-search
+# Restarted only when its code, its unit or the index changed (a restart reloads 1.9 M lines, about 8 s of CPU)
+SIG=$(cat "$DIR/server/search_api.py" /etc/systemd/system/francerouelibre-search.service "$LIB/meta.md5" | md5sum | cut -d' ' -f1)
+if [ "$(cat "$LIB/service.md5" 2>/dev/null)" != "$SIG" ] || ! systemctl is-active --quiet francerouelibre-search; then
+  sudo -n systemctl restart francerouelibre-search && echo "$SIG" > "$LIB/service.md5" && echo "search API restarted"
+else echo "search API unchanged, not restarted"; fi
 curl -s --retry 10 --retry-connrefused --retry-delay 1 --max-time 30 http://127.0.0.1:8017/api/health; echo
 sudo -n systemctl --no-pager --lines=3 status francerouelibre-search | grep -E "Active|Memory|columns|NumPy|CPU"
 
