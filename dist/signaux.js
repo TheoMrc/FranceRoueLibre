@@ -11,7 +11,7 @@
 
   const contractColumns = [
     ['Acheteur', r => buyer(r[0], r[1])], ['Titulaire', r => supplier(r[2])], ['Montant', r => money(r[3]), 'num'], ['Notifié', r => fmtDate(r[4])],
-    ['Procédure', r => `${esc(r[5] || '–')}${r[9] ? ' <span class="tag">accord-cadre</span>' : ''}`], ['Offres', r => r[7] ?? '–', 'num'], ['Objet', r => `<span class="muted">${esc(r[8] || '')}</span>`]
+    ['Procédure', r => `${esc(r[5] || '–')}${r[9] ? ' <span class="tag">accord-cadre</span>' : ''}`], ['Offres', r => r[7] ?? '–', 'num'], ['Objet', r => `<span class="muted clamp3" tabindex="0" title="${esc(r[8] || '')}">${esc(r[8] || '')}</span>`]
   ];
 
   const families = [];

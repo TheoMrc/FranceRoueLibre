@@ -807,3 +807,33 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .sr-error p { margin-top: .4rem; color: var(--c-body); }
 .sr-error .more-btn { width: auto; margin-top: .8rem; padding: .55rem 1.2rem; }
 #srPanels[hidden] { display: none; }
+
+/* ---------- Phones: second header row (menu) and search ---------- */
+:root { --subnav-h: 0px; }
+.panel, .grid-2 > *, .ranking > li { min-width: 0; }
+.ranking { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 680px) {
+  :root { --subnav-h: 2.75rem; }
+  html { scroll-padding-top: calc(var(--header-h) + var(--subnav-h)); }
+  .nav__links { height: var(--subnav-h); padding-block: 0; align-items: center;
+    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+  .nav__links li:last-child { padding-right: 2rem; }
+  .hero, .hero--page { padding-top: calc(var(--header-h) + var(--subnav-h) + var(--sp-4)); }
+  .signal, .cx-drill { scroll-margin-top: calc(var(--header-h) + var(--subnav-h) + 1rem); }
+  /* the menu row is always opaque, so the logo row is too (no text showing through at the top of the page) */
+  .site-header { background: var(--c-header-bg); -webkit-backdrop-filter: saturate(150%) blur(12px); backdrop-filter: saturate(150%) blur(12px); }
+}
+@media (max-width: 720px) { .sr-form input, .sr-form .btn { flex: none; width: 100%; } }
+@media (max-width: 720px) {
+  /* The open search box takes the whole header row, between the margin and the theme button, instead of half covering the logo */
+  .nav-search:focus-within input { position: fixed; z-index: 2; top: calc((var(--header-h) - 2.4rem) / 2); left: var(--gutter); right: calc(var(--gutter) + 3.4rem); width: auto; }
+  .nav-search:focus-within .nav-search__icon { position: fixed; z-index: 3; top: calc(var(--header-h) / 2 - .5rem); left: calc(var(--gutter) + .8rem); right: auto; }
+}
+@media (max-width: 720px) {
+  /* Wide tables scroll sideways instead of squeezing every column into very tall rows */
+  .table-wrap > table { min-width: 680px; }
+  .table-wrap { -webkit-overflow-scrolling: touch; }
+}
+/* Long contract objects: 3 lines, full text on tap or focus */
+.clamp3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; min-width: 240px; cursor: pointer; }
+.clamp3:focus { -webkit-line-clamp: unset; outline: none; }
