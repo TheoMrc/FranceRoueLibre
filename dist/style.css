@@ -838,7 +838,7 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .clamp3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; min-width: 240px; cursor: pointer; }
 .clamp3:focus { -webkit-line-clamp: unset; outline: none; }
 /* GitHub link (official mark from @primer/octicons, MIT) */
-.nav-github { display: inline-grid; place-items: center; width: 2.4rem; height: 2.4rem; margin-left: .4rem; border: 1px solid var(--c-line); border-radius: 50%; background: var(--c-surface); color: var(--c-body); transition: color .2s var(--ease), border-color .2s var(--ease); }
-.nav-github:hover { color: var(--c-ink); border-color: var(--c-muted); }
+.nav-github { display: inline-grid; place-items: center; width: 2.4rem; height: 2.4rem; margin-left: .4rem; color: var(--c-body); transition: color .2s var(--ease); }
+.nav-github:hover { color: var(--c-ink); }
 .footer__github { display: inline-flex; align-items: center; gap: .4rem; }
 @media (max-width: 360px) { .nav-github { display: none; } }
