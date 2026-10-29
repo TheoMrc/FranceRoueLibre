@@ -7,3 +7,5 @@ dist/data/search/frl-search.sqlite3
 _transfer/
 _to_delete/
 __pycache__/
+.claude_runner/
+/xmaterial
