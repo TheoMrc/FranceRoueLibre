@@ -33,6 +33,11 @@ write_conf() {
   {
     echo "# francerouelibre.fr – written by deploy/vps.sh (FranceRoueLibre repo), static files from $WEB"
     echo "limit_req_zone \$binary_remote_addr zone=frl_api:10m rate=5r/s;"
+    # Own access log, without query strings (searched words never reach the disk), read by frl-stats
+    cat <<'NGX'
+map $http_referer $frl_referer { default $http_referer; "~^(?<frl_ref_base>[^?]*)\?" $frl_ref_base; }
+log_format frl '$remote_addr [$time_local] "$request_method $uri $server_protocol" $status $body_bytes_sent "$frl_referer" "$http_user_agent"';
+NGX
     if [ "$https" = 1 ]; then
       cat <<'NGX'
 server {
@@ -68,6 +73,7 @@ NGX
     fi
     cat <<'NGX'
     root /var/www/francerouelibre-web;
+    access_log /var/log/nginx/francerouelibre.access.log frl;
     index index.html;
     charset utf-8;
     gzip on; gzip_vary on; gzip_proxied any; gzip_comp_level 6; gzip_min_length 512;
@@ -139,14 +145,52 @@ else echo "search API unchanged, not restarted"; fi
 curl -s --retry 10 --retry-connrefused --retry-delay 1 --max-time 30 http://127.0.0.1:8017/api/health; echo
 sudo -n systemctl --no-pager --lines=3 status francerouelibre-search | grep -E "Active|Memory|columns|NumPy|CPU"
 
+echo "== visit statistics (frl-stats)"
+# CLI over the access log (server/frl_stats.py); a nightly timer keeps daily counts once the logs are rotated away
+sudo -n ln -sf "$DIR/server/frl_stats.py" /usr/local/bin/frl-stats
+sudo -n chmod a+rx "$DIR/server/frl_stats.py"
+sudo -n tee /etc/systemd/system/francerouelibre-stats.service > /dev/null <<UNIT
+[Unit]
+Description=FranceRoueLibre daily visit counts (deploy/vps.sh)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 $DIR/server/frl_stats.py --save
+Nice=15
+IOWeight=20
+UNIT
+sudo -n tee /etc/systemd/system/francerouelibre-stats.timer > /dev/null <<UNIT
+[Unit]
+Description=FranceRoueLibre daily visit counts
+
+[Timer]
+OnCalendar=*-*-* 00:20
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+UNIT
+sudo -n systemctl daemon-reload
+sudo -n systemctl enable --now --quiet francerouelibre-stats.timer
+echo "frl-stats installed; next run: $(systemctl show francerouelibre-stats.timer -p NextElapseUSecRealtime --value)"
+
 echo "== dns"
 PUBLIC=$(curl -4 -s --max-time 5 https://ifconfig.me || true)
 APEX=$(getent ahostsv4 francerouelibre.fr | awk 'NR==1{print $1}' || true)
 WWW=$(getent ahostsv4 www.francerouelibre.fr | awk 'NR==1{print $1}' || true)
 echo "VPS $PUBLIC · francerouelibre.fr -> ${APEX:-?} · www -> ${WWW:-?}"
 
+# Writes the vhost and reloads nginx only if the whole configuration is valid; otherwise puts the previous file back,
+# so a mistake here can never stop the other sites of the VPS from reloading.
+apply_conf() {
+  sudo -n test -f "$CONF" && sudo -n cp -f "$CONF" "$CONF.prev"
+  write_conf "$1"
+  if sudo -n nginx -t 2>&1 | tail -2; [ "${PIPESTATUS[0]}" = 0 ]; then sudo -n systemctl reload nginx
+  else echo "nginx -t FAILED: previous vhost restored"; sudo -n test -f "$CONF.prev" && sudo -n cp -f "$CONF.prev" "$CONF"; sudo -n nginx -t; return 1; fi
+}
+
 echo "== nginx (http)"
-if ! sudo -n test -f "$CERT"; then write_conf 0; sudo -n nginx -t && sudo -n systemctl reload nginx; fi
+if ! sudo -n test -f "$CERT"; then apply_conf 0; fi
 
 echo "== certificate"
 if sudo -n test -f "$CERT"; then
@@ -158,7 +202,7 @@ else
 fi
 
 if sudo -n test -f "$CERT"; then
-  echo "== nginx (https)"; write_conf 1; sudo -n nginx -t && sudo -n systemctl reload nginx
+  echo "== nginx (https)"; apply_conf 1
 fi
 
 echo "== live check"
