@@ -231,6 +231,9 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .hero__inner { max-width: 760px; }
 .hero h1 { margin-bottom: var(--sp-3); font-size: var(--fs-hero); letter-spacing: -.03em; }
 .hero__lead { max-width: 620px; margin-bottom: var(--sp-4); color: var(--c-muted); font-size: var(--fs-lead); line-height: 1.45; }
+.hero__quote { max-width: 640px; margin: 0 0 var(--sp-4); padding: .2rem 0 .2rem 1rem; border-left: 3px solid var(--c-blue-600); }
+.hero__quote blockquote { margin: 0; color: var(--c-body); font-size: .95rem; line-height: 1.55; font-style: italic; }
+.hero__quote figcaption { margin-top: .5rem; color: var(--c-muted); font-size: .85rem; font-weight: 600; }
 .hero__cta { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 .hero__facts { display: grid; gap: var(--sp-3); margin: 0; }
 .hero__facts dt { margin-bottom: .2rem; font-family: var(--font-display); font-weight: 600; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--c-muted); }
