@@ -11,3 +11,4 @@ __pycache__/
 /xmaterial
 ugap/data/
 ugap/raw_samples/
+.env
