@@ -77,7 +77,7 @@
         <span class="eyebrow">Impôts, taxes et prélèvements</span>
         <h1>Ce que rapporte chaque impôt, <span class="gradient-text">et ce que coûte sa collecte.</span></h1>
         <p class="hero__lead">Tous les prélèvements recensés, un par un : leur produit, qui les paie, qui les reçoit, qui les collecte, ce que l’administration dépense pour les percevoir, et les petites taxes qui rapportent à peine plus qu’elles ne coûtent.</p>
-        <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#un-a-un">Un par un</a><a href="#histoire">Depuis 1995</a><a href="#collecte">Coût de collecte</a><a href="#petites">Petites taxes</a><a href="#ecarts">Fraude et écarts</a><a href="#tableau">Tableau complet</a><a href="#methode">Méthode</a></nav>
+        <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#un-a-un">Un par un</a><a href="#histoire">Depuis 1995</a><a href="#collecte">Coût de collecte</a><a href="#petites">Petites taxes</a><a href="#faible-rendement">Les 243 petites taxes</a><a href="#ecarts">Fraude et écarts</a><a href="#tableau">Tableau complet</a><a href="#methode">Méthode</a></nav>
       </div></div>
     </section>
 
@@ -137,7 +137,26 @@
       </div>
     </section>
 
-    <section class="section section--alt" id="ecarts" aria-labelledby="txGapTitle">
+    <section class="section section--alt" id="faible-rendement" aria-labelledby="txLowTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Inventaire de la Cour des comptes · avril 2025</span><h2 id="txLowTitle">Les 243 taxes à faible rendement, une par une</h2><p class="lead">Toutes les taxes qui rapportent moins de 175 millions d’euros par an, recensées par la Cour des comptes : ce qu’elles rapportent quand on le sait, qui les paie, qui les collecte, à qui va l’argent, et ce que la Cour propose d’en faire.</p></div>
+        <div class="kpis" id="txLowKpis"></div>
+        <blockquote class="tx-quote" id="txLowQuote"></blockquote>
+        <div class="panel"><div class="panel__head"><h3>Une case par taxe en vigueur en 2024</h3><div class="chip-select" id="txLowColor" role="group" aria-label="Couleur des cases"><button type="button" data-color="scenario" class="active">Proposition de la Cour</button><button type="button" data-color="objective">Objectif</button><button type="button" data-color="payer">Qui paie</button></div></div><div id="txWaffle" class="tx-waffle"></div><div id="txWaffleLegend" class="tx-legend"></div><p class="note" id="txWaffleNote"></p></div>
+        <div class="panel panel--wide"><h3>Les 126 rendements connus, par ordre de grandeur</h3><div id="txLowStrip" class="tx-strip"></div><p class="note" id="txLowStripNote"></p></div>
+        <div class="grid-2 tx-onebyone">
+          <div class="panel"><h3>Qui reçoit l’argent</h3><div id="txLowBenef"></div><p class="note">Nombre de taxes en vigueur en 2024 par affectataire, et somme des rendements connus.</p></div>
+          <div class="panel"><h3>Qui les collecte</h3><div id="txLowCollect"></div><p class="note" id="txLowCollectNote"></p></div>
+        </div>
+        <div class="panel panel--wide">
+          <div class="panel__head"><h3>Les 319 taxes de l’inventaire (2019–2024)</h3></div>
+          <div class="tx-filters"><label class="search-field"><span class="sr-only">Rechercher une taxe</span><input id="txLowSearch" type="search" placeholder="permis de chasse, CNC, médicament…" autocomplete="off"></label><label class="select-wrap"><span class="sr-only">État</span><select id="txLowState"><option value="active">En vigueur en 2024 (243)</option><option value="removed">Supprimées depuis 2019</option><option value="">Toutes (319)</option></select></label><label class="select-wrap"><span class="sr-only">Proposition de la Cour</span><select id="txLowScenario"><option value="">Toutes propositions</option><option value="1">Scénario 1 : budget 2026</option><option value="2">Scénario 2 : d’ici 2027</option><option value="3">Scénario 3 : programmation</option><option value="0">Non citées dans les scénarios</option></select></label><label class="select-wrap"><span class="sr-only">Collecteur</span><select id="txLowCollector"><option value="">Tous collecteurs</option></select></label></div>
+          <div id="txLowTable" class="table-wrap"></div><p class="note" id="txLowTableNote"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="ecarts" aria-labelledby="txGapTitle">
       <div class="container">
         <div class="section__head"><span class="eyebrow">Ce qui n’est pas perçu</span><h2 id="txGapTitle">Fraude, écarts et contrôle</h2><p class="lead">L’impôt dû n’est pas toujours l’impôt encaissé. Estimations officielles de l’écart de recouvrement et résultats du contrôle.</p></div>
         <div class="kpis" id="txGapKpis"></div>
@@ -145,7 +164,7 @@
       </div>
     </section>
 
-    <section class="section" id="tableau" aria-labelledby="txTableTitle">
+    <section class="section section--alt" id="tableau" aria-labelledby="txTableTitle">
       <div class="container">
         <div class="section__head"><span class="eyebrow">Toutes les lignes</span><h2 id="txTableTitle">Tableau complet</h2><p class="lead">Chaque impôt avec son produit, son année, son bénéficiaire, son collecteur, son coût de collecte quand il est connu, et le document qui donne le chiffre. Cliquez sur un en-tête pour trier.</p></div>
         <div class="tx-filters"><label class="search-field"><span class="sr-only">Rechercher un impôt</span><input id="txSearch" type="search" placeholder="TVA, taxe de séjour, accise…" autocomplete="off"></label><label class="select-wrap"><span class="sr-only">Catégorie</span><select id="txFilterCategory"><option value="">Toutes catégories</option></select></label><label class="select-wrap"><span class="sr-only">Bénéficiaire</span><select id="txFilterBeneficiary"><option value="">Tous bénéficiaires</option></select></label><label class="select-wrap"><span class="sr-only">Collecteur</span><select id="txFilterCollector"><option value="">Tous collecteurs</option></select></label></div>
@@ -154,7 +173,7 @@
       </div>
     </section>
 
-    <section class="section section--alt" id="methode" aria-labelledby="txMethodTitle">
+    <section class="section" id="methode" aria-labelledby="txMethodTitle">
       <div class="container">
         <div class="section__head"><span class="eyebrow">Méthode</span><h2 id="txMethodTitle">Lire ces chiffres sans se tromper</h2></div>
         <div class="gap-grid tx-method">

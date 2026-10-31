@@ -57,3 +57,19 @@ test('published collection costs carry their source', () => {
 test('built file is up to date', () => {
   assert.deepEqual(JSON.parse(fs.readFileSync('dist/data/impots.json', 'utf8')), JSON.parse(JSON.stringify(data)));
 });
+
+test('low-yield tax inventory reproduces the Cour des comptes totals', () => {
+  const ly = data.lowYield;
+  const active = ly.taxes.filter(t => t.state === 'en vigueur' || t.state === 'créée');
+  assert.equal(ly.taxes.length, 319);
+  assert.equal(active.length, 243);
+  const known = active.filter(t => t.y2024 != null);
+  assert.equal(known.length, 126);
+  assert.ok(Math.abs(known.reduce((s, t) => s + t.y2024, 0) - 5978) < 1);
+  // Unknown yields stay unknown: never zero.
+  assert.ok(ly.taxes.every(t => t.y2024 === null || t.y2024 > 0));
+  assert.equal(new Set(ly.taxes.map(t => t.id)).size, ly.taxes.length);
+  for (const t of ly.taxes) for (const s of t.scenarios) assert.ok([1, 2, 3].includes(s.scenario), t.label);
+  assert.ok(ly.unmatchedScenarioLines.length <= 6);
+  assert.match(data.costs.noLossQuote.text, /aucune taxe prise individuellement/);
+});
