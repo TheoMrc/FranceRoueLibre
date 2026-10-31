@@ -1,6 +1,6 @@
 {
  "retrieved": "2026-10-31",
- "method": "Lignes « source » : chiffre lu dans le fichier Insee versionné. Lignes « extrait » : chiffre relevé dans un extrait du document cité, à confirmer sur le document complet.",
+ "method": "Lignes « source » : chiffre lu dans un fichier versionné avec le site (Insee, Cour des comptes, ou extrait sources/taxes-affectees.json des données du budget de l’État et de l’OFGL). Lignes « extrait » : chiffre relevé dans un extrait du document cité, à confirmer sur le document complet.",
  "sources": [
   {
    "title": "Insee, impôts (comptes nationaux)",
@@ -1149,7 +1149,7 @@
     "ref": ""
    },
    "check": "extrait",
-   "note": "Produit 2024 non trouvé dans une source lisible.",
+   "note": "Produit non trouvé dans les fichiers ouverts : les recettes du budget général du PLF 2025 et le tableau Insee des impôts ne l’isolent pas, il est compris dans un agrégat plus large. Laissé inconnu plutôt qu’estimé.",
    "base": "Consommation"
   },
   {
@@ -1157,61 +1157,64 @@
    "name": "Taxe générale sur les activités polluantes",
    "acronym": "TGAP",
    "short": "TGAP",
-   "year": "2024",
-   "status": "exécution",
+   "year": "2025",
+   "status": "prévision",
    "beneficiary": "État",
    "beneficiaryDetail": "État",
    "collector": "Douane (DGDDI)",
    "collectorDetail": "DGDDI (douane)",
    "payer": "Entreprises",
    "source": {
-    "url": "https://www.senat.fr/questions/base/2025/qSEQ250605036.html",
-    "title": "Sénat, question écrite sur l'utilisation des ressources de la TGAP",
-    "ref": ""
+    "url": "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/plf25-recettes-du-budget-general/exports/csv?delimiter=%3B&with_bom=false",
+    "title": "PLF 2025, recettes du budget général (données data.economie.gouv.fr)",
+    "ref": "ligne 1756 « Taxe générale sur les activités polluantes » : 1 294 000 000 €"
    },
-   "check": "extrait",
-   "note": "Produit 2024 non trouvé dans une source lisible.",
-   "base": "Production"
+   "check": "source",
+   "note": "Prévision du projet de loi de finances pour 2025. Le produit encaissé en 2024 ne figure pas dans les fichiers ouverts lus ici.",
+   "base": "Production",
+   "amount": 1294.0
   },
   {
    "id": "malus-co2-masse",
    "name": "Taxes sur l'immatriculation des véhicules de tourisme (malus CO2 et malus masse)",
    "short": "Malus automobile",
-   "year": "2024",
-   "status": "exécution",
+   "year": "2025",
+   "status": "prévision",
    "beneficiary": "État",
    "beneficiaryDetail": "État",
    "collector": "DGFiP",
    "collectorDetail": "DGFiP / ANTS",
    "payer": "Ménages",
    "source": {
-    "url": "https://www.senat.fr/amendements/2024-2025/143/Amdt_I-1529.html",
-    "title": "Sénat, PLF 2025, amendement n°I-1529",
-    "ref": ""
+    "url": "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/plf25-recettes-du-budget-general/exports/csv?delimiter=%3B&with_bom=false",
+    "title": "PLF 2025, recettes du budget général (données data.economie.gouv.fr)",
+    "ref": "ligne 1726 « Produit de la taxe additionnelle à la taxe sur les certifications d'immatriculation des véhicules » : 1 386 347 815 €"
    },
-   "check": "extrait",
-   "note": "Produit 2024 non trouvé dans une source officielle.",
-   "base": "Consommation"
+   "check": "source",
+   "note": "Prévision du projet de loi de finances pour 2025. La ligne budgétaire 1726 garde le nom de l’ancienne « taxe additionnelle » au certificat d’immatriculation (le malus CO2) ; le fichier ne la détaille pas entre malus CO2 et malus masse.",
+   "base": "Consommation",
+   "amount": 1386.3
   },
   {
    "id": "cartes-grises",
    "name": "Taxe régionale sur les certificats d'immatriculation des véhicules",
    "short": "Cartes grises",
-   "year": "2023",
-   "status": "estimation",
+   "year": "2024",
+   "status": "exécution",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Collectivités locales (régions)",
    "collector": "DGFiP",
    "collectorDetail": "DGFiP / ANTS",
    "payer": "Ménages",
    "source": {
-    "url": "https://www.assemblee-nationale.fr/dyn/17/amendements/0324A/AN/1492",
-    "title": "Assemblée nationale, PLF 2025, amendement n°I-1492 (exposé sommaire)",
-    "ref": "Les régions ont perçu « environ 2 Md€ » en 2023 (contre 2,3 Md€ en 2019)"
+    "url": "https://data.ofgl.fr/api/explore/v2.1/catalog/datasets/ofgl-base-regions-consolidee/exports/csv?delimiter=%3B&with_bom=false&select=exer%2Creg_code%2Creg_name%2Csiren%2Clbudg%2Ccateg%2Cagregat%2Cmontant%2Cptot",
+    "title": "OFGL, comptes consolidés des régions (données data.ofgl.fr)",
+    "ref": "agrégat « Cartes grises », exercice 2024, somme des 17 régions et collectivités uniques : 2 361,6 M€"
    },
-   "check": "extrait",
-   "note": "Produit 2024 non trouvé dans une source officielle.",
-   "base": "Consommation"
+   "check": "source",
+   "note": "Produit perçu par les régions et les collectivités uniques (Corse, Guyane, Martinique), comptes 2024. Mayotte, département, n’est pas dans ce fichier.",
+   "base": "Consommation",
+   "amount": 2361.6
   }
  ],
  "courPartOf": {

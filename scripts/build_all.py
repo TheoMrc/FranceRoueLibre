@@ -9,7 +9,7 @@ import sys
 import time
 from pathlib import Path
 
-STEPS = ['process_spending.py', 'process_local.py', 'process_subsidies.py', 'process_procurement.py', 'process_search.py', 'build_catalog.py']
+STEPS = ['process_spending.py', 'process_local.py', 'process_subsidies.py', 'process_procurement.py', 'process_search.py', 'niches-data.py', 'etat-data.py', 'operateurs-data.py', 'secu-data.py', 'probite-data.py', 'relance-data.py', 'ugap-data.py', 'build_catalog.py']
 
 sys.path.insert(0, str(Path(__file__).parent))
 for step in STEPS:

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Les comptes de la Sécurité sociale en données ouvertes : charges, produits et solde par branche, dépenses d’assurance maladie par région et par poste, et ce qui n’est pas publié.">
+  <title>Sécurité sociale · FranceRoueLibre</title>
+  <link rel="canonical" href="https://francerouelibre.fr/secu.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="FranceRoueLibre">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="Sécurité sociale · FranceRoueLibre">
+  <meta property="og:description" content="Les comptes de la Sécurité sociale en données ouvertes : charges, produits et solde par branche, dépenses d’assurance maladie par région et par poste, et ce qui n’est pas publié.">
+  <meta property="og:url" content="https://francerouelibre.fr/secu.html">
+  <meta property="og:image" content="https://francerouelibre.fr/og.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="FranceRoueLibre : où part l’argent public ? Dépenses, aides, marchés publics et dette, territoire par territoire.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Sécurité sociale · FranceRoueLibre">
+  <meta name="twitter:description" content="Les comptes de la Sécurité sociale en données ouvertes : charges, produits et solde par branche, dépenses d’assurance maladie par région et par poste, et ce qui n’est pas publié.">
+  <meta name="twitter:image" content="https://francerouelibre.fr/og.png">
+  <script>
+    (function () {
+      var theme = null;
+      try { theme = localStorage.getItem('frl-theme'); } catch (e) {}
+      if (theme !== 'light' && theme !== 'dark') theme = 'light'; // light by default, dark only when chosen with the toggle
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./secu.css">
+  <script defer src="./common.js"></script>
+  <script defer src="./secu.js"></script>
+  <script defer src="./nav.js"></script>
+  <script defer src="./collapse.js"></script>
+  <script defer src="./search-bar.js"></script>
+</head>
+<body class="subpage">
+  <header class="site-header" id="siteHeader">
+    <div class="container nav">
+      <a class="brand brand--lockup" href="index.html" aria-label="FranceRoueLibre, accueil">
+        <svg class="brand__mark" width="40" height="40" viewBox="0 0 48 48" fill="none" aria-hidden="true"><defs><linearGradient id="g7" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#0e7490"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><path d="M24 4l17 10v20L24 44 7 34V14z" stroke="url(#g7)" stroke-width="3" stroke-linejoin="round"/><path d="M14 17l7 7 5-4 9 11" stroke="#e11d48" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 31 H35 V25" stroke="#e11d48" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="brand__sep" aria-hidden="true"></span>
+        <span class="brand__name"><span>France</span><span class="gradient-text">RoueLibre</span></span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="index.html#explorer">Carte</a></li>
+        <li><a href="index.html#circuit">Circuit</a></li>
+        <li><a href="index.html#comptes">Comptes</a></li>
+        <li class="nav__group"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu3">Recettes<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu3"><li><a href="impots.html"><strong>Impôts et taxes</strong><small>Ce que rapporte et coûte chaque prélèvement</small></a></li><li><a href="niches.html"><strong>Niches fiscales</strong><small>Réductions et crédits d’impôt, mesure par mesure</small></a></li></ul></li>
+        <li class="nav__group is-current"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu4">Dépenses<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu4"><li><a href="etat.html"><strong>Budget de l’État</strong><small>Missions, programmes, exécution mois par mois</small></a></li><li><a href="operateurs.html"><strong>Opérateurs de l’État</strong><small>Agences et établissements publics</small></a></li><li><a href="secu.html" aria-current="page"><strong>Sécurité sociale</strong><small>Comptes des branches, dépenses d’assurance maladie</small></a></li><li><a href="aides.html"><strong>Aides et subventions</strong><small>Associations, entreprises, plan de relance</small></a></li><li><a href="marches.html"><strong>Marchés publics</strong><small>1,4 million de contrats depuis 2014</small></a></li><li><a href="ugap.html"><strong>UGAP</strong><small>Les prix de la centrale d’achat public</small></a></li></ul></li>
+        <li class="nav__group"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu5">Contrôle<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu5"><li><a href="signaux.html"><strong>Signaux</strong><small>Règles simples appliquées à toutes les données</small></a></li><li><a href="probite.html"><strong>Probité</strong><small>Corruption, favoritisme : les affaires jugées</small></a></li><li><a href="donnees.html"><strong>Données et angles morts</strong><small>Les sources, et ce qui n’est pas publié</small></a></li></ul></li>
+      </ul>
+      <div class="nav__actions">
+      <a class="nav-github" href="https://github.com/TheoMrc/FranceRoueLibre" target="_blank" rel="noopener noreferrer" aria-label="Code source sur GitHub" title="Code source sur GitHub"><svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg></a>
+      <button class="theme-toggle-btn tbtn-morph" id="themeToggle" type="button" aria-label="Changer de thème" title="Changer de thème">
+        <span class="tbtn-halo" aria-hidden="true"></span>
+        <svg class="tbtn-svg-morph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <mask id="theme-morph-mask"><rect width="32" height="32" fill="white"/><circle class="mask-moon-bite" cx="23" cy="11" r="6.5" fill="black"/></mask>
+          <circle class="morph-core" cx="16" cy="16" r="6" fill="currentColor" mask="url(#theme-morph-mask)"/>
+          <g class="morph-rays" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="16" y1="3" x2="16" y2="6"/><line x1="16" y1="26" x2="16" y2="29"/><line x1="3" y1="16" x2="6" y2="16"/><line x1="26" y1="16" x2="29" y2="16"/>
+            <line x1="6.81" y1="6.81" x2="8.93" y2="8.93"/><line x1="23.07" y1="23.07" x2="25.19" y2="25.19"/><line x1="6.81" y1="25.19" x2="8.93" y2="23.07"/><line x1="23.07" y1="8.93" x2="25.19" y2="6.81"/>
+          </g>
+        </svg>
+      </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero hero--page">
+      <div class="hero__bg" aria-hidden="true"></div>
+      <div class="container"><div class="hero__inner">
+        <span class="eyebrow">Sécurité sociale</span>
+        <h1>Le plus gros budget public, <span class="gradient-text">et des comptes ouverts qui s’arrêtent en 2012.</span></h1>
+        <p class="hero__lead" id="scLead">Les administrations de sécurité sociale dépensent près d’un euro public sur deux. Les comptes par branche et les dépenses d’assurance maladie par région publiés en données ouvertes sur data.gouv.fr datent pourtant de 2009, 2010 et 2012. Voici ce qu’ils disent, et ce qui manque.</p>
+        <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#branches">Comptes par branche</a><a href="#recettes">Recettes et charges</a><a href="#regions">Par région</a><a href="#postes">Soins de ville et cliniques</a><a href="#non-publie">Ce qui n’est pas publié</a><a href="#methode">Méthode</a></nav>
+      </div></div>
+    </section>
+
+    <section class="section" id="ensemble" aria-labelledby="scAllTitle">
+      <div class="container">
+        <div class="section__head-row"><div class="section__head"><span class="eyebrow">Comptes nationaux Insee · 1978–2025</span><h2 id="scAllTitle">Les administrations de sécurité sociale</h2><p class="lead">Dépenses et recettes de l’ensemble des administrations de sécurité sociale au sens de la comptabilité nationale : régimes de base, régimes complémentaires de retraite, assurance chômage, hôpitaux publics, Cades et fonds. C’est un périmètre plus large que les comptes des branches présentés plus bas.</p></div>
+          <div class="chip-select" id="scCtxUnit" role="group" aria-label="Unité"><button type="button" data-unit="md" class="active">Md€</button><button type="button" data-unit="hab">€ par habitant</button><button type="button" data-unit="share">% des dépenses publiques</button></div></div>
+        <div class="kpis" id="scCtxKpis"></div>
+        <div class="panel"><h3 id="scCtxTitle">Dépenses et recettes, en milliards d’euros courants</h3><div id="scCtxChart" class="tx-line sc-chart"></div><div id="scCtxLegend" class="tx-legend"></div><p class="note" id="scCtxNote"></p></div>
+        <div class="panel panel--wide"><h3>Solde annuel, en milliards d’euros courants</h3><div id="scCtxBalance" class="tx-line sc-chart"></div><p class="note" id="scCtxBalanceNote"></p></div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="branches" aria-labelledby="scBrTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Commission des comptes · 2009 et 2010</span><h2 id="scBrTitle">Comptes simplifiés des régimes de base, branche par branche</h2><p class="lead" id="scBrLead">Charges, produits et solde de chaque branche, en millions d’euros courants, pour l’ensemble des régimes de base et pour le seul régime général. Ce sont les deux seules années publiées dans ce jeu de données.</p></div>
+        <div class="tx-controls sc-controls">
+          <div class="chip-select" id="scScope" role="group" aria-label="Régimes"></div>
+          <div class="chip-select" id="scYear" role="group" aria-label="Année"></div>
+        </div>
+        <div class="kpis" id="scBrKpis"></div>
+        <div class="grid-2">
+          <div class="panel"><h3 id="scBrBarsTitle">Charges et produits par branche</h3><div id="scBrBars" class="sc-pairs"></div><div class="tx-legend"><span><i style="background:var(--tx-2)"></i>Charges nettes</span><span><i style="background:var(--tx-1)"></i>Produits nets</span></div><p class="note" id="scBrBarsNote"></p></div>
+          <div class="panel"><h3>Solde par branche</h3><div id="scBrSolde" class="sc-solde"></div><p class="note" id="scBrSoldeNote"></p></div>
+        </div>
+        <div class="panel panel--wide"><div class="panel__head"><h3>Le compte détaillé</h3><label class="sc-toggle"><input type="checkbox" id="scDetail"> Afficher les sous-postes</label></div><div id="scBrTable" class="table-wrap"></div><p class="note" id="scBrTableNote"></p></div>
+        <p class="source-links" id="scBrSources"></p>
+      </div>
+    </section>
+
+    <section class="section" id="recettes" aria-labelledby="scMixTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Structure des comptes</span><h2 id="scMixTitle">D’où vient l’argent, où il va</h2><p class="lead">Pour chaque branche, la part de chaque grande ligne dans les produits nets et dans les charges nettes. Mêmes régimes et même année que ci-dessus.</p></div>
+        <div class="grid-2">
+          <div class="panel"><h3>Produits nets : la part de chaque ressource</h3><div id="scMixIn" class="sc-stack"></div><div id="scMixInLegend" class="tx-legend"></div></div>
+          <div class="panel"><h3>Charges nettes : la part de chaque emploi</h3><div id="scMixOut" class="sc-stack"></div><div id="scMixOutLegend" class="tx-legend"></div></div>
+        </div>
+        <p class="note" id="scMixNote"></p>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="regions" aria-labelledby="scRegTitle">
+      <div class="container">
+        <div class="section__head-row"><div class="section__head"><span class="eyebrow">Assurance maladie · janvier à juillet 2012</span><h2 id="scRegTitle">Dépenses remboursées, région par région</h2><p class="lead" id="scRegLead">Montants remboursés par l’assurance maladie du 1er janvier au 31 juillet 2012, dans les 22 régions métropolitaines de l’époque. C’est la seule période publiée dans ce jeu de données.</p></div></div>
+        <div class="tx-controls sc-controls">
+          <div class="chip-select" id="scRegPost" role="group" aria-label="Poste de dépense"></div>
+          <div class="chip-select" id="scRegUnit" role="group" aria-label="Mesure"><button type="button" data-unit="hab" class="active">€ par habitant</button><button type="button" data-unit="amount">Montant</button><button type="button" data-unit="growth">Évolution sur un an</button></div>
+        </div>
+        <div class="kpis" id="scRegKpis"></div>
+        <div class="sc-map-layout">
+          <div class="panel"><h3 id="scMapTitle">Carte</h3><div id="scMap" class="sc-map"></div><div id="scMapLegend" class="sc-scale"></div><p class="note" id="scMapNote"></p></div>
+          <div class="panel"><h3 id="scRankTitle">Classement</h3><div id="scRank"></div></div>
+        </div>
+        <div class="panel panel--wide"><h3>Toutes les régions</h3><div id="scRegTable" class="table-wrap"></div><p class="note" id="scRegTableNote"></p></div>
+        <p class="source-links" id="scRegSources"></p>
+      </div>
+    </section>
+
+    <section class="section" id="postes" aria-labelledby="scPostTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Assurance maladie · par poste</span><h2 id="scPostTitle">Soins de ville, médicaments, cliniques : les séries existent, les montants ne sont pas encore ici</h2><p class="lead" id="scPostLead"></p></div>
+        <div class="kpis" id="scPostKpis"></div>
+        <div class="grid-2">
+          <div class="panel"><h3>Les trois grands postes, janvier à juillet 2012</h3><div id="scPostBars"></div><p class="note" id="scPostBarsNote"></p></div>
+          <div class="panel"><h3>Ce que permettraient les fichiers de soins de ville</h3><div id="scVilleWhat"></div></div>
+        </div>
+        <div class="grid-2">
+          <div class="panel"><h3>Les postes suivis pour les cliniques privées</h3><div id="scCliWhat"></div></div>
+          <div class="panel"><h3>Les fichiers annuels publiés par l’Assurance maladie</h3><div id="scFiles" class="table-wrap"></div><p class="note" id="scFilesNote"></p></div>
+        </div>
+        <p class="source-links" id="scPostSources"></p>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="non-publie" aria-labelledby="scGapTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Données manquantes</span><h2 id="scGapTitle">Ce qui n’est pas publié</h2><p class="lead">Ce qu’aucun jeu de données ouvert ne permet aujourd’hui de suivre sur la Sécurité sociale et la santé, d’après nos recherches dans les catalogues data.gouv.fr, data.economie.gouv.fr et data.ofgl.fr (27 octobre 2026), et qui serait en mesure de le publier.</p></div>
+        <div id="scGaps" class="gap-grid"></div>
+      </div>
+    </section>
+
+    <section class="section" id="methode" aria-labelledby="scMethodTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Méthode</span><h2 id="scMethodTitle">Lire ces chiffres sans se tromper</h2></div>
+        <div class="gap-grid">
+          <article class="gap"><h3>Trois périmètres qui ne s’additionnent pas</h3><p>Les comptes nationaux (Insee) couvrent toutes les administrations de sécurité sociale. Les comptes simplifiés couvrent les seuls régimes de base, hors régimes complémentaires et assurance chômage. Les dépenses par région ne couvrent que des montants remboursés par l’assurance maladie. Aucun de ces chiffres n’est additionné à un autre sur cette page.</p></article>
+          <article class="gap"><h3>« Toutes branches » n’est pas la somme des branches</h3><p>Les branches se versent de l’argent entre elles (par exemple la famille vers la vieillesse). La colonne « toutes branches » publiée est consolidée : ces flux internes en sont retirés. La somme des quatre branches est donc plus élevée ; l’écart est affiché, il n’est pas corrigé.</p></article>
+          <article class="gap"><h3>Totaux vérifiés</h3><p id="scCheckText">Pour chaque branche, chaque année et chaque périmètre, la somme des grandes lignes est comparée au total publié, et le solde publié à la différence produits moins charges.</p></article>
+          <article class="gap"><h3>Sept mois, pas une année</h3><p>Les montants régionaux couvrent janvier à juillet 2012. Ils ne sont pas extrapolés à l’année entière : les euros par habitant sont donc ceux de ces sept mois. L’évolution est celle que publie le fichier, par rapport à la même période de 2011.</p></article>
+          <article class="gap"><h3>Population par région</h3><p id="scPopText">La population de chaque ancienne région est la somme de la population totale 2012 de ses départements, telle que publiée par l’OFGL. Le fichier de l’Assurance maladie ne précise pas le régime couvert ; la population est celle de toute la région.</p></article>
+          <article class="gap"><h3>Une région n’est pas un lieu de soin</h3><p>Le fichier ne dit pas si un remboursement est rattaché à la région de l’assuré ou à celle du professionnel ou de l’établissement. Un écart entre régions peut refléter des patients venus d’ailleurs, l’âge de la population ou l’offre de soins : ce n’est pas, à lui seul, un signe de dépense excessive.</p></article>
+        </div>
+        <p class="source-links" id="scSources"></p>
+      </div>
+    </section>
+
+    <section class="section related" aria-labelledby="relatedTitle"><div class="container"><h2 class="related__title" id="relatedTitle">Pour aller plus loin</h2><div class="related__grid"><a class="related__card" href="impots.html"><strong>Impôts et taxes</strong><span>CSG, CRDS et autres prélèvements qui financent la Sécurité sociale</span></a><a class="related__card" href="index.html#circuit"><strong>Le circuit de l’argent public</strong><span>La Sécurité sociale dans le circuit de l’argent public</span></a><a class="related__card" href="donnees.html"><strong>Données et angles morts</strong><span>Hôpitaux, ARS : ce qui n’est pas publié</span></a></div></div></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div><div class="footer__brand">FranceRoueLibre</div><p>Cartographie des dépenses publiques · données ouvertes</p><p class="footer__legal">Site indépendant, sans lien avec l’État ni avec une administration. Contact : <a href="mailto:stonks@francerouelibre.fr">stonks@francerouelibre.fr</a> · <a href="mentions.html">Mentions légales et confidentialité</a></p></div>
+      <div class="footer__links"><a href="index.html#explorer">Carte</a><a href="index.html#circuit">Circuit</a><a href="index.html#comptes">Comptes</a><a href="impots.html">Impôts et taxes</a><a href="niches.html">Niches fiscales</a><a href="etat.html">Budget de l’État</a><a href="operateurs.html">Opérateurs de l’État</a><a href="secu.html">Sécurité sociale</a><a href="aides.html">Aides et subventions</a><a href="marches.html">Marchés publics</a><a href="ugap.html">UGAP</a><a href="signaux.html">Signaux</a><a href="probite.html">Probité</a><a href="donnees.html">Données et angles morts</a><a class="footer__github" href="https://github.com/TheoMrc/FranceRoueLibre" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg>Code source</a></div>
+    </div>
+  </footer>
+</body>
+</html>

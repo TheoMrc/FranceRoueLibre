@@ -9,3 +9,5 @@ _to_delete/
 __pycache__/
 .claude_runner/
 /xmaterial
+ugap/data/
+ugap/raw_samples/

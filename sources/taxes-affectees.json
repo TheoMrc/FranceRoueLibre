@@ -1,0 +1,7052 @@
+{
+ "note": "Extrait figé de fichiers de sources/raw par scripts/extract-taxes-affectees.py. Montants en M€.",
+ "affected": {
+  "title": "PLF 2024, Évaluation des voies et moyens, tome I : liste des taxes affectées",
+  "url": "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/plf2024-v-and-m-t1-liste-des-taxes-affectees/exports/csv?delimiter=%3B&with_bom=false",
+  "page": "https://data.economie.gouv.fr/explore/dataset/plf2024-v-and-m-t1-liste-des-taxes-affectees/",
+  "modified": "2023-10-03",
+  "years": [
+   "2022 (exécution)",
+   "2023 (prévision)",
+   "2024 (prévision du PLF)"
+  ],
+  "rows": [
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "Etablissement public foncier de Mayotte",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.891,
+     1.807,
+     2.307
+    ],
+    "cap": [
+     0.891,
+     1.807,
+     2.307
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2016 et LFI 2017"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS, CNAVTS, CCMSA (non salariés-maladie) en 2016; CNAVTS dès 2017",
+    "tax": "Redevance due par les titulaires de titres d'exploitation de mines d'hydrocarbures liquides ou gazeux",
+    "taxCode": 140,
+    "mission": null,
+    "programme": null,
+    "y": [
+     3.6,
+     3.6,
+     5.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "OFB - Office français de la biodiversité",
+    "tax": "Redevance pour délivrance initiale du permis de chasse",
+    "taxCode": 205,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "113 Paysages, eau et biodiversité",
+    "y": [
+     0.9,
+     0.9,
+     0.9
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "AFT - Association pour le développement de la formation professionnelle dans les transports",
+    "tax": "Taxe destinée à financer le développement des actions de formation professionnelle dans les transports routiers",
+    "taxCode": 77,
+    "mission": null,
+    "programme": null,
+    "y": [
+     63.426,
+     63.426,
+     63.426
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "Etablissement public foncier de Grand-Est",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     9.48,
+     10.531,
+     11.031
+    ],
+    "cap": [
+     9.48,
+     10.531,
+     11.031
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Régions de la Guadeloupe, de la Martinique, de la Guyane et de la Réunion",
+    "tax": "Droits assimilés au droit d'octroi de mer sur les rhums et spiritueux à base d'alcool de cru",
+    "taxCode": 240,
+    "mission": null,
+    "programme": null,
+    "y": [
+     3.803,
+     3.803,
+     4.786
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes concernées",
+    "tax": "Fraction du Prélèvement sur les mises de jeux de cercle en ligne affectée aux communes dans le ressort territorial desquelles sont ouverts au public un ou plusieurs casinos",
+    "taxCode": 166,
+    "mission": null,
+    "programme": null,
+    "y": [
+     11.0,
+     11.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "AFITF - Agence de financement des infrastructures de transport de France",
+    "tax": "Taxe due par les concessionnaires d'autoroutes",
+    "taxCode": 27,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "203 Infrastructures et services de transports",
+    "y": [
+     655.0,
+     680.0,
+     566.667
+    ],
+    "cap": [
+     566.667,
+     566.667,
+     566.667
+    ],
+    "back": [
+     88.333,
+     113.333,
+     0.0
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime spécial de Sécurité Sociale",
+    "beneficiary": "CNBF - Caisse nationale des barreaux français",
+    "tax": "Droits de plaidoirie",
+    "taxCode": 148,
+    "mission": null,
+    "programme": null,
+    "y": [
+     4.802,
+     4.802,
+     4.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes",
+    "tax": "Taxe pour non-raccordement à l'égout - Participation pour le financement de l'assainissement collectif (PAC)",
+    "taxCode": 163,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.472,
+     0.472,
+     0.646
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes",
+    "tax": "Taxe sur les déchets réceptionnés dans une installation de stockage ou un incinérateur de déchets ménagers",
+    "taxCode": 162,
+    "mission": null,
+    "programme": null,
+    "y": [
+     17.314,
+     17.314,
+     19.117
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "Francéclat",
+    "tax": "Taxe pour le développement des industries de l'horlogerie, bijouterie, joaillerie, orfèvrerie et arts de la table",
+    "taxCode": 36,
+    "mission": null,
+    "programme": null,
+    "y": [
+     12.7,
+     12.7,
+     12.7
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale à fiscalité propre) - part communale",
+    "tax": "Prélèvement progressif sur le produit des jeux dans les casinos au profit des communes",
+    "taxCode": 176,
+    "mission": null,
+    "programme": null,
+    "y": [
+     263.31,
+     263.31,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale à fiscalité propre) - part communale",
+    "tax": "Taxes d'enlèvement des ordures ménagères",
+    "taxCode": 186,
+    "mission": null,
+    "programme": null,
+    "y": [
+     583.566,
+     627.333,
+     564.526
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Centre technique industriel ou comité professionnel du développement économique",
+    "beneficiary": "CTI de l'Industrie : CT des indus. mécaniques (CETIM), CT de l'industrie du décolletage (CTDEC), CTI de la construction métallique (CTICM), CT des indus. aérauliques et thermiques (CETIAT), et Institut de Soudure",
+    "tax": "Taxe pour le développement des industries de la mécanique et de la construction métallique, des matériels et consommables de soudage et produits du décolletage, de construction métallique et des matériels aérauliques et thermiques",
+    "taxCode": 44,
+    "mission": null,
+    "programme": null,
+    "y": [
+     96.715,
+     96.715,
+     96.715
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS - Fonds tabacs",
+    "tax": "Contribution sociale à la charge des fournisseurs agréés de produits de tabac",
+    "taxCode": 137,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     null,
+     null
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "FFDI - Fonds de financement des dossiers impécunieux",
+    "tax": "Quote-part des intérêts servis par la Caisse des dépôts et consignations sur les fonds déposés",
+    "taxCode": 291,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes",
+    "tax": "Taxe locale sur la publicité extérieure",
+    "taxCode": 165,
+    "mission": null,
+    "programme": null,
+    "y": [
+     193.917,
+     193.917,
+     227.335
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Départements",
+    "nature": "Département",
+    "beneficiary": "Départements (part départementale)",
+    "tax": "Taxe départementale de publicité foncière sur les mutations à titres onéreux",
+    "taxCode": 197,
+    "mission": null,
+    "programme": null,
+    "y": [
+     16184.67,
+     14566.203,
+     15661.34
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANTS - Agence nationale des titres sécurisés",
+    "tax": "Fraction des droits de timbre sur les passeports sécurisés",
+    "taxCode": 54,
+    "mission": "Administration générale et territoriale de l'État",
+    "programme": "354 Administration territoriale de l'État",
+    "y": [
+     291.9,
+     297.9,
+     463.66
+    ],
+    "cap": [
+     172.06,
+     193.234,
+     217.043
+    ],
+    "back": [
+     119.84,
+     104.666,
+     246.617
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS",
+    "tax": "Droit de licence sur la rémunération des débitants de tabacs",
+    "taxCode": 99,
+    "mission": null,
+    "programme": null,
+    "y": [
+     369.331,
+     369.331,
+     364.506
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "Centre national de la fonction publique territoriale (CNFPT)",
+    "tax": "Cotisation obligatoire",
+    "taxCode": 131,
+    "mission": null,
+    "programme": null,
+    "y": [
+     424.585,
+     493.635,
+     416.5
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAF",
+    "tax": "Taxe sur les véhicules de société (TVS)",
+    "taxCode": 126,
+    "mission": null,
+    "programme": null,
+    "y": [
+     732.494,
+     759.819,
+     689.614
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Collectivités territoriales de l'Outre-Mer",
+    "nature": "Collectivité et territoire d'Outre Mer",
+    "beneficiary": "Collectivités territoriales des DOM",
+    "tax": "Droit d'octroi de mer et droit d'octroi de mer régional",
+    "taxCode": 172,
+    "mission": null,
+    "programme": null,
+    "y": [
+     1373.812,
+     1373.812,
+     1655.67
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale à fiscalité propre) - part intercommunale",
+    "tax": "Taxes d'enlèvement des ordures ménagères",
+    "taxCode": 186,
+    "mission": null,
+    "programme": null,
+    "y": [
+     7195.881,
+     7735.573,
+     4844.269
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "Organismes de secours et de sauvetage en mer agréés (art. L742-9 code de la sécurité intérieure)",
+    "tax": "Taxe annuelle sur les engins maritimes à usage personnel (TAEMUP)",
+    "taxCode": 31,
+    "mission": null,
+    "programme": null,
+    "y": [
+     4.0,
+     4.0,
+     4.0
+    ],
+    "cap": [
+     4.0,
+     4.0,
+     4.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2017 et LFI 2018"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS",
+    "tax": "Contribution sociale généralisée (CSG)",
+    "taxCode": 136,
+    "mission": null,
+    "programme": null,
+    "y": [
+     50967.0,
+     52987.0,
+     51885.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS",
+    "tax": "Contribution due par les laboratoires sur leurs dépenses de publicité",
+    "taxCode": 102,
+    "mission": null,
+    "programme": null,
+    "y": [
+     130.748,
+     132.055,
+     70.46
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "IRSN - Institut de radioprotection et de sûreté nucléaire",
+    "tax": "Contribution annuelle au profit de l'Institut de radioprotection et de sûreté nucléaire",
+    "taxCode": 202,
+    "mission": "Recherche et enseignement supérieur",
+    "programme": "190 Recherche dans les domaines de l'énergie, du développement et de la mobilité durables",
+    "y": [
+     61.088,
+     61.088,
+     60.7
+    ],
+    "cap": [
+     61.1,
+     61.1,
+     61.1
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2015 et de la LFI 2016"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes",
+    "tax": "Taxe de balayage",
+    "taxCode": 159,
+    "mission": null,
+    "programme": null,
+    "y": [
+     113.462,
+     113.462,
+     124.526
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes",
+    "tax": "Imposition forfaitaire annuelle sur les pylônes",
+    "taxCode": 160,
+    "mission": null,
+    "programme": null,
+    "y": [
+     278.337,
+     293.339,
+     338.104
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ASP - Agence de services et de paiement",
+    "tax": "Taxe sur la cession à titre onéreux des terrains nus ou des droits relatifs à des terrains nus rendus constructibles du fait de leur classement",
+    "taxCode": 10,
+    "mission": "Agriculture, alimentation, forêt et affaires rurales",
+    "programme": "149 Compétitivité et durabilité de l'agriculture, de l'agroalimentaire et de la forêt",
+    "y": [
+     24.0,
+     24.0,
+     24.0
+    ],
+    "cap": [
+     12.0,
+     12.0,
+     12.0
+    ],
+    "back": [
+     12.0,
+     12.0,
+     12.0
+    ],
+    "since": "LFI 2013 et de la LFR-III 2012"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Centre technique industriel ou comité professionnel du développement économique",
+    "beneficiary": "CTI de la filière Bois - Comité professionnel de développement des industries françaises de l'ameublement et du bois (CODIFAB); Institut technologique FCBA (Filière cellulose, bois, ameublement); Centre technique de la mécanique (CETIM)",
+    "tax": "Taxe pour le développement des industries de l'ameublement ainsi que des industries du bois",
+    "taxCode": 35,
+    "mission": null,
+    "programme": null,
+    "y": [
+     15.1,
+     15.1,
+     15.1
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS",
+    "tax": "Contribution due par les entreprises exploitant des médicaments bénéficiant d'une AMM / Contribution sur le chiffre d'affaires des entreprises exploitant une ou plusieurs spécialités pharmaceutiques",
+    "taxCode": 104,
+    "mission": null,
+    "programme": null,
+    "y": [
+     480.664,
+     507.101,
+     588.141
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "OFB - Office français de la biodiversité",
+    "tax": "Droit d'examen du permis de chasse",
+    "taxCode": 204,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "113 Paysages, eau et biodiversité",
+    "y": [
+     0.6,
+     0.6,
+     0.6
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime spécial de Sécurité Sociale",
+    "beneficiary": "CNBF - Caisse nationale des barreaux français",
+    "tax": "Contribution équivalente aux droits de plaidoirie",
+    "taxCode": 98,
+    "mission": null,
+    "programme": null,
+    "y": [
+     103.384,
+     110.597,
+     110.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANSéS - Agence nationale de sécurité sanitaire, de l'alimentation, de l'environnement et du travail",
+    "tax": "Taxe relative à la mise sur le marché des produits phytopharmaceutiques et de leurs adjuvants, des matières fertilisantes et de leurs adjuvants et des supports de culture",
+    "taxCode": 75,
+    "mission": "Agriculture, alimentation, forêt et affaires rurales",
+    "programme": "206 Sécurité et qualité sanitaires de l'alimentation",
+    "y": [
+     8.7,
+     8.7,
+     8.7
+    ],
+    "cap": [
+     15.0,
+     15.0,
+     15.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2016 et LFI 2017"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS, CNAVTS, CCMSA (non salariés-maladie) en 2016; CNAVTS dès 2017",
+    "tax": "Contribution sur les avantages de préretraite d’entreprise",
+    "taxCode": 141,
+    "mission": null,
+    "programme": null,
+    "y": [
+     54.711,
+     48.463,
+     54.308
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Centre technique industriel ou comité professionnel du développement économique",
+    "beneficiary": "Centre technique de l’industrie des papiers, cartons et celluloses",
+    "tax": "Taxe pour le développement des industries de fabrication du papier, du carton et de la pâte de cellulose.",
+    "taxCode": 246,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.0,
+     2.346,
+     2.346
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Régions",
+    "tax": "Taxe intérieure de consommation sur les produits énergétiques (TICPE) - part Grenelle",
+    "taxCode": 215,
+    "mission": null,
+    "programme": null,
+    "y": [
+     557.0,
+     563.892,
+     388.124
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "Personne publique assurant la gestion de l'espace naturel protégé concerné ou la commune d'implantation de l'espace naturel protégé",
+    "tax": "Taxe sur les passagers maritimes embarqués à destination d'espaces naturels protégés",
+    "taxCode": 234,
+    "mission": null,
+    "programme": null,
+    "y": [
+     3.6,
+     3.6,
+     3.6
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "UCF CIBTP - Union des caisses de France",
+    "tax": "Cotisation BTP intempéries",
+    "taxCode": 263,
+    "mission": null,
+    "programme": null,
+    "y": [
+     128.326,
+     128.326,
+     128.326
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Organismes consulaires",
+    "nature": "Organisme consulaire",
+    "beneficiary": "CRMA (incl. Alsace et Moselle)",
+    "tax": "Participation au financement de la formation- Fraction affectée aux CMA pour leurs actions de formation",
+    "taxCode": 247,
+    "mission": null,
+    "programme": null,
+    "y": [
+     31.0,
+     null,
+     null
+    ],
+    "cap": [
+     39.869,
+     null,
+     null
+    ],
+    "back": [
+     0.0,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Départements",
+    "nature": "Département",
+    "beneficiary": "Départements (part départementale)",
+    "tax": "Taxe additionnelle départementale à la taxe de séjour",
+    "taxCode": 193,
+    "mission": null,
+    "programme": null,
+    "y": [
+     18.669,
+     18.669,
+     55.068
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Départements",
+    "nature": "Département",
+    "beneficiary": "Départements (part départementale)",
+    "tax": "Taxe départementale des espaces naturels sensibles",
+    "taxCode": 200,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     null,
+     null
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Autres personnes morales de droit public dépendant de l'Etat",
+    "nature": "Autorité administrative indépendante",
+    "beneficiary": "H3C - Haut conseil du commissariat aux comptes",
+    "tax": "Contribution annuelle acquittée par les personnes inscrites comme commissaires aux comptes, et droit fixe sur chaque rapport de certification des comptes, et contribution de la compagnie nationale des commissaires aux comptes",
+    "taxCode": 39,
+    "mission": null,
+    "programme": null,
+    "y": [
+     16.326,
+     16.12,
+     16.0
+    ],
+    "cap": [
+     19.4,
+     19.4,
+     19.4
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2017 et LFI 2018"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "Etablissement public foncier de la région Ile-de-France",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     137.046,
+     139.136,
+     139.136
+    ],
+    "cap": [
+     141.226,
+     139.136,
+     139.136
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "3CABTP et OPCO Constructys",
+    "tax": "Contribution spécifique pour le développement de la formation professionnelle initiale et continue dans les métiers des professions du bâtiment et des travaux publics.",
+    "taxCode": 288,
+    "mission": null,
+    "programme": null,
+    "y": [
+     49.6,
+     51.534,
+     131.5
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local du département de la Haute-Savoie",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     6.15,
+     7.005,
+     7.005
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale) à fiscalité propre et Départements",
+    "tax": "Versement pour sous-densité",
+    "taxCode": 189,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.209,
+     0.209,
+     0.51
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANCOLS - Agence nationale de contrôle du logement social",
+    "tax": "Cotisation versée par les organismes HLM",
+    "taxCode": 66,
+    "mission": "Cohésion des territoires",
+    "programme": "135 Urbanisme, territoires et amélioration de l'habitat",
+    "y": [
+     11.334,
+     11.334,
+     11.334
+    ],
+    "cap": [
+     11.334,
+     11.334,
+     11.334
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Centre technique industriel ou comité professionnel du développement économique",
+    "beneficiary": "Centres techniques industriels de la plasturgie et des composites",
+    "tax": "Taxe affectée au financement d’un nouveau Centre Technique Industriel de la plasturgie et des composites",
+    "taxCode": 43,
+    "mission": null,
+    "programme": null,
+    "y": [
+     6.4,
+     6.4,
+     6.4
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "FSV",
+    "tax": "Contribution sociale généralisée (CSG)",
+    "taxCode": 136,
+    "mission": null,
+    "programme": null,
+    "y": [
+     19536.0,
+     20337.0,
+     19554.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "Association de gestion du fonds de développement pour l'insertion professionnelle des handicapés (AGEFIPH)",
+    "tax": "Contribution annuelle au fonds de développement pour l'insertion professionnelle des handicapés (FIPH)",
+    "taxCode": 91,
+    "mission": null,
+    "programme": null,
+    "y": [
+     442.4,
+     442.4,
+     442.4
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Organismes consulaires",
+    "nature": "Organisme consulaire",
+    "beneficiary": "Chambres départementales d'agriculture",
+    "tax": "Taxe additionnelle à la taxe foncière sur les propriétés non baties, pour frais de chambres d'agriculture (TCA-TFPNB)",
+    "taxCode": 9,
+    "mission": null,
+    "programme": null,
+    "y": [
+     292.0,
+     292.0,
+     300.8
+    ],
+    "cap": [
+     292.0,
+     292.0,
+     300.8
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2013 et de la LFR-III 2012"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Mutualité sociale agricole",
+    "beneficiary": "CCMSA (non salariés-maladie)",
+    "tax": "Taxe sur les boissons édulcorées",
+    "taxCode": 118,
+    "mission": null,
+    "programme": null,
+    "y": [
+     37.991,
+     38.598,
+     41.239
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANAH - Agence nationale de l'habitat",
+    "tax": "Taxe annuelle sur les logements vacants",
+    "taxCode": 67,
+    "mission": "Cohésion des territoires",
+    "programme": "135 Urbanisme, territoires et amélioration de l'habitat",
+    "y": [
+     null,
+     null,
+     null
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAF",
+    "tax": "Taxe exceptionnelle sur la réserve de capitalisation (exit-tax)",
+    "taxCode": 125,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local de la Réunion",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     9.45,
+     8.845,
+     8.845
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Centre technique industriel ou comité professionnel du développement économique",
+    "beneficiary": "CTC - Comité professionnel de développement Cuir, Chaussure, Maroquinerie",
+    "tax": "Taxe pour le développement des industries du cuir, de la maroquinerie, de la ganterie et de la chaussure",
+    "taxCode": 37,
+    "mission": null,
+    "programme": null,
+    "y": [
+     16.5,
+     16.5,
+     16.5
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Autres personnes morales de droit public dépendant de l'Etat",
+    "nature": "Autorité administrative indépendante",
+    "beneficiary": "AMF - Autorité des marchés financiers",
+    "tax": "Droits et contributions pour frais de contrôle",
+    "taxCode": 48,
+    "mission": null,
+    "programme": null,
+    "y": [
+     118.5,
+     118.6,
+     132.389
+    ],
+    "cap": [
+     106.0,
+     114.5,
+     121.0
+    ],
+    "back": [
+     12.5,
+     4.1,
+     11.389
+    ],
+    "since": "LFI 2014"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Centre technique industriel ou comité professionnel du développement économique",
+    "beneficiary": "CTCPA - Centre technique de la conservation des produits agricoles",
+    "tax": "Taxe pour le développement de l'industrie de la conservation des produits agricoles (CTCPA)",
+    "taxCode": 8,
+    "mission": null,
+    "programme": null,
+    "y": [
+     2.75,
+     2.75,
+     2.75
+    ],
+    "cap": [
+     2.9,
+     2.9,
+     2.9
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "FSD - Fonds de solidarité pour le développement géré par l'Agence française de développement (AFD) - suivi MEF",
+    "tax": "Taxe sur les transactions financières - fraction affectée de la ressource État",
+    "taxCode": 13,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     0.0,
+     251.0
+    ],
+    "cap": [
+     null,
+     251.0,
+     251.0
+    ],
+    "back": [
+     null,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2013 et de la LFR-III 2012"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local Béarn - Pyrénées",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     2.925,
+     2.599,
+     2.599
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Autres personnes morales de droit public dépendant de l'Etat",
+    "nature": "Autorité administrative indépendante",
+    "beneficiary": "ACPR - Autorité de contrôle prudentiel et de résolution",
+    "tax": "Contributions pour frais de contrôle",
+    "taxCode": 49,
+    "mission": null,
+    "programme": null,
+    "y": [
+     218.5,
+     223.1,
+     232.129
+    ],
+    "cap": [
+     195.0,
+     195.0,
+     220.0
+    ],
+    "back": [
+     23.5,
+     28.1,
+     12.129
+    ],
+    "since": "LFI 2014"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Personnes publiques ou privées exploitant des aérodromes pour lesquels : - le nombre annuel des mouvements d'aéronefs de masse maximale au décollage supérieure ou égale à 20 tonnes a dépassé 20 000 lors de l'une des cinq années civiles précédentes, - ou le nombre annuel des mouvements d'aéronef de masse maximale au décollage supérieure ou égale à 2 tonnes a dépassé 50 000 lors de l'une des 5 années civiles précédentes, si les plans d'exposition au bruit ou de gêne sonore de cet aérodrome possèdent un domaine d'intersection avec les plans d'exposition au bruit ou de gêne sonore d'un aérodrome présentant les caractéristiques définies au tiret précédent.",
+    "tax": "Taxe sur les nuisances sonores aériennes",
+    "taxCode": 23,
+    "mission": null,
+    "programme": null,
+    "y": [
+     36.8,
+     44.0,
+     49.6
+    ],
+    "cap": [
+     55.0,
+     55.0,
+     55.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2014"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes de plus de 5.000 hbts",
+    "tax": "Taxe communale additionnelle à certains droits d'enregistrement",
+    "taxCode": 174,
+    "mission": null,
+    "programme": null,
+    "y": [
+     3432.359,
+     3089.123,
+     3483.879
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "SGP - Société du Grand Paris",
+    "tax": "Taxe additionnelle régionale de 15% à la taxe de séjour IDF",
+    "taxCode": 267,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "203 Infrastructures et services de transports",
+    "y": [
+     15.0,
+     20.0,
+     9.698
+    ],
+    "cap": [
+     30.0,
+     25.0,
+     15.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2019"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Communes et EPCI (établissements publics de coopération intercommunale) situés dans un rayon maximal autour de l'accès principal aux installations de stockage",
+    "tax": "TA-TINB - Taxe additionnelle à la taxe sur les installations nucléaires de base dite \"de stockage\"",
+    "taxCode": 179,
+    "mission": null,
+    "programme": null,
+    "y": [
+     3.3,
+     3.3,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "France Compétences",
+    "tax": "PEFPC : Participation au financement de la formation des professions non salariées (Particuliers employeurs) correspondant au minimum à 0,15% au du montant annuel du plafond de la SS",
+    "taxCode": 257,
+    "mission": "Travail et emploi",
+    "programme": "103 Accompagnement des mutations économiques et développement de l'emploi",
+    "y": [
+     15.274,
+     15.839,
+     26.04
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "Association pour le soutien du théâtre privé",
+    "tax": "Taxe sur les spectacles perçue au profit de l'Association pour le soutien du théâtre privé",
+    "taxCode": 17,
+    "mission": null,
+    "programme": null,
+    "y": [
+     5.0,
+     6.0,
+     8.0
+    ],
+    "cap": [
+     8.0,
+     8.0,
+     8.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Départements",
+    "nature": "Département",
+    "beneficiary": "Départements (part départementale)",
+    "tax": "Taxe d’aménagement",
+    "taxCode": 182,
+    "mission": null,
+    "programme": null,
+    "y": [
+     583.836,
+     583.836,
+     630.71
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale) à fiscalité propre et Départements - part départementale",
+    "tax": "Redevances communale et départementale des mines",
+    "taxCode": 178,
+    "mission": null,
+    "programme": null,
+    "y": [
+     10.675,
+     10.675,
+     1.205
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "OFII - Office français de l'immigration et de l'intégration",
+    "tax": "Redevance perçue à l’occasion de l’introduction des familles étrangères en France",
+    "taxCode": 206,
+    "mission": "Immigration, asile et intégration",
+    "programme": "104 Intégration et accès à la nationalité française",
+    "y": [
+     0.8,
+     0.8,
+     0.8
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local de Perpignan-Méditerranée",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     2.775,
+     2.248,
+     2.248
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "Fonds d'indemnisation de la profession d'avoués près les cours d'appel",
+    "tax": "Droit affecté au fonds d’indemnisation de la profession d’avoués près les cours d’appel",
+    "taxCode": 225,
+    "mission": null,
+    "programme": null,
+    "y": [
+     26.503,
+     26.983,
+     28.825
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local de Montauban",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.6,
+     0.579,
+     0.579
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANSéS - Agence nationale de sécurité sanitaire, de l'alimentation, de l'environnement et du travail",
+    "tax": "Taxe sur les produits de tabac",
+    "taxCode": 248,
+    "mission": "Agriculture, alimentation, forêt et affaires rurales",
+    "programme": "206 Sécurité et qualité sanitaires de l'alimentation",
+    "y": [
+     null,
+     null,
+     null
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local du Pays basque",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     4.725,
+     4.273,
+     4.273
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAF",
+    "tax": "Contribution sociale généralisée (CSG)",
+    "taxCode": 136,
+    "mission": null,
+    "programme": null,
+    "y": [
+     13209.0,
+     13741.0,
+     13240.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale) à fiscalité propre et Départements - part intercommunale",
+    "tax": "Taxe communale sur la consommation finale d'électricité (TCFE)",
+    "taxCode": 180,
+    "mission": null,
+    "programme": null,
+    "y": [
+     19.211,
+     19.211,
+     23.913
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local du Grand Toulouse",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     13.5,
+     12.678,
+     12.678
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Collectivité territoriale de Corse et Conservatoire de l'espace littoral, de 2007 à 2011",
+    "tax": "Droit de consommation sur les tabacs dans les DOM",
+    "taxCode": 169,
+    "mission": null,
+    "programme": null,
+    "y": [
+     143.845,
+     143.845,
+     202.609
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national ayant fonction d'administration centrale",
+    "beneficiary": "INPI - Institut national de la propriété industrielle",
+    "tax": "Redevances perçues à l'occasion des procédures et formalités en matière de propriété industrielle ainsi que de registre du commerce et des sociétés, établies par divers textes",
+    "taxCode": 231,
+    "mission": "Économie",
+    "programme": "134 Développement des entreprises et régulations",
+    "y": [
+     170.0,
+     182.22,
+     170.0
+    ],
+    "cap": [
+     94.0,
+     94.0,
+     94.0
+    ],
+    "back": [
+     76.0,
+     88.22,
+     76.0
+    ],
+    "since": "LFI 2021"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANSéS - Agence nationale de sécurité sanitaire, de l'alimentation, de l'environnement et du travail",
+    "tax": "Taxe sur les déclarations et notifications de produit du tabac",
+    "taxCode": 89,
+    "mission": "Agriculture, alimentation, forêt et affaires rurales",
+    "programme": "206 Sécurité et qualité sanitaires de l'alimentation",
+    "y": [
+     null,
+     null,
+     null
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ASP - Agence de services et de paiement",
+    "tax": "Indemnité de défrichement",
+    "taxCode": 11,
+    "mission": "Agriculture, alimentation, forêt et affaires rurales",
+    "programme": "149 Compétitivité et durabilité de l'agriculture, de l'agroalimentaire et de la forêt",
+    "y": [
+     3.0,
+     3.0,
+     3.0
+    ],
+    "cap": [
+     2.0,
+     2.0,
+     2.0
+    ],
+    "back": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Société par actions simplifiée à associé unique ou société par actions simplifiée unipersonnelle",
+    "beneficiary": "Action Logement Services",
+    "tax": "Participation des employeurs à l'effort de construction (PEEC)",
+    "taxCode": 81,
+    "mission": null,
+    "programme": null,
+    "y": [
+     1745.0,
+     1860.0,
+     1966.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local du département de l'Oise",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     5.475,
+     6.543,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Région de la Guyane",
+    "tax": "Taxe due par les concessionnaires de mines d'or, les amodiataires des concessions de mines d'or et les titulaires de permis et d'autorisations d'exploitation de mines d'or exploitées en Guyane (taxe additionnelle aurifère)",
+    "taxCode": 235,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.0,
+     0.0,
+     0.606
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Départements",
+    "nature": "Département",
+    "beneficiary": "Départements et métropole de Lyon",
+    "tax": "Taxe départementale sur la consommation finale d'électricité (TCFE)",
+    "taxCode": 181,
+    "mission": null,
+    "programme": null,
+    "y": [
+     722.972,
+     722.972,
+     1053.389
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANTS - Agence nationale des titres sécurisés",
+    "tax": "Taxe sur les Titres de séjour et de voyage electroniques",
+    "taxCode": 51,
+    "mission": "Administration générale et territoriale de l'État",
+    "programme": "354 Administration territoriale de l'État",
+    "y": [
+     16.0,
+     16.0,
+     20.9
+    ],
+    "cap": [
+     14.49,
+     14.49,
+     14.49
+    ],
+    "back": [
+     1.51,
+     1.51,
+     6.41
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes ou Groupements de communes (parts communale et intercommunale)",
+    "tax": "Taxe d’aménagement",
+    "taxCode": 182,
+    "mission": null,
+    "programme": null,
+    "y": [
+     1267.527,
+     1267.527,
+     1329.219
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "France Compétences",
+    "tax": "Contribution spécifique à la formation professionnelle pour Saint Pierre et Miquelon",
+    "taxCode": 286,
+    "mission": "Travail et emploi",
+    "programme": "103 Accompagnement des mutations économiques et développement de l'emploi",
+    "y": [
+     0.271,
+     0.281,
+     0.33
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "Etablissement public foncier de Bretagne",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     10.893,
+     7.838,
+     7.838
+    ],
+    "cap": [
+     7.751,
+     7.838,
+     7.838
+    ],
+    "back": [
+     3.142,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS",
+    "tax": "Contribution exceptionnelle des organismes complémentaires en santé aux dépenses liées à la gestion de l'épidémie de Covid-19",
+    "taxCode": 281,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "AGS - Association pour la gestion du régime d'assurance des créances des salariés",
+    "tax": "Contribution des employeurs à l'association pour la gestion du régime d'assurance des créances des salariés (AGS)",
+    "taxCode": 85,
+    "mission": null,
+    "programme": null,
+    "y": [
+     907.396,
+     907.396,
+     907.396
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale) à fiscalité propre",
+    "tax": "Participation pour non réalisation d'aires de stationnement",
+    "taxCode": 175,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.057,
+     0.057,
+     0.078
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "France Compétences",
+    "tax": "PEFPC : Participation au financement de la formation des professions non salariées (à l'exception des artisans et des exploitants agricoles) correspondant à 0,25% du montant annuel du plafond de la sécurité sociale",
+    "taxCode": 207,
+    "mission": "Travail et emploi",
+    "programme": "103 Accompagnement des mutations économiques et développement de l'emploi",
+    "y": [
+     176.893,
+     181.169,
+     231.271
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Organismes consulaires",
+    "nature": "Organisme consulaire",
+    "beneficiary": "Chambres de commerce et d'industrie de région (CCI-R)",
+    "tax": "TA-CVAE - Taxe additionnelle à la cotisation sur la valeur ajoutée des entreprises pour frais de chambres de commerce et d'industrie de région",
+    "taxCode": 41,
+    "mission": null,
+    "programme": null,
+    "y": [
+     276.0,
+     272.0,
+     296.0
+    ],
+    "cap": [
+     226.117,
+     245.117,
+     245.117
+    ],
+    "back": [
+     49.883,
+     26.883,
+     50.883
+    ],
+    "since": "LFI 2013 et de la LFR-III 2012"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "AFITF - Agence de financement des infrastructures de transport de France",
+    "tax": "Fraction affectée du produit du relèvement du tarif de taxe intérieure de consommation sur les produits énergétiques (TICPE) sur le carburant gazole",
+    "taxCode": 26,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "203 Infrastructures et services de transports",
+    "y": [
+     1247.5,
+     1908.403,
+     2090.357
+    ],
+    "cap": [
+     1247.5,
+     1908.403,
+     2090.357
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Mutualité sociale agricole",
+    "beneficiary": "CCMSA - non salariés branche vieillesse",
+    "tax": "Droit de circulation sur les vins, cidres, poirés et hydromels",
+    "taxCode": 113,
+    "mission": null,
+    "programme": null,
+    "y": [
+     106.143,
+     105.558,
+     108.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "FNAVDL - Fonds national d’accompagnement vers et dans le logement",
+    "tax": "Cotisation additionnelle versée par les organismes HLM et les SEM",
+    "taxCode": 292,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale) à fiscalité propre et Départements - part intercommunale",
+    "tax": "Redevances communale et départementale des mines",
+    "taxCode": 178,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.807,
+     0.807,
+     12.33
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "SGP - Société du Grand Paris",
+    "tax": "Taxe spéciale d'équipement au profit de l'établissement public Société du Grand Paris",
+    "taxCode": 84,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "203 Infrastructures et services de transports",
+    "y": [
+     67.1,
+     67.1,
+     67.08
+    ],
+    "cap": [
+     67.1,
+     67.1,
+     67.1
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "ANFA - Association nationale pour la formation automobile",
+    "tax": "Taxe pour le développement de la formation professionnelle dans les métiers de la réparation de l'automobile, du cycle et du motocycle",
+    "taxCode": 87,
+    "mission": null,
+    "programme": null,
+    "y": [
+     32.657,
+     32.657,
+     32.657
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "EPCI concernés - Etablissements publics de coopération intercommunale à fiscalité propre (Communes concernées jusqu'en 2012)",
+    "tax": "Fraction du Prélèvement sur les paris hippiques affectée aux EPCI sur le territoire desquelles sont ouverts au public un ou plusieurs hippodromes (affectée jusqu'aux mises 2012 versées en 2013 aux Communes concernées)",
+    "taxCode": 219,
+    "mission": null,
+    "programme": null,
+    "y": [
+     11.0,
+     11.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Départements",
+    "nature": "Département",
+    "beneficiary": "Départements (part départementale)",
+    "tax": "Taxe départementale additionnelle à certains droits d'enregistrement",
+    "taxCode": 198,
+    "mission": null,
+    "programme": null,
+    "y": [
+     164.833,
+     148.35,
+     189.123
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "France Galop et la société d’encouragement à l’élevage du cheval français (SECF)",
+    "tax": "Redevances sur les paris hippiques",
+    "taxCode": 269,
+    "mission": null,
+    "programme": null,
+    "y": [
+     84.678,
+     84.678,
+     74.058
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local de Martinique",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     3.0,
+     4.037,
+     4.037
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "Fonds pour l'emploi du travail temporaire",
+    "tax": "Contribution conventionnelle à la formation pour les entreprises de travail temporaire",
+    "taxCode": 287,
+    "mission": null,
+    "programme": null,
+    "y": [
+     65.0,
+     67.405,
+     64.18
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Safer anonyme à directoire",
+    "beneficiary": "Etablissement public foncier de Normandie",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     10.479,
+     10.151,
+     10.151
+    ],
+    "cap": [
+     9.823,
+     10.151,
+     10.151
+    ],
+    "back": [
+     0.656,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "Etablissement public foncier des Hauts de France",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     18.233,
+     20.714,
+     23.214
+    ],
+    "cap": [
+     18.233,
+     20.714,
+     23.214
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Centre technique industriel ou comité professionnel du développement économique",
+    "beneficiary": "CTIF - Centre technique des industries de la fonderie",
+    "tax": "Taxe sur les produits de la fonderie",
+    "taxCode": 45,
+    "mission": null,
+    "programme": null,
+    "y": [
+     5.45,
+     null,
+     null
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Groupement d'intérêt public (GIP)",
+    "beneficiary": "ANS - Agence nationale du sport",
+    "tax": "Prélèvement sur les jeux exploités par la FdJ hors paris sportifs",
+    "taxCode": 70,
+    "mission": "Sport, jeunesse et vie associative",
+    "programme": "219 Sport",
+    "y": [
+     246.088,
+     246.088,
+     246.088
+    ],
+    "cap": [
+     71.844,
+     71.844,
+     71.844
+    ],
+    "back": [
+     174.244,
+     174.244,
+     174.244
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "France Compétences",
+    "tax": "PEFPC : Participation au financement de la formation des professions non salariées (Artistes auteurs) correspondant au minimum à 0,1% au du montant annuel du plafond de la SS",
+    "taxCode": 258,
+    "mission": "Travail et emploi",
+    "programme": "103 Accompagnement des mutations économiques et développement de l'emploi",
+    "y": [
+     8.9,
+     9.754,
+     15.532
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "Etablissement public foncier de Provence-Alpes-Côte d'Azur",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     38.659,
+     38.259,
+     38.259
+    ],
+    "cap": [
+     37.859,
+     38.259,
+     38.259
+    ],
+    "back": [
+     0.8,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Autre régime de prévoyance sociale",
+    "beneficiary": "CNSA",
+    "tax": "Contribution additionnelle de solidarité autonomie (CASA)",
+    "taxCode": 156,
+    "mission": null,
+    "programme": null,
+    "y": [
+     822.0,
+     864.0,
+     828.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANTS - Agence nationale des titres sécurisés",
+    "tax": "Fraction des droits de timbre sur les cartes nationales d'identité",
+    "taxCode": 55,
+    "mission": "Administration générale et territoriale de l'État",
+    "programme": "354 Administration territoriale de l'État",
+    "y": [
+     24.855,
+     24.855,
+     23.92
+    ],
+    "cap": [
+     11.25,
+     12.0,
+     12.0
+    ],
+    "back": [
+     13.605,
+     12.855,
+     11.92
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale à fiscalité propre) - part intercommunale",
+    "tax": "Prélèvement progressif sur le produit des jeux dans les casinos au profit des communes",
+    "taxCode": 176,
+    "mission": null,
+    "programme": null,
+    "y": [
+     1.5,
+     1.5,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "CNC - Centre national du cinéma et de l'image animée",
+    "tax": "TSA - Taxe sur le prix des entrées aux séances organisées par les exploitants d’établissements de spectacles cinématographiques",
+    "taxCode": 150,
+    "mission": "Médias, livre et industries culturelles",
+    "programme": "334 Livre et industries culturelles",
+    "y": [
+     117.865,
+     135.793,
+     156.3
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANCOLS - Agence nationale de contrôle du logement social",
+    "tax": "Prélèvement sur la participation des employeurs à l'effort de construction (PEEC)",
+    "taxCode": 65,
+    "mission": "Cohésion des territoires",
+    "programme": "135 Urbanisme, territoires et amélioration de l'habitat",
+    "y": [
+     6.45,
+     6.45,
+     6.45
+    ],
+    "cap": [
+     6.45,
+     6.45,
+     6.45
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Mutualité sociale agricole",
+    "beneficiary": "CCMSA - non salariés branche vieillesse",
+    "tax": "Droit sur les bières et les boissons non alcoolisées",
+    "taxCode": 116,
+    "mission": null,
+    "programme": null,
+    "y": [
+     1134.965,
+     1179.33,
+     1158.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Personnes publiques ou privées exploitant des aérodromes dont le trafic embarqué ou débarqué s'élève au cours de la dernière année civile connue à plus de 5000 unités de trafic (UDT)",
+    "tax": "Taxe d'aéroport",
+    "taxCode": 201,
+    "mission": null,
+    "programme": null,
+    "y": [
+     795.1,
+     933.0,
+     1045.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale) à fiscalité propre et Départements - part communale",
+    "tax": "Taxe sur les remontées mécaniques",
+    "taxCode": 185,
+    "mission": null,
+    "programme": null,
+    "y": [
+     5.271,
+     5.271,
+     45.52
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale à fiscalité propre) - part intercommunale",
+    "tax": "Taxe de ski de fond",
+    "taxCode": 184,
+    "mission": null,
+    "programme": null,
+    "y": [
+     2.176,
+     2.176,
+     2.31
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANSéS - Agence nationale de sécurité sanitaire, de l'alimentation, de l'environnement et du travail",
+    "tax": "Taxe annuelle portant sur les autorisations de médicaments vétérinaires et les autorisations d’établissements pharmaceutiques vétérinaires",
+    "taxCode": 74,
+    "mission": "Agriculture, alimentation, forêt et affaires rurales",
+    "programme": "206 Sécurité et qualité sanitaires de l'alimentation",
+    "y": [
+     4.0,
+     4.0,
+     4.0
+    ],
+    "cap": [
+     4.5,
+     4.5,
+     4.5
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2016 et LFI 2017"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "AFITF - Agence de financement des infrastructures de transport de France",
+    "tax": "Taxe sur les exploitants d'infrastructures de transports",
+    "taxCode": 293,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "203 Infrastructures et services de transports",
+    "y": [
+     null,
+     0.0,
+     600.0
+    ],
+    "cap": [
+     null,
+     null,
+     600.0
+    ],
+    "back": [
+     null,
+     null,
+     0.0
+    ],
+    "since": "LFI 2024"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "Etablissement public foncier de Nouvelle-Aquitaine",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     24.322,
+     23.242,
+     23.242
+    ],
+    "cap": [
+     22.161,
+     23.242,
+     23.242
+    ],
+    "back": [
+     2.161,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Autre régime de prévoyance sociale",
+    "beneficiary": "CNSA",
+    "tax": "Contribution solidarité autonomie (CSA)",
+    "taxCode": 155,
+    "mission": null,
+    "programme": null,
+    "y": [
+     2274.0,
+     2376.0,
+     2262.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "CNC - Centre national du cinéma et de l'image animée",
+    "tax": "TST - Taxe sur les éditeurs et distributeurs de services de télévision - Fraction Editeurs",
+    "taxCode": 151,
+    "mission": "Médias, livre et industries culturelles",
+    "programme": "334 Livre et industries culturelles",
+    "y": [
+     292.212,
+     245.27,
+     257.3
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Départements",
+    "nature": "Département",
+    "beneficiary": "Départements (part départementale)",
+    "tax": "Taxe intérieure de consommation sur les produits énergétique (TICPE) - Fractions transférées en compensation du transfert du RMI/RSA et dans le cadre de l'acte II de la décentralisation",
+    "taxCode": 195,
+    "mission": null,
+    "programme": null,
+    "y": [
+     5102.0,
+     5102.0,
+     3693.651
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANSP - Agence nationale de santé publique",
+    "tax": "Fraction des Prélèvements sociaux sur les jeux prévus aux art. L137-20 à L137-22 du Code de la sécurité sociale",
+    "taxCode": 14,
+    "mission": null,
+    "programme": null,
+    "y": [
+     5.0,
+     5.0,
+     5.274
+    ],
+    "cap": [
+     5.0,
+     5.0,
+     5.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.274
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale à fiscalité propre) - part communale",
+    "tax": "Taxe de séjour, taxe de séjour forfaitaire",
+    "taxCode": 183,
+    "mission": null,
+    "programme": null,
+    "y": [
+     156.558,
+     156.558,
+     313.871
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS, CNAVTS, CCMSA (non salariés-maladie) en 2016; CNAVTS dès 2017",
+    "tax": "Forfait social",
+    "taxCode": 145,
+    "mission": null,
+    "programme": null,
+    "y": [
+     5880.835,
+     6069.165,
+     6192.829
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "Etablissement public foncier de Vendée",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     2.314,
+     2.47,
+     2.97
+    ],
+    "cap": [
+     2.314,
+     2.47,
+     2.97
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Collectivité territoriale de Corse et Conservatoire de l'espace littoral, de 2007 à 2011",
+    "tax": "Taxe due par les entreprises de transport public aérien et maritime",
+    "taxCode": 170,
+    "mission": null,
+    "programme": null,
+    "y": [
+     29.509,
+     29.509,
+     48.925
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Autre régime de prévoyance sociale",
+    "beneficiary": "Caisse d'amortissement de la dette sociale (CADES)",
+    "tax": "Contribution sociale généralisée (CSG)",
+    "taxCode": 136,
+    "mission": null,
+    "programme": null,
+    "y": [
+     9501.0,
+     9885.0,
+     9681.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "CNC - Centre national du cinéma et de l'image animée",
+    "tax": "Taxe sur les ventes et les locations de vidéogrammes destinés à l'usage privé du public (taxe vidéo et VOD )",
+    "taxCode": 153,
+    "mission": "Médias, livre et industries culturelles",
+    "programme": "334 Livre et industries culturelles",
+    "y": [
+     127.05,
+     130.0,
+     126.5
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Collectivité territoriale de Corse et Conservatoire de l'espace littoral, de 2007 à 2011",
+    "tax": "Droit annuel de francisation et de navigation en Corse; droit de passeport en Corse",
+    "taxCode": 168,
+    "mission": null,
+    "programme": null,
+    "y": [
+     4.694,
+     4.694,
+     4.613
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS, CNAVTS, CCMSA (non salariés-maladie) en 2016; CNAVTS dès 2017",
+    "tax": "Contribution sur les indemnités de mise à la retraite",
+    "taxCode": 142,
+    "mission": null,
+    "programme": null,
+    "y": [
+     29.77,
+     29.77,
+     33.806
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Autre régime de prévoyance sociale",
+    "beneficiary": "Caisse d'amortissement de la dette sociale (CADES)",
+    "tax": "Contributions pour le remboursement de la dette sociale (CRDS)",
+    "taxCode": 96,
+    "mission": null,
+    "programme": null,
+    "y": [
+     8372.0,
+     8716.0,
+     8510.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "FSD - Fonds de solidarité pour le développement géré par l'Agence française de développement (AFD) - suivi MAED",
+    "tax": "Taxe sur les transactions financières - fraction affectée de la ressource État",
+    "taxCode": 13,
+    "mission": null,
+    "programme": null,
+    "y": [
+     528.0,
+     277.0,
+     277.0
+    ],
+    "cap": [
+     528.0,
+     277.0,
+     277.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2013 et de la LFR-III 2012"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale à fiscalité propre) - part communale",
+    "tax": "Taxes sur les friches commerciales",
+    "taxCode": 188,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS, CNAVTS, CCMSA (non salariés-maladie) en 2016; CNAVTS dès 2017",
+    "tax": "Contribution sur les régimes de retraite conditionnant la constitution de droits à prestations à l’achèvement de la carrière du bénéficiaire dans l’entreprise",
+    "taxCode": 146,
+    "mission": null,
+    "programme": null,
+    "y": [
+     211.292,
+     221.013,
+     209.571
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "Comités départementaux et interdépartementaux des pêches maritimes et des élevages marins",
+    "tax": "Taxe sur les installations de production d'électricité utilisant l'énergie mécanique du vent situées dans les eaux intérieures ou la mer territoriale",
+    "taxCode": 290,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Autre personne morale de droit privé",
+    "beneficiary": "FGAO - Fonds de garantie des assurances obligatoires de dommages",
+    "tax": "Contribution des assurés",
+    "taxCode": 208,
+    "mission": null,
+    "programme": null,
+    "y": [
+     99.6,
+     101.1,
+     101.1
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAVTS, CNAF, FSV, CNAMTS en 2016; CNAVTS, CNAF, CNAMTS dès 2017",
+    "tax": "Taxe sur les salaires",
+    "taxCode": 218,
+    "mission": null,
+    "programme": null,
+    "y": [
+     16386.278,
+     17261.585,
+     16136.695
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "Etablissement public foncier d'Occitanie",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     23.878,
+     31.596,
+     31.596
+    ],
+    "cap": [
+     22.83,
+     31.596,
+     31.596
+    ],
+    "back": [
+     1.048,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS, CNAVTS, CCMSA (non salariés-maladie) en 2016; CNAVTS dès 2017",
+    "tax": "Redevances UMTS 2G et 3G",
+    "taxCode": 144,
+    "mission": null,
+    "programme": null,
+    "y": [
+     12.836,
+     12.836,
+     7.889
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local des collectivités de Côte-d'Or",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     2.7,
+     3.052,
+     3.052
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS",
+    "tax": "Droits perçus au profit de la Caisse nationale de l'assurance maladie des travailleurs salariés (CNAMTS) en matière de produits de santé, taxe annuelle due par les laboratoires de biologie médicale",
+    "taxCode": 241,
+    "mission": null,
+    "programme": null,
+    "y": [
+     81.553,
+     86.039,
+     72.455
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Départements",
+    "nature": "Département",
+    "beneficiary": "Départements (part départementale)",
+    "tax": "Taxe sur les conventions d'assurance",
+    "taxCode": 196,
+    "mission": null,
+    "programme": null,
+    "y": [
+     8471.959,
+     8760.006,
+     9292.981
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale) à fiscalité propre",
+    "tax": "Taxes dans le domaine funéraire",
+    "taxCode": 164,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.969,
+     0.969,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale) à fiscalité propre et Départements - part communale",
+    "tax": "Taxe communale sur la consommation finale d'électricité (TCFE)",
+    "taxCode": 180,
+    "mission": null,
+    "programme": null,
+    "y": [
+     911.822,
+     1300.0,
+     1066.455
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "Caisse des dépôts et des consignations",
+    "tax": "Solde de la taxe d'apprentissage après prise en compte des versements directs des entreprises mentionnés au II de l'article L. 6241-2",
+    "taxCode": 289,
+    "mission": null,
+    "programme": null,
+    "y": [
+     500.0,
+     515.0,
+     541.78
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "AGRASC - Agence de gestion et de recouvrement des avoirs saisis et confisqués",
+    "tax": "Fraction des produits annuels de la vente de biens confisqués",
+    "taxCode": 62,
+    "mission": "Justice",
+    "programme": "310 Conduite et pilotage de la politique de la justice",
+    "y": [
+     105.133,
+     100.0,
+     100.0
+    ],
+    "cap": [
+     9.9,
+     9.9,
+     9.9
+    ],
+    "back": [
+     95.233,
+     90.1,
+     90.1
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "CELRL - Conservatoire de l'espace littoral et des rivages lacustres",
+    "tax": "Taxe annuelle sur les engins maritimes à usage personnel (TAEMUP)",
+    "taxCode": 31,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "113 Paysages, eau et biodiversité",
+    "y": [
+     40.0,
+     40.0,
+     40.0
+    ],
+    "cap": [
+     40.0,
+     40.0,
+     40.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "France Compétences",
+    "tax": "PEFPC : Participation au financement de la formation des intermittents correspondant au minimum à 2% des rémunérations versées",
+    "taxCode": 259,
+    "mission": "Travail et emploi",
+    "programme": "103 Accompagnement des mutations économiques et développement de l'emploi",
+    "y": [
+     30.246,
+     31.365,
+     33.3
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Autre établissement public national administratif à compétence territoriale limitée",
+    "beneficiary": "Agences de l'eau",
+    "tax": "Redevance pour obstacle sur les cours d’eau, redevance pour stockage d’eau en période d’étiage, redevance pour la protection du milieu aquatique, redevance pour pollutions diffuses, redevances pour prélèvement sur la ressource en eau, redevances pour pollution de l’eau, redevances pour modernisation des réseaux de collecte, redevances cynégétiques, droit de validation du permis de chasse",
+    "taxCode": 32,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "113 Paysages, eau et biodiversité",
+    "y": [
+     2197.62,
+     2197.62,
+     2347.62
+    ],
+    "cap": [
+     2197.62,
+     2197.62,
+     2347.62
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2015 et de la LFI 2016"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "INAO - Institut national de l'origine et de la qualité",
+    "tax": "Droit sur les produits bénéficiant d'une appellation d'origine ou d'une indication géographique protégée (INAO)",
+    "taxCode": 3,
+    "mission": "Agriculture, alimentation, forêt et affaires rurales",
+    "programme": "149 Compétitivité et durabilité de l'agriculture, de l'agroalimentaire et de la forêt",
+    "y": [
+     6.1,
+     6.1,
+     6.1
+    ],
+    "cap": [
+     7.5,
+     7.5,
+     7.5
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes",
+    "tax": "Surtaxe sur les eaux minérales",
+    "taxCode": 158,
+    "mission": null,
+    "programme": null,
+    "y": [
+     21.663,
+     21.663,
+     23.826
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Régions de la Guadeloupe, de la Martinique, de la Guyane et de la Réunion",
+    "tax": "Taxe spéciale de consommation sur les carburants",
+    "taxCode": 238,
+    "mission": null,
+    "programme": null,
+    "y": [
+     548.967,
+     548.967,
+     599.982
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes",
+    "tax": "Impôt sur les spectacles, jeux et divertissements",
+    "taxCode": 157,
+    "mission": null,
+    "programme": null,
+    "y": [
+     157.914,
+     157.914,
+     307.461
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Départements",
+    "nature": "Département",
+    "beneficiary": "Départements (part départementale)",
+    "tax": "Droits départementaux d'enregistrement sur les mutations à titre onéreux d'immeubles",
+    "taxCode": 192,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.0,
+     0.0,
+     499.597
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANSéS - Agence nationale de sécurité sanitaire, de l'alimentation, de l'environnement et du travail",
+    "tax": "Taxe annuelle sur la vente des produits phytopharmaceutiques",
+    "taxCode": 79,
+    "mission": "Agriculture, alimentation, forêt et affaires rurales",
+    "programme": "206 Sécurité et qualité sanitaires de l'alimentation",
+    "y": [
+     4.179,
+     4.179,
+     4.179
+    ],
+    "cap": [
+     4.2,
+     4.2,
+     4.2
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime spécial de Sécurité Sociale",
+    "beneficiary": "Caisse nationale de retraite des industries électriques et gazières",
+    "tax": "Contribution tarifaire d'acheminement (CTA)",
+    "taxCode": 97,
+    "mission": null,
+    "programme": null,
+    "y": [
+     1643.36,
+     1702.18,
+     1671.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Groupement d'intérêt public (GIP)",
+    "beneficiary": "ANS - Agence nationale du sport",
+    "tax": "Contribution sur la cession à un service de télévision des droits de diffusion de manifestations ou de compétitions sportives",
+    "taxCode": 72,
+    "mission": "Sport, jeunesse et vie associative",
+    "programme": "219 Sport",
+    "y": [
+     59.064,
+     59.665,
+     59.665
+    ],
+    "cap": [
+     74.1,
+     59.665,
+     59.665
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Autorités organisatrices des transports urbains",
+    "tax": "Versement transport dû par les entreprises de plus de 9 salariés implantées en province",
+    "taxCode": 94,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     null,
+     null
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local d'Agen",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.375,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Centre technique industriel ou comité professionnel du développement économique",
+    "beneficiary": "CTI des matériaux : Centre d'étude et de recherche de l'industrie du béton (CERIB); Centre technique de matériaux naturels de construction (CTMNC)",
+    "tax": "Taxe pour le développement des industries des matériaux de construction regroupant les industries du béton, de la terre cuite et des roches ornementales et de construction",
+    "taxCode": 46,
+    "mission": null,
+    "programme": null,
+    "y": [
+     13.08,
+     13.08,
+     13.08
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "SGP - Société du Grand Paris",
+    "tax": "Imposition forfaitaire sur le matériel roulant circulant sur le réseau de transport ferroviaire et guidé géré par la RATP - IFER-STIF RATP",
+    "taxCode": 22,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "203 Infrastructures et services de transports",
+    "y": [
+     75.2,
+     76.7,
+     82.224
+    ],
+    "cap": [
+     76.0,
+     79.0,
+     84.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "FranceAgriMer",
+    "tax": "Certificats sanitaires et phytosanitaires",
+    "taxCode": 4,
+    "mission": "Agriculture, alimentation, forêt et affaires rurales",
+    "programme": "149 Compétitivité et durabilité de l'agriculture, de l'agroalimentaire et de la forêt",
+    "y": [
+     0.0,
+     null,
+     null
+    ],
+    "cap": [
+     2.0,
+     null,
+     null
+    ],
+    "back": [
+     0.0,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "France Compétences",
+    "tax": "PEFPC : Participation au financement de la formation des professions non salariées (artisans) correspondant à 0,29% du montant annuel du plafond de la sécurité sociale, dont micro entrepreneurs",
+    "taxCode": 211,
+    "mission": "Travail et emploi",
+    "programme": "103 Accompagnement des mutations économiques et développement de l'emploi",
+    "y": [
+     32.507,
+     61.376,
+     84.16
+    ],
+    "cap": [
+     null,
+     61.4,
+     85.0
+    ],
+    "back": [
+     null,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2017 et LFI 2018"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "SGP - Société du Grand Paris",
+    "tax": "Taxe annuelle sur les locaux à usage de bureaux, les locaux commerciaux, les locaux de stockage et les surfaces de stationnement annexées à ces catégories de locaux perçue dans la région Ile-de-France",
+    "taxCode": 21,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "203 Infrastructures et services de transports",
+    "y": [
+     600.9,
+     655.1,
+     700.121
+    ],
+    "cap": [
+     601.0,
+     664.0,
+     718.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "CNC - Centre national du cinéma et de l'image animée",
+    "tax": "TST - Taxe sur les éditeurs et distributeurs de services de télévision - Fraction Distributeurs",
+    "taxCode": 152,
+    "mission": "Médias, livre et industries culturelles",
+    "programme": "334 Livre et industries culturelles",
+    "y": [
+     176.88,
+     201.601,
+     203.78
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale à fiscalité propre) - part intercommunale",
+    "tax": "Taxe de séjour, taxe de séjour forfaitaire",
+    "taxCode": 183,
+    "mission": null,
+    "programme": null,
+    "y": [
+     223.772,
+     223.772,
+     355.63
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "Comités régionaux des pêches maritimes et des élevages marins",
+    "tax": "Taxe sur les installations de production d'électricité utilisant l'énergie mécanique du vent situées dans les eaux intérieures ou la mer territoriale",
+    "taxCode": 290,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local Alsace (ex du Bas Rhin)",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     6.3,
+     7.175,
+     71.753
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "VNF - Voies navigables de France",
+    "tax": "Redevance hydraulique",
+    "taxCode": 268,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "203 Infrastructures et services de transports",
+    "y": [
+     127.5,
+     127.5,
+     136.5
+    ],
+    "cap": [
+     127.5,
+     127.5,
+     136.5
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2020"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "SGP - Société du Grand Paris",
+    "tax": "Taxe sur les surfaces de stationnement",
+    "taxCode": 266,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "203 Infrastructures et services de transports",
+    "y": [
+     14.2,
+     14.6,
+     28.232
+    ],
+    "cap": [
+     28.0,
+     20.0,
+     30.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2019"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANSéS - Agence nationale de sécurité sanitaire, de l'alimentation, de l'environnement et du travail",
+    "tax": "Taxe liée aux dossiers de demande concernant les médicaments vétérinaires ou leur publicité",
+    "taxCode": 73,
+    "mission": "Agriculture, alimentation, forêt et affaires rurales",
+    "programme": "206 Sécurité et qualité sanitaires de l'alimentation",
+    "y": [
+     4.3,
+     4.3,
+     4.3
+    ],
+    "cap": [
+     4.0,
+     4.0,
+     4.0
+    ],
+    "back": [
+     0.3,
+     0.3,
+     0.3
+    ],
+    "since": "LFR 2016 et LFI 2017"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes ou Groupements de communes (parts communale et intercommunale)",
+    "tax": "Taxes locales d'équipement",
+    "taxCode": 187,
+    "mission": null,
+    "programme": null,
+    "y": [
+     25.256,
+     25.256,
+     17.455
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "Comité national des pêches maritimes et des élevages marins",
+    "tax": "Taxe sur les installations de production d'électricité utilisant l'énergie mécanique du vent situées dans les eaux intérieures ou la mer territoriale",
+    "taxCode": 290,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "AGFPN - Association de Gestion du Fonds Paritaire National – AGFPN.",
+    "tax": "Contribution patronale au dialogue social (0,016%)",
+    "taxCode": 264,
+    "mission": null,
+    "programme": null,
+    "y": [
+     98.045,
+     98.045,
+     111.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Région Ile-de-France",
+    "tax": "Redevance pour création de bureaux ou de locaux de recherche en région Ile-de-France",
+    "taxCode": 237,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     null,
+     null
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Mutualité sociale agricole",
+    "beneficiary": "CCMSA (non salariés-maladie)",
+    "tax": "Taxe sur les boissons sucrées",
+    "taxCode": 117,
+    "mission": null,
+    "programme": null,
+    "y": [
+     430.946,
+     437.841,
+     452.911
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère industriel ou commercial non doté d'un comptable public",
+    "beneficiary": "ANDRA - Agence nationale pour la gestion des déchets radioactifs",
+    "tax": "Taxe additionnelle à la taxe sur les installations nucléaires de base - Recherche",
+    "taxCode": 29,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "174 Énergie, climat et après-mines",
+    "y": [
+     65.072,
+     65.072,
+     65.072
+    ],
+    "cap": [
+     55.0,
+     55.0,
+     55.0
+    ],
+    "back": [
+     10.072,
+     10.072,
+     10.072
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "CNM - Centre national de la musique",
+    "tax": "Taxe sur les spectacles de variétés",
+    "taxCode": 92,
+    "mission": "Médias, livre et industries culturelles",
+    "programme": "334 Livre et industries culturelles",
+    "y": [
+     33.504,
+     30.0,
+     35.0
+    ],
+    "cap": [
+     50.0,
+     50.0,
+     50.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS, CNAVTS, CCMSA (non salariés-maladie) en 2016; CNAVTS dès 2017",
+    "tax": "Contribution sociale de solidarité des sociétés (C3S)",
+    "taxCode": 139,
+    "mission": null,
+    "programme": null,
+    "y": [
+     4374.61,
+     4613.026,
+     4273.554
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local du Doubs",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     6.975,
+     6.242,
+     6.242
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "Etablissement public foncier de l'Ouest Rhône-Alpes",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     20.51,
+     19.807,
+     19.807
+    ],
+    "cap": [
+     19.104,
+     19.807,
+     19.807
+    ],
+    "back": [
+     1.406,
+     0.0,
+     0.0
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Fondation",
+    "beneficiary": "Fondation du patrimoine",
+    "tax": "Fraction du produit des successions en déshérence",
+    "taxCode": 220,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Organismes consulaires",
+    "nature": "Organisme consulaire",
+    "beneficiary": "Chambres de commerce et d'industrie de région (CCI-R)",
+    "tax": "TA-CFE - fraction CCI-R de la Taxe additionnelle à la cotisation foncière des entreprises pour frais de chambres de commerce et d’industrie de région",
+    "taxCode": 42,
+    "mission": null,
+    "programme": null,
+    "y": [
+     270.0,
+     280.0,
+     280.0
+    ],
+    "cap": [
+     299.0,
+     280.0,
+     255.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     25.0
+    ],
+    "since": "LFI 2013 et de la LFR-III 2012"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANTS - Agence nationale des titres sécurisés",
+    "tax": "Droit de timbre pour la délivrance du permis de conduire en cas de perte ou de vol",
+    "taxCode": 53,
+    "mission": "Administration générale et territoriale de l'État",
+    "programme": "354 Administration territoriale de l'État",
+    "y": [
+     9.604,
+     9.604,
+     8.78
+    ],
+    "cap": [
+     7.0,
+     7.0,
+     7.0
+    ],
+    "back": [
+     2.604,
+     2.604,
+     1.78
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Offices de l'eau (dans les DOM)",
+    "tax": "Redevances pour prélèvement sur la ressource en eau, pour pollution de l'eau, pour modernisation des réseaux de collecte, pour pollutions diffuses, pour stockage d'eau en période d'étiage, pour obstacle sur les cours d'eau et pour protection du milieu aquatique dans les DOM",
+    "taxCode": 171,
+    "mission": null,
+    "programme": null,
+    "y": [
+     28.0,
+     28.0,
+     28.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "Caisse nationale des allocations familiales [pour le restant des prélèvements]",
+    "tax": "Fraction des Prélèvements sociaux sur les jeux prévus aux art. L137-20 à L137-22 du Code de la sécurité sociale",
+    "taxCode": 14,
+    "mission": null,
+    "programme": null,
+    "y": [
+     361.58,
+     361.58,
+     381.369
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Centre technique industriel ou comité professionnel du développement économique",
+    "beneficiary": "CTI de l'Industrie : CT des indus. mécaniques (CETIM), CT de l'industrie du décolletage (CTDEC), CTI de la construction métallique (CTICM), CT des indus. aérauliques et thermiques (CETIAT), et Institut de Soudure",
+    "tax": "Taxe sur les produits de la fonderie",
+    "taxCode": 45,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     5.45,
+     5.45
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Autre régime de prévoyance sociale",
+    "beneficiary": "CNSA",
+    "tax": "Contribution sociale généralisée (CSG)",
+    "taxCode": 136,
+    "mission": null,
+    "programme": null,
+    "y": [
+     30509.0,
+     31739.0,
+     31157.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Établissement public administratif local",
+    "nature": "(Autre) Établissement public administratif local",
+    "beneficiary": "Centres de gestion de la fonction publique territoriale",
+    "tax": "Cotisation obligatoire",
+    "taxCode": 129,
+    "mission": null,
+    "programme": null,
+    "y": [
+     174.62,
+     178.415,
+     182.876
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANAH - Agence nationale de l'habitat",
+    "tax": "Recettes issues de la mise aux enchères des \"quotas carbone\"",
+    "taxCode": 251,
+    "mission": "Cohésion des territoires",
+    "programme": "135 Urbanisme, territoires et amélioration de l'habitat",
+    "y": [
+     1884.0,
+     2400.0,
+     2400.0
+    ],
+    "cap": [
+     481.0,
+     700.0,
+     700.0
+    ],
+    "back": [
+     1403.0,
+     1700.0,
+     1700.0
+    ],
+    "since": "LFI 2019"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local de la Savoie",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     3.675,
+     3.71,
+     3.71
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Régions",
+    "tax": "Taxe sur les permis de conduire",
+    "taxCode": 213,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.05,
+     0.05,
+     0.046
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "OFB - Office français de la biodiversité",
+    "tax": "Taxe sur les installations de production d'électricité utilisant l'énergie mécanique du vent situées dans les eaux intérieures ou la mer territoriale",
+    "taxCode": 290,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "113 Paysages, eau et biodiversité",
+    "y": [
+     null,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Autres personnes morales de droit public dépendant de l'Etat",
+    "nature": "Groupement d'intérêt public (GIP)",
+    "beneficiary": "Groupements d'intérêt public \"Objectif Meuse\" et \"Haute-Marne\" et Communes concernées",
+    "tax": "TA-TINB - Taxe additionnelle à la taxe sur les installations nucléaires de base dite \"Accompagnement\"",
+    "taxCode": 229,
+    "mission": null,
+    "programme": null,
+    "y": [
+     57.81,
+     57.81,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "CGLLS - Caisse de garantie du logement locatif social",
+    "tax": "Cotisation additionnelle versée par les organismes HLM et les SEM",
+    "taxCode": 122,
+    "mission": "Cohésion des territoires",
+    "programme": "135 Urbanisme, territoires et amélioration de l'habitat",
+    "y": [
+     67.5,
+     57.938,
+     55.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale) à fiscalité propre et Départements - part communale",
+    "tax": "Redevances communale et départementale des mines",
+    "taxCode": 178,
+    "mission": null,
+    "programme": null,
+    "y": [
+     6.953,
+     6.953,
+     8.367
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme mutualiste",
+    "nature": "Assurance mutuelle agricole",
+    "beneficiary": "CAAA - Caisses d'assurances d'accidents agricoles d'Alsace-Moselle",
+    "tax": "Cotisation au profit des caisses d’assurances d’accidents agricoles d’Alsace-Moselle",
+    "taxCode": 95,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "FSD - Fonds de solidarité pour le développement géré par l'Agence française de développement (AFD) - suivi MAED",
+    "tax": "Taxe de solidarité sur les billets d'avion",
+    "taxCode": 12,
+    "mission": null,
+    "programme": null,
+    "y": [
+     210.0,
+     210.0,
+     210.0
+    ],
+    "cap": [
+     210.0,
+     210.0,
+     210.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2014"
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "France Compétences",
+    "tax": "PEFPC : CPF CDD (ex-CIF-CDD) : 1% des salaires versés, ou moins en cas d'accord de branche",
+    "taxCode": 226,
+    "mission": "Travail et emploi",
+    "programme": "103 Accompagnement des mutations économiques et développement de l'emploi",
+    "y": [
+     301.05,
+     301.05,
+     341.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "Agence pour la mise en valeur des espaces urbains de la zone dite des \" 50 pas géométriques \" en Martinique",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     1.198,
+     0.975,
+     0.975
+    ],
+    "cap": [
+     1.198,
+     0.975,
+     0.975
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2015 et de la LFI 2016"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Départements",
+    "nature": "Département",
+    "beneficiary": "Départements (part départementale)",
+    "tax": "Droit départemental de passage sur les ouvrages d'art reliant le continent aux îles maritimes",
+    "taxCode": 194,
+    "mission": null,
+    "programme": null,
+    "y": [
+     34.175,
+     34.175,
+     50.277
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Mutualité sociale agricole",
+    "beneficiary": "CCMSA - non salariés branche vieillesse",
+    "tax": "Cotisation spéciale sur les boissons alcooliques",
+    "taxCode": 109,
+    "mission": null,
+    "programme": null,
+    "y": [
+     752.725,
+     762.244,
+     751.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "UNEDIC",
+    "tax": "Contribution sociale généralisée (CSG)",
+    "taxCode": 136,
+    "mission": null,
+    "programme": null,
+    "y": [
+     15831.0,
+     16441.0,
+     17800.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAF",
+    "tax": "Contributions patronales et salariales sur les attributions d’options (stock-options) de souscription ou d’achat des actions et sur les attributions gratuites",
+    "taxCode": 124,
+    "mission": null,
+    "programme": null,
+    "y": [
+     880.73,
+     921.251,
+     912.052
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Centre technique industriel ou comité professionnel du développement économique",
+    "beneficiary": "Comité de développement et de promotion de l'habillement - DEFI",
+    "tax": "Taxe pour le développement des industries de l'habillement",
+    "taxCode": 38,
+    "mission": null,
+    "programme": null,
+    "y": [
+     11.0,
+     11.0,
+     11.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère scientifique culturel et professionnel",
+    "beneficiary": "Etablissements publics d'enseignement supérieur, établissements mentionnés aux articles L. 443-1 et L. 753-1 du code de l’éducation ou à l'article L. 1431-1 du code général des collectivités territoriales dispensant des formations initiales d'enseignement supérieur, établissements d'enseignement supérieur privés d'intérêt général et centres régionaux des œuvres universitaires et scolaires",
+    "tax": "Contribution vie étudiante et campus",
+    "taxCode": 252,
+    "mission": null,
+    "programme": null,
+    "y": [
+     164.35,
+     174.7,
+     170.2
+    ],
+    "cap": [
+     165.0,
+     177.0,
+     177.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2019"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS jusqu'en 2017; CNAMTS et ACOSS en 2018",
+    "tax": "TVA nette",
+    "taxCode": 138,
+    "mission": null,
+    "programme": null,
+    "y": [
+     57235.0,
+     60247.0,
+     57083.073
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "AFITF - Agence de financement des infrastructures de transport de France",
+    "tax": "Taxe de solidarité sur les billets d'avion",
+    "taxCode": 12,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "203 Infrastructures et services de transports",
+    "y": [
+     110.0,
+     163.0,
+     252.0
+    ],
+    "cap": [
+     230.0,
+     230.0,
+     252.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2020"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Intercommunalité",
+    "nature": "Autre établissement public local de coopération non spécialisé ou entente",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale) à fiscalité propre et Départements - part départementale",
+    "tax": "Taxe sur les remontées mécaniques",
+    "taxCode": 185,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.66,
+     0.66,
+     20.893
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Centre technique industriel ou comité professionnel du développement économique",
+    "beneficiary": "Comité professionnel des stocks stratégiques pétroliers",
+    "tax": "Rémunération pour services rendus au comité professionnel des stocks stratégiques pétroliers",
+    "taxCode": 167,
+    "mission": null,
+    "programme": null,
+    "y": [
+     383.5,
+     420.0,
+     420.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CCMSA (non salariés-maladie, non salariés-RCO et salariés), CNAMTS, CNAF, autres régimes de sécurité sociale, CNSA, FCAATA, Fonds CMU-C jusqu'en 2016; CNAMTS et RAVGDT en 2017",
+    "tax": "Droits de consommation sur les tabacs",
+    "taxCode": 134,
+    "mission": null,
+    "programme": null,
+    "y": [
+     13558.609,
+     13558.609,
+     13398.482
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Départements",
+    "nature": "Département",
+    "beneficiary": "Départements d'Outre-mer",
+    "tax": "Droits de consommation sur les tabacs (DOM)",
+    "taxCode": 173,
+    "mission": null,
+    "programme": null,
+    "y": [
+     143.845,
+     143.845,
+     10.475
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Mutualité sociale agricole",
+    "beneficiary": "CCMSA - non salariés branche vieillesse",
+    "tax": "Droit de consommation sur les produits intermédiaires",
+    "taxCode": 114,
+    "mission": null,
+    "programme": null,
+    "y": [
+     61.93,
+     60.65,
+     59.577
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Centre technique industriel ou comité professionnel du développement économique",
+    "beneficiary": "ITERG - Institut des corps gras",
+    "tax": "Taxe affectée au financement de l'institut des corps gras",
+    "taxCode": 33,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.65,
+     0.65,
+     0.65
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Mutualité sociale agricole",
+    "beneficiary": "FCATA (Fonds commun des accidents du travail agricole) jusqu'en 2016; CCMSA en 2017",
+    "tax": "Contribution forfaitaire des organismes assureurs et contribution forfaitaire des organismes participant à la gestion du régime prévu par la loi n° 2001-1128 du 30 novembre 2001",
+    "taxCode": 112,
+    "mission": null,
+    "programme": null,
+    "y": [
+     4.2,
+     3.8,
+     4.2
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Régions",
+    "tax": "Taxe sur les certificats d'immatriculation des véhicules (cartes grises)",
+    "taxCode": 214,
+    "mission": null,
+    "programme": null,
+    "y": [
+     2312.894,
+     2440.103,
+     1884.291
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "France Compétences",
+    "tax": "PEFPC : Participation au financement de la formation des professions non salariées (Peche et culture) correspondant au minimum à 0,15% au du montant annuel du plafond de la SS",
+    "taxCode": 212,
+    "mission": "Travail et emploi",
+    "programme": "103 Accompagnement des mutations économiques et développement de l'emploi",
+    "y": [
+     0.43,
+     1.206,
+     1.206
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Exploitant public",
+    "beneficiary": "FNAL - Fonds national d'aide au logement",
+    "tax": "Taxe sur les plus-values immobilières (PVI) autres que terrains à bâtir",
+    "taxCode": 63,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     null,
+     null
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "Comité de gestion des œuvres sociales des personnels hospitaliers (CGOS)",
+    "tax": "Cotisation obligatoire",
+    "taxCode": 129,
+    "mission": null,
+    "programme": null,
+    "y": [
+     474.95,
+     482.0,
+     490.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Mutualité sociale agricole",
+    "beneficiary": "CCMSA (non salariés-vieillesse et maladie) jusqu'en 2016; CCMSA (non salariés-vieillesse, maladie et RCO) en 2017",
+    "tax": "Droits de consommation sur les alcools",
+    "taxCode": 115,
+    "mission": null,
+    "programme": null,
+    "y": [
+     2269.054,
+     2288.637,
+     2270.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAF",
+    "tax": "Taxe spéciale sur les conventions d'assurance automobile",
+    "taxCode": 128,
+    "mission": null,
+    "programme": null,
+    "y": [
+     1102.049,
+     1135.11,
+     1140.094
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public et foncier de Guadeloupe",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     4.275,
+     6.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "Organismes de secours et de sauvetage en mer agréés (art. L742-9 code de la sécurité intérieure)",
+    "tax": "Taxe annuelle sur les engins maritimes à usage personnel (TAEMUP) – Fraction perçue sur les engins ne battant pas pavillon français",
+    "taxCode": 245,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.16,
+     0.16,
+     0.16
+    ],
+    "cap": [
+     4.0,
+     4.0,
+     4.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2017 et LFI 2018"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public local à caractère industriel ou commercial",
+    "beneficiary": "Etablissement public foncier local de l'Ain",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     3.75,
+     3.09,
+     3.09
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Société à responsabilité limitée (sans autre indication)",
+    "beneficiary": "Filière de responsabilité élargie du producteur (REP) relative aux navires de plaisance et de sport hors d’usage (NPSHU)",
+    "tax": "Taxe annuelle sur les engins maritimes à usage personnel (TAEMUP)",
+    "taxCode": 31,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.9,
+     0.9,
+     0.9
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "France Compétences",
+    "tax": "Contribution supplémentaire à l'apprentissage",
+    "taxCode": 120,
+    "mission": "Travail et emploi",
+    "programme": "103 Accompagnement des mutations économiques et développement de l'emploi",
+    "y": [
+     310.735,
+     235.0,
+     190.25
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Régions",
+    "tax": "Taxe intérieure de consommation sur les produits énergétique (TICPE dont part modulable)",
+    "taxCode": 216,
+    "mission": null,
+    "programme": null,
+    "y": [
+     4642.852,
+     4659.438,
+     4847.712
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Fondation",
+    "beneficiary": "Fondation du patrimoine",
+    "tax": "Fraction du prélèvement sur les jeux de loterie correspondant aux jeux dédiés au patrimoine",
+    "taxCode": 285,
+    "mission": null,
+    "programme": null,
+    "y": [
+     31.265,
+     31.265,
+     27.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Exploitant public",
+    "beneficiary": "FNGRA - Fonds national de gestion des risques en agriculture et fonds de calamités agricoles dans les départements d'outre-mer",
+    "tax": "Contributions additionnelles aux primes ou cotisations afférentes à certaines conventions d'assurance",
+    "taxCode": 7,
+    "mission": null,
+    "programme": null,
+    "y": [
+     69.0,
+     120.0,
+     120.0
+    ],
+    "cap": [
+     60.0,
+     120.0,
+     120.0
+    ],
+    "back": [
+     9.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2015 et de la LFI 2016"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Autre régime de prévoyance sociale",
+    "beneficiary": "Fonds CMU - Fonds de financement de la protection complémentaire de la couverture universelle du risque maladie",
+    "tax": "Fraction de Taxe de solidarité additionnelle (TSA)",
+    "taxCode": 133,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     null,
+     null
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Départements",
+    "nature": "Département",
+    "beneficiary": "Communes et départements (part départementale)",
+    "tax": "Redevance proportionnelle sur l'énergie hydraulique",
+    "taxCode": 177,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.783,
+     0.783,
+     3.43
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Région Ile-de-France",
+    "tax": "Taxe d’aménagement",
+    "taxCode": 182,
+    "mission": null,
+    "programme": null,
+    "y": [
+     53.985,
+     53.985,
+     54.156
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "Etablissement public d'aménagement en Guyane",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     3.471,
+     3.938,
+     3.938
+    ],
+    "cap": [
+     3.405,
+     3.938,
+     3.938
+    ],
+    "back": [
+     0.066,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2016 et LFI 2017"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale) à fiscalité propre et Départements - part intercommunale",
+    "tax": "Taxe sur les remontées mécaniques",
+    "taxCode": 185,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.105,
+     0.105,
+     0.652
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS",
+    "tax": "Contribution due par les laboratoires et les grossistes répartiteurs sur les ventes en gros aux officines pharmaceutiques",
+    "taxCode": 101,
+    "mission": null,
+    "programme": null,
+    "y": [
+     234.302,
+     247.188,
+     239.186
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Établissement public national à caractère industriel ou commercial doté d'un comptable public",
+    "beneficiary": "Agence pour la mise en valeur des espaces urbains de la zone dite des \" 50 pas géométriques \" en Guadeloupe",
+    "tax": "Taxes spéciales d'équipement",
+    "taxCode": 20,
+    "mission": null,
+    "programme": null,
+    "y": [
+     1.186,
+     0.997,
+     0.997
+    ],
+    "cap": [
+     1.186,
+     0.997,
+     0.997
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2015 et de la LFI 2016"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Régions de la Guadeloupe, de la Martinique, de la Guyane et de la Réunion",
+    "tax": "Taxe due par les entreprises de transport public aérien et maritime sur les passagers embarqués",
+    "taxCode": 239,
+    "mission": null,
+    "programme": null,
+    "y": [
+     31.871,
+     31.871,
+     48.925
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Etablissements publics nationaux (non opérateurs)",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ARPE - Autorité des relations sociales des plateformes d'emploi",
+    "tax": "Taxe sur les exploitants de plateformes de mises en relation par voie électronique en vue de fournir certaines prestations de transport",
+    "taxCode": 284,
+    "mission": null,
+    "programme": null,
+    "y": [
+     2.0,
+     2.0,
+     2.0
+    ],
+    "cap": [
+     2.0,
+     2.0,
+     2.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2022"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Régions",
+    "nature": "Région",
+    "beneficiary": "Région Ile-de-France",
+    "tax": "Taxe annuelle sur les locaux à usage de bureaux, les locaux commerciaux, les locaux de stockage et les surfaces de stationnement annexées à ces catégories de locaux perçue dans la région Ile-de-France",
+    "taxCode": 21,
+    "mission": null,
+    "programme": null,
+    "y": [
+     212.938,
+     212.938,
+     231.805
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes ou EPCI (établissements publics de coopération intercommunale à fiscalité propre) - part communale",
+    "tax": "Taxe de ski de fond",
+    "taxCode": 184,
+    "mission": null,
+    "programme": null,
+    "y": [
+     3.761,
+     3.761,
+     2.76
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "France Compétences",
+    "tax": "Contribution unique à la formation professionnelle et à l'alternance",
+    "taxCode": 265,
+    "mission": "Travail et emploi",
+    "programme": "103 Accompagnement des mutations économiques et développement de l'emploi",
+    "y": [
+     8997.918,
+     9830.0,
+     10453.715
+    ],
+    "cap": [
+     9475.409,
+     9900.0,
+     10500.0
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFI 2020"
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Communes",
+    "nature": "Commune et commune nouvelle",
+    "beneficiary": "Communes et départements (part communale)",
+    "tax": "Redevance proportionnelle sur l'énergie hydraulique",
+    "taxCode": 177,
+    "mission": null,
+    "programme": null,
+    "y": [
+     3.081,
+     3.081,
+     11.348
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "CGLLS - Caisse de garantie du logement locatif social",
+    "tax": "Cotisation versée par les organismes HLM et les SEM",
+    "taxCode": 121,
+    "mission": "Cohésion des territoires",
+    "programme": "135 Urbanisme, territoires et amélioration de l'habitat",
+    "y": [
+     384.0,
+     342.622,
+     272.8
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Autre personne morale de droit privé",
+    "beneficiary": "FGTI - Fonds de garantie des victimes d'actes terroristes et autres infractions",
+    "tax": "Prélèvement sur les contrats d'assurance de biens",
+    "taxCode": 209,
+    "mission": null,
+    "programme": null,
+    "y": [
+     582.1,
+     582.121,
+     598.3
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS",
+    "tax": "Fraction de Taxe de solidarité additionnelle (TSA)",
+    "taxCode": 133,
+    "mission": null,
+    "programme": null,
+    "y": [
+     5608.338,
+     5776.588,
+     5453.896
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère industriel ou commercial non doté d'un comptable public",
+    "beneficiary": "ANDRA - Agence nationale pour la gestion des déchets radioactifs",
+    "tax": "Contribution spéciale pour la gestion des déchets radioactifs - Conception",
+    "taxCode": 86,
+    "mission": "Écologie, développement et mobilité durables",
+    "programme": "174 Énergie, climat et après-mines",
+    "y": [
+     80.7,
+     80.7,
+     80.7
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "France Compétences",
+    "tax": "PEFPC : Participation au financement de la formation des professions non salariées (Entreprises du Vivant, agriculture) correspondant à 0,30 % des revenus professionnels ou de l'assiette forfaitaire déterminés à l'article L. 731-16 du code rural et de la pêche maritime",
+    "taxCode": 1,
+    "mission": "Travail et emploi",
+    "programme": "103 Accompagnement des mutations économiques et développement de l'emploi",
+    "y": [
+     62.442,
+     66.308,
+     63.412
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Exploitant public",
+    "beneficiary": "FNAL - Fonds national d'aide au logement",
+    "tax": "Taxe annuelle sur les locaux à usage de bureaux, les locaux commerciaux, les locaux de stockage et les surfaces de stationnement annexées à ces catégories de locaux perçue dans la région Ile-de-France",
+    "taxCode": 21,
+    "mission": null,
+    "programme": null,
+    "y": [
+     66.2,
+     66.2,
+     66.2
+    ],
+    "cap": [
+     66.2,
+     66.2,
+     66.2
+    ],
+    "back": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "since": "LFR 2016 et LFI 2017"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS",
+    "tax": "Contribution due par les entreprises fabriquant ou exploitant des dispositifs médicaux sur leurs dépenses de publicité",
+    "taxCode": 103,
+    "mission": null,
+    "programme": null,
+    "y": [
+     50.945,
+     53.747,
+     26.745
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Groupement d'intérêt public (GIP)",
+    "beneficiary": "ANS - Agence nationale du sport",
+    "tax": "Prélèvement sur les paris sportifs en ligne de la FdJ et des nouveaux opérateurs agréés",
+    "taxCode": 69,
+    "mission": "Sport, jeunesse et vie associative",
+    "programme": "219 Sport",
+    "y": [
+     181.701,
+     181.701,
+     181.701
+    ],
+    "cap": [
+     34.6,
+     34.6,
+     34.6
+    ],
+    "back": [
+     147.101,
+     147.101,
+     147.101
+    ],
+    "since": "LFI 2012"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Associations",
+    "nature": "Association déclarée",
+    "beneficiary": "Organismes de secours et de sauvetage en mer agréés (art. L742-9 code de la sécurité intérieure)",
+    "tax": "Taxe sur les installations de production d'électricité utilisant l'énergie mécanique du vent situées dans les eaux intérieures ou la mer territoriale",
+    "taxCode": 290,
+    "mission": null,
+    "programme": null,
+    "y": [
+     null,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "CNC - Centre national du cinéma et de l'image animée",
+    "tax": "Cotisations (normale et supplémentaire) des entreprises cinématographiques",
+    "taxCode": 149,
+    "mission": "Médias, livre et industries culturelles",
+    "programme": "334 Livre et industries culturelles",
+    "y": [
+     7.006,
+     10.102,
+     10.6
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Secteur local",
+    "category": "Organismes consulaires",
+    "nature": "Organisme consulaire",
+    "beneficiary": "CRMA (incl. Alsace et Moselle)",
+    "tax": "TA-CFE - fraction CRMA de la Taxe additionnelle à la cotisation foncière des entreprises pour frais de chambre régionale de métiers et d'artisanat",
+    "taxCode": 40,
+    "mission": null,
+    "programme": null,
+    "y": [
+     236.748,
+     236.748,
+     236.748
+    ],
+    "cap": [
+     203.149,
+     196.149,
+     167.149
+    ],
+    "back": [
+     33.599,
+     40.599,
+     69.599
+    ],
+    "since": "LFR 2017 et LFI 2018"
+   },
+   {
+    "sector": "Secteur social",
+    "category": "Organisme gérant un régime de protection sociale à adhésion obligatoire",
+    "nature": "Régime général de la Sécurité Sociale",
+    "beneficiary": "CNAMTS, CNAVTS, CCMSA (non salariés-maladie) en 2016; CNAVTS dès 2017",
+    "tax": "Prélèvement sur les contrats d'assurance-vie en deshérence; 'Prélèvement sur les contrats participation et intéressement en déshérence",
+    "taxCode": 143,
+    "mission": null,
+    "programme": null,
+    "y": [
+     17.183,
+     17.183,
+     18.639
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Opérateurs État",
+    "nature": "Établissement public national à caractère administratif",
+    "beneficiary": "ANTS - Agence nationale des titres sécurisés",
+    "tax": "Taxe pour la gestion des certificats d'immatriculation des véhicules",
+    "taxCode": 52,
+    "mission": "Administration générale et territoriale de l'État",
+    "programme": "354 Administration territoriale de l'État",
+    "y": [
+     40.0,
+     40.0,
+     42.0
+    ],
+    "cap": [
+     36.2,
+     36.2,
+     36.2
+    ],
+    "back": [
+     3.8,
+     3.8,
+     5.8
+    ],
+    "since": "LFR-I 2014 et de la LFI 2015"
+   },
+   {
+    "sector": "Autres bénéficiaires",
+    "category": "Autres personnes morales de droit privé",
+    "nature": "Exploitant public",
+    "beneficiary": "FNAL - Fonds national d'aide au logement",
+    "tax": "Cotisation des employeurs",
+    "taxCode": 68,
+    "mission": null,
+    "programme": null,
+    "y": [
+     2695.0,
+     2887.0,
+     3008.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   },
+   {
+    "sector": "Organismes d'administration centrale",
+    "category": "Autres personnes morales de droit public dépendant de l'Etat",
+    "nature": "Service déconcentré de l'État à compétence (inter) régionale",
+    "beneficiary": "Fonds national de compensation de l'énergie éolienne en mer (Communes, Comité national de la pêche, activités maritimes)",
+    "tax": "IFER éoliennes",
+    "taxCode": 222,
+    "mission": null,
+    "programme": null,
+    "y": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "cap": [
+     null,
+     null,
+     null
+    ],
+    "back": [
+     null,
+     null,
+     null
+    ],
+    "since": null
+   }
+  ]
+ },
+ "budgetLines": {
+  "title": "PLF 2025, recettes du budget général (données)",
+  "url": "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/plf25-recettes-du-budget-general/exports/csv?delimiter=%3B&with_bom=false",
+  "page": "https://data.economie.gouv.fr/explore/dataset/plf25-recettes-du-budget-general/",
+  "lines": {
+   "1756": {
+    "label": "Taxe générale sur les activités polluantes",
+    "year": "2025",
+    "amount": 1294.0
+   },
+   "1726": {
+    "label": "Produit de la taxe additionnelle à la taxe sur les certifications d'immatriculation des véhicules",
+    "year": "2025",
+    "amount": 1386.348
+   }
+  }
+ },
+ "cartesGrises": {
+  "title": "OFGL, comptes consolidés des régions, agrégat « Cartes grises »",
+  "url": "https://data.ofgl.fr/api/explore/v2.1/catalog/datasets/ofgl-base-regions-consolidee/exports/csv?delimiter=%3B&with_bom=false&select=exer%2Creg_code%2Creg_name%2Csiren%2Clbudg%2Ccateg%2Cagregat%2Cmontant%2Cptot",
+  "page": "https://data.ofgl.fr/explore/dataset/ofgl-base-regions-consolidee/",
+  "years": [
+   {
+    "year": 2012,
+    "amount": 2116.8,
+    "collectivities": 26
+   },
+   {
+    "year": 2013,
+    "amount": 2041.6,
+    "collectivities": 26
+   },
+   {
+    "year": 2014,
+    "amount": 2076.8,
+    "collectivities": 26
+   },
+   {
+    "year": 2015,
+    "amount": 2086.3,
+    "collectivities": 26
+   },
+   {
+    "year": 2016,
+    "amount": 2186.7,
+    "collectivities": 17
+   },
+   {
+    "year": 2017,
+    "amount": 2228.5,
+    "collectivities": 17
+   },
+   {
+    "year": 2018,
+    "amount": 2326.2,
+    "collectivities": 17
+   },
+   {
+    "year": 2019,
+    "amount": 2298.6,
+    "collectivities": 17
+   },
+   {
+    "year": 2020,
+    "amount": 2091.3,
+    "collectivities": 17
+   },
+   {
+    "year": 2021,
+    "amount": 2163.5,
+    "collectivities": 17
+   },
+   {
+    "year": 2022,
+    "amount": 1890.7,
+    "collectivities": 17
+   },
+   {
+    "year": 2023,
+    "amount": 2034.2,
+    "collectivities": 17
+   },
+   {
+    "year": 2024,
+    "amount": 2361.6,
+    "collectivities": 17
+   },
+   {
+    "year": 2025,
+    "amount": 2595.2,
+    "collectivities": 17
+   }
+  ]
+ }
+}

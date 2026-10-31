@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Le budget de l’État mission par mission et programme par programme (AE et CP), par nature, ses recettes, son exécution mois par mois, ses indicateurs de performance, son budget vert et son aide au développement.">
+  <title>Budget de l’État · FranceRoueLibre</title>
+  <link rel="canonical" href="https://francerouelibre.fr/etat.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="FranceRoueLibre">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="Budget de l’État · FranceRoueLibre">
+  <meta property="og:description" content="Le budget de l’État mission par mission et programme par programme (AE et CP), par nature, ses recettes, son exécution mois par mois, ses indicateurs de performance, son budget vert et son aide au développement.">
+  <meta property="og:url" content="https://francerouelibre.fr/etat.html">
+  <meta property="og:image" content="https://francerouelibre.fr/og.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="FranceRoueLibre : où part l’argent public ? Dépenses, aides, marchés publics et dette, territoire par territoire.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Budget de l’État · FranceRoueLibre">
+  <meta name="twitter:description" content="Le budget de l’État mission par mission et programme par programme (AE et CP), par nature, ses recettes, son exécution mois par mois, ses indicateurs de performance, son budget vert et son aide au développement.">
+  <meta name="twitter:image" content="https://francerouelibre.fr/og.png">
+  <script>
+    (function () {
+      var theme = null;
+      try { theme = localStorage.getItem('frl-theme'); } catch (e) {}
+      if (theme !== 'light' && theme !== 'dark') theme = 'light'; // light by default, dark only when chosen with the toggle
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./etat.css">
+  <script defer src="./common.js"></script>
+  <script defer src="./etat.js"></script>
+  <script defer src="./nav.js"></script>
+  <script defer src="./collapse.js"></script>
+  <script defer src="./search-bar.js"></script>
+</head>
+<body class="subpage">
+  <header class="site-header" id="siteHeader">
+    <div class="container nav">
+      <a class="brand brand--lockup" href="index.html" aria-label="FranceRoueLibre, accueil">
+        <svg class="brand__mark" width="40" height="40" viewBox="0 0 48 48" fill="none" aria-hidden="true"><defs><linearGradient id="g7" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#0e7490"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><path d="M24 4l17 10v20L24 44 7 34V14z" stroke="url(#g7)" stroke-width="3" stroke-linejoin="round"/><path d="M14 17l7 7 5-4 9 11" stroke="#e11d48" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 31 H35 V25" stroke="#e11d48" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="brand__sep" aria-hidden="true"></span>
+        <span class="brand__name"><span>France</span><span class="gradient-text">RoueLibre</span></span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="index.html#explorer">Carte</a></li>
+        <li><a href="index.html#circuit">Circuit</a></li>
+        <li><a href="index.html#comptes">Comptes</a></li>
+        <li class="nav__group"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu3">Recettes<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu3"><li><a href="impots.html"><strong>Impôts et taxes</strong><small>Ce que rapporte et coûte chaque prélèvement</small></a></li><li><a href="niches.html"><strong>Niches fiscales</strong><small>Réductions et crédits d’impôt, mesure par mesure</small></a></li></ul></li>
+        <li class="nav__group is-current"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu4">Dépenses<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu4"><li><a href="etat.html" aria-current="page"><strong>Budget de l’État</strong><small>Missions, programmes, exécution mois par mois</small></a></li><li><a href="operateurs.html"><strong>Opérateurs de l’État</strong><small>Agences et établissements publics</small></a></li><li><a href="secu.html"><strong>Sécurité sociale</strong><small>Comptes des branches, dépenses d’assurance maladie</small></a></li><li><a href="aides.html"><strong>Aides et subventions</strong><small>Associations, entreprises, plan de relance</small></a></li><li><a href="marches.html"><strong>Marchés publics</strong><small>1,4 million de contrats depuis 2014</small></a></li><li><a href="ugap.html"><strong>UGAP</strong><small>Les prix de la centrale d’achat public</small></a></li></ul></li>
+        <li class="nav__group"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu5">Contrôle<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu5"><li><a href="signaux.html"><strong>Signaux</strong><small>Règles simples appliquées à toutes les données</small></a></li><li><a href="probite.html"><strong>Probité</strong><small>Corruption, favoritisme : les affaires jugées</small></a></li><li><a href="donnees.html"><strong>Données et angles morts</strong><small>Les sources, et ce qui n’est pas publié</small></a></li></ul></li>
+      </ul>
+      <div class="nav__actions">
+      <a class="nav-github" href="https://github.com/TheoMrc/FranceRoueLibre" target="_blank" rel="noopener noreferrer" aria-label="Code source sur GitHub" title="Code source sur GitHub"><svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg></a>
+      <button class="theme-toggle-btn tbtn-morph" id="themeToggle" type="button" aria-label="Changer de thème" title="Changer de thème">
+        <span class="tbtn-halo" aria-hidden="true"></span>
+        <svg class="tbtn-svg-morph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <mask id="theme-morph-mask"><rect width="32" height="32" fill="white"/><circle class="mask-moon-bite" cx="23" cy="11" r="6.5" fill="black"/></mask>
+          <circle class="morph-core" cx="16" cy="16" r="6" fill="currentColor" mask="url(#theme-morph-mask)"/>
+          <g class="morph-rays" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="16" y1="3" x2="16" y2="6"/><line x1="16" y1="26" x2="16" y2="29"/><line x1="3" y1="16" x2="6" y2="16"/><line x1="26" y1="16" x2="29" y2="16"/>
+            <line x1="6.81" y1="6.81" x2="8.93" y2="8.93"/><line x1="23.07" y1="23.07" x2="25.19" y2="25.19"/><line x1="6.81" y1="25.19" x2="8.93" y2="23.07"/><line x1="23.07" y1="8.93" x2="25.19" y2="6.81"/>
+          </g>
+        </svg>
+      </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero hero--page">
+      <div class="hero__bg" aria-hidden="true"></div>
+      <div class="container"><div class="hero__inner">
+        <span class="eyebrow">Budget de l’État · loi de finances et exécution</span>
+        <h1>Le budget de l’État, <span class="gradient-text">voté puis dépensé.</span></h1>
+        <p class="hero__lead" id="etLead">Où vont les crédits de l’État, mission par mission et programme par programme, ce qu’il encaisse, comment le solde se creuse mois après mois, ce que disent ses indicateurs de performance, sa cotation environnementale et son aide au développement. Montants en euros courants, tels que publiés par la Direction du budget, la DGFiP et la DG Trésor.</p>
+        <nav class="tx-index" aria-label="Sections de la page"><a href="#lire">Lire un budget</a><a href="#missions">Missions et programmes</a><a href="#nature">Par nature</a><a href="#recettes">Recettes</a><a href="#mois">Mois par mois</a><a href="#performance">Performance</a><a href="#vert">Budget vert</a><a href="#apd">Aide au développement</a><a href="#bilan">Bilan de l’État</a><a href="#non-publie">Ce qui n’est pas publié</a><a href="#methode">Méthode</a></nav>
+      </div></div>
+    </section>
+
+    <section class="section" id="lire" aria-labelledby="etReadTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Les mots du budget</span><h2 id="etReadTitle">Lire un budget de l’État en six notions</h2><p class="lead">L’accueil du site montre les comptes nationaux de l’Insee, toutes administrations confondues. Ici, c’est le budget de l’État seul, dans sa nomenclature à lui : celle que vote le Parlement et que suivent les comptables publics.</p></div>
+        <div class="kpis" id="etKpis"></div>
+        <div class="gap-grid et-notions">
+          <article class="gap"><h3>Mission</h3><p>Une grande politique publique (Défense, Enseignement scolaire, Justice…). Le Parlement vote les crédits mission par mission. Une mission peut relever de plusieurs ministères.</p></article>
+          <article class="gap"><h3>Programme</h3><p>Le découpage d’une mission confié à un responsable (souvent un directeur d’administration centrale), avec ses objectifs et ses indicateurs. Le programme est l’unité de gestion : on peut déplacer des crédits à l’intérieur, pas entre programmes sans texte.</p></article>
+          <article class="gap"><h3>Action</h3><p>Le détail indicatif d’un programme (par exemple « Enseignement en lycée »). Les montants par action sont une prévision : le gestionnaire peut les redistribuer en cours d’année.</p></article>
+          <article class="gap"><h3>AE et CP</h3><p>Les <strong>autorisations d’engagement</strong> (AE) plafonnent ce que l’État peut engager dans l’année, y compris pour des contrats payés sur plusieurs années. Les <strong>crédits de paiement</strong> (CP) plafonnent ce qu’il peut payer dans l’année. Un grand marché d’armement pèse beaucoup en AE l’année de sa signature, puis en CP au fil des livraisons.</p></article>
+          <article class="gap"><h3>Budget général et comptes spéciaux</h3><p>Le <strong>budget général</strong> porte l’essentiel des dépenses. Les <strong>comptes d’affectation spéciale</strong> (pensions, participations financières…) isolent des recettes dédiées à une dépense ; les <strong>comptes de concours financiers</strong> retracent des prêts et avances (dont les impôts locaux avancés aux collectivités) ; les <strong>budgets annexes</strong> des services qui vendent une prestation (contrôle aérien, Journal officiel).</p></article>
+          <article class="gap"><h3>PLF, LFI, exécution</h3><p>Le <strong>projet</strong> de loi de finances (PLF) est déposé à l’automne ; la <strong>loi</strong> de finances initiale (LFI) est ce que le Parlement vote, parfois très différent ; l’<strong>exécution</strong> est ce qui a réellement été encaissé et payé. Les données détaillées ouvertes ici sont celles du PLF 2025 ; l’exécution vient des situations mensuelles.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="missions" aria-labelledby="etMisTitle">
+      <div class="container">
+        <div class="section__head-row"><div class="section__head"><span class="eyebrow">PLF 2025 · par destination</span><h2 id="etMisTitle">Où va le budget de l’État</h2><p class="lead" id="etMisLead">Chaque rectangle est une mission, sa surface est proportionnelle à ses crédits. Cliquez sur une mission pour voir ses programmes, puis sur un programme pour ses actions.</p></div></div>
+        <div class="tx-controls">
+          <div class="chip-select" id="etScope" role="group" aria-label="Périmètre"><button type="button" data-scope="bg" class="active">Budget général, hors remboursements d’impôts</button><button type="button" data-scope="bgall">Budget général complet</button><button type="button" data-scope="other">Comptes spéciaux et budgets annexes</button></div>
+          <div class="chip-select" id="etCredit" role="group" aria-label="Type de crédits"><button type="button" data-credit="cp" class="active">Crédits de paiement</button><button type="button" data-credit="ae">Autorisations d’engagement</button></div>
+        </div>
+        <div class="tx-map-layout">
+          <div class="panel tx-map-panel"><div class="et-crumbs" id="etCrumbs"></div><div id="etTreemap" class="tx-treemap"></div><div id="etLegend" class="tx-legend"></div><p class="note" id="etTreemapNote"></p></div>
+          <aside class="panel tx-detail" id="etDetail" aria-live="polite"><p class="note">Sélectionnez une mission.</p></aside>
+        </div>
+        <div class="panel panel--wide et-table-panel">
+          <div class="panel__head"><h3>Toutes les missions et leurs programmes</h3><label class="search-field search-field--inline"><span class="sr-only">Rechercher une mission ou un programme</span><input id="etMisSearch" type="search" placeholder="Police, universités, dette, pensions…" autocomplete="off"></label></div>
+          <div id="etMisTable" class="table-wrap"></div>
+          <p class="note" id="etMisTableNote"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="nature" aria-labelledby="etNatTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">PLF 2025 et exécution 2025 · par nature</span><h2 id="etNatTitle">Payer des agents, verser des aides, rembourser des intérêts</h2><p class="lead">La même dépense, rangée cette fois par ce qu’elle achète : les « titres » de la loi organique. Budget général hors remboursements et dégrèvements d’impôts, en milliards d’euros.</p></div>
+        <div class="grid-2">
+          <div class="panel"><h3>Prévu (PLF 2025) et payé (exécution 2025), par titre</h3><div class="tx-legend et-legend-top"><span><i style="background:var(--tx-1)"></i>PLF 2025, crédits de paiement</span><span><i style="background:var(--tx-2)"></i>Exécution 2025 (situation de décembre)</span></div><div id="etNatCompare"></div><p class="note" id="etNatCompareNote"></p></div>
+          <div class="panel"><h3>Le détail par catégorie (PLF 2025)</h3><div id="etNatCats"></div><p class="note" id="etNatCatsNote"></p></div>
+        </div>
+        <div class="panel panel--wide"><h3>La nature des dépenses de chaque mission</h3><div id="etNatStack" class="et-stack"></div><div id="etNatStackLegend" class="tx-legend"></div><p class="note" id="etNatStackNote"></p></div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="recettes" aria-labelledby="etRecTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">PLF 2025 · recettes</span><h2 id="etRecTitle">Ce que l’État prévoyait d’encaisser</h2><p class="lead">Les recettes du budget général sont publiées brutes : une partie est rendue aux contribuables (remboursements et dégrèvements), une autre est reversée aux collectivités et à l’Union européenne (prélèvements sur recettes). Ce qui reste finance les missions.</p></div>
+        <div id="etRecFlow" class="et-flow"></div>
+        <div class="grid-2">
+          <div class="panel"><h3>Les quinze premières recettes fiscales</h3><div id="etRecTax"></div><p class="note" id="etRecTaxNote"></p></div>
+          <div class="panel"><h3>Recettes non fiscales et prélèvements sur recettes</h3><div id="etRecOther"></div><p class="note" id="etRecOtherNote"></p></div>
+        </div>
+        <div class="panel panel--wide"><h3>Comptes spéciaux : recettes prévues en 2025, et prévisions 2026 et 2027</h3><div id="etRecSpecial" class="table-wrap"></div><p class="note" id="etRecSpecialNote"></p></div>
+      </div>
+    </section>
+
+    <section class="section" id="mois" aria-labelledby="etMonTitle">
+      <div class="container">
+        <div class="section__head-row"><div class="section__head"><span class="eyebrow">Situation mensuelle de l’État</span><h2 id="etMonTitle">Le budget exécuté, mois par mois</h2><p class="lead" id="etMonLead">Chaque mois, la DGFiP publie le cumul des recettes encaissées et des dépenses payées depuis le 1<sup>er</sup> janvier. Une courbe par année.</p></div>
+          <div class="chip-select" id="etMonMode" role="group" aria-label="Mode de calcul"><button type="button" data-mode="cum" class="active">Cumul depuis janvier</button><button type="button" data-mode="month">Mois par mois</button></div></div>
+        <div class="kpis" id="etMonKpis"></div>
+        <div class="panel panel--wide">
+          <div class="panel__head"><h3 id="etMonChartTitle">Solde budgétaire</h3><label class="select-wrap"><span class="sr-only">Ligne affichée</span><select id="etMonPick"></select></label></div>
+          <div id="etMonChart" class="tx-line"></div><div id="etMonLegend" class="tx-legend"></div><p class="note" id="etMonNote"></p>
+        </div>
+        <div class="panel panel--wide"><h3>Du solde publié à ses composantes</h3><div id="etMonRecon" class="table-wrap"></div><p class="note" id="etMonReconNote"></p></div>
+        <div class="panel panel--wide"><div class="panel__head"><h3>Les situations mensuelles depuis 2010, en PDF</h3><label class="select-wrap"><span class="sr-only">Année</span><select id="etPdfYear"></select></label></div><ul id="etPdfList" class="et-pdfs"></ul><p class="note" id="etPdfNote"></p></div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="performance" aria-labelledby="etPerfTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Rapports annuels de performance 2025</span><h2 id="etPerfTitle">Les indicateurs de performance, et leurs cibles</h2><p class="lead">Chaque programme se fixe des objectifs mesurés par des indicateurs, avec une cible votée et une réalisation publiée l’année suivante. Le classement « cible atteinte », « amélioration » ou « absence d’amélioration » est celui de l’administration. Un écart à la cible n’est pas une faute : une cible peut être ambitieuse, le contexte peut changer, un indicateur peut être mal choisi.</p></div>
+        <div class="kpis" id="etPerfKpis"></div>
+        <div class="panel panel--wide"><h3>Résultat des indicateurs, mission par mission</h3><div id="etPerfStack" class="et-stack"></div><div id="etPerfLegend" class="tx-legend"></div><p class="note" id="etPerfStackNote"></p></div>
+        <div class="panel panel--wide"><h3>Les plus grands écarts à la cible, en points de pourcentage</h3><div id="etPerfGaps" class="table-wrap"></div><p class="note" id="etPerfGapsNote"></p></div>
+        <div class="panel panel--wide"><h3>Où la réalisation 2025 manque</h3><div id="etPerfMissing" class="et-cols"></div><p class="note" id="etPerfMissingNote"></p></div>
+        <div class="panel panel--wide">
+          <div class="panel__head"><h3>Tous les indicateurs</h3></div>
+          <div class="tx-filters"><label class="search-field"><span class="sr-only">Rechercher un indicateur</span><input id="etPerfSearch" type="search" placeholder="délai, taux, satisfaction, coût…" autocomplete="off"></label><label class="select-wrap"><span class="sr-only">Mission</span><select id="etPerfMission"><option value="">Toutes les missions</option></select></label><label class="select-wrap"><span class="sr-only">Résultat</span><select id="etPerfStatus"><option value="">Tous les résultats</option></select></label></div>
+          <div id="etPerfTable" class="table-wrap"></div><div class="tx-more" id="etPerfMore"></div>
+          <p class="note" id="etPerfTableNote"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="vert" aria-labelledby="etVertTitle">
+      <div class="container">
+        <div class="section__head-row"><div class="section__head"><span class="eyebrow">Budget vert · PLF 2026</span><h2 id="etVertTitle">Ce que l’État cote favorable ou défavorable à l’environnement</h2><p class="lead">Chaque dépense (crédits, dépenses fiscales, taxes affectées) est cotée par l’administration sur six axes : climat (atténuation, adaptation), eau, déchets, pollutions, biodiversité. La cotation globale résume ces six axes. Elle dit l’effet attendu, pas un effet mesuré.</p></div>
+          <div class="chip-select" id="etVertYear" role="group" aria-label="Année"><button type="button" data-y="v24">Exécution 2024</button><button type="button" data-y="v25">LFI 2025</button><button type="button" data-y="v26" class="active">PLF 2026</button></div></div>
+        <div class="kpis" id="etVertKpis"></div>
+        <div class="panel panel--wide"><h3>Par type de dépense</h3><div id="etVertStack" class="et-stack"></div><div id="etVertLegend" class="tx-legend"></div><p class="note" id="etVertStackNote"></p></div>
+        <div class="grid-2">
+          <div class="panel"><h3>Les plus grosses dépenses cotées favorables</h3><div id="etVertFav"></div></div>
+          <div class="panel"><h3>Les plus grosses dépenses cotées défavorables</h3><div id="etVertDef"></div></div>
+        </div>
+        <div class="panel panel--wide"><h3>Par mission</h3><div id="etVertMissions" class="table-wrap"></div><p class="note" id="etVertNote"></p></div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="apd" aria-labelledby="etApdTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Aide publique au développement · 2018–2024</span><h2 id="etApdTitle">L’aide publique au développement déclarée par la France</h2><p class="lead">Les déclarations de la France au Comité d’aide au développement de l’OCDE, ligne à ligne : dons, prêts, contributions aux organisations multilatérales. Depuis 2018, l’OCDE compte l’aide en « équivalent-don » : un prêt n’y compte que pour sa part de faveur par rapport à un prêt aux conditions du marché.</p></div>
+        <div class="kpis" id="etApdKpis"></div>
+        <div class="panel panel--wide"><h3>Aide déclarée chaque année</h3><div id="etApdLine" class="tx-line"></div><div id="etApdLegend" class="tx-legend"></div><p class="note" id="etApdLineNote"></p></div>
+        <div class="grid-2">
+          <div class="panel"><h3 id="etApdCountryTitle">Premiers pays bénéficiaires</h3><div id="etApdCountry"></div><p class="note" id="etApdCountryNote"></p></div>
+          <div class="panel"><h3 id="etApdSectorTitle">Par secteur</h3><div id="etApdSector"></div></div>
+        </div>
+        <div class="grid-2">
+          <div class="panel"><h3 id="etApdAgencyTitle">Par organisme déclarant</h3><div id="etApdAgency"></div></div>
+          <div class="panel"><h3 id="etApdFinTitle">Par instrument</h3><div id="etApdFin"></div><p class="note" id="etApdNote"></p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="bilan" aria-labelledby="etBilTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Comptabilité générale de l’État · 2016–2025</span><h2 id="etBilTitle">Ce que l’État possède et ce qu’il doit</h2><p class="lead">À côté du budget (encaissements et paiements de l’année), l’État tient une comptabilité d’entreprise : un bilan (bâtiments, routes, participations, créances d’un côté ; dettes et provisions de l’autre) et un compte de résultat (charges et produits rattachés à l’année). Montants recalculés à partir des balances des comptes publiées par la DGFiP.</p></div>
+        <div class="kpis" id="etBilKpis"></div>
+        <div class="grid-2">
+          <div class="panel"><h3 id="etBilActifTitle">Actif</h3><div id="etBilActif"></div></div>
+          <div class="panel"><h3 id="etBilPassifTitle">Passif</h3><div id="etBilPassif"></div></div>
+        </div>
+        <div class="grid-2">
+          <div class="panel"><h3>Situation nette (actif moins passif)</h3><div id="etBilNet" class="tx-line"></div><p class="note" id="etBilNetNote"></p></div>
+          <div class="panel"><h3>Résultat patrimonial (produits moins charges)</h3><div id="etBilRes" class="tx-line"></div><p class="note" id="etBilResNote"></p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="non-publie" aria-labelledby="etGapTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Données manquantes</span><h2 id="etGapTitle">Ce qui n’est pas publié</h2><p class="lead">Ce que les fichiers ouverts utilisés ici ne permettent pas de savoir, et qui pourrait le publier.</p></div>
+        <div id="etGaps" class="gap-grid"></div>
+      </div>
+    </section>
+
+    <section class="section" id="methode" aria-labelledby="etMethodTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Méthode</span><h2 id="etMethodTitle">Lire ces chiffres sans se tromper</h2></div>
+        <div class="gap-grid">
+          <article class="gap"><h3>Un projet, pas une loi</h3><p>Le détail par mission, programme et nature vient du projet de loi de finances 2025 déposé en octobre 2024. La loi de finances finalement promulguée en février 2025, après la censure du gouvernement, en diffère. Les montants d’exécution viennent des situations mensuelles, qui ne descendent pas au niveau des missions.</p></article>
+          <article class="gap"><h3>Remboursements et dégrèvements</h3><p>La mission « Remboursements et dégrèvements » (<span id="etRdAmount">–</span> prévus) n’est pas une politique publique : c’est l’impôt rendu (crédits d’impôt, trop-perçus, dégrèvements de taxe d’habitation…). Elle est exclue par défaut des graphiques de dépenses, comme dans la présentation « nette » du budget.</p></article>
+          <article class="gap"><h3>Pas d’addition entre périmètres</h3><p>Le budget général, les comptes spéciaux et les budgets annexes se versent de l’argent entre eux (par exemple les cotisations employeur de l’État au compte « Pensions »). Les additionner compterait deux fois les mêmes euros : ils sont montrés séparément.</p></article>
+          <article class="gap"><h3>Cumuls et mois</h3><p>Les situations mensuelles sont des cumuls depuis janvier. Le mode « mois par mois » est la différence entre deux cumuls successifs : il peut être négatif (régularisations, remboursements). La situation d’avril 2024 est arrêtée au 24 avril, comme dans le fichier publié.</p></article>
+          <article class="gap"><h3>Indicateurs de performance</h3><p>Les écarts en points ne sont calculés que pour les indicateurs en pourcentage dont la réalisation et la cible sont des nombres compris entre 0 et 100. Le sens souhaité (hausse ou baisse) n’est pas toujours renseigné : l’écart est affiché tel quel, le classement reste celui de l’administration.</p></article>
+          <article class="gap"><h3>Comptabilité générale</h3><p>Bilan et résultat sont recalculés en sommant les soldes des comptes de la balance par poste. Ils peuvent différer à la marge du compte général de l’État certifié par la Cour des comptes (retraitements, engagements hors bilan).</p></article>
+        </div>
+        <p class="source-links" id="etSources"></p>
+      </div>
+    </section>
+    <section class="section related" aria-labelledby="relatedTitle"><div class="container"><h2 class="related__title" id="relatedTitle">Pour aller plus loin</h2><div class="related__grid"><a class="related__card" href="operateurs.html"><strong>Opérateurs de l’État</strong><span>Les agences et établissements que ces programmes financent</span></a><a class="related__card" href="impots.html"><strong>Impôts et taxes</strong><span>D’où viennent les recettes du budget général</span></a><a class="related__card" href="niches.html"><strong>Niches fiscales</strong><span>Les dépenses qui passent par l’impôt plutôt que par le budget</span></a><a class="related__card" href="aides.html"><strong>Aides et subventions</strong><span>Qui reçoit les subventions, bénéficiaire par bénéficiaire</span></a></div></div></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div><div class="footer__brand">FranceRoueLibre</div><p>Cartographie des dépenses publiques · données ouvertes</p><p class="footer__legal">Site indépendant, sans lien avec l’État ni avec une administration. Contact : <a href="mailto:stonks@francerouelibre.fr">stonks@francerouelibre.fr</a> · <a href="mentions.html">Mentions légales et confidentialité</a></p></div>
+      <div class="footer__links"><a href="index.html#explorer">Carte</a><a href="index.html#circuit">Circuit</a><a href="index.html#comptes">Comptes</a><a href="impots.html">Impôts et taxes</a><a href="niches.html">Niches fiscales</a><a href="etat.html">Budget de l’État</a><a href="operateurs.html">Opérateurs de l’État</a><a href="secu.html">Sécurité sociale</a><a href="aides.html">Aides et subventions</a><a href="marches.html">Marchés publics</a><a href="ugap.html">UGAP</a><a href="signaux.html">Signaux</a><a href="probite.html">Probité</a><a href="donnees.html">Données et angles morts</a><a class="footer__github" href="https://github.com/TheoMrc/FranceRoueLibre" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg>Code source</a></div>
+    </div>
+  </footer>
+</body>
+</html>

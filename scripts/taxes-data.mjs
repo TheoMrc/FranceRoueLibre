@@ -1,6 +1,7 @@
 // dist/data/impots.json for the Impôts page: Insee tax lines 1995-2025 (sources/taxes-insee-detail.json), the curated list of
 // every tax with its yield and source (sources/impots-liste.json), the published costs of collection (sources/impots-couts.json)
-// and the Cour des comptes inventory of low-yield taxes (sources/taxes-faible-rendement.json).
+// and the Cour des comptes inventory of low-yield taxes (sources/taxes-faible-rendement.json), and the PLF 2024 list of taxes affected
+// to bodies other than the State, with their ceilings (sources/taxes-affectees.json, frozen by scripts/extract-taxes-affectees.py).
 // GDP is recovered from Insee's own Md€ / %-of-GDP pairs, as on the home page. Run alone: node scripts/taxes-data.mjs
 import fs from 'node:fs';
 import path from 'node:path';
@@ -19,6 +20,7 @@ export function buildTaxesData(root = '.') {
   const list = read(src('impots-liste.json'));
   const costs = read(src('impots-couts.json'));
   const lowYield = read(src('taxes-faible-rendement.json'));
+  const affectedFile = read(src('taxes-affectees.json'));
 
   const jan = new Map(population.january1.map(r => [r.year, r.population]));
   const pop = year => jan.has(year) && jan.has(year + 1) ? (jan.get(year) + jan.get(year + 1)) / 2 : jan.get(year) ?? null;
@@ -53,11 +55,20 @@ export function buildTaxesData(root = '.') {
   for (const t of list.taxes) if (t.partOf && !ids.has(t.partOf)) throw new Error(`partOf points nowhere: ${t.id} → ${t.partOf}`);
 
   const all = mergeTaxes(list.taxes, lowYield, list.courPartOf || {});
+  // Costs of collection published for one tax outside the list's own documents (older reports, ministerial answers,
+  // parliamentary debates), attached by row id; a cost already on the line is never replaced.
+  for (const [id, cost] of Object.entries(costs.attach || {})) {
+    const row = all.find(t => t.id === id);
+    if (!row) throw new Error(`attach points nowhere: ${id}`);
+    if (!/^https:\/\//.test(cost.url || '')) throw new Error(`attached cost without source: ${id}`);
+    if (!row.cost) row.cost = cost;
+  }
+  checkFromExtract(list.taxes, affectedFile);
   const { taxes: _inventory, ...lowYieldMeta } = lowYield;
   return {
     generated: list.retrieved, totals, macro,
     insee: { source: insee.source, publication: insee.publication, years: insee.years, status: insee.status, lines: insee.lines },
-    all, counts: list.counts || [], costs, lowYield: lowYieldMeta,
+    all, counts: list.counts || [], costs, lowYield: lowYieldMeta, affected: affectedTaxes(affectedFile.affected),
     sources: [...(list.sources || []), ...(costs.sources || [])]
   };
 }
@@ -119,6 +130,36 @@ export function mergeTaxes(listTaxes, lowYield, courPartOf = {}) {
   }
   for (const r of rows) r.inForce = r.origin === 'liste' ? r.state === 'en vigueur' || r.state === 'créée' : inForce(r);
   return rows;
+}
+
+/* Lines of the list whose amount is read in the frozen extract sources/taxes-affectees.json (budget revenue lines, OFGL regional
+   accounts) must keep the extract's figure. */
+const FROM_EXTRACT = { tgap: x => x.budgetLines.lines['1756'].amount, 'malus-co2-masse': x => Math.round(x.budgetLines.lines['1726'].amount * 10) / 10, 'cartes-grises': x => x.cartesGrises.years.find(y => y.year === 2024).amount };
+function checkFromExtract(listTaxes, extract) {
+  for (const [id, get] of Object.entries(FROM_EXTRACT)) {
+    const t = listTaxes.find(r => r.id === id);
+    if (!t || t.amount !== get(extract)) throw new Error(`Amount differs from sources/taxes-affectees.json: ${id}`);
+  }
+}
+
+/* Taxes affected to bodies other than the State budget (PLF 2024, Voies et moyens tome I), one row per tax and beneficiary.
+   Three years: 2022 actual, 2023 and 2024 forecasts. A capped row has a ceiling; above it, the yield goes back to the State
+   budget (« reversement »), which the file gives and which always equals max(0, yield - ceiling). */
+export function affectedTaxes(src) {
+  const rows = src.rows.map(r => ({ tax: r.tax, beneficiary: r.beneficiary, sector: r.sector, category: r.category, mission: r.mission, y: r.y, cap: r.cap, back: r.back, since: r.since }));
+  for (const r of rows) r.cap.forEach((c, k) => {
+    if (c != null && r.y[k] != null && Math.abs(Math.max(0, r.y[k] - c) - r.back[k]) > 0.001) throw new Error(`Ceiling and reversement disagree: ${r.tax} (${k})`);
+  });
+  const sum = (list, f) => Math.round(list.reduce((s, r) => s + (f(r) || 0), 0) * 10) / 10;
+  const years = src.years.map((label, k) => {
+    const capped = rows.filter(r => r.cap[k] != null);
+    return { label, yield: sum(rows, r => r.y[k]), rows: rows.filter(r => r.y[k] != null).length, capped: capped.length, cappedYield: sum(capped, r => r.y[k]), cap: sum(capped, r => r.cap[k]), back: sum(capped, r => r.back[k]), over: capped.filter(r => r.back[k] > 0).length };
+  });
+  const sectors = [...new Set(rows.map(r => r.sector))].map(name => {
+    const list = rows.filter(r => r.sector === name);
+    return { name, rows: list.length, yield: sum(list, r => r.y[2]), capped: list.filter(r => r.cap[2] != null).length, back: sum(list, r => r.back[2]) };
+  }).sort((a, b) => b.yield - a.yield);
+  return { title: src.title, url: src.url, page: src.page, modified: src.modified, yearLabels: src.years, taxes: new Set(rows.map(r => r.tax)).size, beneficiaries: new Set(rows.map(r => r.beneficiary)).size, years, sectors, rows };
 }
 
 export function writeTaxesData(root = '.') {

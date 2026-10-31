@@ -125,18 +125,18 @@
   {
    "name": "Douane (DGDDI)",
    "scope": "coût de collecte des droits et taxes",
-   "per100": 0.46,
-   "year": 2021,
-   "url": "https://www.budget.gouv.fr/files/uploads/extract/2021/PLR/BG/PGM/302/FR_2021_PLR_BG_PGM_302_PERF.html",
-   "title": "RAP 2021, programme 302, indicateur 3.1.1"
+   "per100": 0.56,
+   "year": 2023,
+   "url": "https://questions.assemblee-nationale.fr/dyn/contenu/visualisation/826959/file/Gestion%20des%20finances%20publiques#page=11",
+   "title": "RAP 2023, mission Gestion des finances publiques, indicateur 1.1"
   },
   {
    "name": "Urssaf (cotisations et contributions sociales)",
    "scope": "coût du recouvrement",
-   "per100": 0.313,
-   "year": 2024,
-   "url": "https://evaluation.securite-sociale.fr/home/financement/212-reduire-le-cout-du-recouvrem.html",
-   "title": "REPSS Financement, indicateur 2.12"
+   "per100": 0.308,
+   "year": 2025,
+   "url": "https://www.assemblee-nationale.fr/dyn/dyn/contenu/visualisation/1113000/file/PLACSS%202025%20Annexe%201%20-%20REPSS%20Financement%202026.pdf#page=12",
+   "title": "REPSS Financement 2026, indicateur 2-12"
   },
   {
    "name": "Moyenne des administrations fiscales (OCDE, 46 pays)",
@@ -148,7 +148,7 @@
    "focus": true
   }
  ],
- "collectorsNote": "Chaque administration calcule son ratio à sa façon (coûts complets ou directs, recettes brutes ou nettes) : les comparaisons sont des ordres de grandeur. La douane a changé de méthode en 2022 (0,57 €) et la prévision 2024 (0,84 €) intègre le transfert des accises vers la DGFiP ; la dernière réalisation comparable trouvée est 2021. Le ratio de la France dans les tableaux de l’OCDE n’a pas pu être lu : seule la moyenne est montrée.",
+ "collectorsNote": "Chaque administration calcule son ratio à sa façon (coûts complets ou directs, recettes brutes ou nettes) : les comparaisons sont des ordres de grandeur. La douane a changé de méthode en 2022 et le transfert des accises vers la DGFiP (achevé au 1er janvier 2027) brouille la série ; sa dernière réalisation séparée trouvée est 2023. Le ratio de la France dans les tableaux de l’OCDE n’a pas pu être lu : seule la moyenne est montrée.",
  "oecd": [],
  "localFees": [
   {
@@ -156,24 +156,24 @@
    "rate": 3.0,
    "detail": "1 % d’assiette et de recouvrement + 2 % de dégrèvements et non-valeurs",
    "law": "CGI, art. 1641",
-   "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069577/LEGISCTA000006147090/",
-   "check": "extrait"
+   "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000053546093",
+   "check": "source"
   },
   {
    "tax": "Taxe d’enlèvement des ordures ménagères, parts des syndicats",
    "rate": 8.0,
-   "detail": "4,4 % d’assiette et de recouvrement + 3,6 % de dégrèvements et non-valeurs",
+   "detail": "4,4 % d’assiette et de recouvrement + 3,6 % de dégrèvements et non-valeurs (taxe perçue au profit d’une collectivité)",
    "law": "CGI, art. 1641",
-   "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069577/LEGISCTA000006147090/",
-   "check": "à confirmer sur le texte en vigueur"
+   "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000053546093",
+   "check": "source"
   },
   {
    "tax": "Taxes spéciales d’équipement (établissements publics fonciers)",
    "rate": 9.0,
-   "detail": "5,4 % d’assiette et de recouvrement + 3,6 % de dégrèvements et non-valeurs",
+   "detail": "5,4 % d’assiette et de recouvrement + 3,6 % de dégrèvements et non-valeurs (taxe perçue au profit d’un établissement)",
    "law": "CGI, art. 1641",
-   "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069577/LEGISCTA000006147090/",
-   "check": "à confirmer sur le texte en vigueur"
+   "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000053546093",
+   "check": "source"
   }
  ],
  "localFeesNote": "Frais ajoutés à l’avis d’imposition et payés par le contribuable, en plus de l’impôt local : ils rémunèrent l’État pour l’établissement, le recouvrement, les dégrèvements et les impayés.",
@@ -245,18 +245,16 @@
    "pct": 0.12,
    "year": "2011",
    "note": "Produit 25,8 Md€.",
-   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf",
-   "title": "Cour des comptes, Les missions fiscales de la douane (RPA 2014)",
-   "uncertain": true
+   "url": "https://www.assemblee-nationale.fr/dyn/14/questions/QANR5L14QE41909.pdf",
+   "title": "Réponse ministérielle à la QE AN n° 41909, JO du 26 août 2014, p. 7176 (chiffres de la Cour des comptes)"
   },
   {
    "tax": "Droits sur les tabacs",
    "pct": 0.05,
-   "year": "2011",
-   "note": "Produit ≈ 11,6 Md€.",
-   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf",
-   "title": "Cour des comptes (RPA 2014)",
-   "uncertain": true
+   "year": "2011-2012",
+   "note": "Même taux dans le rapport de la Cour des comptes sur les missions fiscales de la douane (2014).",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "title": "IGF, Les taxes à faible rendement, tome 1 (février 2014), p. 6"
   },
   {
    "tax": "Droits sur les boissons (douane), moyenne nationale",
@@ -268,37 +266,195 @@
    "uncertain": true
   },
   {
-   "tax": "Taxe sur les farines (au profit de la MSA)",
-   "meur": 18.3,
-   "pct": 28.6,
-   "year": "2012",
-   "note": "Rendement 64 M€ ; coût jugé « manifestement disproportionné » par la Cour des comptes.",
-   "url": "https://www.senat.fr/questions/base/2015/qSEQ151018272.html",
-   "title": "Sénat, question écrite n° 18272 (2015)"
-  },
-  {
    "tax": "Prélèvement à la source de l’impôt sur le revenu (mise en place)",
    "meur": 214.6,
    "year": "2015-2019",
    "note": "Coût du projet pour la DGFiP, ponctuel et non annuel, hors autres administrations.",
    "url": "https://www.ccomptes.fr/sites/default/files/2023-10/20220125-S2021-2295-mise-en-oeuvre-prelevement-a-la-source.pdf",
    "title": "Cour des comptes, La mise en œuvre du prélèvement à la source (2022)"
+  },
+  {
+   "tax": "Impôt sur le revenu (DGFiP)",
+   "pct": 1.05,
+   "year": "2022",
+   "note": "Dépenses de gestion rapportées aux recettes recouvrées. Le seul taux récent publié pour l’IR, cité en passant dans un rapport sur l’IFI. En 2006 : 2,47 % (DGI et Trésor public, autre méthode).",
+   "url": "https://www.ccomptes.fr/fr/documents/68192#page=8",
+   "title": "Cour des comptes, L’impôt sur la fortune immobilière (janvier 2024), synthèse p. 8"
+  },
+  {
+   "tax": "Impôt sur la fortune immobilière (IFI)",
+   "pct": 2.66,
+   "year": "2022",
+   "note": "3,34 % en 2018, première année de l’IFI ; 1,66 % pour l’ISF en 2017. Le contrôle est le premier poste de coût.",
+   "url": "https://www.ccomptes.fr/fr/documents/68192#page=8",
+   "title": "Cour des comptes, L’impôt sur la fortune immobilière (janvier 2024), synthèse p. 8"
+  },
+  {
+   "tax": "Taxes foncières (TFPB et TFPNB)",
+   "meur": 422.5,
+   "pct": 0.96,
+   "year": "2021",
+   "note": "0,45 % d’assiette, 0,29 % de recouvrement, 0,21 % de contentieux ; moyenne de tous les impôts : 0,71 %. Les frais facturés aux contribuables (1,8 Md€) ne sont rapprochés d’aucun coût réel.",
+   "url": "https://www.ccomptes.fr/fr/documents/63540#page=6",
+   "title": "Cour des comptes, Les taxes foncières, exercices 2016-2021 (janvier 2023), synthèse p. 6"
+  },
+  {
+   "tax": "Taxe d’habitation",
+   "pct": 2.99,
+   "year": "vers 2012",
+   "note": "Taux le plus élevé des quatorze impôts ou agrégats dont la DGFiP savait restituer le coût. 3,97 % en 2006, 4,17 % en 1997.",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "title": "IGF, Les taxes à faible rendement, tome 1 (février 2014), p. 6",
+   "ended": {
+    "text": "supprimée sur les résidences principales en 2023",
+    "full": false
+   }
+  },
+  {
+   "tax": "Taxe sur les conventions d’assurance",
+   "pct": 0.05,
+   "year": "vers 2012",
+   "note": "Taux le plus bas des quatorze impôts ou agrégats suivis par la DGFiP.",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "title": "IGF, Les taxes à faible rendement, tome 1 (février 2014), p. 6"
+  },
+  {
+   "tax": "Droits d’enregistrement (agrégat des petits droits)",
+   "pct": 2.25,
+   "year": "vers 2012",
+   "note": "Agrégat de la DGFiP contenant des taxes à faible rendement. Ensemble des droits d’enregistrement en 2006 : 1,55 %.",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "title": "IGF, Les taxes à faible rendement, tome 1 (février 2014), p. 6"
+  },
+  {
+   "tax": "CFE, IFER et CVAE (agrégat)",
+   "pct": 1.19,
+   "year": "vers 2012",
+   "note": "Agrégat de la DGFiP contenant des taxes à faible rendement.",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "title": "IGF, Les taxes à faible rendement, tome 1 (février 2014), p. 6"
+  },
+  {
+   "tax": "Taxe générale sur les activités polluantes (TGAP)",
+   "pct": 1.48,
+   "year": "vers 2012",
+   "note": "Douane ; moyenne de la douane : 0,47 %.",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "title": "IGF, Les taxes à faible rendement, tome 1 (février 2014), p. 6"
+  },
+  {
+   "tax": "Droit annuel de francisation et de navigation (bateaux)",
+   "pct": 13.7,
+   "year": "vers 2012",
+   "note": "Douane.",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "title": "IGF, Les taxes à faible rendement, tome 1 (février 2014), p. 6",
+   "ended": {
+    "text": "remplacé en 2022 par la taxe annuelle sur les engins maritimes",
+    "full": true,
+    "url": "https://www.douane.gouv.fr/fiche/vous-souhaitez-avoir-des-renseignements-sur-le-droit-annuel-de-francisation-et-de-navigation"
+   }
+  },
+  {
+   "tax": "« Autres » contributions indirectes de la douane",
+   "pct": 14.9,
+   "year": "vers 2012",
+   "note": "Taxes sur les jeux, les spectacles, les farines, les huiles. La Cour des comptes (2014) donnait « près de 15 % » pour ce bloc.",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "title": "IGF, Les taxes à faible rendement, tome 1 (février 2014), p. 6",
+   "ended": {
+    "text": "en partie supprimées depuis (farines en 2019, huiles)",
+    "full": false
+   }
+  },
+  {
+   "tax": "Taxe spéciale sur certains véhicules routiers (taxe à l’essieu)",
+   "meur": 18,
+   "pct": 10.6,
+   "year": "2011",
+   "note": "Produit 170,3 M€ (calcul : 18 / 170,3).",
+   "url": "https://www.assemblee-nationale.fr/dyn/14/questions/QANR5L14QE41909.pdf",
+   "title": "Réponse ministérielle à la QE AN n° 41909, JO du 26 août 2014, p. 7176",
+   "ended": {
+    "text": "supprimée en 2021, remplacée par la taxe annuelle sur les véhicules lourds",
+    "full": true,
+    "url": "https://www.impots.gouv.fr/fiche-taxe-annuelle-sur-les-vehicules-lourds-de-transports-de-marchandises-ta-vltm"
+   }
+  },
+  {
+   "tax": "Taxe sur les farines (au profit de la MSA)",
+   "meur": 3,
+   "pct": 3.24,
+   "year": "2013",
+   "note": "Les 18 M€ souvent cités portaient sur un bloc d’une douzaine de taxes douanières, pas sur la seule taxe sur les farines (32,5 agents selon l’Assemblée nationale, « un peu moins de 5 % du produit »).",
+   "url": "https://www.senat.fr/seances/s201511/s20151123/s20151123018.html",
+   "title": "Sénat, séance du 23 novembre 2015, réponse du secrétaire d’État au budget",
+   "ended": {
+    "text": "supprimée en 2019",
+    "full": true,
+    "url": "https://www.assemblee-nationale.fr/dyn/15/questions/QANR5L15QE11580.pdf"
+   }
+  },
+  {
+   "tax": "Taxes du CNC sur les entrées en salle et la télévision (TSA, TST-E, TST-D)",
+   "meur": 0.351,
+   "pct": 0.07,
+   "range": "≈ 0,07 %",
+   "year": "2021",
+   "note": "Frais de gestion du CNC, qui les collecte lui-même, pour 514 M€ de produit (calcul FranceRoueLibre). Auparavant, la DGFiP prélevait 4 % du produit de la TSA et 1,5 % de la TST pour frais de gestion.",
+   "url": "https://www.assemblee-nationale.fr/dyn/16/questions/QANR5L16QE11578.pdf",
+   "title": "Réponse ministérielle à la QE AN n° 11578, JO du 7 mai 2024, p. 3625"
+  },
+  {
+   "tax": "Redevance audiovisuelle (avant son adossement à la taxe d’habitation)",
+   "meur": 73,
+   "year": "2004",
+   "note": "Gains attendus de l’adossement : 27 M€ en 2005, 50 M€ par an ensuite.",
+   "url": "https://questions.assemblee-nationale.fr/dyn/12/questions/QANR5L12QE51127.pdf",
+   "title": "Réponse ministérielle à la QE AN n° 51127, JO du 29 mars 2005, p. 3271",
+   "ended": {
+    "text": "supprimée en 2022",
+    "full": true
+   }
+  },
+  {
+   "tax": "Amendes (hors amendes forfaitaires majorées)",
+   "meur": 330,
+   "pct": 87.5,
+   "year": "2004",
+   "note": "Coût administratif de 330 M€ pour 377 M€ de recettes (calcul : 330 / 377) ; périmètre du coût non précisé. Ce ne sont pas des impôts.",
+   "url": "https://www.senat.fr/rap/l05-418-2/l05-418-29.html",
+   "title": "Sénat, rapport n° 418 (2005-2006), tome II (B. Angels)"
+  },
+  {
+   "tax": "Interlocuteur social unique des indépendants (Urssaf et RSI)",
+   "pct": 2,
+   "year": "2014",
+   "note": "Les indépendants pesaient 34 % des coûts de collecte des Urssaf pour environ 8 % des encaissements.",
+   "url": "https://www.ccomptes.fr/fr/documents/32770#page=14",
+   "title": "Cour des comptes, Simplifier la collecte des prélèvements versés par les entreprises (2016), synthèse",
+   "ended": {
+    "text": "RSI supprimé en 2018",
+    "full": false
+   }
+  },
+  {
+   "tax": "Retraites complémentaires Agirc-Arrco (collecte par leurs propres caisses)",
+   "pct": 0.6,
+   "range": "au moins 0,60 %",
+   "year": "2014",
+   "note": "Contre 0,28 % pour les Urssaf.",
+   "url": "https://www.ccomptes.fr/fr/documents/32770#page=14",
+   "title": "Cour des comptes, Simplifier la collecte des prélèvements versés par les entreprises (2016), synthèse"
   }
  ],
- "perTaxNote": "Seuls la TVA, l’IS et l’agrégat « impôts divers » ont un coût publié par la DGFiP (dans le rapport de la Cour des comptes de 2025) ; rien pour l’impôt sur le revenu, la taxe foncière ou les droits de succession pris un à un. Les collecteurs généralistes (DGFiP, douane, Urssaf) ne suivent pas le coût des petites taxes impôt par impôt (Cour des comptes, 2025, p. 53).",
+ "perTaxNote": "Coûts relevés dans des rapports de la Cour des comptes et de l’IGF, des réponses ministérielles et des débats parlementaires, de 2005 à 2024. Chaque chiffre est celui du document, à sa date et avec sa méthode : ils ne se comparent qu’en ordre de grandeur. « Vers 2012 » : l’IGF ne date pas ses taux de la douane et des agrégats de la DGFiP (rapport de février 2014, moyenne de la DGFiP donnée pour 2012).",
  "costDots": [
   {
    "name": "Droits sur les boissons, direction régionale la plus chère",
    "per100": 38.65,
    "year": "2011",
    "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf"
-  },
-  {
-   "name": "Taxe sur les farines",
-   "per100": 28.6,
-   "year": "2012",
-   "yield": 64,
-   "url": "https://www.senat.fr/questions/base/2015/qSEQ151018272.html"
   },
   {
    "name": "Droits sur les boissons, moyenne",
@@ -328,13 +484,13 @@
    "name": "Accise sur les produits énergétiques (TICPE)",
    "per100": 0.12,
    "year": "2011",
-   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf"
+   "url": "https://www.assemblee-nationale.fr/dyn/14/questions/QANR5L14QE41909.pdf"
   },
   {
    "name": "Droits sur les tabacs",
    "per100": 0.05,
    "year": "2011",
-   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf"
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8"
   },
   {
    "name": "Comités professionnels (CPDE), taxes collectées",
@@ -363,6 +519,108 @@
    "range": "0,10 à 0,28 €",
    "year": "2021-2023",
    "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=53"
+  },
+  {
+   "name": "« Autres » contributions indirectes de la douane",
+   "per100": 14.9,
+   "year": "vers 2012",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "ended": {
+    "text": "en partie supprimées depuis (farines en 2019, huiles)",
+    "full": false
+   }
+  },
+  {
+   "name": "Droit de francisation et de navigation",
+   "per100": 13.7,
+   "year": "vers 2012",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "ended": {
+    "text": "remplacé en 2022 par la taxe annuelle sur les engins maritimes",
+    "full": true,
+    "url": "https://www.douane.gouv.fr/fiche/vous-souhaitez-avoir-des-renseignements-sur-le-droit-annuel-de-francisation-et-de-navigation"
+   }
+  },
+  {
+   "name": "Taxe à l’essieu (TSVR)",
+   "per100": 10.6,
+   "year": "2011",
+   "url": "https://www.assemblee-nationale.fr/dyn/14/questions/QANR5L14QE41909.pdf",
+   "yield": 170.3,
+   "ended": {
+    "text": "supprimée en 2021, remplacée par la taxe annuelle sur les véhicules lourds",
+    "full": true,
+    "url": "https://www.impots.gouv.fr/fiche-taxe-annuelle-sur-les-vehicules-lourds-de-transports-de-marchandises-ta-vltm"
+   }
+  },
+  {
+   "name": "Taxe sur les farines",
+   "per100": 3.24,
+   "year": "2013",
+   "url": "https://www.senat.fr/seances/s201511/s20151123/s20151123018.html",
+   "yield": 64,
+   "ended": {
+    "text": "supprimée en 2019",
+    "full": true,
+    "url": "https://www.assemblee-nationale.fr/dyn/15/questions/QANR5L15QE11580.pdf"
+   }
+  },
+  {
+   "name": "Taxe d’habitation",
+   "per100": 2.99,
+   "year": "vers 2012",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "ended": {
+    "text": "supprimée sur les résidences principales en 2023",
+    "full": false
+   }
+  },
+  {
+   "name": "Impôt sur la fortune immobilière",
+   "per100": 2.66,
+   "year": "2022",
+   "url": "https://www.ccomptes.fr/fr/documents/68192#page=8"
+  },
+  {
+   "name": "Indépendants (ISU, Urssaf et RSI)",
+   "per100": 2,
+   "year": "2014",
+   "url": "https://www.ccomptes.fr/fr/documents/32770#page=14",
+   "ended": {
+    "text": "RSI supprimé en 2018",
+    "full": false
+   }
+  },
+  {
+   "name": "TGAP",
+   "per100": 1.48,
+   "year": "vers 2012",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8"
+  },
+  {
+   "name": "Impôt sur le revenu",
+   "per100": 1.05,
+   "year": "2022",
+   "url": "https://www.ccomptes.fr/fr/documents/68192#page=8"
+  },
+  {
+   "name": "Taxes foncières",
+   "per100": 0.96,
+   "year": "2021",
+   "url": "https://www.ccomptes.fr/fr/documents/63540#page=6"
+  },
+  {
+   "name": "Taxe sur les conventions d’assurance",
+   "per100": 0.05,
+   "year": "vers 2012",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8"
+  },
+  {
+   "name": "Taxes du CNC (TSA, TST)",
+   "per100": 0.07,
+   "range": "≈ 0,07 €",
+   "year": "2021",
+   "url": "https://www.assemblee-nationale.fr/dyn/16/questions/QANR5L16QE11578.pdf"
   }
  ],
  "compliance": {
@@ -419,5 +677,417 @@
   "text": "Si aucune taxe prise individuellement n’affiche a priori un coût de collecte supérieur à son rendement, la complexité d’ensemble que dessine ce paysage de gestion constitue en soi un enjeu de simplification.",
   "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=47",
   "title": "Cour des comptes, Les taxes à faible rendement (avril 2025), p. 47"
+ },
+ "attach": {
+  "ir": {
+   "pct": 1.05,
+   "year": "2022",
+   "url": "https://www.ccomptes.fr/fr/documents/68192#page=8",
+   "title": "Cour des comptes, L’impôt sur la fortune immobilière (janvier 2024), synthèse p. 8"
+  },
+  "ifi": {
+   "pct": 2.66,
+   "year": "2022",
+   "url": "https://www.ccomptes.fr/fr/documents/68192#page=8",
+   "title": "Cour des comptes, L’impôt sur la fortune immobilière (janvier 2024), synthèse p. 8"
+  },
+  "tf": {
+   "pct": 0.96,
+   "meur": 422.5,
+   "year": "2021",
+   "url": "https://www.ccomptes.fr/fr/documents/63540#page=6",
+   "title": "Cour des comptes, Les taxes foncières, exercices 2016-2021 (janvier 2023), synthèse p. 6"
+  },
+  "th": {
+   "pct": 2.99,
+   "year": "vers 2012",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "title": "IGF, Les taxes à faible rendement, tome 1 (février 2014), p. 6"
+  },
+  "tgap": {
+   "pct": 1.48,
+   "year": "vers 2012",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "title": "IGF, Les taxes à faible rendement, tome 1 (février 2014), p. 6"
+  },
+  "fiscalite-alcools": {
+   "pct": 1.18,
+   "year": "vers 2012",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "title": "IGF, Les taxes à faible rendement, tome 1 (février 2014), p. 6"
+  },
+  "payrolltax": {
+   "pct": 0.31,
+   "year": "2006",
+   "url": "https://www.senat.fr/rap/r07-060-2/r07-060-27.html",
+   "title": "Sénat, rapport d’information n° 60 (2007-2008), tome II, annexe statistique (P. Marini)"
+  },
+  "dmtg": {
+   "pct": 1.55,
+   "year": "2006",
+   "url": "https://www.senat.fr/rap/r07-060-2/r07-060-27.html",
+   "title": "Sénat, rapport d’information n° 60 (2007-2008), tome II, annexe statistique (P. Marini), ensemble des droits d’enregistrement"
+  },
+  "cnc-tsa": {
+   "pct": 0.07,
+   "range": "≈ 0,07 % (avec la TST)",
+   "year": "2021",
+   "url": "https://www.assemblee-nationale.fr/dyn/16/questions/QANR5L16QE11578.pdf",
+   "title": "Réponse ministérielle à la QE AN n° 11578, JO du 7 mai 2024, p. 3625"
+  },
+  "cnc-tst-e": {
+   "pct": 0.07,
+   "range": "≈ 0,07 % (avec la TSA)",
+   "year": "2021",
+   "url": "https://www.assemblee-nationale.fr/dyn/16/questions/QANR5L16QE11578.pdf",
+   "title": "Réponse ministérielle à la QE AN n° 11578, JO du 7 mai 2024, p. 3625"
+  },
+  "cnc-tst-d": {
+   "pct": 0.07,
+   "range": "≈ 0,07 % (avec la TSA)",
+   "year": "2021",
+   "url": "https://www.assemblee-nationale.fr/dyn/16/questions/QANR5L16QE11578.pdf",
+   "title": "Réponse ministérielle à la QE AN n° 11578, JO du 7 mai 2024, p. 3625"
+  },
+  "cc-58": {
+   "pct": 13.7,
+   "year": "vers 2012",
+   "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+   "title": "IGF, Les taxes à faible rendement, tome 1 (février 2014), p. 6, droit de francisation et de navigation (ensemble)"
+  },
+  "cc-226": {
+   "pct": 3.24,
+   "meur": 3,
+   "year": "2013",
+   "url": "https://www.senat.fr/seances/s201511/s20151123/s20151123018.html",
+   "title": "Sénat, séance du 23 novembre 2015, réponse du secrétaire d’État au budget"
+  },
+  "cc-191": {
+   "pct": 10.6,
+   "meur": 18,
+   "year": "2011",
+   "url": "https://www.assemblee-nationale.fr/dyn/14/questions/QANR5L14QE41909.pdf",
+   "title": "Réponse ministérielle à la QE AN n° 41909, JO du 26 août 2014, p. 7176, taxe à l’essieu avant sa refonte"
+  }
+ },
+ "byTax": {
+  "title": "Taux d’intervention par impôt, DGI et Trésor public, 2002-2006",
+  "years": [
+   2002,
+   2003,
+   2004,
+   2005,
+   2006
+  ],
+  "rows": [
+   [
+    "Impôt sur le revenu",
+    [
+     2.55,
+     2.57,
+     2.69,
+     2.65,
+     2.47
+    ]
+   ],
+   [
+    "Taxe d’habitation",
+    [
+     3.96,
+     3.99,
+     3.77,
+     3.86,
+     3.97
+    ]
+   ],
+   [
+    "Taxes foncières",
+    [
+     2.19,
+     2.03,
+     1.94,
+     1.9,
+     1.75
+    ]
+   ],
+   [
+    "Taxe professionnelle",
+    [
+     1.2,
+     0.89,
+     0.89,
+     0.85,
+     0.83
+    ]
+   ],
+   [
+    "Impôt sur les sociétés",
+    [
+     0.91,
+     0.89,
+     0.83,
+     0.89,
+     0.86
+    ]
+   ],
+   [
+    "Taxe sur les salaires",
+    [
+     0.39,
+     0.33,
+     0.24,
+     0.33,
+     0.31
+    ]
+   ],
+   [
+    "TVA",
+    [
+     1.13,
+     1.08,
+     0.92,
+     0.82,
+     0.77
+    ]
+   ],
+   [
+    "Droits d’enregistrement",
+    [
+     1.88,
+     1.96,
+     1.75,
+     1.68,
+     1.55
+    ]
+   ],
+   [
+    "Vignette automobile",
+    [
+     6.03,
+     7.34,
+     6.32,
+     4.57,
+     null
+    ]
+   ],
+   [
+    "ISF",
+    [
+     1.79,
+     2.22,
+     2.55,
+     2.43,
+     2.22
+    ]
+   ],
+   [
+    "Ensemble",
+    [
+     1.44,
+     1.41,
+     1.35,
+     1.32,
+     1.23
+    ]
+   ]
+  ],
+  "url": "https://www.senat.fr/rap/r07-060-2/r07-060-27.html",
+  "source": "Sénat, rapport d’information n° 60 (2007-2008), tome II, annexe statistique (P. Marini), 25 octobre 2007",
+  "note": "Le seul tableau public trouvé qui suive le coût de chaque grand impôt sur plusieurs années. La méthode n’est pas décrite et ne se raccorde pas aux taux actuels (l’IR passe de 2,47 % en 2006 à 1,05 % en 2022 selon la Cour des comptes, sans série entre les deux). Une réponse ministérielle de 2006 donne, pour la seule mission de recouvrement du Trésor public en 2004, 0,43 % pour l’IR et 1,92 % pour la taxe d’habitation.",
+  "noteUrl": "https://www.assemblee-nationale.fr/dyn/12/questions/QANR5L12QE39143.pdf",
+  "ended": {
+   "Taxe d’habitation": {
+    "text": "supprimée sur les résidences principales en 2023",
+    "full": false
+   },
+   "Taxe professionnelle": {
+    "text": "supprimée en 2010, remplacée par la CFE et la CVAE",
+    "full": true
+   },
+   "Vignette automobile": {
+    "text": "supprimée pour les particuliers en 2001",
+    "full": true,
+    "url": "https://www.assemblee-nationale.fr/dyn/12/questions/QANR5L12QE5881.pdf"
+   },
+   "ISF": {
+    "text": "supprimé en 2018, remplacé par l’IFI",
+    "full": true
+   }
+  }
+ },
+ "lawFees": [
+  {
+   "tax": "Taxe sur les spectacles vivants, taxes affectées aux centres techniques et comités professionnels",
+   "rate": 5,
+   "law": "CGI, art. 1647, X",
+   "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000054373998"
+  },
+  {
+   "tax": "Taxes de l’article 1635 ter (taxes affectées diverses)",
+   "rate": 4,
+   "law": "CGI, art. 1647, I",
+   "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000054373998"
+  },
+  {
+   "tax": "Taxe d’aménagement",
+   "rate": 3,
+   "law": "CGI, art. 1647, XX",
+   "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000054373998"
+  },
+  {
+   "tax": "Taxe sur les engins maritimes à usage personnel, taxes sur le transport maritime de passagers",
+   "rate": 2.5,
+   "law": "CGI, art. 1647, VII",
+   "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000054373998"
+  },
+  {
+   "tax": "Droits de mutation (« frais de notaire »), part des départements",
+   "rate": 2.37,
+   "law": "CGI, art. 1647, V",
+   "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000054373998",
+   "detail": "en plus des droits ; 2,14 % au taux réduit"
+  },
+  {
+   "tax": "Taxe sur l’éolien en mer",
+   "rate": 1.5,
+   "law": "CGI, art. 1647, XIX",
+   "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000054373998"
+  },
+  {
+   "tax": "Taxe sur la distance parcourue sur autoroutes, contribution de supervision de la Banque de France",
+   "rate": 1,
+   "law": "CGI, art. 1647, VI et XVI",
+   "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000054373998"
+  },
+  {
+   "tax": "Taxes sur les médicaments et dispositifs médicaux, taxe sur les produits phytopharmaceutiques",
+   "rate": 0.5,
+   "law": "CGI, art. 1647, III bis et XVIII",
+   "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000054373998"
+  },
+  {
+   "tax": "Contributions d’assurance chômage collectées par l’Urssaf pour l’Unédic",
+   "rate": 0.1,
+   "law": "convention Urssaf-Unédic",
+   "url": "https://www.senat.fr/rap/r21-725/r21-7251.pdf#page=40",
+   "detail": "≈ 39 M€ par an"
+  }
+ ],
+ "lawFeesNote": "Forfaits fixés par la loi ou par convention, retenus sur le produit avant reversement à l’organisme bénéficiaire : ce sont des prix, pas des coûts mesurés. Exemple de l’écart : pour les taxes du CNC, la DGFiP prélevait 4 % de la TSA ; le CNC, qui les collecte lui-même depuis, déclare environ 0,07 %.",
+ "publish": {
+  "facts": [
+   {
+    "label": "Impôts ou agrégats dont la DGFiP savait restituer le coût",
+    "value": "14",
+    "sub": "IGF, 2014 (13 pour la douane) ; la liste complète n’est pas publiée"
+   },
+   {
+    "label": "Dernier tableau public du coût de chaque grand impôt",
+    "value": "2006",
+    "sub": "Sénat, rapport Marini (2007) : dix impôts, de 2002 à 2006"
+   }
+  ],
+  "items": [
+   {
+    "state": "partial",
+    "title": "Le coût de collecte de chaque impôt, chaque année",
+    "today": "Le budget ne publie qu’un taux global par administration (0,54 € pour 100 € à la DGFiP en 2024). Les coûts par impôt n’apparaissent qu’au hasard des rapports : TVA et IS dans un rapport de 2025 sur les petites taxes, IR et IFI dans un rapport sur l’IFI, taxes foncières dans un rapport sur les taxes foncières. Rien pour la CSG ni pour les successions depuis 2006, rien pour les accises depuis 2011.",
+    "ask": "Le résultat annuel de la comptabilité analytique de la DGFiP (son enquête de coûts par impôt), de la douane et des Urssaf, impôt par impôt, en euros et en pourcentage du produit, dans un fichier ouvert, avec une méthode stable d’une année sur l’autre.",
+    "who": "DGFiP, DGDDI, Urssaf Caisse nationale et MSA, dans les rapports annuels de performance",
+    "found": "Comblé ici en partie : des coûts par impôt retrouvés dans des documents de 2005 à 2024, et une série de dix impôts pour 2002-2006.",
+    "proof": {
+     "text": "La DGFiP n’est aujourd’hui en mesure de restituer les coûts de gestion que sur quatorze impositions ou agrégats",
+     "url": "https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf#page=8",
+     "title": "IGF, Les taxes à faible rendement (2014), p. 6"
+    }
+   },
+   {
+    "state": "none",
+    "title": "Ce que rapporte chacune des petites taxes",
+    "today": "Pour 117 des 243 taxes de moins de 175 M€, la Cour des comptes elle-même n’a pas pu obtenir le produit. Le fascicule « Voies et moyens » ne détaille que les recettes du budget de l’État : les taxes encaissées par des agences, des chambres ou des fonds n’y figurent pas, ou dans un total.",
+    "ask": "Chaque année, le produit encaissé de chaque prélèvement obligatoire, quels que soient son collecteur et son bénéficiaire, dans une liste unique et ouverte, avec son article de loi. L’inventaire de la Cour des comptes (avril 2025) montre que c’est faisable : il faut qu’il devienne annuel et complet.",
+    "who": "Direction de la législation fiscale et direction du budget, en annexe au projet de loi de finances, avec les organismes affectataires",
+    "proof": {
+     "url": "https://www.ccomptes.fr/fr/publications/les-taxes-faible-rendement-0",
+     "title": "Inventaire de la Cour des comptes (2025) : produit 2024 connu pour 126 des 243 taxes en vigueur"
+    }
+   },
+   {
+    "state": "partial",
+    "title": "Les frais facturés pour collecter, face au coût réel",
+    "today": "L’État ajoute 3 à 9 % aux impôts locaux et retient 0,5 à 5 % sur des dizaines de taxes collectées pour d’autres (CGI, art. 1641 et 1647). Ce sont des forfaits : sur les taxes foncières, 1,8 Md€ de frais en 2021 pour un coût de gestion estimé à 422,5 M€ ; sur les taxes du CNC, 4 % prélevés autrefois pour un coût réel d’environ 0,07 %.",
+    "ask": "Pour chaque frais d’assiette et de recouvrement, le montant encaissé par l’État et le coût réel de la mission correspondante, chaque année.",
+    "who": "DGFiP et DGDDI, dans l’annexe « Voies et moyens »",
+    "found": "Taux légaux relevés sur Légifrance et ajoutés plus haut, dans « Ce que l’État retient pour collecter pour d’autres ».",
+    "proof": {
+     "text": "Aucun élément ne permet de s’assurer que ce montant est bien en rapport avec les coûts réellement engagés",
+     "url": "https://www.ccomptes.fr/fr/documents/63540#page=6",
+     "title": "Cour des comptes, Les taxes foncières (2023), p. 6"
+    }
+   },
+   {
+    "state": "none",
+    "title": "Le coût de collecte des organismes qui lèvent leurs propres taxes",
+    "today": "Des dizaines d’organismes collectent eux-mêmes une taxe (agences de l’eau, CNC, comités professionnels, chambres, OPCO, ANSM, ANSES…). Leurs comptes ne distinguent presque jamais ce que leur coûte la collecte. La Cour des comptes juge ces collecteurs spécialisés 3 à 30 fois plus chers que la DGFiP, sans chiffre taxe par taxe.",
+    "ask": "Dans le rapport annuel de chaque organisme affectataire, le coût complet de l’assiette, du recouvrement et du contrôle de chacune de ses taxes, et le nombre d’agents qui s’y consacrent.",
+    "who": "Chaque organisme affectataire, sous le contrôle de son ministère de tutelle",
+    "proof": {
+     "text": "Des coûts de gestion des organismes de collecte en baisse mais mal mesurés et parfois excessifs",
+     "url": "https://www.vie-publique.fr/files/rapport/pdf/164000432.pdf",
+     "title": "Cour des comptes, Simplifier la collecte des prélèvements versés par les entreprises (2016), sommaire"
+    }
+   },
+   {
+    "state": "past",
+    "title": "Ce que coûtent les impôts aux contribuables",
+    "today": "Aucune mesure française du temps et de l’argent que passent ménages et entreprises à déclarer et payer. Le programme de mesure des charges administratives de 2007-2011 a compté des formulaires supprimés, sans montant. Le dernier chiffre international, 139 heures par an pour une entreprise type, date de 2018 (Banque mondiale, série arrêtée).",
+    "ask": "Une mesure périodique, impôt par impôt, du coût de conformité (temps de déclaration, comptabilité, conseil), pour les ménages et pour les entreprises selon leur taille.",
+    "who": "Direction de la législation fiscale, Insee ou Conseil des prélèvements obligatoires",
+    "proof": {
+     "text": "près de 2,2 millions de formulaires supprimés par an",
+     "url": "https://www.assemblee-nationale.fr/dyn/13/questions/QANR5L13QE15944.pdf",
+     "title": "Réponse ministérielle à la QE AN n° 15944 (2009) : un bilan sans montant"
+    }
+   },
+   {
+    "state": "partial",
+    "title": "Les chiffres que la France envoie à l’OCDE",
+    "today": "L’administration fiscale française répond au questionnaire international de l’OCDE (recettes, dépenses de fonctionnement, effectifs, arriérés). Ses réponses ne sont pas publiées en France en données ouvertes, et la fiche pays de l’OCDE n’affiche pas de ratio de coût lisible pour la France.",
+    "ask": "Les réponses françaises au questionnaire ISORA de l’OCDE, chaque année, sur data.gouv.fr ou data.economie.gouv.fr.",
+    "who": "DGFiP",
+    "proof": {
+     "url": "https://www.oecd.org/tax/forum-on-tax-administration/publications-and-products/tax-administration-series-country-snapshot-FRA.pdf",
+     "title": "OCDE, Tax Administration Series, fiche pays France"
+    }
+   },
+   {
+    "state": "partial",
+    "title": "Une série longue à méthode constante",
+    "today": "Le taux de la DGFiP a changé de définition au moins quatre fois (DGI seule en 1999, recettes brutes en 2010, méthode commune avec la douane en 2018, accises en 2024 ; 2023 révisé de 0,68 % à 0,58 %). Les taux par impôt de 2006 (Sénat) et de 2022 (Cour des comptes) ne se raccordent pas.",
+    "ask": "Chaque série recalculée sur toute sa durée avec la méthode actuelle, et la méthode publiée : périmètre des coûts, recettes brutes ou nettes.",
+    "who": "DGFiP et DGDDI",
+    "proof": {
+     "text": "Les services fiscaux considèrent que les enjeux liés au taux d’intervention sont limités",
+     "url": "https://www.ccomptes.fr/fr/documents/68192#page=8",
+     "title": "Cour des comptes, L’impôt sur la fortune immobilière (2024), p. 8"
+    }
+   }
+  ],
+  "note": "Méthode : recherche dans les rapports de la Cour des comptes, de l’IGF et du Conseil des prélèvements obligatoires, les rapports annuels de performance, les annexes budgétaires, les questions écrites et les comptes rendus du Parlement, de 1997 à 2026. Chaque chiffre retenu a été relu dans le document cité.",
+  "searched": [
+   {
+    "title": "les annexes de l’IGF 2014 (fiches taxe par taxe), non publiées"
+   },
+   {
+    "title": "le « rapport sur les coûts de gestion » de la DGI et du Trésor public (données 1997), cité mais introuvable"
+   },
+   {
+    "title": "l’étude comparative de l’IGF sur les coûts de gestion (1999), jamais publiée"
+   },
+   {
+    "title": "le coût réel du prélèvement sur l’octroi de mer, faute de comptabilité analytique",
+    "url": "https://questions.assemblee-nationale.fr/q17/17-18024QE.htm"
+   }
+  ]
  }
 }

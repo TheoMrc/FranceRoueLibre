@@ -1,0 +1,42 @@
+/* Niches fiscales page: only what style.css does not already provide (tx-* charts, tables and filters are shared). */
+.nf-warn { margin-bottom: var(--sp-3); }
+.nf-warn strong { display: block; margin-bottom: .2rem; }
+.nf-years { min-height: 250px; }
+.nf-bar { cursor: default; }
+.nf-bar--a { fill: var(--tx-1); }
+.nf-bar--b { fill: var(--tx-3); }
+.nf-sw { display: inline-block; width: .75rem; height: .75rem; border-radius: 3px; }
+.nf-sw--a { background: var(--tx-1); }
+.nf-sw--b { background: var(--tx-3); }
+.nf-changes .tx-bars__fill { background: var(--tx-1); }
+.nf-changes > :last-child .tx-bars__fill { background: var(--tx-2); }
+.nf-details { margin-top: .8rem; }
+.nf-details summary { cursor: pointer; color: var(--c-teal-600); font-weight: 600; font-size: .88rem; }
+.nf-list { margin: .7rem 0 0; padding-left: 1.1rem; max-height: 340px; overflow-y: auto; font-size: .82rem; line-height: 1.5; color: var(--c-body); }
+.nf-list li { margin-bottom: .35rem; }
+.nf-list .muted { color: var(--c-muted); }
+.nf-blind .tx-bars__fill { background: var(--tx-8); }
+.nf-dl { display: grid; grid-template-columns: auto 1fr; gap: .55rem 1rem; margin: 0; font-size: .86rem; line-height: 1.5; }
+.nf-dl dt { color: var(--c-ink); font-weight: 700; white-space: nowrap; }
+.nf-dl dd { margin: 0; color: var(--c-body); }
+.nf-count { font-size: .82rem; font-weight: 500; margin-left: .4rem; }
+.nf-scroll { max-height: 560px; overflow-y: auto; }
+.nf-scroll thead th { position: sticky; top: 0; background: var(--c-bg); z-index: 1; }
+.nf-table .tx-namecell { min-width: 260px; }
+.nf-table td { min-width: 6rem; }
+.nf-table td.num { min-width: 4.5rem; }
+.nf-table td.nf-mission { min-width: 9rem; }
+.nf-st { display: inline-block; padding: .05rem .45rem; border-radius: var(--r-pill); font-size: .72rem; font-weight: 700; white-space: nowrap; }
+.nf-st--ok { background: var(--c-surface-2); color: var(--c-muted); }
+.nf-st--nc { background: color-mix(in srgb, #e11d48 14%, transparent); color: #e11d48; }
+.nf-st--eps { background: color-mix(in srgb, var(--c-amber) 16%, transparent); color: var(--c-amber); }
+.nf-st--vide { background: var(--c-surface-2); color: var(--c-body); }
+.nf-sm-only { display: none; }
+#methode .gap { background: var(--c-surface); }
+@media (max-width: 640px) {
+  .nf-table .nf-hide-sm { display: none; }
+  .nf-table .nf-sm-only { display: block; margin-top: .2rem; }
+  .nf-table .tx-namecell { min-width: 210px; }
+  .nf-dl { grid-template-columns: 1fr; gap: .2rem; }
+  .nf-dl dd { margin-bottom: .5rem; }
+}

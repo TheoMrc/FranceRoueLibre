@@ -86,3 +86,44 @@ test('low-yield tax inventory reproduces the Cour des comptes totals', () => {
   assert.ok(ly.unmatchedScenarioLines.length <= 6);
   assert.match(data.costs.noLossQuote.text, /aucune taxe prise individuellement/);
 });
+
+test('the four yields filled from budget and OFGL files keep the frozen extract figures; electricity stays unknown', () => {
+  const extract = JSON.parse(fs.readFileSync('sources/taxes-affectees.json', 'utf8'));
+  const byId = new Map(data.all.map(t => [t.id, t]));
+  assert.equal(byId.get('tgap').amount, extract.budgetLines.lines['1756'].amount);
+  assert.equal(byId.get('tgap').amount, 1294);
+  assert.equal(byId.get('malus-co2-masse').amount, 1386.3);
+  assert.equal(byId.get('cartes-grises').amount, extract.cartesGrises.years.find(y => y.year === 2024).amount);
+  for (const id of ['tgap', 'malus-co2-masse', 'cartes-grises']) {
+    const t = byId.get(id);
+    assert.equal(t.check, 'source', id); assert.match(t.source.url, /^https:\/\//, id); assert.ok(t.source.ref, id);
+  }
+  assert.equal(byId.get('accise-electricite').amount, undefined);
+});
+
+test('taxes affectées: every capped line gives back exactly what exceeds its ceiling', () => {
+  const A = data.affected;
+  assert.equal(A.rows.length, 267);
+  assert.equal(A.years.length, 3);
+  for (const r of A.rows) {
+    assert.equal(r.y.length, 3); assert.ok(r.tax && r.beneficiary && r.sector, r.tax);
+    r.cap.forEach((c, k) => { if (c != null && r.y[k] != null) assert.ok(Math.abs(Math.max(0, r.y[k] - c) - r.back[k]) < 0.001, `${r.tax} ${k}`); });
+  }
+  const y24 = A.years[2];
+  assert.equal(y24.capped, A.rows.filter(r => r.cap[2] != null).length);
+  assert.ok(Math.abs(y24.back - A.rows.reduce((s, r) => s + (r.back[2] || 0), 0)) < 0.1);
+  assert.ok(Math.abs(A.sectors.reduce((s, x) => s + x.yield, 0) - y24.yield) < 0.5);
+  assert.match(A.url, /^https:\/\//);
+});
+
+test('costs found outside the list are attached to their tax, and every publication request is sourced', () => {
+  const c = data.costs, byId = new Map(data.all.map(t => [t.id, t]));
+  for (const id of Object.keys(c.attach)) assert.match(byId.get(id).cost?.url || '', /^https:\/\//, id);
+  assert.equal(byId.get('ir').cost.pct, 1.05);
+  assert.equal(byId.get('cc-226').cost.pct, 3.24);
+  // The 18 M€ often quoted for the flour tax covered a block of about twelve taxes: never shown as the flour tax alone.
+  assert.ok(!c.perTax.some(r => /farines/.test(r.tax) && r.meur === 18.3));
+  for (const r of [...c.lawFees, ...c.publish.items.map(i => i.proof)]) assert.match(r.url, /^https:\/\//);
+  for (const r of c.byTax.rows) assert.equal(r[1].length, c.byTax.years.length, r[0]);
+  for (const r of c.lawFees) assert.ok(r.rate > 0 && r.rate <= 10, r.tax);
+});

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Les prix publics du catalogue de l’UGAP, la centrale d’achat public, comparés produit par produit à ceux de revendeurs, et la place de l’UGAP dans les marchés publics déclarés. Étude en cours.">
+  <title>UGAP, les prix de la centrale d’achat public · FranceRoueLibre</title>
+  <link rel="canonical" href="https://francerouelibre.fr/ugap.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="FranceRoueLibre">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="UGAP, les prix de la centrale d’achat public · FranceRoueLibre">
+  <meta property="og:description" content="Les prix publics du catalogue de l’UGAP, la centrale d’achat public, comparés produit par produit à ceux de revendeurs, et la place de l’UGAP dans les marchés publics déclarés. Étude en cours.">
+  <meta property="og:url" content="https://francerouelibre.fr/ugap.html">
+  <meta property="og:image" content="https://francerouelibre.fr/og.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="FranceRoueLibre : où part l’argent public ? Dépenses, aides, marchés publics et dette, territoire par territoire.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="UGAP, les prix de la centrale d’achat public · FranceRoueLibre">
+  <meta name="twitter:description" content="Les prix publics du catalogue de l’UGAP, la centrale d’achat public, comparés produit par produit à ceux de revendeurs, et la place de l’UGAP dans les marchés publics déclarés. Étude en cours.">
+  <meta name="twitter:image" content="https://francerouelibre.fr/og.png">
+  <script>
+    (function () {
+      var theme = null;
+      try { theme = localStorage.getItem('frl-theme'); } catch (e) {}
+      if (theme !== 'light' && theme !== 'dark') theme = 'light'; // light by default, dark only when chosen with the toggle
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./ugap.css">
+  <script defer src="./common.js"></script>
+  <script defer src="./ugap.js"></script>
+  <script defer src="./nav.js"></script>
+  <script defer src="./collapse.js"></script>
+  <script defer src="./search-bar.js"></script>
+</head>
+<body class="subpage">
+  <header class="site-header" id="siteHeader">
+    <div class="container nav">
+      <a class="brand brand--lockup" href="index.html" aria-label="FranceRoueLibre, accueil">
+        <svg class="brand__mark" width="40" height="40" viewBox="0 0 48 48" fill="none" aria-hidden="true"><defs><linearGradient id="g7" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#0e7490"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><path d="M24 4l17 10v20L24 44 7 34V14z" stroke="url(#g7)" stroke-width="3" stroke-linejoin="round"/><path d="M14 17l7 7 5-4 9 11" stroke="#e11d48" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 31 H35 V25" stroke="#e11d48" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="brand__sep" aria-hidden="true"></span>
+        <span class="brand__name"><span>France</span><span class="gradient-text">RoueLibre</span></span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="index.html#explorer">Carte</a></li>
+        <li><a href="index.html#circuit">Circuit</a></li>
+        <li><a href="index.html#comptes">Comptes</a></li>
+        <li class="nav__group"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu3">Recettes<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu3"><li><a href="impots.html"><strong>Impôts et taxes</strong><small>Ce que rapporte et coûte chaque prélèvement</small></a></li><li><a href="niches.html"><strong>Niches fiscales</strong><small>Réductions et crédits d’impôt, mesure par mesure</small></a></li></ul></li>
+        <li class="nav__group is-current"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu4">Dépenses<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu4"><li><a href="etat.html"><strong>Budget de l’État</strong><small>Missions, programmes, exécution mois par mois</small></a></li><li><a href="operateurs.html"><strong>Opérateurs de l’État</strong><small>Agences et établissements publics</small></a></li><li><a href="secu.html"><strong>Sécurité sociale</strong><small>Comptes des branches, dépenses d’assurance maladie</small></a></li><li><a href="aides.html"><strong>Aides et subventions</strong><small>Associations, entreprises, plan de relance</small></a></li><li><a href="marches.html"><strong>Marchés publics</strong><small>1,4 million de contrats depuis 2014</small></a></li><li><a href="ugap.html" aria-current="page"><strong>UGAP</strong><small>Les prix de la centrale d’achat public</small></a></li></ul></li>
+        <li class="nav__group"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu5">Contrôle<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu5"><li><a href="signaux.html"><strong>Signaux</strong><small>Règles simples appliquées à toutes les données</small></a></li><li><a href="probite.html"><strong>Probité</strong><small>Corruption, favoritisme : les affaires jugées</small></a></li><li><a href="donnees.html"><strong>Données et angles morts</strong><small>Les sources, et ce qui n’est pas publié</small></a></li></ul></li>
+      </ul>
+      <div class="nav__actions">
+      <a class="nav-github" href="https://github.com/TheoMrc/FranceRoueLibre" target="_blank" rel="noopener noreferrer" aria-label="Code source sur GitHub" title="Code source sur GitHub"><svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg></a>
+      <button class="theme-toggle-btn tbtn-morph" id="themeToggle" type="button" aria-label="Changer de thème" title="Changer de thème">
+        <span class="tbtn-halo" aria-hidden="true"></span>
+        <svg class="tbtn-svg-morph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <mask id="theme-morph-mask"><rect width="32" height="32" fill="white"/><circle class="mask-moon-bite" cx="23" cy="11" r="6.5" fill="black"/></mask>
+          <circle class="morph-core" cx="16" cy="16" r="6" fill="currentColor" mask="url(#theme-morph-mask)"/>
+          <g class="morph-rays" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="16" y1="3" x2="16" y2="6"/><line x1="16" y1="26" x2="16" y2="29"/><line x1="3" y1="16" x2="6" y2="16"/><line x1="26" y1="16" x2="29" y2="16"/>
+            <line x1="6.81" y1="6.81" x2="8.93" y2="8.93"/><line x1="23.07" y1="23.07" x2="25.19" y2="25.19"/><line x1="6.81" y1="25.19" x2="8.93" y2="23.07"/><line x1="23.07" y1="8.93" x2="25.19" y2="6.81"/>
+          </g>
+        </svg>
+      </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero hero--page">
+      <div class="hero__bg" aria-hidden="true"></div>
+      <div class="container"><div class="hero__inner">
+        <span class="eyebrow">UGAP · étude en cours</span>
+        <h1>Les prix de la centrale d’achat public, <span class="gradient-text">comparés à ceux du commerce.</span></h1>
+        <p class="hero__lead">L’UGAP (Union des groupements d’achats publics) est la centrale d’achat nationale de l’État : une administration, une commune ou un hôpital peut lui acheter directement, sans lancer son propre appel d’offres. Ses prix sont-ils plus élevés que ceux d’un magasin ? Nous relevons les prix publics de son catalogue en ligne et ceux de revendeurs pour les mêmes références de fabricant, produit par produit.</p>
+        <nav class="tx-index" aria-label="Sections de la page"><a href="#resultats">Premiers résultats</a><a href="#detail">Par famille de produits</a><a href="#collecte">Ce qui a été collecté</a><a href="#decp">L’UGAP dans les marchés publics</a><a href="#tableau">Toutes les comparaisons</a><a href="#methode">Méthode et limites</a><a href="#reste">Ce qui reste à faire</a><a href="#a-publier">Ce qui n’est pas publié</a></nav>
+      </div></div>
+    </section>
+
+    <section class="section" id="resultats" aria-labelledby="ugResTitle">
+      <div class="container">
+        <div class="ug-status" id="ugStatus" role="note"><strong>Étude en cours.</strong> Chargement de l’état de la collecte…</div>
+        <div class="section__head"><span class="eyebrow">Premiers résultats</span><h2 id="ugResTitle">Même référence, deux prix</h2><p class="lead" id="ugResLead">Pour chaque produit trouvé à la fois sur ugap.fr et chez un revendeur, on divise le prix UGAP par le prix du revendeur, toutes taxes comprises des deux côtés.</p></div>
+        <div class="kpis" id="ugKpis"></div>
+        <div class="panel"><h3>Écart du prix UGAP par rapport au revendeur le moins cher trouvé</h3><div id="ugHist" class="ug-hist"></div><div class="ug-legend" id="ugHistLegend"></div><p class="note" id="ugHistNote"></p></div>
+        <p class="callout" id="ugReadCaution"></p>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="detail" aria-labelledby="ugDetailTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Par famille de produits</span><h2 id="ugDetailTitle">Un écart qui change de signe selon les produits</h2><p class="lead">Le point est l’écart médian, la barre va du premier au troisième quartile : la moitié des produits du groupe se trouvent dans cette barre. À gauche de l’axe, l’UGAP est moins chère ; à droite, plus chère.</p></div>
+        <div class="panel"><h3>Écart médian et dispersion, par groupe</h3><div id="ugRange" class="ug-range"></div><p class="note" id="ugRangeNote"></p></div>
+        <div class="panel panel--wide"><h3>Détail par groupe</h3><div id="ugGroupTable" class="table-wrap"></div><p class="note">« Panier » : somme des prix UGAP divisée par la somme des prix revendeur pour les mêmes produits, un exemplaire de chacun. Il pèse davantage les produits chers (toners) que la médiane.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="collecte" aria-labelledby="ugCovTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Ce qui a été collecté</span><h2 id="ugCovTitle">Un échantillon encore partiel</h2><p class="lead" id="ugCovLead"></p></div>
+        <div class="kpis" id="ugCovKpis"></div>
+        <div class="grid-2 ug-cov">
+          <div class="panel"><h3>Catalogue UGAP : fiches lues par univers</h3><div id="ugUniverses" class="ug-stack"></div><div class="ug-legend" id="ugUnivLegend"></div><p class="note" id="ugUnivNote"></p></div>
+          <div class="panel"><h3>Revendeurs</h3><div id="ugRetailers" class="table-wrap"></div><p class="note" id="ugRetailNote"></p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="decp" aria-labelledby="ugDecpTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Données essentielles de la commande publique</span><h2 id="ugDecpTitle">L’UGAP dans les marchés publics déclarés</h2><p class="lead">Les DECP recensent les contrats notifiés par chaque acheteur public. L’UGAP y apparaît deux fois : comme acheteur, quand elle met en concurrence ses propres fournisseurs, et comme titulaire, quand un acheteur public déclare un contrat passé avec elle.</p></div>
+        <div class="kpis" id="ugDecpKpis"></div>
+        <div class="grid-2">
+          <div class="panel"><h3>Contrats déclarés par l’UGAP comme acheteur, par année de notification</h3><div id="ugBuyerYears" class="ug-cols"></div><div class="ug-legend" id="ugBuyerLegend"></div><p class="note" id="ugBuyerNote"></p></div>
+          <div class="panel"><h3>Contrats déclarés avec l’UGAP comme titulaire</h3><div id="ugSupplierYears" class="table-wrap"></div><p class="note" id="ugSupplierNote"></p></div>
+        </div>
+        <div class="panel panel--wide"><h3>Les plus gros plafonds déclarés par l’UGAP</h3><div id="ugLargest" class="table-wrap"></div><p class="note" id="ugLargestNote"></p></div>
+        <div class="panel panel--wide"><h3>Acheteurs qui déclarent le plus de montants auprès de l’UGAP</h3><div id="ugTopBuyers"></div><p class="note" id="ugTopBuyersNote"></p></div>
+        <p class="source-links" id="ugDecpSources"></p>
+      </div>
+    </section>
+
+    <section class="section" id="tableau" aria-labelledby="ugTableTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Toutes les comparaisons</span><h2 id="ugTableTitle">Chaque paire, avec ses deux liens</h2><p class="lead">Une ligne par produit UGAP, face à l’offre comparable la moins chère trouvée. Les deux liens ouvrent les fiches d’origine : les prix ont pu changer depuis le relevé. Cliquez sur un en-tête pour trier.</p></div>
+        <div class="ug-filters">
+          <label class="search-field"><span class="sr-only">Rechercher un produit</span><input id="ugSearch" type="search" placeholder="HP 305, Trodat, toner, classeur…" autocomplete="off"></label>
+          <label class="select-wrap"><span class="sr-only">Univers</span><select id="ugFilterUniverse"><option value="">Tous les univers</option></select></label>
+          <label class="select-wrap"><span class="sr-only">Revendeur</span><select id="ugFilterRetailer"><option value="">Tous les revendeurs</option></select></label>
+        </div>
+        <div id="ugTable" class="table-wrap"></div>
+        <div class="ug-more"><button type="button" class="btn btn--ghost" id="ugMore" hidden>Afficher plus de lignes</button></div>
+        <p class="note" id="ugTableNote"></p>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="methode" aria-labelledby="ugMethodTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Méthode et limites</span><h2 id="ugMethodTitle">Ce que mesure cette comparaison, et ce qu’elle ne mesure pas</h2></div>
+        <div class="gap-grid" id="ugMethod"></div>
+        <p class="callout ug-noblame">Un écart de prix n’est ni une preuve ni une accusation. Le prix catalogue n’est pas forcément le prix payé, et une centrale d’achat vend aussi un service : procédure de mise en concurrence déjà faite, sécurité juridique pour l’acheteur, livraison et facturation publiques. Cette page compare des prix affichés, rien de plus.</p>
+        <p class="source-links" id="ugSources"></p>
+      </div>
+    </section>
+
+    <section class="section" id="reste" aria-labelledby="ugTodoTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Étude en cours</span><h2 id="ugTodoTitle">Ce qui reste à faire</h2><p class="lead">Les chiffres ci-dessus seront recalculés à chaque étape. Tant que ces points restent ouverts, ils ne valent que pour les produits effectivement comparés.</p></div>
+        <div class="gap-grid" id="ugTodo"></div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="a-publier" aria-labelledby="ugAskTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Données manquantes</span><h2 id="ugAskTitle">Ce qui n’est pas publié</h2><p class="lead">Pour savoir ce que coûte vraiment un achat passé par l’UGAP, il faudrait connaître ce que les acheteurs publics paient et en quelle quantité. Rien de cela n’est en données ouvertes.</p></div>
+        <div class="gap-grid" id="ugAsk"></div>
+      </div>
+    </section>
+    <section class="section related" aria-labelledby="relatedTitle"><div class="container"><h2 class="related__title" id="relatedTitle">Pour aller plus loin</h2><div class="related__grid"><a class="related__card" href="marches.html"><strong>Marchés publics</strong><span>Tous les marchés publics, acheteur par acheteur</span></a><a class="related__card" href="signaux.html"><strong>Signaux</strong><span>Les signaux sur la concurrence dans les achats</span></a></div></div></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div><div class="footer__brand">FranceRoueLibre</div><p>Cartographie des dépenses publiques · données ouvertes</p><p class="footer__legal">Site indépendant, sans lien avec l’État ni avec une administration. Contact : <a href="mailto:stonks@francerouelibre.fr">stonks@francerouelibre.fr</a> · <a href="mentions.html">Mentions légales et confidentialité</a></p></div>
+      <div class="footer__links"><a href="index.html#explorer">Carte</a><a href="index.html#circuit">Circuit</a><a href="index.html#comptes">Comptes</a><a href="impots.html">Impôts et taxes</a><a href="niches.html">Niches fiscales</a><a href="etat.html">Budget de l’État</a><a href="operateurs.html">Opérateurs de l’État</a><a href="secu.html">Sécurité sociale</a><a href="aides.html">Aides et subventions</a><a href="marches.html">Marchés publics</a><a href="ugap.html">UGAP</a><a href="signaux.html">Signaux</a><a href="probite.html">Probité</a><a href="donnees.html">Données et angles morts</a><a class="footer__github" href="https://github.com/TheoMrc/FranceRoueLibre" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg>Code source</a></div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Atteintes à la probité jugées en France de 2021 à 2025 : corruption, favoritisme, prise illégale d’intérêts, détournement de fonds publics, peines prononcées, et ce qui n’est pas publié.">
+  <title>Probité · FranceRoueLibre</title>
+  <link rel="canonical" href="https://francerouelibre.fr/probite.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="FranceRoueLibre">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="Probité · FranceRoueLibre">
+  <meta property="og:description" content="Atteintes à la probité jugées en France de 2021 à 2025 : corruption, favoritisme, prise illégale d’intérêts, détournement de fonds publics, peines prononcées, et ce qui n’est pas publié.">
+  <meta property="og:url" content="https://francerouelibre.fr/probite.html">
+  <meta property="og:image" content="https://francerouelibre.fr/og.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="FranceRoueLibre : où part l’argent public ? Dépenses, aides, marchés publics et dette, territoire par territoire.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Probité · FranceRoueLibre">
+  <meta name="twitter:description" content="Atteintes à la probité jugées en France de 2021 à 2025 : corruption, favoritisme, prise illégale d’intérêts, détournement de fonds publics, peines prononcées, et ce qui n’est pas publié.">
+  <meta name="twitter:image" content="https://francerouelibre.fr/og.png">
+  <script>
+    (function () {
+      var theme = null;
+      try { theme = localStorage.getItem('frl-theme'); } catch (e) {}
+      if (theme !== 'light' && theme !== 'dark') theme = 'light'; // light by default, dark only when chosen with the toggle
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./probite.css">
+  <script defer src="./common.js"></script>
+  <script defer src="./probite.js"></script>
+  <script defer src="./nav.js"></script>
+  <script defer src="./collapse.js"></script>
+  <script defer src="./search-bar.js"></script>
+</head>
+<body class="subpage">
+  <header class="site-header" id="siteHeader">
+    <div class="container nav">
+      <a class="brand brand--lockup" href="index.html" aria-label="FranceRoueLibre, accueil">
+        <svg class="brand__mark" width="40" height="40" viewBox="0 0 48 48" fill="none" aria-hidden="true"><defs><linearGradient id="g7" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#0e7490"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><path d="M24 4l17 10v20L24 44 7 34V14z" stroke="url(#g7)" stroke-width="3" stroke-linejoin="round"/><path d="M14 17l7 7 5-4 9 11" stroke="#e11d48" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 31 H35 V25" stroke="#e11d48" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="brand__sep" aria-hidden="true"></span>
+        <span class="brand__name"><span>France</span><span class="gradient-text">RoueLibre</span></span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="index.html#explorer">Carte</a></li>
+        <li><a href="index.html#circuit">Circuit</a></li>
+        <li><a href="index.html#comptes">Comptes</a></li>
+        <li class="nav__group"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu3">Recettes<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu3"><li><a href="impots.html"><strong>Impôts et taxes</strong><small>Ce que rapporte et coûte chaque prélèvement</small></a></li><li><a href="niches.html"><strong>Niches fiscales</strong><small>Réductions et crédits d’impôt, mesure par mesure</small></a></li></ul></li>
+        <li class="nav__group"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu4">Dépenses<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu4"><li><a href="etat.html"><strong>Budget de l’État</strong><small>Missions, programmes, exécution mois par mois</small></a></li><li><a href="operateurs.html"><strong>Opérateurs de l’État</strong><small>Agences et établissements publics</small></a></li><li><a href="secu.html"><strong>Sécurité sociale</strong><small>Comptes des branches, dépenses d’assurance maladie</small></a></li><li><a href="aides.html"><strong>Aides et subventions</strong><small>Associations, entreprises, plan de relance</small></a></li><li><a href="marches.html"><strong>Marchés publics</strong><small>1,4 million de contrats depuis 2014</small></a></li><li><a href="ugap.html"><strong>UGAP</strong><small>Les prix de la centrale d’achat public</small></a></li></ul></li>
+        <li class="nav__group is-current"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu5">Contrôle<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu5"><li><a href="signaux.html"><strong>Signaux</strong><small>Règles simples appliquées à toutes les données</small></a></li><li><a href="probite.html" aria-current="page"><strong>Probité</strong><small>Corruption, favoritisme : les affaires jugées</small></a></li><li><a href="donnees.html"><strong>Données et angles morts</strong><small>Les sources, et ce qui n’est pas publié</small></a></li></ul></li>
+      </ul>
+      <div class="nav__actions">
+      <a class="nav-github" href="https://github.com/TheoMrc/FranceRoueLibre" target="_blank" rel="noopener noreferrer" aria-label="Code source sur GitHub" title="Code source sur GitHub"><svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg></a>
+      <button class="theme-toggle-btn tbtn-morph" id="themeToggle" type="button" aria-label="Changer de thème" title="Changer de thème">
+        <span class="tbtn-halo" aria-hidden="true"></span>
+        <svg class="tbtn-svg-morph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <mask id="theme-morph-mask"><rect width="32" height="32" fill="white"/><circle class="mask-moon-bite" cx="23" cy="11" r="6.5" fill="black"/></mask>
+          <circle class="morph-core" cx="16" cy="16" r="6" fill="currentColor" mask="url(#theme-morph-mask)"/>
+          <g class="morph-rays" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="16" y1="3" x2="16" y2="6"/><line x1="16" y1="26" x2="16" y2="29"/><line x1="3" y1="16" x2="6" y2="16"/><line x1="26" y1="16" x2="29" y2="16"/>
+            <line x1="6.81" y1="6.81" x2="8.93" y2="8.93"/><line x1="23.07" y1="23.07" x2="25.19" y2="25.19"/><line x1="6.81" y1="25.19" x2="8.93" y2="23.07"/><line x1="23.07" y1="8.93" x2="25.19" y2="6.81"/>
+          </g>
+        </svg>
+      </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero hero--page">
+      <div class="hero__bg" aria-hidden="true"></div>
+      <div class="container"><div class="hero__inner">
+        <span class="eyebrow">Atteintes à la probité · décisions de justice 2021–2025</span>
+        <h1>Corruption, favoritisme, détournements : <span class="gradient-text">ce que jugent les tribunaux.</span></h1>
+        <p class="hero__lead" id="pbLead">Les affaires d’atteinte à la probité tranchées chaque année par la justice pénale : corruption, trafic d’influence, favoritisme, prise illégale d’intérêts, détournement de fonds publics, concussion. Ce sont des décisions de justice, pas des faits constatés ni des soupçons, et le fichier publié ne descend pas plus bas que la France entière.</p>
+        <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#infractions">Par infraction</a><a href="#decisions">Condamnations et relaxes</a><a href="#peines">Peines</a><a href="#lire">Lire ces chiffres</a><a href="#non-publie">Ce qui n’est pas publié</a></nav>
+      </div></div>
+    </section>
+
+    <section class="section" id="ensemble" aria-labelledby="pbAllTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Ministère de la Justice · données nationales agrégées</span><h2 id="pbAllTitle">Combien d’affaires jugées chaque année</h2><p class="lead">Une affaire est comptée l’année de la décision (jugement, ordonnance pénale ou homologation d’une comparution sur reconnaissance préalable de culpabilité). L’année des faits, souvent bien antérieure, n’est pas publiée.</p></div>
+        <div class="kpis" id="pbKpis"></div>
+        <div class="grid-2">
+          <div class="panel"><h3>Affaires jugées par année et par type de décision</h3><div id="pbYears" class="pb-chart"></div><div id="pbYearsLegend" class="tx-legend"></div><p class="note" id="pbYearsNote"></p></div>
+          <div class="panel"><h3>Qui est jugé : personnes physiques et morales</h3><div id="pbAuthors" class="pb-chart"></div><div id="pbAuthorsLegend" class="tx-legend"></div><p class="note" id="pbAuthorsNote"></p></div>
+        </div>
+        <p class="note pb-warn" id="pbWarn"></p>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="infractions" aria-labelledby="pbInfTitle">
+      <div class="container">
+        <div class="section__head-row"><div class="section__head"><span class="eyebrow">Par type d’infraction</span><h2 id="pbInfTitle">Quinze libellés, cinq années</h2><p class="lead">Nombre d’affaires (ou de prévenus poursuivis pour l’infraction) par libellé de la typologie utilisée dans le fichier. Une affaire qui porte sur plusieurs infractions compte dans chacune : ces cases ne s’additionnent pas.</p></div>
+          <div class="chip-select" id="pbUnit" role="group" aria-label="Unité de compte"><button type="button" data-unit="affaires" class="active">Affaires</button><button type="button" data-unit="unites">Prévenus × infraction</button></div></div>
+        <div id="pbMultiples" class="pb-multiples"></div>
+        <p class="note" id="pbMultiplesNote"></p>
+      </div>
+    </section>
+
+    <section class="section" id="decisions" aria-labelledby="pbDecTitle">
+      <div class="container">
+        <div class="section__head-row"><div class="section__head"><span class="eyebrow">Issue des décisions</span><h2 id="pbDecTitle">Condamnations, relaxes et autres issues</h2><p class="lead">Pour chaque infraction, nombre d’affaires selon l’issue de la décision, année par année. « Autre issue » regroupe ce qui n’est ni une condamnation ni une relaxe ; le fichier ne le détaille pas.</p></div>
+          <div class="chip-select" id="pbDecYears" role="group" aria-label="Année de décision"></div></div>
+        <div class="panel panel--wide"><div id="pbDecTable" class="table-wrap"></div><p class="note" id="pbDecNote"></p></div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="peines" aria-labelledby="pbPenTitle">
+      <div class="container">
+        <div class="section__head-row"><div class="section__head"><span class="eyebrow">Peines prononcées</span><h2 id="pbPenTitle">Prison, amende, inéligibilité</h2><p class="lead">Nombre d’affaires dans lesquelles au moins une peine de chaque sorte a été prononcée. Une même affaire peut cumuler prison, amende et peines complémentaires : les lignes ne s’additionnent pas.</p></div>
+          <div class="chip-select" id="pbPenYears" role="group" aria-label="Année de décision"></div></div>
+        <div class="kpis" id="pbPenKpis"></div>
+        <div class="grid-2">
+          <div class="panel"><h3 id="pbPrisonTitle">Prison et amende : ferme ou avec sursis</h3><div id="pbPrison"></div><p class="note" id="pbPrisonNote"></p></div>
+          <div class="panel"><h3 id="pbComplTitle">Peines complémentaires</h3><div id="pbCompl"></div><p class="note" id="pbComplNote"></p></div>
+        </div>
+        <div class="panel panel--wide"><h3>Affaires avec une peine de chaque catégorie, 2021–2025</h3><div id="pbPenTable" class="table-wrap"></div><p class="note" id="pbPenNote"></p></div>
+      </div>
+    </section>
+
+    <section class="section" id="lire" aria-labelledby="pbReadTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Méthode</span><h2 id="pbReadTitle">Lire ces chiffres sans se tromper</h2></div>
+        <div class="gap-grid">
+          <article class="gap"><h3>Des décisions, pas des faits</h3><p>Chaque nombre compte des affaires tranchées par un tribunal ou par ordonnance pénale. Ce n’est ni le nombre de faits commis, ni celui des faits constatés par la police, la gendarmerie ou les services d’enquête, ni celui des plaintes et signalements. Une hausse peut venir d’enquêtes plus nombreuses, de parquets mieux dotés, de procédures plus rapides ou d’une nouvelle façon de poursuivre, autant que de comportements nouveaux.</p></article>
+          <article class="gap"><h3>L’année de la décision</h3><p>L’année affichée est celle de la décision. Les affaires de probité sont souvent jugées plusieurs années après les faits : le fichier ne publie ni l’année des faits ni la durée de la procédure.</p></article>
+          <article class="gap"><h3>Affaires et « prévenus × infraction »</h3><p>Une affaire peut viser plusieurs personnes et plusieurs infractions. La seconde unité compte chaque couple prévenu-infraction : trois prévenus poursuivis pour corruption et recel donnent jusqu’à six unités. Les tableaux par infraction ou par peine ne s’additionnent donc pas en un total.</p></article>
+          <article class="gap"><h3>Des cases masquées</h3><p>Le producteur masque les effectifs inférieurs à 5 (« &lt;5 ») et, pour éviter de les recalculer par différence, quelques autres (« n.d. »). Ils restent masqués ici : ils ne sont ni estimés, ni comptés comme zéro.</p></article>
+          <article class="gap"><h3>Première instance, appel ?</h3><p>Le fichier ne précise pas si les décisions d’appel ou de cassation sont comprises, ni si une condamnation est devenue définitive. Une relaxe peut être infirmée en appel, et inversement.</p></article>
+          <article class="gap"><h3>Un libellé n’est pas une qualification complète</h3><p>Les libellés regroupent plusieurs articles du code pénal (« infractions assimilées »). Le fichier ne publie pas la liste des qualifications qui composent chaque regroupement : la forte hausse d’un libellé ne peut pas être rattachée ici à une infraction précise.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="non-publie" aria-labelledby="pbGapTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Données manquantes</span><h2 id="pbGapTitle">Ce qui n’est pas publié</h2><p class="lead">Ce jeu de données donne une vue nationale des atteintes à la probité jugées depuis 2021. Il laisse dans l’ombre presque tout ce qui permettrait de mesurer l’ampleur du problème et l’efficacité de la réponse.</p></div>
+        <div class="gap-grid">
+          <article class="gap"><span class="gap__state none">Aucune donnée ouverte</span><h3>La géographie</h3><p>Ni département, ni région, ni juridiction : le fichier est national. Impossible de rapporter les affaires à la population ou de comparer les territoires. La juridiction qui rend chaque décision est pourtant connue de l’institution judiciaire ; le ministère de la Justice pourrait publier ces comptes par ressort ou par département.</p></article>
+          <article class="gap"><span class="gap__state none">Aucune donnée ouverte</span><h3>Les faits enregistrés par la police et la gendarmerie</h3><p>Le nombre d’atteintes à la probité constatées par les forces de sécurité, avant toute poursuite, n’est pas dans ce fichier ; il permettrait de suivre l’entrée de la chaîne pénale. À publier par le service statistique ministériel de la sécurité intérieure (SSMSI), par département et par année.</p></article>
+          <article class="gap"><span class="gap__state none">Aucune donnée ouverte</span><h3>Les suites données par les parquets</h3><p>Classements sans suite, alternatives aux poursuites, conventions judiciaires d’intérêt public, ouvertures d’information : rien sur ce qui se passe entre le signalement et le jugement. Seules les affaires arrivées à une décision sont comptées.</p></article>
+          <article class="gap"><span class="gap__state none">Aucune donnée ouverte</span><h3>Les montants en jeu</h3><p>Sommes détournées, avantages promis, marchés publics concernés, préjudice pour la collectivité, avoirs saisis et confisqués : aucun montant n’est publié. On ne peut pas dire combien d’argent public ces affaires représentent.</p></article>
+          <article class="gap"><span class="gap__state partial">Données partielles</span><h3>Le détail des peines</h3><p>On sait combien d’affaires comportent de la prison ou une amende, pas la durée des peines de prison ni le montant des amendes, et pas davantage la durée des inéligibilités. Ces quantums figurent dans les décisions et dans les bases du ministère de la Justice.</p></article>
+          <article class="gap"><span class="gap__state partial">Données partielles</span><h3>Qui sont les personnes jugées</h3><p>Le fichier distingue élus, agents publics et secteur privé pour certaines infractions, et personnes physiques ou morales. Il ne dit pas quel mandat (maire, parlementaire, conseiller), quelle administration ni quel secteur d’activité sont concernés.</p></article>
+          <article class="gap"><span class="gap__state none">Aucune donnée ouverte</span><h3>Les décisions elles-mêmes</h3><p>Le fichier ne renvoie à aucune décision : impossible de relier ces chiffres à des affaires concrètes, de vérifier un cas ou de savoir quelles affaires se cachent derrière la hausse d’un libellé.</p></article>
+          <article class="gap"><span class="gap__state partial">Données partielles</span><h3>La durée des procédures</h3><p>Ni la date des faits, ni celle du signalement, ni celle de l’ouverture de l’enquête ne sont publiées : le temps que met la justice à juger une atteinte à la probité reste inconnu.</p></article>
+        </div>
+        <p class="source-links" id="pbSources"></p>
+      </div>
+    </section>
+    <section class="section related" aria-labelledby="relatedTitle"><div class="container"><h2 class="related__title" id="relatedTitle">Pour aller plus loin</h2><div class="related__grid"><a class="related__card" href="signaux.html"><strong>Signaux</strong><span>Les anomalies repérées dans les données publiques</span></a><a class="related__card" href="marches.html"><strong>Marchés publics</strong><span>Les marchés publics, où se joue le favoritisme</span></a></div></div></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div><div class="footer__brand">FranceRoueLibre</div><p>Cartographie des dépenses publiques · données ouvertes</p><p class="footer__legal">Site indépendant, sans lien avec l’État ni avec une administration. Contact : <a href="mailto:stonks@francerouelibre.fr">stonks@francerouelibre.fr</a> · <a href="mentions.html">Mentions légales et confidentialité</a></p></div>
+      <div class="footer__links"><a href="index.html#explorer">Carte</a><a href="index.html#circuit">Circuit</a><a href="index.html#comptes">Comptes</a><a href="impots.html">Impôts et taxes</a><a href="niches.html">Niches fiscales</a><a href="etat.html">Budget de l’État</a><a href="operateurs.html">Opérateurs de l’État</a><a href="secu.html">Sécurité sociale</a><a href="aides.html">Aides et subventions</a><a href="marches.html">Marchés publics</a><a href="ugap.html">UGAP</a><a href="signaux.html">Signaux</a><a href="probite.html">Probité</a><a href="donnees.html">Données et angles morts</a><a class="footer__github" href="https://github.com/TheoMrc/FranceRoueLibre" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg>Code source</a></div>
+    </div>
+  </footer>
+</body>
+</html>

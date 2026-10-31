@@ -1,0 +1,5 @@
+/* Impôts page, additions only: section « Taxes affectées et plafonds ». */
+#methode .gap { background: var(--c-surface); }
+.tx-aff td.tx-aff-back { color: var(--tx-8); font-weight: 700; }
+.tx-aff th { white-space: normal; min-width: 5.5rem; }
+.tx-aff td:nth-child(2) { min-width: 180px; }

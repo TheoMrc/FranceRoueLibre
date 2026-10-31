@@ -1,0 +1,103 @@
+/* Budget de l'État (etat.html): styles specific to this page, on top of style.css (tx-* charts, panels, kpis). */
+#lire, #missions, #nature, #recettes, #mois, #performance, #vert, #apd, #bilan, #non-publie, #methode { scroll-margin-top: var(--header-h); }
+.et-notions { margin-top: var(--sp-3); }
+.et-notions .gap p strong { color: var(--c-ink); }
+#missions .tx-controls { align-items: center; }
+#missions .chip-select, #mois .chip-select, #vert .chip-select { max-width: 100%; }
+@media (max-width: 680px) { #missions .chip-select { border-radius: var(--r-md); } #missions .chip-select button { flex: 1 1 auto; } }
+.et-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .45rem; margin-bottom: .7rem; font-size: .84rem; color: var(--c-muted); }
+.et-crumbs button { padding: .2rem .6rem; border: 0; border-radius: var(--r-pill); background: var(--c-surface-2); color: var(--c-ink); font: inherit; font-weight: 600; cursor: pointer; text-align: left; }
+.section--alt .et-crumbs button { background: var(--c-surface); }
+.et-crumbs button[aria-current="true"] { background: var(--c-teal-600); color: #fff; }
+.tx-legend .muted { color: var(--c-muted); }
+.et-legend-top { margin: 0 0 .9rem; }
+.et-h4 { margin: 1rem 0 .45rem; color: var(--c-muted); font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.et-mini { display: grid; gap: .45rem; }
+.et-mini div { display: grid; grid-template-columns: 1fr auto; gap: .15rem .6rem; font-size: .8rem; color: var(--c-body); }
+.et-mini span { display: inline-flex; align-items: center; gap: .4rem; }
+.et-mini i { width: .6rem; height: .6rem; border-radius: 2px; flex: none; }
+.et-mini strong { color: var(--c-ink); font-variant-numeric: tabular-nums; }
+.et-mini em { grid-column: 1 / -1; display: block; height: 5px; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--c) var(--w), var(--c-surface-2) var(--w)); }
+.et-list { display: grid; gap: .3rem; max-height: 300px; margin: 0; padding: 0 .3rem 0 0; overflow-y: auto; list-style: none; font-size: .8rem; }
+.et-list li { display: flex; justify-content: space-between; gap: .8rem; padding: .25rem 0; border-bottom: 1px solid var(--c-line); }
+.et-list li > span:last-child { color: var(--c-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.et-list .tx-rowlink { font-weight: 500; font-size: .8rem; }
+.et-table-panel { margin-top: var(--sp-3); }
+.et-table-panel .search-field { flex: 0 1 340px; }
+.et-mis-table tr.et-group td { padding-top: 1.1rem; color: var(--c-muted); font-size: .74rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; background: none; }
+.et-mis-table .tx-rowlink { text-align: left; }
+.et-mis-table td.num { white-space: nowrap; }
+
+/* Paired bars (planned vs executed) */
+.et-pairs { display: grid; gap: .8rem; margin: 0; padding: 0; list-style: none; }
+.et-pairs li { display: grid; gap: .22rem; }
+.et-pairs .tx-bars__line { display: flex; justify-content: space-between; gap: 1rem; color: var(--c-ink); font-size: .86rem; }
+.et-pairs .tx-bars__line strong { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.et-pairs__bar { position: relative; display: block; height: 10px; border-radius: 3px; background: var(--c-surface-2); cursor: default; }
+.section--alt .panel .et-pairs__bar { background: var(--c-surface); }
+.et-pairs__bar::before { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--w); min-width: 2px; border-radius: 3px; background: var(--c); }
+
+/* 100 % stacked rows */
+.et-stack__rows { display: grid; gap: .7rem; margin: 0; padding: 0; list-style: none; }
+.et-stack__rows li { display: grid; gap: .25rem; }
+.et-stack__rows li.is-link { cursor: pointer; border-radius: var(--r-sm); }
+.et-stack__rows li.is-link:hover .et-stack__label span, .et-stack__rows li.is-link:focus-visible .et-stack__label span { color: var(--c-teal-600); text-decoration: underline; }
+.et-stack__label { display: flex; justify-content: space-between; gap: 1rem; color: var(--c-ink); font-size: .84rem; }
+.et-stack__label small { display: block; color: var(--c-muted); font-size: .74rem; }
+.et-stack__label strong { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.et-stack__bar { display: flex; gap: 2px; height: 14px; }
+.et-stack__bar span { flex-basis: 0; min-width: 2px; border-radius: 3px; }
+.et-stack__bar span:hover { outline: 2px solid var(--c-ink); outline-offset: 1px; }
+
+/* Receipts equation */
+.et-flow { display: grid; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.et-flow__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .6rem; }
+.et-flow__item { position: relative; display: flex; flex-direction: column; gap: .15rem; padding: .8rem .9rem; border-radius: var(--r-md); background: var(--c-bg); box-shadow: 0 0 0 1px var(--c-line); }
+.et-flow__item span { color: var(--c-muted); font-size: .76rem; font-weight: 600; line-height: 1.3; }
+.et-flow__item strong { color: var(--c-ink); font-family: var(--font-display); font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+.et-flow__item small { color: var(--c-muted); font-size: .72rem; line-height: 1.35; }
+.et-flow__item.is-total { box-shadow: inset 0 0 0 2px var(--c-teal-600); }
+.et-flow__item.is-alert { box-shadow: inset 0 0 0 2px var(--tx-2); }
+.et-flow__op { position: absolute; top: .55rem; right: .7rem; color: var(--c-muted); font-size: 1.05rem; }
+.et-flow .note { margin: 0; }
+
+/* Monthly */
+#mois .panel__head .select-wrap { flex: 0 1 380px; }
+.data-table tr.et-total td { font-weight: 700; border-top: 2px solid var(--c-line); }
+.et-pdfs { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .4rem .9rem; margin: 0; padding: 0; list-style: none; }
+.et-pdfs li { display: flex; flex-direction: column; padding: .45rem .6rem; border-radius: var(--r-sm); background: var(--c-surface-2); }
+.et-pdfs a { color: var(--c-teal-600); font-size: .84rem; font-weight: 600; }
+.et-pdfs small { color: var(--c-muted); font-size: .72rem; }
+
+/* Performance and green budget */
+.et-status { display: inline-flex; align-items: center; gap: .35rem; font-size: .76rem; color: var(--c-body); white-space: nowrap; }
+.et-status::before { content: ""; width: .6rem; height: .6rem; border-radius: 2px; background: var(--c); flex: none; }
+.et-dot { display: inline-block; width: .55rem; height: .55rem; margin-right: .3rem; border-radius: 2px; vertical-align: 0; }
+#performance .tx-filters .select-wrap { flex: 0 1 280px; }
+#performance .data-table td, #vert .data-table td { vertical-align: top; }
+.grid-2 + .panel, .panel + .grid-2, .panel--wide + .panel--wide, .kpis + .panel { margin-top: var(--sp-3); }
+@media (max-width: 680px) {
+  .et-flow__row { grid-template-columns: 1fr 1fr; }
+  .et-flow__item strong { font-size: 1.1rem; }
+  .et-pdfs { grid-template-columns: 1fr 1fr; }
+}
+
+/* Tables */
+.data-table td.et-val, .data-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table td.et-val { min-width: 4.5rem; max-width: 11rem; }
+.et-perf-table td:first-child { min-width: 260px; overflow-wrap: anywhere; }
+.et-wide-table { min-width: 680px; }
+.et-wide-table td:first-child { min-width: 240px; }
+.et-mis-table { min-width: 560px; }
+@media (min-width: 900px) { .et-cols .tx-bars { grid-template-columns: 1fr 1fr; column-gap: 2.4rem; } }
+@media (max-width: 680px) {
+  .et-perf-table thead { display: none; }
+  .table-wrap > .et-perf-table, .et-perf-table tbody { display: block; min-width: 0; }
+  .et-perf-table td { overflow-wrap: anywhere; }
+  .et-perf-table .et-status { white-space: normal; }
+  .et-perf-table tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .2rem .6rem; padding: .7rem 0; box-shadow: inset 0 -1px 0 var(--c-line); }
+  .et-perf-table td { padding: 0; box-shadow: none; min-width: 0 !important; max-width: none; text-align: left !important; }
+  .et-perf-table td:first-child { grid-column: 1 / -1; margin-bottom: .2rem; }
+  .et-perf-table td[data-l]::before { content: attr(data-l); display: block; color: var(--c-muted); font-size: .68rem; font-weight: 600; }
+  .et-perf-table td[data-l="Résultat"] { grid-column: span 2; }
+}

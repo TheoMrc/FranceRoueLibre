@@ -1,0 +1,8 @@
+/* Aides page (aides.html): plan de relance section. */
+#associations, #entreprises, #fondsvert, #relance { scroll-margin-top: var(--header-h); }
+.rel-pick { flex: 0 1 420px; max-width: 100%; }
+.rel-pick select { width: 100%; text-overflow: ellipsis; }
+.rel-sub { margin: 0 0 .8rem; color: var(--c-ink); font-size: .92rem; }
+#relUnit { margin-bottom: .9rem; }
+.rel-gaps { margin-top: var(--sp-3); }
+.section--alt .rel-gaps .gap { background: var(--c-bg); }

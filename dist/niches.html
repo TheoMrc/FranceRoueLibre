@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Les niches fiscales, mesure par mesure : ce que coûte chaque réduction ou crédit d’impôt, l’impôt réduit, la mission de rattachement, et les mesures dont le coût n’est pas publié.">
+  <title>Niches fiscales · FranceRoueLibre</title>
+  <link rel="canonical" href="https://francerouelibre.fr/niches.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="FranceRoueLibre">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="Niches fiscales · FranceRoueLibre">
+  <meta property="og:description" content="Les niches fiscales, mesure par mesure : ce que coûte chaque réduction ou crédit d’impôt, l’impôt réduit, la mission de rattachement, et les mesures dont le coût n’est pas publié.">
+  <meta property="og:url" content="https://francerouelibre.fr/niches.html">
+  <meta property="og:image" content="https://francerouelibre.fr/og.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="FranceRoueLibre : où part l’argent public ? Dépenses, aides, marchés publics et dette, territoire par territoire.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Niches fiscales · FranceRoueLibre">
+  <meta name="twitter:description" content="Les niches fiscales, mesure par mesure : ce que coûte chaque réduction ou crédit d’impôt, l’impôt réduit, la mission de rattachement, et les mesures dont le coût n’est pas publié.">
+  <meta name="twitter:image" content="https://francerouelibre.fr/og.png">
+  <script>
+    (function () {
+      var theme = null;
+      try { theme = localStorage.getItem('frl-theme'); } catch (e) {}
+      if (theme !== 'light' && theme !== 'dark') theme = 'light'; // light by default, dark only when chosen with the toggle
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./niches.css">
+  <script defer src="./common.js"></script>
+  <script defer src="./niches.js"></script>
+  <script defer src="./nav.js"></script>
+  <script defer src="./collapse.js"></script>
+  <script defer src="./search-bar.js"></script>
+</head>
+<body class="subpage">
+  <header class="site-header" id="siteHeader">
+    <div class="container nav">
+      <a class="brand brand--lockup" href="index.html" aria-label="FranceRoueLibre, accueil">
+        <svg class="brand__mark" width="40" height="40" viewBox="0 0 48 48" fill="none" aria-hidden="true"><defs><linearGradient id="g7" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#0e7490"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><path d="M24 4l17 10v20L24 44 7 34V14z" stroke="url(#g7)" stroke-width="3" stroke-linejoin="round"/><path d="M14 17l7 7 5-4 9 11" stroke="#e11d48" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 31 H35 V25" stroke="#e11d48" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="brand__sep" aria-hidden="true"></span>
+        <span class="brand__name"><span>France</span><span class="gradient-text">RoueLibre</span></span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="index.html#explorer">Carte</a></li>
+        <li><a href="index.html#circuit">Circuit</a></li>
+        <li><a href="index.html#comptes">Comptes</a></li>
+        <li class="nav__group is-current"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu3">Recettes<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu3"><li><a href="impots.html"><strong>Impôts et taxes</strong><small>Ce que rapporte et coûte chaque prélèvement</small></a></li><li><a href="niches.html" aria-current="page"><strong>Niches fiscales</strong><small>Réductions et crédits d’impôt, mesure par mesure</small></a></li></ul></li>
+        <li class="nav__group"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu4">Dépenses<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu4"><li><a href="etat.html"><strong>Budget de l’État</strong><small>Missions, programmes, exécution mois par mois</small></a></li><li><a href="operateurs.html"><strong>Opérateurs de l’État</strong><small>Agences et établissements publics</small></a></li><li><a href="secu.html"><strong>Sécurité sociale</strong><small>Comptes des branches, dépenses d’assurance maladie</small></a></li><li><a href="aides.html"><strong>Aides et subventions</strong><small>Associations, entreprises, plan de relance</small></a></li><li><a href="marches.html"><strong>Marchés publics</strong><small>1,4 million de contrats depuis 2014</small></a></li><li><a href="ugap.html"><strong>UGAP</strong><small>Les prix de la centrale d’achat public</small></a></li></ul></li>
+        <li class="nav__group"><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navMenu5">Contrôle<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ul class="nav__menu" id="navMenu5"><li><a href="signaux.html"><strong>Signaux</strong><small>Règles simples appliquées à toutes les données</small></a></li><li><a href="probite.html"><strong>Probité</strong><small>Corruption, favoritisme : les affaires jugées</small></a></li><li><a href="donnees.html"><strong>Données et angles morts</strong><small>Les sources, et ce qui n’est pas publié</small></a></li></ul></li>
+      </ul>
+      <div class="nav__actions">
+      <a class="nav-github" href="https://github.com/TheoMrc/FranceRoueLibre" target="_blank" rel="noopener noreferrer" aria-label="Code source sur GitHub" title="Code source sur GitHub"><svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg></a>
+      <button class="theme-toggle-btn tbtn-morph" id="themeToggle" type="button" aria-label="Changer de thème" title="Changer de thème">
+        <span class="tbtn-halo" aria-hidden="true"></span>
+        <svg class="tbtn-svg-morph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <mask id="theme-morph-mask"><rect width="32" height="32" fill="white"/><circle class="mask-moon-bite" cx="23" cy="11" r="6.5" fill="black"/></mask>
+          <circle class="morph-core" cx="16" cy="16" r="6" fill="currentColor" mask="url(#theme-morph-mask)"/>
+          <g class="morph-rays" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="16" y1="3" x2="16" y2="6"/><line x1="16" y1="26" x2="16" y2="29"/><line x1="3" y1="16" x2="6" y2="16"/><line x1="26" y1="16" x2="29" y2="16"/>
+            <line x1="6.81" y1="6.81" x2="8.93" y2="8.93"/><line x1="23.07" y1="23.07" x2="25.19" y2="25.19"/><line x1="6.81" y1="25.19" x2="8.93" y2="23.07"/><line x1="23.07" y1="8.93" x2="25.19" y2="6.81"/>
+          </g>
+        </svg>
+      </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero hero--page">
+      <div class="hero__bg" aria-hidden="true"></div>
+      <div class="container"><div class="hero__inner">
+        <span class="eyebrow">Dépenses fiscales · projet de loi de finances pour 2026</span>
+        <h1>Les niches fiscales mesure par mesure, <span class="gradient-text">et celles dont personne ne publie le coût.</span></h1>
+        <p class="hero__lead" id="nfLead">Réductions et crédits d’impôt, exonérations, taux réduits : ce que coûte chaque mesure, l’impôt qu’elle réduit, la politique publique à laquelle elle est rattachée.</p>
+        <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#plus-couteuses">Les plus coûteuses</a><a href="#annees">2024 à 2026</a><a href="#angle-mort">Non chiffrées</a><a href="#tableau">Tableau complet</a><a href="#non-publie">Ce qui n’est pas publié</a><a href="#methode">Méthode</a></nav>
+      </div></div>
+    </section>
+
+    <section class="section" id="ensemble" aria-labelledby="nfAllTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Vue d’ensemble</span><h2 id="nfAllTitle">Un manque à gagner chiffré mesure par mesure</h2><p class="lead">Une dépense fiscale est une disposition qui fait payer moins d’impôt que la règle générale à certains contribuables ou pour certaines dépenses. L’État la compte comme un coût : l’impôt qu’il ne perçoit pas.</p></div>
+        <div class="kpis" id="nfKpis"></div>
+        <div class="callout nf-warn"><strong>Un total à lire comme un ordre de grandeur.</strong> Chaque mesure est chiffrée seule, en supposant que tout le reste de la législation ne change pas. Les mesures interagissent : supprimer deux niches à la fois ne rapporte pas forcément la somme de leurs deux coûts (plafonnement global des niches de l’impôt sur le revenu, effets de barème, report des contribuables vers une autre mesure). Les documents budgétaires additionnent pourtant les chiffrages, avec cette même réserve ; nous faisons de même, en le rappelant à chaque total.</div>
+        <div class="grid-2">
+          <div class="panel"><h3>Par impôt réduit, coût prévu en 2026</h3><div id="nfByTax"></div><p class="note" id="nfByTaxNote"></p></div>
+          <div class="panel"><h3>Par mission budgétaire de rattachement, coût prévu en 2026</h3><div id="nfByMission"></div><p class="note" id="nfByMissionNote"></p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="plus-couteuses" aria-labelledby="nfTopTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Les plus coûteuses</span><h2 id="nfTopTitle">Les vingt niches les plus coûteuses en 2026</h2><p class="lead">Crédit d’impôt recherche, emploi à domicile, abattement sur les pensions : quelques mesures font l’essentiel du coût chiffré.</p></div>
+        <div class="panel"><div id="nfTop"></div><p class="note" id="nfTopNote"></p></div>
+      </div>
+    </section>
+
+    <section class="section" id="annees" aria-labelledby="nfYearsTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">2024, 2025, 2026</span><h2 id="nfYearsTitle">Trois années dans le même fichier</h2><p class="lead">Le projet de loi de finances pour 2026 donne, pour chaque mesure, le coût estimé de 2024 et les prévisions pour 2025 et 2026.</p></div>
+        <div class="panel"><h3>Coût total, en milliards d’euros</h3><div id="nfYears" class="nf-years"></div><div class="tx-legend" id="nfYearsLegend"></div><p class="note" id="nfYearsNote"></p></div>
+        <div class="grid-2 nf-changes">
+          <div class="panel"><h3>Plus fortes hausses, de 2024 à 2026</h3><div id="nfUp"></div></div>
+          <div class="panel"><h3>Plus fortes baisses, de 2024 à 2026</h3><div id="nfDown"></div></div>
+        </div>
+        <div class="panel panel--wide"><h3>De la liste du PLF 2024 au fichier du PLF 2026</h3><div class="kpis" id="nfListKpis"></div><details class="nf-details" id="nfGone"></details><details class="nf-details" id="nfNew"></details><p class="note" id="nfListNote"></p></div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="angle-mort" aria-labelledby="nfBlindTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Angle mort</span><h2 id="nfBlindTitle">Les niches dont le coût n’est pas publié</h2><p class="lead">Pour près d’une mesure sur trois, le projet de loi de finances ne donne aucun montant 2026 : « nc » (non chiffrée), « ε » (moins de 0,5 M€, sans montant précis), ou rien du tout. Ces mesures ne sont pas gratuites : leur coût est inconnu, et absent de tous les totaux.</p></div>
+        <div class="kpis" id="nfBlindKpis"></div>
+        <div class="grid-2 nf-blind">
+          <div class="panel"><h3>Mesures sans montant 2026, par impôt</h3><div id="nfBlindTax"></div><p class="note">Les droits d’enregistrement et de timbre (successions, donations, ventes) concentrent les mesures « non chiffrées ».</p></div>
+          <div class="panel"><h3>Ce que veulent dire « nc » et « ε »</h3><dl class="nf-dl"><dt>nc</dt><dd>Montant non calculé. La mesure existe, l’administration la recense, mais ne publie pas son coût (données manquantes, méthode absente, ou mesure jugée non chiffrable).</dd><dt>ε</dt><dd>Epsilon : coût estimé inférieur à 0,5 M€ par an. Aucun montant précis n’est donné ; addition de plusieurs ε inconnue.</dd><dt>Sans montant</dt><dd>Ni chiffre ni mention pour 2026. Souvent des mesures en fin de vie ou supprimées par le projet de loi de finances, mais le fichier ne le dit pas.</dd></dl></div>
+        </div>
+        <div class="panel panel--wide">
+          <div class="panel__head"><h3>La liste, mesure par mesure <span class="muted nf-count" id="nfBlindCount"></span></h3><div class="chip-select" id="nfBlindMode" role="group" aria-label="Type de mesure sans montant"><button type="button" data-mode="all" class="active">Toutes</button><button type="button" data-mode="nc">nc</button><button type="button" data-mode="ε">ε</button><button type="button" data-mode="vide">Sans montant</button></div></div>
+          <div id="nfBlindTable" class="table-wrap nf-scroll"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="tableau" aria-labelledby="nfTableTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Toutes les mesures</span><h2 id="nfTableTitle">Tableau complet</h2><p class="lead">Chaque dépense fiscale avec son code, sa finalité, l’impôt réduit, sa mission, son coût en 2024, 2025 et 2026 et sa cotation environnementale. Cliquez sur un en-tête pour trier.</p></div>
+        <div class="tx-filters"><label class="search-field"><span class="sr-only">Rechercher une mesure</span><input id="nfSearch" type="search" placeholder="Crédit d’impôt recherche, dons, Pinel, outre-mer, 110246…" autocomplete="off"></label><label class="select-wrap"><span class="sr-only">Impôt</span><select id="nfFilterTax"><option value="">Tous impôts</option></select></label><label class="select-wrap"><span class="sr-only">Mission</span><select id="nfFilterMission"><option value="">Toutes missions</option></select></label><label class="select-wrap"><span class="sr-only">Chiffrage</span><select id="nfFilterStatus"><option value="">Chiffrées ou non</option></select></label></div>
+        <div id="nfTable" class="table-wrap"></div>
+        <p class="note" id="nfTableNote"></p>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="non-publie" aria-labelledby="nfMissTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Données manquantes</span><h2 id="nfMissTitle">Ce qui n’est pas publié</h2><p class="lead">Savoir si une niche fiscale atteint son but demande au moins trois choses : son coût, qui en profite, et une évaluation. Les données ouvertes donnent le premier, pas toujours, et presque jamais les deux autres.</p></div>
+        <div class="gap-grid">
+          <article class="gap"><span class="gap__state none">Rien de publié</span><h3>Qui en profite</h3><p>Aucun des deux fichiers ne donne le nombre de bénéficiaires, ni leur répartition par niveau de revenu, taille d’entreprise, secteur ou territoire. Pour une réduction d’impôt de plusieurs milliards, on ne sait pas, en données ouvertes, combien de foyers ou d’entreprises la touchent.</p><p class="note">À publier par la direction de la législation fiscale (ministère de l’Économie), mesure par mesure, dans le même fichier que les coûts.</p></article>
+          <article class="gap"><span class="gap__state none">Rien de publié</span><h3>Les évaluations</h3><p>Aucune liste ouverte des évaluations menées, de leur date, de leur auteur et de leur conclusion. Les lois de programmation des finances publiques prévoient pourtant l’évaluation des dépenses fiscales ; on ne peut pas savoir, mesure par mesure, laquelle a été évaluée et avec quel résultat.</p><p class="note">À publier par la direction de la législation fiscale et la direction du budget.</p></article>
+          <article class="gap"><span class="gap__state partial">Publié en partie</span><h3>Les montants du document de référence</h3><p>Le fichier ouvert du tome II des voies et moyens du PLF 2024, la liste officielle des dépenses fiscales, a cinq colonnes de chiffrage : elles sont vides (<strong id="nfEmptyCols">0</strong> cellule remplie sur 468 lignes). Les coûts ne sont lisibles que dans le PDF, ou, depuis, dans le fichier du « budget vert », qui n’est pas fait pour cela.</p><p class="note">À corriger par la direction du budget sur data.economie.gouv.fr.</p></article>
+          <article class="gap"><span class="gap__state partial">Publié en partie</span><h3>Méthode et fiabilité de chaque chiffrage</h3><p>Le fichier donne un montant, jamais comment il a été obtenu (simulation sur les déclarations, reconstitution, extrapolation) ni sa fiabilité. Un chiffre de 1 Md€ estimé à grands traits et un chiffre issu des déclarations fiscales apparaissent de la même façon.</p><p class="note">À ajouter en colonnes, comme les documents budgétaires le font sur papier.</p></article>
+          <article class="gap"><span class="gap__state none">Rien de publié</span><h3>Pourquoi « nc »</h3><p>Pour les mesures non chiffrées, aucune raison n’est donnée, ni date prévue de chiffrage. <span id="nfNcNever"></span></p><p class="note">À publier avec chaque mention « nc ».</p></article>
+          <article class="gap"><span class="gap__state none">Rien de publié</span><h3>Dates de création et de fin</h3><p>La liste 2024 signalait les mesures éteintes par une ligne grisée : la couleur disparaît dans le fichier CSV. Ni date de création, ni date de fin prévue, ni historique des codes : on ne peut pas suivre une mesure d’un budget à l’autre autrement que par son code.</p><p class="note">À publier en colonnes (création, fin du fait générateur, code précédent).</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="methode" aria-labelledby="nfMethodTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Méthode</span><h2 id="nfMethodTitle">Lire ces chiffres sans se tromper</h2></div>
+        <div class="gap-grid nf-method">
+          <article class="gap"><h3>Deux fichiers, un code</h3><p>Les coûts viennent du fichier du « budget vert » du PLF 2026 (lignes « Dépenses fiscales »), le seul fichier ouvert lu ici qui chiffre chaque mesure. La section et la finalité viennent de la liste du PLF 2024 (tome II des voies et moyens). Les deux sont reliés par le code de la mesure.</p></article>
+          <article class="gap"><h3>Mesures partagées</h3><p>Quand le budget vert donne deux cotations environnementales à une même mesure (80 % neutre, 20 % défavorable, par exemple), il la coupe en deux lignes avec un coût déjà réparti. Les lignes sont réadditionnées par code : une mesure, un coût.</p></article>
+          <article class="gap"><h3>Des totaux indicatifs</h3><p>Les coûts sont des chiffrages isolés, qui ne s’additionnent pas rigoureusement. Le total est la somme des mesures chiffrées l’année dite : il ignore les mesures « nc » et « ε », et change quand une mesure entre ou sort du chiffrage. Le total officiel publié dans le tome II du PLF 2026 n’est pas dans ces fichiers ; il n’est donc pas reproduit ici.</p></article>
+          <article class="gap"><h3>Années</h3><p>2024 : coût estimé de l’année écoulée ; 2025 : prévision révisée ; 2026 : prévision du projet de loi, avant vote. Toutes ont été publiées à l’automne 2025 et peuvent être révisées l’année suivante.</p></article>
+          <article class="gap"><h3>Ce qui n’est pas une niche ici</h3><p>Seules les mesures classées « dépenses fiscales » par l’administration sont comptées. Les règles jugées « normales » (quotient familial, taux réduits de TVA sur l’alimentation, par exemple) n’y sont pas, tout comme les allègements de cotisations sociales.</p></article>
+        </div>
+        <p class="source-links" id="nfSources"></p>
+      </div>
+    </section>
+    <section class="section related" aria-labelledby="relatedTitle"><div class="container"><h2 class="related__title" id="relatedTitle">Pour aller plus loin</h2><div class="related__grid"><a class="related__card" href="impots.html"><strong>Impôts et taxes</strong><span>Ce que rapporte chaque impôt avant ces réductions</span></a><a class="related__card" href="aides.html"><strong>Aides et subventions</strong><span>Les aides directes aux entreprises et associations</span></a><a class="related__card" href="etat.html"><strong>Budget de l’État</strong><span>Les missions du budget auxquelles chaque niche se rattache</span></a></div></div></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div><div class="footer__brand">FranceRoueLibre</div><p>Cartographie des dépenses publiques · données ouvertes</p><p class="footer__legal">Site indépendant, sans lien avec l’État ni avec une administration. Contact : <a href="mailto:stonks@francerouelibre.fr">stonks@francerouelibre.fr</a> · <a href="mentions.html">Mentions légales et confidentialité</a></p></div>
+      <div class="footer__links"><a href="index.html#explorer">Carte</a><a href="index.html#circuit">Circuit</a><a href="index.html#comptes">Comptes</a><a href="impots.html">Impôts et taxes</a><a href="niches.html">Niches fiscales</a><a href="etat.html">Budget de l’État</a><a href="operateurs.html">Opérateurs de l’État</a><a href="secu.html">Sécurité sociale</a><a href="aides.html">Aides et subventions</a><a href="marches.html">Marchés publics</a><a href="ugap.html">UGAP</a><a href="signaux.html">Signaux</a><a href="probite.html">Probité</a><a href="donnees.html">Données et angles morts</a><a class="footer__github" href="https://github.com/TheoMrc/FranceRoueLibre" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg>Code source</a></div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,4 +1,4 @@
-/* Aides et subventions: State grants to associations (annexes jaunes), de minimis aid, Fonds vert. */
+/* Aides et subventions: State grants to associations (annexes jaunes), de minimis aid, Fonds vert, plan de relance. */
 (() => {
   const { money, count, pct, esc, load, sirenLink, bars, ranking, lazy } = FRL;
   const $ = id => document.getElementById(id);
@@ -87,7 +87,95 @@
     }
   }
 
+  /* ---- Plan de relance (data/aides/relance.json, scripts/relance-data.py) ---- */
+  async function initRelance() {
+    let data;
+    try { data = await load('./data/aides/relance.json'); }
+    catch (error) { $('relKpis').innerHTML = '<p class="note">Données du plan de relance pas encore intégrées.</p>'; return; }
+    const MONTHS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    const month = ym => { const [y, m] = String(ym).split('-'); return `${MONTHS[Number(m) - 1]} ${y}`; };
+    const NATURE = { aide: 'aide versée', 'aide-validee': 'aide validée, pas forcément versée', fiscal: 'baisse d’impôt estimée', projet: 'coût des projets ou investissement déclaré' };
+    const byId = Object.fromEntries(data.indicators.map(i => [i.id, i]));
+    const deptName = code => data.deptNames[code] || (code === '' ? 'Non renseigné' : code);
+    const perHab = (v, p) => p ? v / p : null;
+    const euro = v => v == null ? '–' : `${count(Math.round(v))} €`;
+    const kpi = (label, value, sub, alert) => `<div class="kpi${alert ? ' is-alert' : ''}"><span>${label}</span><strong>${value}</strong><small>${sub}</small></div>`;
+
+    const bip = byId.BIP2, mpr = byId.MPR1;
+    $('relKpis').innerHTML = [
+      kpi('Mesures suivies', count(data.measures), `${count(data.indicatorsCount)} indicateurs, ${month(data.dates[0])} – ${month(data.dates[1])}`),
+      bip ? kpi('Baisse des impôts de production', money(bip.total), `montant estimé, ${month(bip.lastDate)}`) : '',
+      mpr ? kpi('MaPrimeRénov’ : primes payées', money(mpr.total), `cumul à fin ${month(mpr.lastDate)}`) : '',
+      kpi('Entreprises lauréates', count(data.laureates.count), 'appels à projets industriels, sans montant publié', true)
+    ].join('');
+
+    const row = i => ({ label: `${i.measure}`, value: i.total, sub: `${i.label} · ${NATURE[i.nature]} · ${month(i.lastDate)}` });
+    const aid = data.indicators.filter(i => i.nature !== 'projet').map(row)
+      .concat(data.nationalEuros.filter(n => /attribués/.test(n.label)).map(n => ({ label: n.measure, value: n.value, sub: `${n.label} · national · ${month(n.date)}` })))
+      .sort((a, b) => b.value - a.value);
+    ranking($('relAid'), aid, { limit: 10 });
+    $('relAidNote').textContent = 'Dernière valeur cumulée publiée par le tableau de bord, somme des départements (y compris « Étranger » et collectivités d’outre-mer quand ils figurent). La baisse des impôts de production est un manque à gagner estimé, pas une dépense. Le tableau de bord ne publie pas de total national pour ces indicateurs : aucun total officiel à confronter.';
+    const projects = data.indicators.filter(i => i.nature === 'projet').map(row)
+      .concat(data.nationalEuros.filter(n => !/attribués/.test(n.label)).map(n => ({ label: n.measure, value: n.value, sub: `${n.label} · national · ${month(n.date)}` })))
+      .sort((a, b) => b.value - a.value);
+    ranking($('relProjects'), projects, { limit: 12 });
+    $('relProjectsNote').textContent = `Montants des projets aidés ou de l’investissement que les bénéficiaires déclarent avoir engagé grâce à l’aide : ce n’est pas l’argent public versé, qui n’est pas publié pour ces mesures. Les fonds labellisés « Relance » sont des fonds d’investissement privés. Indicateurs nationaux nommés « montant » sans unité indiquée, non repris ici : ${data.nationalUnknownUnit.map(n => `${n.id} (${count(n.value)})`).join(', ')}.`;
+
+    /* One indicator: series and departments */
+    const pick = $('relPick');
+    pick.innerHTML = data.indicators.map(i => `<option value="${i.id}">${esc(i.measure)} : ${esc(i.label.toLowerCase())}</option>`).join('');
+    pick.value = byId.MPR1 ? 'MPR1' : data.indicators[0].id;
+    let unit = 'total';
+    const drawPick = () => {
+      const ind = byId[pick.value];
+      const withPop = ind.depts.filter(([, , p]) => p);
+      $('relPickTitle').textContent = ind.measure;
+      $('relPickKpis').innerHTML = [
+        kpi(ind.label, money(ind.total), `${NATURE[ind.nature]} · cumul à fin ${month(ind.lastDate)}`),
+        kpi('Volet du plan', esc(ind.volet || '–'), esc(ind.ministry || '')),
+        kpi('Départements avec un montant', count(ind.depts.filter(d => d[1] > 0).length), `sur ${count(ind.depts.length)} territoires publiés`)
+      ].join('');
+      bars($('relSeries'), ind.series.map(([ym, v]) => ({ label: month(ym), short: ym.endsWith('-01') ? ym.slice(0, 4) : '', value: v })), { height: 200 });
+      const peak = ind.series.reduce((m, s) => s[1] > m[1] ? s : m, ind.series[0]);
+      $('relSeriesNote').textContent = `De ${month(ind.series[0][0])} à ${month(ind.series.at(-1)[0])}.` + (ind.drops.length ? ` La série, censée être cumulée, chute en ${ind.drops.map(([ym, a, b]) => `${month(ym)} (${money(a)} → ${money(b)})`).join(', ')} ; le fichier ne l’explique pas. Le plus haut publié est ${money(peak[1])} (${month(peak[0])}) ; la valeur retenue ailleurs est la dernière publiée.` : '');
+      const rows = (unit === 'hab' ? withPop.map(([c, v, p]) => ({ c, value: perHab(v, p), sub: `${money(v)} · ${count(p)} habitants` })) : ind.depts.map(([c, v, p]) => ({ c, value: v, sub: p ? `${euro(perHab(v, p))} par habitant` : 'population non disponible' })))
+        .sort((a, b) => b.value - a.value).map(r => ({ label: `${deptName(r.c)}${/^\d|^2[AB]$/.test(r.c) ? ` (${r.c})` : ''}`, value: r.value, sub: r.sub }));
+      $('relDeptTitle').textContent = `Départements, cumul à fin ${month(ind.lastDate)}`;
+      ranking($('relDepts'), rows, { limit: 15, format: unit === 'hab' ? euro : money });
+      $('relDeptsNote').textContent = `${unit === 'hab' ? `Par habitant : population municipale ${data.popYear} (Insee, via l’OFGL), pour les ${count(withPop.length)} départements où elle est disponible. ` : ''}Quinze premiers territoires sur ${count(ind.depts.length)}. Un montant rattaché à un département suit le lieu du bénéficiaire déclaré dans le tableau de bord.`;
+    };
+    pick.addEventListener('change', drawPick);
+    $('relUnit').addEventListener('click', event => {
+      const b = event.target.closest('[data-unit]'); if (!b) return;
+      unit = b.dataset.unit;
+      $('relUnit').querySelectorAll('button').forEach(n => n.classList.toggle('active', n === b));
+      drawPick();
+    });
+    drawPick();
+
+    /* Laureates (no amount published) */
+    const L = data.laureates;
+    ranking($('relLauMeasures'), L.byMeasure.map(([label, n]) => ({ label, value: n })), { limit: 10, format: count });
+    $('relLauNote').textContent = `${count(L.count)} projets lauréats publiés entre ${new Date(L.updates[0]).toLocaleDateString('fr-FR')} et ${new Date(L.updates[1]).toLocaleDateString('fr-FR')}, dont ${L.byType.map(([t, n]) => `${count(n)} ${t}`).slice(0, 3).join(', ')}. Le fichier ne donne aucun montant d’aide.`;
+    ranking($('relLauDepts'), L.byDept.map(([c, name, n, p]) => ({ label: `${name || deptName(c)}${c ? ` (${c})` : ''}`, value: n, sub: p ? `${(100000 * n / p).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} pour 100 000 habitants` : '' })), { limit: 10, format: count });
+    const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const drawTable = () => {
+      const q = norm($('relSearch').value.trim());
+      const hits = (q ? L.rows.filter(r => norm(`${r[0]} ${r[1]} ${r[6]} ${L.filieres[r[4]]} ${deptName(r[2])}`).includes(q)) : L.rows.filter(r => r[0])).slice(0, q ? 100 : 25);
+      $('relTable').innerHTML = `<table class="data-table"><thead><tr><th>Entreprise${q ? '' : ' (25 premières par ordre alphabétique, cherchez pour voir les autres)'}</th><th>Commune</th><th>Mesure</th><th>Filière</th><th>Type</th></tr></thead><tbody>${hits.map(r => `<tr><td>${sirenLink(/^\d{9}$/.test(r[1]) ? r[1] : '', r[0])}</td><td class="muted">${esc(r[6])}${r[2] ? ` (${esc(r[2])})` : ''}</td><td class="muted">${esc(L.measures[r[3]])}</td><td class="muted">${esc(L.filieres[r[4]])}</td><td class="muted">${esc(L.types[r[5]])}</td></tr>`).join('') || '<tr><td colspan="5">Aucun résultat</td></tr>'}</tbody></table>`;
+    };
+    let timer = 0;
+    $('relSearch').addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(drawTable, 200); });
+    drawTable();
+
+    const ends = data.indicators.map(i => i.lastDate).sort();
+    $('relStopText').textContent = `Selon les mesures, les séries s’arrêtent entre ${month(ends[0])} et ${month(ends.at(-1))}, et la liste des lauréats en ${month(L.updates[1].slice(0, 7))}. Aucun bilan final n’est publié dans ces jeux de données.`;
+    const S = data.sources, linkTo = (url, text) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(text)}</a>`;
+    $('relSources').innerHTML = [linkTo(S.dashboard.page, `Tableau de bord France Relance, données agrégées (data.economie.gouv.fr, ${count(S.dashboard.rows)} lignes)`), linkTo(S.laureates.page, 'Lauréats du plan de relance (data.economie.gouv.fr)'), linkTo(S.population.url, S.population.label)].join('');
+  }
+
   lazy($('associations'), initAsso);
   lazy($('entreprises'), initEntreprises);
   lazy($('fondsvert'), initFondsVert);
+  lazy($('relance'), initRelance);
 })();

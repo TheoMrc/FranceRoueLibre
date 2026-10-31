@@ -1,0 +1,70 @@
+/* Opérateurs de l'État (operateurs.html): only what style.css does not already provide (tx-* charts, kpis, panels, tables). */
+#ensemble, #tutelles, #statuts, #financement, #taxes, #tableau, #methode, #non-publie { scroll-margin-top: var(--header-h); }
+.op-page .section:not(.section--alt) .gap { background: var(--c-surface); }
+
+/* Treemap: mission blocks drawn over the cells */
+.op-groups { pointer-events: none; }
+.op-group { fill: none; stroke: var(--c-bg); stroke-width: 3; }
+.op-group__label { fill: var(--c-ink); font-size: 12px; font-weight: 700; paint-order: stroke; stroke: var(--c-surface); stroke-width: 4px; stroke-linejoin: round; }
+.op-group__n { font-weight: 600; font-size: 11px; fill: var(--c-body); font-variant-numeric: tabular-nums; }
+.op-treemap .tx-cell rect { stroke-width: 1; }
+.op-treemap .tx-cell.is-selected rect { stroke: var(--c-ink); stroke-width: 2.5; }
+.op-detail h3 { margin-top: .6rem; }
+.op-detail .tx-pill + .tx-pill { margin-top: .3rem; white-space: normal; }
+
+/* Fiche lists */
+.op-taxlist { display: grid; gap: .35rem; margin: .5rem 0 0; padding: 0; list-style: none; }
+.op-taxlist li { display: grid; grid-template-columns: 1fr auto; gap: 0 .6rem; padding-top: .35rem; border-top: 1px solid var(--c-line); font-size: .8rem; }
+.op-taxlist li span { color: var(--c-body); }
+.op-taxlist li strong { color: var(--c-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.op-taxlist li small { grid-column: 1 / -1; color: var(--c-muted); font-size: .74rem; }
+.op-oplist { display: grid; gap: .25rem; margin: .4rem 0 0; padding: 0; list-style: none; font-size: .84rem; max-height: 340px; overflow-y: auto; }
+.op-oplist .tx-rowlink { font-weight: 500; }
+
+/* Earmarked taxes: kept and returned parts on one track */
+.op-stack-legend i.is-kept { background: var(--tx-1); }
+.op-stack-legend i.is-returned { background: var(--tx-2); }
+.op-stack .tx-bars__line strong .muted { color: var(--c-muted); font-weight: 500; font-size: .78rem; }
+.op-stack__track { display: flex !important; }
+.op-stack__kept, .op-stack__returned { display: block; height: 100%; min-width: 0; }
+.op-stack__kept { background: var(--tx-1); min-width: 2px; }
+.op-stack__returned { background: var(--tx-2); }
+.op-stack .tx-rowlink { text-align: left; }
+.tx-bars .tx-rowlink { font-weight: 500; }
+
+/* Table */
+.op-table .tx-namecell { min-width: 260px; }
+.op-table td { vertical-align: top; }
+.op-prog { display: inline-block; min-width: 2.2rem; color: var(--c-ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+.op-page .tx-filters .select-wrap { flex: 0 1 220px; }
+.op-page .tx-filters .search-field { flex: 1 1 260px; }
+
+/* Fiche dialog (from the table and the charts) */
+.op-dialog { position: fixed; inset: 0; margin: auto; height: fit-content; overflow-y: auto; width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: var(--sp-3); border: 0; border-radius: var(--r-md); background: var(--c-bg); color: var(--c-body); box-shadow: var(--sh-md), 0 0 0 1px var(--c-line); }
+.op-dialog::backdrop { background: rgba(13, 27, 42, .45); }
+.op-dialog h3 { margin: .6rem 2rem .2rem 0; font-size: 1.15rem; }
+.op-dialog dl { display: grid; grid-template-columns: auto 1fr; gap: .35rem .9rem; margin: .9rem 0; font-size: .84rem; }
+.op-dialog dt { color: var(--c-muted); }
+.op-dialog dd { margin: 0; color: var(--c-ink); }
+.op-dialog a { color: var(--c-teal-600); font-weight: 600; }
+.op-dialog .tx-amount { margin: .6rem 0 .2rem; color: var(--c-ink); font-family: var(--font-display); font-size: 1.9rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.op-dialog__close { position: sticky; top: 0; float: right; margin: 0; }
+.op-dialog__close button { width: 2rem; height: 2rem; border: 0; border-radius: 50%; background: var(--c-surface-2); color: var(--c-ink); font-size: 1.2rem; line-height: 1; cursor: pointer; }
+.op-dialog .tx-pill { white-space: normal; }
+
+@media (max-width: 680px) {
+  .op-dialog dl, .op-detail dl { grid-template-columns: 1fr; gap: .1rem; }
+  .op-dialog dd, .op-detail dd { margin-bottom: .45rem; }
+  .op-page .tx-filters .select-wrap { flex: 1 1 100%; }
+  .op-page .section__head-row .chip-select { width: 100%; }
+  .op-page .section__head-row .chip-select button { flex: 1 1 auto; }
+}
+
+/* Side fiche: one column, it is narrow */
+.op-detail dl { grid-template-columns: 1fr; gap: .1rem; }
+.op-detail dd { margin-bottom: .45rem; }
+.op-table { font-size: .84rem; }
+.op-table .op-progcell { min-width: 240px; }
+.op-table td:nth-child(3), .op-table td:nth-child(5) { min-width: 150px; }
+@media (max-width: 680px) { .op-page .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .op-page .kpi strong { font-size: 1.25rem; } }
+@media (max-width: 680px) { .op-table .tx-namecell { min-width: 200px; } }

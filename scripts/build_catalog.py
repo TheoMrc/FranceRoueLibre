@@ -49,7 +49,7 @@ GAPS = [
     {'title': 'Universités', 'state': 'partial', 'text': 'Pas de jeu consolidé des comptes financiers par université trouvé dans les catalogues ; les rapports annuels restent en PDF.'},
     {'title': 'Subventions des collectivités', 'state': 'partial', 'text': 'Les montants totaux sont connus (OFGL : « subventions aux personnes de droit privé »), mais les bénéficiaires ne sont publiés que par une minorité de collectivités, sans consolidation nationale.'},
     {'title': 'Aides fiscales aux entreprises (CIR, crédits d’impôt…)', 'state': 'none', 'text': 'Les dépenses fiscales sont chiffrées par mesure dans le PLF, mais aucun bénéficiaire n’est publié (secret fiscal), y compris pour les montants les plus élevés.'},
-    {'title': 'Prix unitaires et quantités achetées', 'state': 'none', 'text': 'Les marchés publics ne publient que le montant total du contrat, jamais les quantités ni les prix à l’unité. Les bordereaux de prix restent dans les dossiers de chaque marché, le catalogue de l’UGAP n’est pas public, et les factures (transmises par Chorus Pro) ne sont pas ouvertes : impossible de comparer le prix d’une lampe ou d’une ampoule au prix du commerce sans demande d’accès aux documents (CADA).'},
+    {'title': 'Prix unitaires et quantités achetées', 'state': 'none', 'text': 'Les marchés publics ne publient que le montant total du contrat, jamais les quantités ni les prix à l’unité. Les bordereaux de prix restent dans les dossiers de chaque marché, le catalogue de l’UGAP n’affiche le prix sans compte que pour une partie des produits (39 % des fiches lues), et les factures (transmises par Chorus Pro) ne sont pas ouvertes : impossible de comparer le prix d’une lampe ou d’une ampoule au prix du commerce sans demande d’accès aux documents (CADA).'},
     {'title': 'Petits marchés publics', 'state': 'none', 'text': 'Les marchés de moins de 40 000 € HT n’ont pas à être publiés dans les DECP : ils échappent à tout suivi ouvert.'},
     {'title': 'Opérateurs de l’État', 'state': 'partial', 'text': 'La liste des ≈ 430 opérateurs est ouverte, leurs budgets détaillés et effectifs restent dans des annexes PDF.'},
     {'title': 'Rémunérations des dirigeants publics', 'state': 'partial', 'text': 'Seules les « dix plus hautes rémunérations » de certains ministères et collectivités sont publiées, de manière dispersée et non standardisée.'},
@@ -79,9 +79,9 @@ TITLES = {
     'france-relance': 'France Relance : données agrégées', 'plan-de-relance': 'Plan de relance : mesures territorialisées',
     'datagouv-fonds-vert': 'Fonds vert : projets subventionnés', 'datagouv-ars-pdl-fir': 'ARS Pays de la Loire : subventions du FIR 2025',
     'decp-v3': 'Marchés publics (DECP, format v3)', 'decp-2022': 'Marchés publics (DECP, format 2022)', 'decp-concessions': 'Contrats de concession (DECP)',
-    'atteintes-probite': 'Atteintes à la probité enregistrées', 'insee-population': 'Population de la France (Insee)',
-    'datagouv-cnam-ville': 'Assurance maladie : dépenses de soins de ville', 'datagouv-cnam-cliniques': 'Assurance maladie : dépenses des cliniques privées',
-    'datagouv-cnam-regions': 'Assurance maladie : dépenses par région', 'datagouv-secu-comptes': 'Comptes de la Sécurité sociale',
+    'atteintes-probite': 'Atteintes à la probité dans les décisions de justice (2021–2025)', 'insee-population': 'Population de la France (Insee)',
+    'datagouv-cnam-ville': 'Assurance maladie : dépenses de soins de ville (fichiers non téléchargés : page à jeton)', 'datagouv-cnam-cliniques': 'Assurance maladie : dépenses des cliniques privées (fichiers non téléchargés : page à jeton)',
+    'datagouv-cnam-regions': 'Assurance maladie : dépenses par région (janv.–juil. 2012)', 'datagouv-secu-comptes': 'Comptes de la Sécurité sociale (2009–2010)',
 }
 
 

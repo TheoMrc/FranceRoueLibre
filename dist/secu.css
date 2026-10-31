@@ -1,0 +1,80 @@
+/* Sécurité sociale page (secu.html): styles specific to this page, on top of style.css. */
+.sc-chart svg, .sc-map svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sc-controls { align-items: center; }
+.sc-col { transition: opacity .15s ease; }
+.sc-col.is-dim { opacity: .45; }
+
+/* Paired horizontal bars (charges / produits) */
+.sc-pairs { display: grid; gap: .9rem; }
+.sc-pair { display: grid; gap: .22rem; }
+.sc-pair__head { display: flex; justify-content: space-between; gap: .8rem; font-size: .86rem; color: var(--c-ink); }
+.sc-pair__head small { color: var(--c-muted); font-size: .76rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sc-pair.is-total { padding-top: .7rem; border-top: 1px solid var(--c-line); }
+.sc-pair.is-total .sc-pair__head span { font-weight: 700; }
+.sc-pair__bar { display: block; width: 0; height: 9px; border-radius: var(--r-pill); background: var(--c); transition: width .8s cubic-bezier(.22, .8, .3, 1); }
+.sc-pair__bar.is-in { width: var(--w); }
+
+/* Diverging bars around zero (soldes) */
+.sc-div { display: grid; gap: .75rem; padding: 0; margin: 0; list-style: none; }
+.sc-div li { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) auto; align-items: center; gap: .7rem; font-size: .84rem; color: var(--c-ink); }
+.sc-div li.is-total { padding-top: .7rem; border-top: 1px solid var(--c-line); font-weight: 700; }
+.sc-div li.is-fsv .sc-div__label { color: var(--c-muted); }
+.sc-div strong { font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; min-width: 6.5rem; }
+.sc-div__track { position: relative; height: 12px; border-radius: var(--r-pill); background: var(--c-surface-2); }
+.sc-div__track::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--c-muted); opacity: .6; }
+.sc-div__fill { position: absolute; top: 0; bottom: 0; width: 0; border-radius: var(--r-pill); transition: width .8s cubic-bezier(.22, .8, .3, 1); }
+.sc-div__fill.neg { right: 50%; background: var(--tx-8); }
+.sc-div__fill.pos { left: 50%; background: var(--tx-3); }
+.sc-div__fill.is-in { width: var(--w); }
+
+/* 100 % stacked bars (structure of produits / charges) */
+.sc-stack { display: grid; gap: .8rem; }
+.sc-stack__row { display: grid; gap: .3rem; }
+.sc-stack__row.is-total { padding-top: .7rem; border-top: 1px solid var(--c-line); }
+.sc-stack__label { display: flex; justify-content: space-between; gap: .8rem; font-size: .86rem; color: var(--c-ink); }
+.sc-stack__row.is-total .sc-stack__label { font-weight: 700; }
+.sc-stack__label small { color: var(--c-muted); font-size: .76rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.sc-stack__bar { display: flex; height: 16px; border-radius: 4px; overflow: hidden; background: var(--c-surface-2); }
+.sc-stack__bar span { display: block; height: 100%; min-width: 1px; box-shadow: inset -1px 0 0 var(--c-surface); }
+.sc-stack__bar span:hover { filter: brightness(1.1); }
+
+/* Accounts table */
+.sc-toggle { display: inline-flex; align-items: center; gap: .45rem; color: var(--c-body); font-size: .84rem; cursor: pointer; }
+.sc-acc tr.lvl0 td { font-weight: 700; color: var(--c-ink); background: var(--c-surface-2); }
+.sc-acc tr.lvl1 td:first-child { padding-left: 1.2rem; }
+.sc-acc tr.lvl2 td { color: var(--c-muted); font-size: .8rem; }
+.sc-acc tr.lvl2 td:first-child { padding-left: 2.2rem; }
+.sc-acc tr.lvl3 td { color: var(--c-muted); font-size: .78rem; }
+.sc-acc tr.lvl3 td:first-child { padding-left: 3.1rem; }
+.sc-acc tr.lvl4 td { color: var(--c-muted); font-size: .76rem; }
+.sc-acc tr.lvl4 td:first-child { padding-left: 4rem; }
+.sc-acc th.sc-sum, .sc-acc td.sc-sum { color: var(--c-muted); }
+.sc-acc td.sc-total { font-weight: 600; color: var(--c-ink); }
+.sc-acc th { white-space: normal; min-width: 5.5rem; }
+.sc-acc th:first-child { min-width: 11rem; }
+.data-table tfoot td { font-weight: 600; color: var(--c-ink); box-shadow: inset 0 1px 0 var(--c-line); }
+
+/* Map */
+.sc-map-layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: var(--sp-3); align-items: start; margin-bottom: var(--sp-3); }
+.sc-map { max-width: 620px; margin-inline: auto; }
+.sc-dep { stroke-width: .5; transition: fill .3s ease, opacity .15s ease; cursor: default; }
+.sc-dep.is-hover { filter: brightness(.88); }
+.sc-reg-line { fill: none; stroke: var(--c-surface); stroke-width: 1.4; stroke-linejoin: round; pointer-events: none; }
+#methode .gap { background: var(--c-surface); }
+.sc-scale { display: flex; align-items: center; gap: .6rem; margin-top: .8rem; font-size: .78rem; color: var(--c-muted); font-variant-numeric: tabular-nums; }
+.sc-scale i { flex: 1; height: 10px; border-radius: var(--r-pill); }
+#scRank .tx-bars { gap: .45rem; }
+
+/* Series files */
+.sc-facts { display: grid; gap: .45rem; padding-left: 1.1rem; margin: 0 0 .8rem; color: var(--c-body); font-size: .88rem; line-height: 1.5; }
+.sc-facts strong { color: var(--c-ink); font-variant-numeric: tabular-nums; }
+.sc-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
+.sc-tags .tag { display: inline-block; padding: .15rem .55rem; border-radius: var(--r-pill); background: var(--c-surface-2); color: var(--c-body); font-size: .74rem; font-weight: 600; }
+.sc-who { margin-top: .6rem; color: var(--c-muted) !important; font-size: .8rem !important; }
+
+@media (max-width: 960px) { .sc-map-layout { grid-template-columns: 1fr; } }
+@media (max-width: 680px) {
+  .sc-div li { grid-template-columns: minmax(0, 1fr) auto; }
+  .sc-div__track { grid-column: 1 / -1; grid-row: 2; }
+  .sc-controls .chip-select { border-radius: var(--r-md); }
+}

@@ -21,6 +21,8 @@
   const approx = t => ({ plafond: 'au plus ', plancher: 'plus de ', estimation: '≈ ' })[t.status] || '';
   const euros = value => `${nf(value, value < 10 ? 2 : 0)} €`;
   const link = (url, text) => url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(text)}</a>` : esc(text);
+  /* A cost published for a tax that no longer exists, or only in part: say so next to the figure. */
+  const ended = e => e ? ` <span class="tx-ended${e.full === false ? ' is-partial' : ''}">${e.url ? link(e.url, e.text) : esc(e.text)}</span>` : '';
   const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const reduced = () => globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
 
@@ -416,8 +418,17 @@
     hbars($('txFees'), fees.map(f => ({ label: f.tax, sub: `${esc(f.detail || '')} · ${link(f.url, f.law || 'source')}`, value: f.rate })), { format: v => `${nf(v, 1)} % de l’impôt`, max: 10 });
     $('txFeesNote').innerHTML = `${esc(C.localFeesNote || '')}${C.localFeesTotal ? ` ${esc(C.localFeesTotal.text)} ${link(C.localFeesTotal.url, 'Rapport de la Cour des comptes (2017)')}` : ''}`;
     const perTax = C.perTax || [];
-    $('txPerTaxCost').innerHTML = perTax.length ? `<table class="data-table"><thead><tr><th>Impôt</th><th class="num">Coût</th><th class="num">En % du produit</th><th>Année</th><th>Remarque</th><th>Source</th></tr></thead><tbody>${perTax.map(r => `<tr><td class="tx-name">${esc(r.tax)}</td><td class="num">${meur(r.meur)}</td><td class="num">${r.range ? esc(r.range) : r.pct != null ? pct(r.pct, 2) : '–'}</td><td>${esc(r.year || '')}</td><td class="muted">${esc(r.note || '')}${r.uncertain ? ' Valeur lue dans un tableau mal extrait : à confirmer.' : ''}</td><td class="tx-src">${link(r.url, r.title || 'source')}</td></tr>`).join('')}</tbody></table>` : '<p class="tx-empty">Aucun coût par impôt publié trouvé.</p>';
+    $('txPerTaxCost').innerHTML = perTax.length ? `<table class="data-table"><thead><tr><th>Impôt</th><th class="num">Coût</th><th class="num">En % du produit</th><th>Année</th><th>Remarque</th><th>Source</th></tr></thead><tbody>${perTax.map(r => `<tr><td class="tx-name">${esc(r.tax)}${ended(r.ended)}</td><td class="num">${meur(r.meur)}</td><td class="num">${r.range ? esc(r.range) : r.pct != null ? pct(r.pct, 2) : '–'}</td><td>${esc(r.year || '')}</td><td class="muted">${esc(r.note || '')}${r.uncertain ? ' Valeur lue dans un tableau mal extrait : à confirmer.' : ''}</td><td class="tx-src">${link(r.url, r.title || 'source')}</td></tr>`).join('')}</tbody></table>` : '<p class="tx-empty">Aucun coût par impôt publié trouvé.</p>';
     $('txPerTaxCostNote').textContent = C.perTaxNote || '';
+    const law = C.lawFees || [];
+    hbars($('txLawFees'), law.map(f => ({ label: f.tax, sub: `${f.detail ? `${esc(f.detail)} · ` : ''}${link(f.url, f.law || 'source')}`, value: f.rate })), { format: v => `${nf(v, 2)} % du produit`, max: 10 });
+    $('txLawFeesNote').textContent = C.lawFeesNote || '';
+    const BT = C.byTax;
+    if (BT) {
+      const hi = Math.max(...BT.rows.flatMap(r => r[1]).filter(v => v != null));
+      $('txByTax').innerHTML = `<table class="data-table tx-bytax"><thead><tr><th>Impôt</th>${BT.years.map(y => `<th class="num">${y}</th>`).join('')}</tr></thead><tbody>${BT.rows.map(([name, vals]) => `<tr${name === 'Ensemble' ? ' class="is-total"' : ''}><td>${esc(name)}${ended(BT.ended?.[name])}</td>${vals.map(v => v == null ? '<td class="num muted">–</td>' : `<td class="num" style="--h:${(v / hi).toFixed(3)}">${pct(v, 2)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+      $('txByTaxNote').innerHTML = `${esc(BT.note)} Sources : ${link(BT.url, BT.source)} ; ${link(BT.noteUrl, 'réponse ministérielle (2006)')}.`;
+    }
 
     /* ---------- Small taxes: cost per 100 € on a log axis ---------- */
     const dots = (C.costDots || []).filter(r => r.per100 > 0).sort((a, b) => b.per100 - a.per100);
@@ -430,19 +441,19 @@
         for (let p = lo; p <= hi; p++) svg += `<line class="tx-grid" x1="${x(10 ** p)}" x2="${x(10 ** p)}" y1="${T}" y2="${H - B}"/><text class="tx-tick" x="${x(10 ** p)}" y="${H - 10}" text-anchor="middle">${nf(10 ** p, 2)} €</text>`;
         dots.forEach((r, i) => {
           const cy = T + rowH * i + rowH / 2 + (narrow ? 8 : 0), cx = x(r.per100);
-          const lab = `${r.name} (${r.year})`, maxc = Math.floor((W - 16) / 6.2);
-          svg += narrow ? `<text class="tx-tick tx-tick--strong" x="${L}" y="${cy - 12}">${esc(lab.length > maxc ? `${lab.slice(0, maxc - 1)}…` : lab)}</text>` : `<text class="tx-label" x="${L - 12}" y="${cy + 4}" text-anchor="end">${esc(r.name)} <tspan class="tx-label--muted">${esc(r.year)}</tspan></text>`;
-          svg += `<line class="tx-axis" x1="${x(10 ** lo)}" x2="${cx}" y1="${cy}" y2="${cy}"/><circle class="tx-dot" data-i="${i}" cx="${cx.toFixed(1)}" cy="${cy}" r="6" fill="${r.per100 >= 5 ? 'var(--tx-8)' : 'var(--tx-1)'}"/><text class="tx-label" x="${cx + 10}" y="${cy + 4}">${r.range ? esc(r.range) : `${nf(r.per100, r.per100 < 1 ? 2 : 1)} €`}</text>`;
+          const lab = `${r.name} (${r.year}${r.ended?.full ? ', supprimée' : ''})`, maxc = Math.floor((W - 16) / 6.2);
+          svg += narrow ? `<text class="tx-tick tx-tick--strong" x="${L}" y="${cy - 12}">${esc(lab.length > maxc ? `${lab.slice(0, maxc - 1)}…` : lab)}</text>` : `<text class="tx-label" x="${L - 12}" y="${cy + 4}" text-anchor="end">${esc(r.name)} <tspan class="tx-label--muted">${esc(r.year)}${r.ended?.full ? ' · supprimée' : ''}</tspan></text>`;
+          svg += `<line class="tx-axis" x1="${x(10 ** lo)}" x2="${cx}" y1="${cy}" y2="${cy}"/><circle class="tx-dot${r.ended?.full ? ' is-ended' : ''}" data-i="${i}" cx="${cx.toFixed(1)}" cy="${cy}" r="6" fill="${r.per100 >= 5 ? 'var(--tx-8)' : 'var(--tx-1)'}"${r.ended?.full ? ` style="stroke:${r.per100 >= 5 ? 'var(--tx-8)' : 'var(--tx-1)'}"` : ''}/><text class="tx-label" x="${cx + 10}" y="${cy + 4}">${r.range ? esc(r.range) : `${nf(r.per100, r.per100 < 1 ? 2 : 1)} €`}</text>`;
         });
         dotsEl.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Coût de collecte pour 100 euros perçus, échelle logarithmique">${svg}</svg>`;
       });
       dotsEl.addEventListener('pointermove', event => {
         const dot = event.target.closest?.('.tx-dot'); if (!dot) { hideTip(); return; }
         const r = dots[Number(dot.dataset.i)];
-        showTip(event, `<strong>${esc(r.name)}</strong><span class="tx-tip__value">${r.range ? esc(r.range) : `${nf(r.per100, 2)} €`} pour 100 € perçus</span><br>${esc(r.year)}${r.yield ? ` · rendement ${meur(r.yield)}` : ''}`);
+        showTip(event, `<strong>${esc(r.name)}</strong><span class="tx-tip__value">${r.range ? esc(r.range) : `${nf(r.per100, 2)} €`} pour 100 € perçus</span><br>${esc(r.year)}${r.yield ? ` · rendement ${meur(r.yield)}` : ''}${r.ended ? `<br>${esc(r.ended.text)}` : ''}`);
       });
       dotsEl.addEventListener('pointerleave', hideTip);
-      $('txCostDotsNote').innerHTML = `Échelle logarithmique : chaque graduation multiplie le coût par dix. En rouge, plus de 5 € pour 100 €. Sources : ${[...new Map(dots.map(r => [r.url, r])).values()].map((r, i) => link(r.url, `[${i + 1}]`)).join(' ')}. Les coûts sont ceux du rapport cité, à sa date ; certaines taxes ont depuis été supprimées ou réformées.${C.noLossQuote ? ` Le cas le plus cité, la taxe sur les appareils automatiques (flippers, jeux vidéo), qui rapportait quelques centaines de milliers d’euros (${link('https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf', 'IGF, 2014')}), a été supprimée en 2015 (${link('https://www.senat.fr/questions/base/2015/qSEQ150114502.html', 'Sénat')}) sans que son coût de gestion ait été publié.` : ''}`;
+      $('txCostDotsNote').innerHTML = `Échelle logarithmique : chaque graduation multiplie le coût par dix. En rouge, plus de 5 € pour 100 €. Cercle vide : taxe supprimée depuis. Sources : ${[...new Map(dots.map(r => [r.url, r])).values()].map((r, i) => link(r.url, `[${i + 1}]`)).join(' ')}. Les coûts sont ceux du rapport cité, à sa date ; certaines taxes ont depuis été supprimées ou réformées.${C.noLossQuote ? ` Le cas le plus cité, la taxe sur les appareils automatiques (flippers, jeux vidéo), qui rapportait quelques centaines de milliers d’euros (${link('https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf', 'IGF, 2014')}), a été supprimée en 2015 (${link('https://www.senat.fr/questions/base/2015/qSEQ150114502.html', 'Sénat')}) sans que son coût de gestion ait été publié.` : ''}`;
     } else dotsEl.innerHTML = '<p class="tx-empty">Aucun coût publié.</p>';
     $('txCounts').innerHTML = (data.counts || []).map(c => `<div class="tx-count"><strong>${esc(c.value)}</strong><p>${esc(c.text)}</p>${link(c.url, c.title || 'source')}</div>`).join('');
 
@@ -453,6 +464,57 @@
     $('txGapKpis').innerHTML = gaps.filter(g => g.kpi).map(g => `<div class="kpi"><span>${esc(g.label)}</span><strong>${esc(g.kpi)}</strong><small>${esc(g.sub || '')}</small></div>`).join('');
     $('txGapList').innerHTML = gaps.map(g => `<article class="gap"><h3>${esc(g.label)}</h3><p>${esc(g.text)}</p><p class="note">${link(g.url, g.title || 'source')}</p></article>`).join('') || '<p class="tx-empty">Aucune estimation officielle trouvée.</p>';
 
+
+    /* ---------- What the government should publish: computed counts, then one card per missing publication ---------- */
+    const P = C.publish || {};
+    const withCost = active.filter(t => t.cost && !t.partOf);
+    const oldCost = withCost.filter(t => parseInt(String(t.cost.year).slice(-4), 10) < 2020);
+    $('txAskKpis').innerHTML = [
+      ['Prélèvements en vigueur avec un coût de collecte publié', `${withCost.length} sur ${active.length}`, oldCost.length ? `dont ${oldCost.length} avec un chiffre antérieur à 2020` : 'chiffres récents'],
+      ['Prélèvements en vigueur au produit inconnu', String(unknown.length), 'ni l’État ni la Cour des comptes ne publient ce qu’ils rapportent'],
+      ...(P.facts || []).map(f => [f.label, f.value, f.sub])
+    ].map(([a, b, c]) => `<div class="kpi"><span>${esc(a)}</span><strong>${esc(b)}</strong><small>${esc(c || '')}</small></div>`).join('');
+    const STATE = { none: 'Rien de publié', partial: 'Publié en partie', past: 'Publié autrefois, plus maintenant' };
+    $('txAskList').innerHTML = (P.items || []).map((a, i) => `<article class="gap tx-ask"><span class="gap__state ${a.state === 'none' ? 'none' : 'partial'}">${esc(STATE[a.state] || a.state)}</span><h3><span class="tx-ask__n">${i + 1}</span>${esc(a.title)}</h3><dl><dt>Aujourd’hui</dt><dd>${esc(a.today)}</dd><dt>Ce qu’il faudrait publier</dt><dd>${esc(a.ask)}</dd><dt>Par qui</dt><dd>${esc(a.who)}</dd></dl>${a.found ? `<p class="tx-ask__found">${esc(a.found)}</p>` : ''}${a.proof ? `<blockquote class="tx-ask__proof">${a.proof.text ? `« ${esc(a.proof.text)} »` : ''}${link(a.proof.url, a.proof.title)}</blockquote>` : ''}</article>`).join('');
+    $('txAskNote').innerHTML = `${esc(P.note || '')}${(P.searched || []).length ? ` Documents cherchés sans succès ou introuvables en ligne : ${P.searched.map(d => d.url ? link(d.url, d.title) : esc(d.title)).join(' ; ')}.` : ''}`;
+
+    /* ---------- Taxes affected to bodies other than the State budget, and their ceilings (PLF 2024) ---------- */
+    const A = data.affected;
+    if (A) {
+      const [y22, , y24] = A.years;
+      $('txAffKpis').innerHTML = [
+        ['Taxes affectées, ligne par bénéficiaire', String(A.rows.length), `${A.taxes} taxes, ${A.beneficiaries} bénéficiaires (Sécurité sociale, collectivités, agences, chambres…)`],
+        ['Produit prévu en 2024', meur(y24.yield), `somme des ${y24.rows} lignes chiffrées du fichier, CSG et fractions de TVA comprises ; ${meur(y22.yield)} en 2022`],
+        ['Lignes plafonnées en 2024', String(y24.capped), `pour un plafond total de ${meur(y24.cap)} et un produit prévu de ${meur(y24.cappedYield)}`],
+        ['Repris par l’État au-delà du plafond', meur(y24.back), `prévu en 2024 sur ${y24.over} lignes ; ${meur(y22.back)} en 2022 (exécution, ${y22.over} lignes)`]
+      ].map(([a, b, c]) => `<div class="kpi"><span>${esc(a)}</span><strong>${esc(b)}</strong><small>${esc(c)}</small></div>`).join('');
+      hbars($('txAffSectors'), A.sectors.map(s => ({ label: s.name, sub: `${s.rows} lignes${s.capped ? `, dont ${s.capped} plafonnées` : ', aucune plafonnée'}${s.back ? ` · ${meur(s.back)} repris par l’État` : ''}`, value: s.yield })), { format: meur });
+      const over = A.rows.filter(r => r.back[2] > 0).sort((a, b) => b.back[2] - a.back[2]);
+      hbars($('txAffBack'), over.slice(0, 12).map(r => ({ label: r.tax.length > 70 ? `${r.tax.slice(0, 68).replace(/\s+\S*$/, '')}…` : r.tax, sub: `${esc(r.beneficiary)} · produit ${meur(r.y[2])}, plafond ${meur(r.cap[2])}`, value: r.back[2] })), { format: meur });
+      $('txAffBackNote').textContent = `${over.length} lignes dépassent leur plafond en 2024 (prévision) ; les douze plus grosses reprises sont affichées. Montants prévus par le projet de loi de finances pour 2024.`;
+      [...new Set(A.rows.map(r => r.sector))].sort((a, b) => a.localeCompare(b, 'fr')).forEach(v => $('txAffSector').insertAdjacentHTML('beforeend', `<option>${esc(v)}</option>`));
+      let affKey = 'y2', affDir = -1, affAll = false;
+      const AFF_COLS = [['tax', 'Taxe'], ['beneficiary', 'Bénéficiaire'], ['y0', 'Produit 2022', 'num'], ['y2', 'Produit 2024', 'num'], ['cap2', 'Plafond 2024', 'num'], ['back2', 'Repris par l’État 2024', 'num'], ['since', 'Plafonnée depuis']];
+      const affVal = (r, k) => k === 'tax' || k === 'beneficiary' || k === 'since' ? r[k] || null : r[{ y: 'y', cap: 'cap', back: 'back' }[k.replace(/\d$/, '')]][Number(k.slice(-1))];
+      const drawAff = () => {
+        const q = norm($('txAffSearch').value), sec = $('txAffSector').value, mode = $('txAffMode').value;
+        let rows = A.rows.filter(r => (!q || norm(`${r.tax} ${r.beneficiary} ${r.mission || ''}`).includes(q)) && (!sec || r.sector === sec)
+          && (mode === '' || (mode === 'capped' ? r.cap[2] != null : r.back[2] > 0)));
+        rows.sort((a, b) => { const va = affVal(a, affKey), vb = affVal(b, affKey); if (va == null || vb == null) return (va == null) - (vb == null); return (typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb), 'fr')) * affDir; });
+        const total = rows.length;
+        if (!affAll) rows = rows.slice(0, 15);
+        const cell = v => v == null ? '<td class="num muted">–</td>' : `<td class="num">${meur(v)}</td>`;
+        $('txAffTable').innerHTML = `<table class="data-table tx-table tx-aff"><thead><tr>${AFF_COLS.map(([k, label, cls]) => `<th${cls ? ` class="${cls}"` : ''} data-sort="${k}" aria-sort="${affKey === k ? (affDir > 0 ? 'ascending' : 'descending') : 'none'}">${label}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr><td class="tx-namecell"><span class="tx-name">${esc(r.tax)}</span></td><td>${esc(r.beneficiary)}<br><span class="muted">${esc(r.sector)}</span></td>${cell(r.y[0])}${cell(r.y[2])}${r.cap[2] == null ? '<td class="num muted">sans plafond</td>' : cell(r.cap[2])}${r.cap[2] == null ? '<td class="num muted">–</td>' : `<td class="num${r.back[2] > 0 ? ' tx-aff-back' : ''}">${meur(r.back[2])}</td>`}<td class="muted">${esc(r.since || '')}</td></tr>`).join('')}</tbody></table>${total > rows.length ? `<div class="tx-more"><button type="button" id="txAffAll">Afficher les ${total} lignes</button></div>` : ''}`;
+        $('txAffAll')?.addEventListener('click', () => { affAll = true; drawAff(); });
+      };
+      ['input', 'change'].forEach(ev => ['txAffSearch', 'txAffSector', 'txAffMode'].forEach(id => $(id).addEventListener(ev, () => { affAll = false; drawAff(); })));
+      $('txAffTable').addEventListener('click', event => {
+        const th = event.target.closest('th[data-sort]'); if (!th) return;
+        const k = th.dataset.sort; affDir = affKey === k ? -affDir : (/\d$/.test(k) ? -1 : 1); affKey = k; drawAff();
+      });
+      drawAff();
+      $('txAffNote').innerHTML = `Source : ${link(A.page || A.url, A.title)} (fichier publié le ${esc(A.modified.split('-').reverse().join('/'))}). Produit 2022 : exécution ; 2023 et 2024 : prévisions du projet de loi de finances pour 2024. « Repris par l’État » : reversement au budget général, que le fichier donne et qui vaut toujours le produit moins le plafond quand le produit le dépasse. Le total additionne les lignes du fichier ; une même taxe partagée entre plusieurs bénéficiaires y figure une fois par bénéficiaire, sans double compte. Ce document date de l’automne 2023 : les plafonds ont changé depuis, et la liste des PLF suivants n’est pas publiée dans ce format.`;
+    }
 
     /* ---------- Full table: every tax, curated list and Cour des comptes inventory ---------- */
     const filters = { base: $('txFilterBase'), beneficiary: $('txFilterBeneficiary'), collector: $('txFilterCollector') };
@@ -479,7 +541,7 @@
       if (!showAll) rows = rows.slice(0, 60);
       $('txTable').innerHTML = `<table class="data-table tx-table"><thead><tr>${COLS.map(([k, label, cls]) => `<th${cls ? ` class="${cls}"` : ''}${k ? ` data-sort="${k}" aria-sort="${sortKey === k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"` : ''}>${label}</th>`).join('')}</tr></thead><tbody>${rows.map(t => `<tr class="${t.partOf ? 'is-sub' : ''}${t.inForce ? '' : ' is-removed'}"><td class="tx-namecell"><button type="button" class="tx-name tx-rowlink" data-id="${esc(t.id)}">${esc(t.name)}</button>${t.acronym ? ` <span class="muted">${esc(t.acronym)}</span>` : ''}${t.note ? `<br><span class="muted">${esc(t.note.length > 90 ? `${t.note.slice(0, 88).replace(/\s+\S*$/, '')}…` : t.note)}</span>` : ''}</td><td><span class="tx-pill"><i style="background:${color('base', t.base)}"></i>${esc(t.base)}</span></td><td class="num">${t.amount == null ? '<span class="muted">inconnu</span>' : `${approx(t)}${meur(t.amount)}${t.check === 'extrait' ? '<sup>*</sup>' : ''}`}</td><td class="tx-bar-cell">${t.amount ? `<span class="tx-minibar" style="width:${Math.max(2, 100 * Math.sqrt(t.amount / maxAmount)).toFixed(1)}%;background:${color('base', t.base)}"></span>` : ''}</td><td class="muted">${esc(t.year)}${t.inForce ? '' : `<br>${esc(t.state)}`}</td><td>${esc(t.beneficiary)}${t.beneficiaryDetail && t.beneficiaryDetail !== t.beneficiary && t.origin === 'cour' ? `<br><span class="muted">${esc(t.beneficiaryDetail.length > 60 ? `${t.beneficiaryDetail.slice(0, 58)}…` : t.beneficiaryDetail)}</span>` : ''}</td><td>${esc(t.collector)}</td><td class="num">${t.cost?.range ? esc(t.cost.range) : t.cost?.pct != null ? pct(t.cost.pct, 2) : t.cost?.meur != null ? meur(t.cost.meur) : '<span class="muted">non publié</span>'}</td><td>${t.scenario ? `<span class="tx-scen s${t.scenario}" title="${esc(SCEN_LABELS[t.scenario])}">${t.scenario}</span>` : ''}</td><td class="tx-src">${link(t.source?.url, t.origin === 'cour' ? 'Cour des comptes' : (t.source?.title || 'source').split(/,| – | \(/)[0])}</td></tr>`).join('')}</tbody></table>${total > rows.length ? `<div class="tx-more"><button type="button" id="txShowAll">Afficher les ${total} lignes</button></div>` : ''}`;
       $('txShowAll')?.addEventListener('click', () => { showAll = true; drawTable(); });
-      $('txTableNote').textContent = `${total} ligne${total > 1 ? 's' : ''}${sum ? `, ${meur(sum)} de produit connu (fractions non additionnées)` : ''}. Barre : racine carrée du produit, pour que les petites taxes restent visibles. Lignes en retrait : fraction d’un autre impôt, non additionnée. * Chiffre relevé dans un extrait du document cité, à confirmer ; sans astérisque, lu dans le fichier Insee ou Cour des comptes versionné. « ≈ », « au plus », « plus de » : estimation, plafond ou plancher. Cour : scénario de la Cour des comptes (1 = revoir dès le budget 2026, 2 = réexaminer d’ici 2027, 3 = rationaliser).`;
+      $('txTableNote').textContent = `${total} ligne${total > 1 ? 's' : ''}${sum ? `, ${meur(sum)} de produit connu (fractions non additionnées)` : ''}. Barre : racine carrée du produit, pour que les petites taxes restent visibles. Lignes en retrait : fraction d’un autre impôt, non additionnée. * Chiffre relevé dans un extrait du document cité, à confirmer ; sans astérisque, lu dans un fichier versionné avec le site (Insee, Cour des comptes, budget de l’État, OFGL). « ≈ », « au plus », « plus de » : estimation, plafond ou plancher. Cour : scénario de la Cour des comptes (1 = revoir dès le budget 2026, 2 = réexaminer d’ici 2027, 3 = rationaliser).`;
     }
     ['input', 'change'].forEach(ev => ['txSearch', 'txFilterBase', 'txFilterBeneficiary', 'txFilterCollector', 'txFilterScenario', 'txFilterState'].forEach(id => $(id).addEventListener(ev, () => { showAll = false; drawTable(); })));
     $('txTable').addEventListener('click', event => {
