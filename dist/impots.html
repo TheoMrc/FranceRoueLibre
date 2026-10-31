@@ -76,18 +76,18 @@
       <div class="container"><div class="hero__inner">
         <span class="eyebrow">Impôts, taxes et prélèvements</span>
         <h1>Ce que rapporte chaque impôt, <span class="gradient-text">et ce que coûte sa collecte.</span></h1>
-        <p class="hero__lead">Tous les prélèvements recensés, un par un : leur produit, qui les paie, qui les reçoit, qui les collecte, ce que l’administration dépense pour les percevoir, et les petites taxes qui rapportent à peine plus qu’elles ne coûtent.</p>
-        <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#un-a-un">Un par un</a><a href="#histoire">Depuis 1995</a><a href="#collecte">Coût de collecte</a><a href="#petites">Petites taxes</a><a href="#faible-rendement">Les 243 petites taxes</a><a href="#ecarts">Fraude et écarts</a><a href="#tableau">Tableau complet</a><a href="#methode">Méthode</a></nav>
+        <p class="hero__lead" id="txLead">Tous les prélèvements recensés, des grands impôts aux plus petites taxes, sur les mêmes graphiques : leur produit, qui les paie, qui les reçoit, qui les collecte, et ce que coûte leur collecte.</p>
+        <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#un-a-un">Du plus gros au plus petit</a><a href="#histoire">Depuis 1995</a><a href="#collecte">Coût de collecte</a><a href="#ecarts">Fraude et écarts</a><a href="#tableau">Tableau complet</a><a href="#methode">Méthode</a></nav>
       </div></div>
     </section>
 
     <section class="section" id="ensemble" aria-labelledby="txAllTitle">
       <div class="container">
-        <div class="section__head"><span class="eyebrow">Vue d’ensemble</span><h2 id="txAllTitle">Tous les impôts, à la même échelle</h2><p class="lead">Chaque rectangle est un impôt ou une taxe, sa surface est son produit annuel. Survolez ou touchez un rectangle pour le détail ; les couleurs regroupent les impôts par ce qu’ils taxent.</p></div>
+        <div class="section__head"><span class="eyebrow">Vue d’ensemble</span><h2 id="txAllTitle">Tous les impôts, à la même échelle</h2><p class="lead">Chaque rectangle est un impôt ou une taxe, sa surface est son produit annuel. Les plus petits ne sont qu’un trait : survolez ou touchez la carte pour les voir, ou cherchez-les dans le tableau.</p></div>
         <div class="kpis" id="txKpis"></div>
-        <div class="tx-controls"><div class="chip-select" id="txGroup" role="group" aria-label="Couleur des rectangles"><button type="button" data-group="category" class="active">Ce qui est taxé</button><button type="button" data-group="beneficiary">Qui reçoit</button><button type="button" data-group="collector">Qui collecte</button><button type="button" data-group="payer">Qui paie</button></div></div>
+        <div class="tx-controls"><div class="chip-select tx-color" role="group" aria-label="Couleur des graphiques"><button type="button" data-color="base" class="active">Ce qui est taxé</button><button type="button" data-color="beneficiary">Qui reçoit</button><button type="button" data-color="collector">Qui collecte</button><button type="button" data-color="payer">Qui paie</button><button type="button" data-color="scenario">Avis de la Cour</button></div></div>
         <div class="tx-map-layout">
-          <div class="panel tx-map-panel"><div id="txTreemap" class="tx-treemap" aria-describedby="txTreemapNote"></div><div id="txLegend" class="tx-legend"></div><p class="note" id="txTreemapNote"></p></div>
+          <div class="panel tx-map-panel"><div id="txTreemap" class="tx-treemap"></div><div id="txLegend" class="tx-legend"></div><p class="note" id="txTreemapNote"></p></div>
           <aside class="panel tx-detail" id="txDetail" aria-live="polite"><p class="note">Sélectionnez un impôt pour voir son détail.</p></aside>
         </div>
       </div>
@@ -95,20 +95,25 @@
 
     <section class="section section--alt" id="un-a-un" aria-labelledby="txOneTitle">
       <div class="container">
-        <div class="section__head"><span class="eyebrow">Du plus gros au plus petit</span><h2 id="txOneTitle">Quelques géants, une longue traîne</h2><p class="lead">Les mêmes impôts sur une échelle logarithmique : chaque graduation multiplie le montant par dix. Une poignée d’impôts fait l’essentiel des recettes, des dizaines d’autres rapportent moins de 175 millions d’euros.</p></div>
-        <div class="panel"><h3>Chaque impôt, par ordre de grandeur</h3><div id="txStrip" class="tx-strip"></div><p class="note" id="txStripNote"></p></div>
+        <div class="section__head-row"><div class="section__head"><span class="eyebrow">Du plus gros au plus petit</span><h2 id="txOneTitle">Quelques géants, une très longue traîne</h2><p class="lead" id="txOneLead"></p></div><div class="chip-select tx-color" role="group" aria-label="Couleur des graphiques"><button type="button" data-color="base" class="active">Ce qui est taxé</button><button type="button" data-color="beneficiary">Qui reçoit</button><button type="button" data-color="collector">Qui collecte</button><button type="button" data-color="payer">Qui paie</button><button type="button" data-color="scenario">Avis de la Cour</button></div></div>
+        <div class="panel"><h3>Chaque prélèvement, par ordre de grandeur</h3><div id="txStrip" class="tx-strip"></div><p class="note" id="txStripNote"></p></div>
         <div class="grid-2 tx-onebyone">
           <div class="panel"><h3>Part cumulée des recettes</h3><div id="txPareto" class="tx-pareto"></div><p class="note" id="txParetoNote"></p></div>
+          <div class="panel"><h3>En nombre de taxes et en argent</h3><div id="txShare"></div><p class="note" id="txShareNote"></p></div>
+        </div>
+        <div class="panel"><h3>Une case par prélèvement en vigueur</h3><div id="txWaffle" class="tx-waffle"></div><p class="note" id="txWaffleNote"></p></div>
+        <div class="grid-2 tx-onebyone">
           <div class="panel"><h3>Les quinze plus gros</h3><div id="txTop"></div></div>
+          <div class="panel"><h3>Les quinze plus petits connus</h3><div id="txBottom"></div></div>
         </div>
       </div>
     </section>
 
     <section class="section" id="histoire" aria-labelledby="txHistTitle">
       <div class="container">
-        <div class="section__head-row"><div class="section__head"><span class="eyebrow">Comptes nationaux Insee · 1995–2025</span><h2 id="txHistTitle">Trente ans d’impôts</h2><p class="lead">Les huit grandes catégories d’impôts de la comptabilité nationale, empilées. Cotisations sociales non comprises.</p></div>
+        <div class="section__head-row"><div class="section__head"><span class="eyebrow">Comptes nationaux Insee · 1995–2025</span><h2 id="txHistTitle">Trente ans d’impôts</h2><p class="lead">Les huit grandes catégories d’impôts de la comptabilité nationale, empilées : elles couvrent l’ensemble des impôts, petites taxes comprises. Cotisations sociales non comprises.</p></div>
           <div class="chip-select" id="txHistUnit" role="group" aria-label="Unité"><button type="button" data-unit="md" class="active">Md€</button><button type="button" data-unit="pib">% du PIB</button><button type="button" data-unit="hab">€ par habitant</button></div></div>
-        <div class="panel"><div id="txStack" class="tx-stack"></div><div id="txStackLegend" class="tx-legend"></div><p class="note" id="txStackNote"></p></div>
+        <div class="panel"><div id="txStack" class="tx-stack"></div><div id="txStackLegend" class="tx-legend tx-legend--cols"></div><p class="note" id="txStackNote"></p></div>
         <div class="panel panel--wide tx-series">
           <div class="panel__head"><h3 id="txSeriesTitle">Un impôt dans le temps</h3><label class="select-wrap"><span class="sr-only">Impôt affiché</span><select id="txSeriesPick"></select></label></div>
           <div id="txSeries" class="tx-line"></div><p class="note" id="txSeriesNote"></p>
@@ -120,39 +125,15 @@
       <div class="container">
         <div class="section__head"><span class="eyebrow">Coût de collecte</span><h2 id="txCostTitle">Combien coûte la perception de l’impôt ?</h2><p class="lead">Ce que dépensent les administrations (agents, informatique, locaux) pour asseoir, contrôler et recouvrer les impôts, rapporté à ce qu’elles encaissent. Le coût supporté par les contribuables eux-mêmes (déclarations, comptabilité, conseil) n’est pas compris.</p></div>
         <div class="kpis" id="txCostKpis"></div>
-        <div class="grid-2">
+        <blockquote class="tx-quote" id="txQuote"></blockquote>
+        <div class="panel"><h3>Coût de collecte pour 100 € perçus, administration par administration et taxe par taxe</h3><div id="txCostDots" class="tx-strip"></div><p class="note" id="txCostDotsNote"></p></div>
+        <div class="grid-2 tx-onebyone">
           <div class="panel"><h3>Pour 100 € collectés, ce que dépense chaque administration</h3><div id="txCollectors"></div><p class="note" id="txCollectorsNote"></p></div>
           <div class="panel"><h3>Coût de gestion de la DGFiP, en % des recettes brutes</h3><div id="txDgfip" class="tx-line"></div><p class="note" id="txDgfipNote"></p></div>
         </div>
-        <div class="panel panel--wide"><h3>Ce que l’État facture en plus des impôts locaux pour les lever</h3><div id="txFees"></div><p class="note" id="txFeesNote"></p></div>
+        <div class="panel"><h3>Ce que l’État facture en plus des impôts locaux pour les lever</h3><div id="txFees"></div><p class="note" id="txFeesNote"></p></div>
         <div class="panel panel--wide"><h3>Coût de collecte impôt par impôt, quand il est publié</h3><div id="txPerTaxCost" class="table-wrap"></div><p class="note" id="txPerTaxCostNote"></p></div>
-      </div>
-    </section>
-
-    <section class="section" id="petites" aria-labelledby="txSmallTitle">
-      <div class="container">
-        <div class="section__head"><span class="eyebrow">Taxes à faible rendement</span><h2 id="txSmallTitle">Les petites taxes qui coûtent cher</h2><p class="lead">Plus de deux cents taxes rapportent moins de 175 millions d’euros chacune. Pour la plupart, personne ne publie ce que coûte leur collecte : les rares chiffres disponibles montrent des écarts de un à plusieurs centaines selon la taxe.</p></div>
-        <div class="panel"><h3>Coût de collecte pour 100 € perçus</h3><div id="txCostDots" class="tx-strip"></div><p class="note" id="txCostDotsNote"></p></div>
         <div id="txCounts" class="tx-counts"></div>
-      </div>
-    </section>
-
-    <section class="section section--alt" id="faible-rendement" aria-labelledby="txLowTitle">
-      <div class="container">
-        <div class="section__head"><span class="eyebrow">Inventaire de la Cour des comptes · avril 2025</span><h2 id="txLowTitle">Les 243 taxes à faible rendement, une par une</h2><p class="lead">Toutes les taxes qui rapportent moins de 175 millions d’euros par an, recensées par la Cour des comptes : ce qu’elles rapportent quand on le sait, qui les paie, qui les collecte, à qui va l’argent, et ce que la Cour propose d’en faire.</p></div>
-        <div class="kpis" id="txLowKpis"></div>
-        <blockquote class="tx-quote" id="txLowQuote"></blockquote>
-        <div class="panel"><div class="panel__head"><h3>Une case par taxe en vigueur en 2024</h3><div class="chip-select" id="txLowColor" role="group" aria-label="Couleur des cases"><button type="button" data-color="scenario" class="active">Proposition de la Cour</button><button type="button" data-color="objective">Objectif</button><button type="button" data-color="payer">Qui paie</button></div></div><div id="txWaffle" class="tx-waffle"></div><div id="txWaffleLegend" class="tx-legend"></div><p class="note" id="txWaffleNote"></p></div>
-        <div class="panel panel--wide"><h3>Les 126 rendements connus, par ordre de grandeur</h3><div id="txLowStrip" class="tx-strip"></div><p class="note" id="txLowStripNote"></p></div>
-        <div class="grid-2 tx-onebyone">
-          <div class="panel"><h3>Qui reçoit l’argent</h3><div id="txLowBenef"></div><p class="note">Nombre de taxes en vigueur en 2024 par affectataire, et somme des rendements connus.</p></div>
-          <div class="panel"><h3>Qui les collecte</h3><div id="txLowCollect"></div><p class="note" id="txLowCollectNote"></p></div>
-        </div>
-        <div class="panel panel--wide">
-          <div class="panel__head"><h3>Les 319 taxes de l’inventaire (2019–2024)</h3></div>
-          <div class="tx-filters"><label class="search-field"><span class="sr-only">Rechercher une taxe</span><input id="txLowSearch" type="search" placeholder="permis de chasse, CNC, médicament…" autocomplete="off"></label><label class="select-wrap"><span class="sr-only">État</span><select id="txLowState"><option value="active">En vigueur en 2024 (243)</option><option value="removed">Supprimées depuis 2019</option><option value="">Toutes (319)</option></select></label><label class="select-wrap"><span class="sr-only">Proposition de la Cour</span><select id="txLowScenario"><option value="">Toutes propositions</option><option value="1">Scénario 1 : budget 2026</option><option value="2">Scénario 2 : d’ici 2027</option><option value="3">Scénario 3 : programmation</option><option value="0">Non citées dans les scénarios</option></select></label><label class="select-wrap"><span class="sr-only">Collecteur</span><select id="txLowCollector"><option value="">Tous collecteurs</option></select></label></div>
-          <div id="txLowTable" class="table-wrap"></div><p class="note" id="txLowTableNote"></p>
-        </div>
       </div>
     </section>
 
@@ -166,8 +147,8 @@
 
     <section class="section section--alt" id="tableau" aria-labelledby="txTableTitle">
       <div class="container">
-        <div class="section__head"><span class="eyebrow">Toutes les lignes</span><h2 id="txTableTitle">Tableau complet</h2><p class="lead">Chaque impôt avec son produit, son année, son bénéficiaire, son collecteur, son coût de collecte quand il est connu, et le document qui donne le chiffre. Cliquez sur un en-tête pour trier.</p></div>
-        <div class="tx-filters"><label class="search-field"><span class="sr-only">Rechercher un impôt</span><input id="txSearch" type="search" placeholder="TVA, taxe de séjour, accise…" autocomplete="off"></label><label class="select-wrap"><span class="sr-only">Catégorie</span><select id="txFilterCategory"><option value="">Toutes catégories</option></select></label><label class="select-wrap"><span class="sr-only">Bénéficiaire</span><select id="txFilterBeneficiary"><option value="">Tous bénéficiaires</option></select></label><label class="select-wrap"><span class="sr-only">Collecteur</span><select id="txFilterCollector"><option value="">Tous collecteurs</option></select></label></div>
+        <div class="section__head"><span class="eyebrow">Toutes les lignes</span><h2 id="txTableTitle">Tableau complet</h2><p class="lead">Chaque prélèvement avec son produit, son année, ce qu’il taxe, son bénéficiaire, son collecteur, son coût de collecte quand il est connu, l’avis de la Cour des comptes et le document qui donne le chiffre. Cliquez sur un en-tête pour trier, sur un nom pour sa fiche.</p></div>
+        <div class="tx-filters"><label class="search-field"><span class="sr-only">Rechercher un impôt</span><input id="txSearch" type="search" placeholder="TVA, permis de chasse, CNC, médicament…" autocomplete="off"></label><label class="select-wrap"><span class="sr-only">Ce qui est taxé</span><select id="txFilterBase"><option value="">Tout ce qui est taxé</option></select></label><label class="select-wrap"><span class="sr-only">Bénéficiaire</span><select id="txFilterBeneficiary"><option value="">Tous bénéficiaires</option></select></label><label class="select-wrap"><span class="sr-only">Collecteur</span><select id="txFilterCollector"><option value="">Tous collecteurs</option></select></label><label class="select-wrap"><span class="sr-only">Avis de la Cour des comptes</span><select id="txFilterScenario"><option value="">Tous avis de la Cour</option></select></label><label class="select-wrap"><span class="sr-only">État</span><select id="txFilterState"><option value="active">En vigueur</option><option value="removed">Supprimées depuis 2019</option><option value="">En vigueur et supprimées</option></select></label></div>
         <div id="txTable" class="table-wrap"></div>
         <p class="note" id="txTableNote"></p>
       </div>
@@ -177,10 +158,12 @@
       <div class="container">
         <div class="section__head"><span class="eyebrow">Méthode</span><h2 id="txMethodTitle">Lire ces chiffres sans se tromper</h2></div>
         <div class="gap-grid tx-method">
-          <article class="gap"><h3>Des périmètres qui ne s’additionnent pas</h3><p>Le produit d’un impôt est donné par sa meilleure source (loi de finances, comptes de la Sécurité sociale, comptes des collectivités, douane). Ces sources n’ont pas toutes la même année ni la même définition (brut ou net des remboursements, avant ou après crédits d’impôt). Le total affiché en haut est celui des comptes nationaux de l’Insee, pas la somme des lignes.</p></article>
-          <article class="gap"><h3>Fractions et doubles comptes</h3><p>Une partie de la TVA, de l’accise sur les énergies ou de la taxe sur les salaires est reversée à la Sécurité sociale ou aux collectivités. Ces fractions sont signalées et ne sont jamais ajoutées une seconde fois dans les graphiques.</p></article>
-          <article class="gap"><h3>Coût de collecte</h3><p>Il n’existe pas de comptabilité analytique publique du coût de chaque impôt. Les taux globaux (DGFiP, douane, Urssaf) viennent des rapports de performance ; les coûts impôt par impôt ne sont montrés que lorsqu’un rapport public (Cour des comptes, IGF, Parlement) les a chiffrés. Aucun coût n’est estimé ici par simple règle de trois.</p></article>
-          <article class="gap"><h3>Cotisations sociales</h3><p>Les cotisations sociales (retraite, maladie, chômage…) sont des prélèvements obligatoires mais pas des impôts au sens de la comptabilité nationale. Elles figurent à part, pour comparaison.</p></article>
+          <article class="gap"><h3>Une seule liste, deux sources</h3><p>Les grands impôts viennent des comptes nationaux de l’Insee et des documents budgétaires ; les taxes de moins de 175 M€ viennent de l’inventaire publié par la Cour des comptes en avril 2025. Une taxe présente dans les deux n’apparaît qu’une fois.</p></article>
+          <article class="gap"><h3>Des périmètres qui ne s’additionnent pas tout à fait</h3><p>Les années (2022 à 2025) et les définitions (brut ou net des remboursements, avant ou après crédits d’impôt) diffèrent selon la source. Le total officiel est celui de l’Insee, en tête de page, pas la somme des lignes.</p></article>
+          <article class="gap"><h3>Fractions et doubles comptes</h3><p>Une partie de la TVA va aux collectivités ; l’accise sur les tabacs perçue en Corse fait partie de l’accise sur les tabacs. Ces fractions restent visibles dans le tableau mais ne sont jamais additionnées une seconde fois dans les graphiques.</p></article>
+          <article class="gap"><h3>Rendement inconnu n’est pas zéro</h3><p>Pour 117 petites taxes, ni l’État ni la Cour des comptes ne connaissent le produit. Elles comptent dans les nombres de taxes, apparaissent en case vide, mais pas dans les montants.</p></article>
+          <article class="gap"><h3>Coût de collecte</h3><p>Il n’existe pas de comptabilité publique du coût de chaque impôt. Les taux globaux (DGFiP, douane, Urssaf) viennent des rapports de performance, quelques coûts par impôt de la Cour des comptes. Aucun coût n’est estimé ici par simple règle de trois.</p></article>
+          <article class="gap"><h3>Chiffres à confirmer</h3><p>Les montants marqués d’un astérisque ont été relevés dans un extrait du document cité, sans que le document complet ait pu être ouvert. Les autres sont lus dans les fichiers de l’Insee et de la Cour des comptes versionnés avec le site.</p></article>
         </div>
         <p class="source-links" id="txSources"></p>
       </div>

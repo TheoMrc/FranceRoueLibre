@@ -1,6 +1,7 @@
-/* Impôts: every tax with its yield, who pays, who receives, who collects, the cost of collection when a public report
-   gives it, Insee history 1995-2025, small taxes, tax gaps. One data file: data/impots.json (scripts/taxes-data.mjs).
-   Charts are plain SVG strings redrawn on resize; colours come from the --tx-* tokens so the theme switch needs no redraw. */
+/* Impôts: every tax and levy in one list (large taxes from the national accounts and budget documents, the Cour des comptes
+   inventory of taxes under 175 M€), with its yield, who pays, who receives, who collects, the cost of collection when a public
+   report gives it; Insee history 1995-2025; tax gaps. One data file: data/impots.json (scripts/taxes-data.mjs).
+   One colour scheme drives every global chart. Charts are SVG strings redrawn on resize; colours come from the --tx-* tokens. */
 (() => {
   const { esc, load } = FRL;
   const $ = id => document.getElementById(id);
@@ -23,16 +24,23 @@
   const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const reduced = () => globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
 
-  /* Fixed slot per group value (colour follows the entity, never its rank); values outside the list fold into grey. */
+  /* One colour scheme at a time for every global chart. Fixed slot per value (colour follows the entity, never its rank);
+     values outside the list fold into grey. « Avis de la Cour » only exists for taxes of the Cour des comptes inventory. */
+  const SCEN_LABELS = ['Petite taxe non citée par la Cour', 'Scénario 1 : revoir dès le budget 2026', 'Scénario 2 : réexaminer d’ici 2027', 'Scénario 3 : rationaliser', 'Plus de 175 M€ (hors inventaire)'];
   const GROUPS = {
-    category: { label: 'Ce qui est taxé', field: 'category', order: ['Consommation', 'Revenus', 'Bénéfices des sociétés', 'Patrimoine et transactions', 'Production et travail', 'Énergie et environnement', 'Santé, alcool, tabac, jeux', 'Taxes sectorielles et affectées'] },
-    beneficiary: { label: 'Qui reçoit', field: 'beneficiary', order: ['État', 'Sécurité sociale', 'Collectivités locales', 'Opérateurs et agences', 'Partagé', 'Union européenne'] },
-    collector: { label: 'Qui collecte', field: 'collector', order: ['DGFiP', 'Douane (DGDDI)', 'Urssaf', 'Autres collecteurs'] },
-    payer: { label: 'Qui paie', field: 'payer', order: ['Ménages', 'Entreprises', 'Ménages et entreprises'] }
+    base: { label: 'Ce qui est taxé', value: t => t.base, order: ['Consommation', 'Revenus des ménages', 'Production', 'Salaires', 'Patrimoine', 'Bénéfices des sociétés'] },
+    beneficiary: { label: 'Qui reçoit', value: t => t.beneficiary, order: ['État', 'Sécurité sociale', 'Collectivités locales', 'Opérateurs et agences', 'Partagé', 'Union européenne'] },
+    collector: { label: 'Qui collecte', value: t => t.collector, order: ['DGFiP', 'Douane (DGDDI)', 'Urssaf', 'Autres collecteurs'] },
+    payer: { label: 'Qui paie', value: t => t.payer, order: ['Ménages', 'Entreprises', 'Ménages et entreprises'] },
+    scenario: { label: 'Avis de la Cour des comptes', value: t => SCEN_LABELS[t.scenario == null ? 4 : t.scenario], order: [SCEN_LABELS[1], SCEN_LABELS[2], SCEN_LABELS[3], SCEN_LABELS[0], SCEN_LABELS[4]] }
   };
-  const slot = (group, value) => { const i = GROUPS[group].order.indexOf(value); return i < 0 ? 'other' : String(i + 1); };
+  const slot = (group, value) => {
+    const i = GROUPS[group].order.indexOf(value);
+    if (group === 'scenario') return ['1', '2', '3', 'other', 'none'][i] || 'other';
+    return i < 0 ? 'other' : String(i + 1);
+  };
   const color = (group, value) => `var(--tx-${slot(group, value)})`;
-  const lightText = (group, value) => ['3', '4', '5', 'other'].includes(slot(group, value));
+  const lightText = (group, value) => ['3', '4', '5', 'other', 'none'].includes(slot(group, value));
 
   /* Tooltip shared by every chart. */
   const tip = document.createElement('div');
@@ -122,134 +130,141 @@
     requestAnimationFrame(() => el.querySelectorAll('.tx-bars__fill').forEach(n => { n.style.width = n.style.getPropertyValue('--w'); }));
   }
 
+
   load('./data/impots.json').then(init).catch(error => {
     console.error(error);
     $('txTreemap').innerHTML = '<p class="tx-empty">Données indisponibles. Le site doit être servi par HTTP.</p>';
   });
 
   function init(data) {
-    const taxes = data.taxes;
-    const population = data.totals.population;
+    const ALL = data.all;
+    const TOT = data.totals, population = TOT.population;
     const insee = data.insee, macro = new Map(data.macro.map(m => [m.year, m]));
     const seriesOf = id => { const line = insee.lines.find(l => l.id === id); return line ? insee.years.map((year, i) => ({ x: year, value: line.values[i] })) : []; };
-    // Shown in charts: lines with an amount, minus fractions of another line (they would be counted twice).
-    const counted = taxes.filter(t => Number.isFinite(t.amount) && t.amount > 0 && !t.partOf);
+    const active = ALL.filter(t => t.inForce);
+    // Amounts in charts: taxes in force with a known amount, minus fractions of another line (they would be counted twice).
+    const counted = active.filter(t => Number.isFinite(t.amount) && t.amount > 0 && !t.partOf);
+    const unknown = active.filter(t => t.amount == null);
     const totalListed = counted.reduce((s, t) => s + t.amount, 0);
-    let group = 'category', selected = null;
+    const ranked = counted.slice().sort((a, b) => b.amount - a.amount);
+    const median = ranked[Math.floor(ranked.length / 2)].amount;
+    const byId = new Map(ALL.map(t => [t.id, t]));
+    let group = 'base', selected = null;
+    const gval = t => GROUPS[group].value(t);
+    const groupsPresent = list => { const seen = new Set(list.map(gval)); return [...GROUPS[group].order.filter(v => seen.has(v)), ...[...seen].filter(v => !GROUPS[group].order.includes(v))]; };
 
-    /* KPIs */
-    const TOT = data.totals;
+    /* ---------- Headline ---------- */
     $('txKpis').innerHTML = [
       ['Impôts perçus en ' + TOT.year, md(TOT.taxes), `Comptes nationaux Insee (${TOT.status}), hors cotisations sociales`],
       ['Prélèvements obligatoires', pct(TOT.levyRate), `du PIB en ${TOT.year}, cotisations sociales comprises (≈ ${md(TOT.levy)})`],
-      ['Par habitant', `${nf(Math.round(TOT.taxes * 1e9 / population), 0)} €`, `d’impôts en ${TOT.year}, hors cotisations`],
-      ['Prélèvements listés ici', String(taxes.length), `${counted.length} avec un produit connu ; la Cour des comptes compte à elle seule 243 petites taxes`]
-    ].map(([a, b, c]) => `<div class="kpi"><span>${a}</span><strong>${b}</strong><small>${c}</small></div>`).join('');
+      ['Prélèvements recensés ici', String(active.length), `en vigueur, dont ${unknown.length} au produit inconnu de l’État lui-même`],
+      ['La moitié rapporte moins de', meur(median), `par an ; les cinq plus gros font ${pct(100 * ranked.slice(0, 5).reduce((s, t) => s + t.amount, 0) / totalListed, 0)} du total`]
+    ].map(([a, b, c]) => `<div class="kpi"><span>${esc(a)}</span><strong>${esc(b)}</strong><small>${esc(c)}</small></div>`).join('');
+    $('txLead').textContent = `Les ${active.length} impôts, taxes et prélèvements recensés, de la TVA (${meur(ranked[0].amount)}) aux plus petites taxes (${meur(ranked.at(-1).amount)} pour la plus petite connue), sur les mêmes graphiques : ce qu’ils rapportent, qui les paie, qui les reçoit, qui les collecte, et ce que coûte leur collecte.`;
+    $('txOneLead').textContent = `Les ${counted.length} prélèvements dont le produit est connu, sur une échelle logarithmique où chaque graduation multiplie le montant par dix. ${unknown.length} autres n’ont pas de produit connu : ils sont comptés à part.`;
+
+    /* ---------- Colour scheme shared by the global charts ---------- */
+    const redraws = [];
+    document.querySelectorAll('.tx-color').forEach(box => box.addEventListener('click', event => {
+      const b = event.target.closest('button'); if (!b || b.dataset.color === group) return;
+      group = b.dataset.color;
+      document.querySelectorAll('.tx-color button').forEach(n => n.classList.toggle('active', n.dataset.color === group));
+      redraws.forEach(fn => fn());
+    }));
+    const legendHtml = (list, withAmount = true) => groupsPresent(list).map(v => {
+      const items = list.filter(t => gval(t) === v), sum = items.reduce((s, t) => s + (t.amount || 0), 0);
+      return `<span><i style="background:${color(group, v)}"></i>${esc(v)} <b>${withAmount ? meur(sum) : items.length}</b></span>`;
+    }).join('');
+    const tipFor = t => `<strong>${esc(t.name)}</strong><span class="tx-tip__value">${t.amount == null ? 'produit inconnu' : `${approx(t)}${meur(t.amount)}`}</span>${t.amount != null && !t.partOf && t.inForce ? ` · ${pct(100 * t.amount / totalListed, t.amount / totalListed < .001 ? 3 : 1)} du total` : ''}<br>${esc(t.year)} · ${esc(t.beneficiary)} · ${esc(t.collector)}${t.partOf ? '<br>Fraction d’une autre ligne, non additionnée' : ''}`;
 
     /* ---------- Treemap ---------- */
     const treemapEl = $('txTreemap');
-    function drawTreemap(W) {
+    const drawTreemap = W => {
       const H = Math.round(treemapEl.clientHeight || 480);
-      const g = GROUPS[group];
-      const buckets = new Map();
-      counted.forEach(t => { const key = g.order.includes(t[g.field]) ? t[g.field] : 'Autres'; if (!buckets.has(key)) buckets.set(key, []); buckets.get(key).push(t); });
-      const groups = [...buckets].map(([key, items]) => ({ key, value: items.reduce((s, t) => s + t.amount, 0), items: items.sort((a, b) => b.amount - a.amount) })).sort((a, b) => b.value - a.value);
+      const groups = groupsPresent(counted).map(key => ({ key, items: counted.filter(t => gval(t) === key).sort((a, b) => b.amount - a.amount) }))
+        .map(g => ({ ...g, value: g.items.reduce((s, t) => s + t.amount, 0) })).sort((a, b) => b.value - a.value);
       let cells = '';
       squarify(groups, 0, 0, W, H).forEach(gr => {
         squarify(gr.items.map(t => ({ ...t, value: t.amount })), gr.x, gr.y, gr.w, gr.h).forEach(c => {
           const fits = c.w > 64 && c.h > 30, big = c.w > 64 && c.h > 48;
-          const maxChars = Math.floor((c.w - 12) / 6.6), name = (c.short || c.name);
+          const maxChars = Math.floor((c.w - 12) / 6.6), name = c.short || c.name;
           const text = name.length > maxChars ? `${name.slice(0, Math.max(1, maxChars - 1))}…` : name;
-          cells += `<g class="tx-cell${lightText(group, c[g.field]) ? ' is-light' : ''}${selected === c.id ? ' is-selected' : ''}" data-id="${esc(c.id)}" tabindex="0" role="button" aria-label="${esc(c.name)} : ${esc(meur(c.amount))}"><rect x="${c.x.toFixed(1)}" y="${c.y.toFixed(1)}" width="${Math.max(0, c.w).toFixed(1)}" height="${Math.max(0, c.h).toFixed(1)}" rx="3" fill="${color(group, c[g.field])}"/>${fits ? `<text x="${(c.x + 7).toFixed(1)}" y="${(c.y + 18).toFixed(1)}">${esc(text)}</text>` : ''}${big ? `<text class="tx-cell__value" x="${(c.x + 7).toFixed(1)}" y="${(c.y + 34).toFixed(1)}">${meur(c.amount)}</text>` : ''}</g>`;
+          cells += `<g class="tx-cell${lightText(group, gval(c)) ? ' is-light' : ''}${selected === c.id ? ' is-selected' : ''}" data-id="${esc(c.id)}"${fits ? ' tabindex="0" role="button"' : ''} aria-label="${esc(c.name)} : ${esc(meur(c.amount))}"><rect x="${c.x.toFixed(2)}" y="${c.y.toFixed(2)}" width="${Math.max(0, c.w).toFixed(2)}" height="${Math.max(0, c.h).toFixed(2)}" rx="${Math.min(3, c.w / 3, c.h / 3).toFixed(1)}" fill="${color(group, gval(c))}"/>${fits ? `<text x="${(c.x + 7).toFixed(1)}" y="${(c.y + 18).toFixed(1)}">${esc(text)}</text>` : ''}${big ? `<text class="tx-cell__value" x="${(c.x + 7).toFixed(1)}" y="${(c.y + 34).toFixed(1)}">${meur(c.amount)}</text>` : ''}</g>`;
         });
       });
       treemapEl.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="group" aria-label="Impôts et taxes, surface proportionnelle au produit">${cells}</svg>`;
-      $('txLegend').innerHTML = groups.map(gr => `<span><i style="background:${gr.key === 'Autres' ? 'var(--tx-other)' : color(group, gr.key)}"></i>${esc(gr.key)} <b>${meur(gr.value)}</b></span>`).join('');
-    }
-    const byId = id => taxes.find(t => t.id === id);
-    treemapEl.addEventListener('pointermove', event => {
-      const cell = event.target.closest?.('.tx-cell'); if (!cell) { hideTip(); return; }
-      const t = byId(cell.dataset.id);
-      showTip(event, `<strong>${esc(t.name)}</strong><span class="tx-tip__value">${meur(t.amount)}</span> · ${pct(100 * t.amount / totalListed)} du total listé<br>${esc(t.year)} · ${esc(t.beneficiary)} · ${esc(t.collector)}`);
-    });
+      $('txLegend').innerHTML = legendHtml(counted);
+    };
+    redraws.push(responsive(treemapEl, drawTreemap));
+    treemapEl.addEventListener('pointermove', event => { const cell = event.target.closest?.('.tx-cell'); if (!cell) { hideTip(); return; } showTip(event, tipFor(byId.get(cell.dataset.id))); });
     treemapEl.addEventListener('pointerleave', hideTip);
     treemapEl.addEventListener('click', event => { const cell = event.target.closest?.('.tx-cell'); if (!cell) return; select(cell.dataset.id); if (innerWidth <= 960) $('txDetail').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'nearest' }); });
     treemapEl.addEventListener('keydown', event => { const cell = event.target.closest?.('.tx-cell'); if (cell && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); select(cell.dataset.id); } });
-    const redrawTreemap = responsive(treemapEl, drawTreemap);
-    $('txGroup').addEventListener('click', event => {
-      const b = event.target.closest('button'); if (!b) return;
-      group = b.dataset.group;
-      $('txGroup').querySelectorAll('button').forEach(n => n.classList.toggle('active', n === b));
-      redrawTreemap();
-    });
-    $('txTreemapNote').textContent = `${counted.length} prélèvements dont le produit est connu, ${meur(totalListed)} au total. Les années et les sources diffèrent d’une ligne à l’autre (voir le tableau) : ce total n’est pas celui des comptes nationaux. Les fractions d’un impôt reversées à un autre bénéficiaire ne sont pas comptées deux fois.`;
+    const tiny = counted.filter(t => t.amount < totalListed * 2e-5).length;
+    $('txTreemapNote').textContent = `${counted.length} prélèvements au produit connu, ${meur(totalListed)} au total. ${tiny} d’entre eux sont trop petits pour être visibles à cette échelle (moins de ${meur(totalListed * 2e-5)}) ; ${unknown.length} autres, au produit inconnu, n’y figurent pas. Les années et les sources diffèrent d’une ligne à l’autre : ce total n’est pas celui des comptes nationaux. Les fractions d’un impôt (par exemple la TVA reversée aux collectivités) ne sont pas comptées deux fois.`;
 
     /* ---------- Detail panel ---------- */
     // Without a cost for the tax itself, the overall rate of the administration that collects it, labelled as such.
     const globalRate = t => {
       const c = (data.costs.collectors || []).find(r => !r.focus && r.name.startsWith(t.collector.split(' ')[0]));
-      return c ? `<br><span class="muted">Pour l’ensemble des prélèvements qu’elle collecte, l’administration ${esc(t.collector)} dépense ${euros(c.per100)} pour 100 € (${c.year}).</span>` : '';
+      return c ? `<br><span class="muted">Pour l’ensemble de ce qu’elle collecte, l’administration ${esc(t.collector)} dépense ${euros(c.per100)} pour 100 € (${c.year}).</span>` : '';
     };
-    const checkNote = t => t.check === 'extrait' ? '<p class="note">Chiffre relevé dans un extrait du document cité : à confirmer sur le document complet.</p>' : '';
     function select(id) {
+      const t = byId.get(id); if (!t) return;
       selected = id;
       treemapEl.querySelectorAll('.tx-cell').forEach(n => n.classList.toggle('is-selected', n.dataset.id === id));
-      const t = byId(id); if (!t) return;
-      const per = t.amount ? t.amount * 1e6 / population : null;
-      const cost = t.cost;
-      $('txDetail').innerHTML = `<span class="tx-pill"><i style="background:${color('category', t.category)}"></i>${esc(t.category)}</span>
+      const per = t.amount ? t.amount * 1e6 / population : null, cost = t.cost;
+      $('txDetail').innerHTML = `<span class="tx-pill"><i style="background:${color('base', t.base)}"></i>${esc(t.base)}</span>${t.scenario ? ` <span class="tx-scen s${t.scenario}" title="${esc(SCEN_LABELS[t.scenario])}">Cour : scénario ${t.scenario}</span>` : ''}
         <h3>${esc(t.name)}${t.acronym ? ` <span class="muted">(${esc(t.acronym)})</span>` : ''}</h3>
-        <div class="tx-amount">${approx(t)}${meur(t.amount)}</div>
-        <p class="note">${esc(t.year)} · ${esc(t.status || '')}${per ? ` · ${euros(per)} par habitant` : ''}${t.amount && !t.partOf ? ` · ${pct(100 * t.amount / totalListed)} du total listé` : ''}</p>
+        <div class="tx-amount">${t.amount == null ? 'Produit inconnu' : `${approx(t)}${meur(t.amount)}`}</div>
+        <p class="note">${esc(t.year)} · ${esc(t.status || '')}${per ? ` · ${euros(per)} par habitant` : ''}${t.amount && !t.partOf && t.inForce ? ` · ${pct(100 * t.amount / totalListed, t.amount / totalListed < .001 ? 3 : 1)} du total recensé` : ''}${t.y2019 != null ? ` · ${meur(t.y2019)} en 2019` : ''}</p>
         ${t.insee ? `<div class="tx-spark" id="txSpark"></div><p class="note">Comptes nationaux Insee, ${insee.years[0]}–${insee.years.at(-1)}, Md€</p>` : ''}
-        <dl><dt>Qui paie</dt><dd>${esc(t.payer)}</dd><dt>Qui reçoit</dt><dd>${esc(t.beneficiaryDetail || t.beneficiary)}</dd><dt>Qui collecte</dt><dd>${esc(t.collectorDetail || t.collector)}</dd>${t.created ? `<dt>Créé en</dt><dd>${esc(t.created)}</dd>` : ''}
-        <dt>Coût de collecte</dt><dd>${cost ? `${cost.range ? `${esc(cost.range)} du produit` : cost.pct != null ? `${pct(cost.pct, 2)} du produit` : ''}${cost.meur != null ? `${cost.pct != null ? ' · ' : ''}${meur(cost.meur)}` : ''} <span class="muted">(${esc(cost.year || '')}, ${link(cost.url, cost.title || 'source')})</span>` : `<span class="muted">non publié pour cet impôt</span>${globalRate(t)}`}</dd></dl>
-        ${t.partOf ? `<p class="note">Fraction d’un autre impôt de la liste : non comptée une seconde fois dans les graphiques.</p>` : ''}
-        ${t.note ? `<p class="note">${esc(t.note)}</p>` : ''}${checkNote(t)}
+        <dl><dt>Ce qui est taxé</dt><dd>${esc(t.base)}</dd><dt>Qui paie</dt><dd>${esc(t.payer)}</dd><dt>Qui reçoit</dt><dd>${esc(t.beneficiaryDetail || t.beneficiary)}</dd><dt>Qui collecte</dt><dd>${esc(t.collectorDetail || t.collector)}</dd>${t.objective ? `<dt>Objectif</dt><dd>${esc(t.objective)} <span class="muted">(Cour des comptes)</span></dd>` : ''}${t.created ? `<dt>Créé en</dt><dd>${esc(t.created)}</dd>` : ''}${t.state && t.state !== 'en vigueur' ? `<dt>État</dt><dd>${esc(t.state)} entre 2019 et 2024</dd>` : ''}
+        <dt>Coût de collecte</dt><dd>${cost ? `${cost.range ? `${esc(cost.range)} du produit` : cost.pct != null ? `${pct(cost.pct, 2)} du produit` : ''}${cost.meur != null ? ` · ${meur(cost.meur)}` : ''} <span class="muted">(${esc(cost.year || '')}, ${link(cost.url, cost.title || 'source')})</span>` : `<span class="muted">non publié pour cette taxe</span>${globalRate(t)}`}</dd></dl>
+        ${t.scenario ? `<p class="note">Avis de la Cour des comptes : ${esc(data.lowYield.scenarioLabels[t.scenario])}.</p>` : ''}
+        ${t.note ? `<p class="note">${esc(t.note)}</p>` : ''}${t.check === 'extrait' ? '<p class="note">Chiffre relevé dans un extrait du document cité : à confirmer sur le document complet.</p>' : ''}
         <p class="note">Source : ${link(t.source?.url, t.source?.title || 'document')}${t.source?.ref ? ` · ${esc(t.source.ref)}` : ''}</p>`;
       if (t.insee) lineChart($('txSpark'), seriesOf(t.insee), { spark: true, label: `${t.name} depuis 1995` });
     }
-    select(counted.slice().sort((a, b) => b.amount - a.amount)[0]?.id);
+    select(ranked[0].id);
+    const openDetail = id => { select(id); $('txDetail').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' }); };
 
-    /* ---------- Log strip: each tax by order of magnitude ---------- */
+    /* ---------- Log strip: every tax, one row per value of the colour scheme ---------- */
     const strip = $('txStrip');
-    responsive(strip, W => {
-      const cats = GROUPS.category.order.filter(c => counted.some(t => t.category === c));
-      const narrow = W < 560, rowH = narrow ? 48 : 34, L = narrow ? 8 : 200, R = 14, T = 8, B = 30, H = T + B + rowH * cats.length;
-      const lo = Math.floor(Math.log10(Math.min(...counted.map(t => t.amount)))), hi = Math.ceil(Math.log10(Math.max(...counted.map(t => t.amount))));
-      const x = v => L + (W - L - R) * (Math.log10(v) - lo) / (hi - lo);
-      let svg = '';
-      for (let p = lo; p <= hi; p++) svg += `<line class="tx-grid" x1="${x(10 ** p)}" x2="${x(10 ** p)}" y1="${T}" y2="${H - B}"/><text class="tx-tick" x="${x(10 ** p)}" y="${H - 10}" text-anchor="middle">${meur(10 ** p).replace(' ', ' ')}</text>`;
-      svg += `<line class="tx-ref" x1="${x(175)}" x2="${x(175)}" y1="${T}" y2="${H - B}"/>`;
-      cats.forEach((c, i) => {
-        const cy = T + rowH * i + rowH / 2 + (narrow ? 8 : 0);
-        if (!narrow) svg += `<text class="tx-label tx-label--muted" x="${L - 12}" y="${cy + 4}" text-anchor="end">${esc(c)}</text>`;
+    const drawStrip = W => {
+      const rows = groupsPresent(active);
+      const narrow = W < 640, rowH = narrow ? 62 : 40, L = narrow ? 8 : 230, R = narrow ? 8 : 104, T = 8, B = 30, H = T + B + rowH * rows.length;
+      const lo = -2, hi = 6, x = v => L + (W - L - R) * (Math.log10(Math.max(v, 10 ** lo)) - lo) / (hi - lo);
+      let svg = '', labels = '';
+      for (let p = lo; p <= hi; p++) {
+        svg += `<line class="tx-grid" x1="${x(10 ** p)}" x2="${x(10 ** p)}" y1="${T}" y2="${H - B}"/>`;
+        if (!narrow || p % 2 === 0) svg += `<text class="tx-tick" x="${x(10 ** p)}" y="${H - 10}" text-anchor="middle">${meur(10 ** p).replace(' ', ' ')}</text>`;
+      }
+      svg += `<line class="tx-ref" x1="${x(175)}" x2="${x(175)}" y1="${T}" y2="${H - B}"/><text class="tx-ref-label" x="${x(175) + 5}" y="${H - B - 5}">175 M€</text>`;
+      rows.forEach((v, i) => {
+        const top = T + rowH * i, cy = top + rowH / 2 + (narrow ? 10 : 0);
+        const items = counted.filter(t => gval(t) === v).sort((a, b) => b.amount - a.amount), missing = unknown.filter(t => gval(t) === v).length;
+        labels += narrow ? `<text class="tx-tick tx-tick--strong tx-halo" x="${L}" y="${top + 13}">${esc(v)}${missing ? ` · ${missing} au produit inconnu` : ''}</text>`
+          : `<text class="tx-label" x="${L - 14}" y="${cy + 4}" text-anchor="end">${esc(v)}</text>${missing ? `<text class="tx-tick" x="${W - R + 10}" y="${cy + 4}">+ ${missing} inconnu${missing > 1 ? 's' : ''}</text>` : ''}`;
         svg += `<line class="tx-axis" x1="${L}" x2="${W - R}" y1="${cy}" y2="${cy}" opacity=".25"/>`;
-        // Spread overlapping dots vertically within the row.
         const placed = [];
-        counted.filter(t => t.category === c).sort((a, b) => b.amount - a.amount).forEach(t => {
+        items.forEach(t => {
           const cx = x(t.amount); let dy = 0;
-          for (const k of [0, -7, 7, -14, 14]) { if (!placed.some(p => Math.abs(p.x - cx) < 9 && p.dy === k)) { dy = k; break; } }
+          for (const k of [0, -6, 6, -12, 12]) { if (!placed.some(p => Math.abs(p.x - cx) < 8 && p.dy === k)) { dy = k; break; } }
           placed.push({ x: cx, dy });
-          svg += `<circle class="tx-dot" data-id="${esc(t.id)}" cx="${cx.toFixed(1)}" cy="${cy + dy}" r="5.5" fill="${color('category', c)}"/>`;
+          svg += `<circle class="tx-dot" data-id="${esc(t.id)}" cx="${cx.toFixed(1)}" cy="${cy + dy}" r="4.5" fill="${color(group, v)}"/>`;
         });
       });
-      if (narrow) svg += cats.map((c, i) => `<text class="tx-tick tx-tick--strong" x="${L}" y="${T + rowH * i + 12}">${esc(c)}</text>`).join('');
-      svg += `<text class="tx-ref-label" x="${x(175) + 5}" y="${narrow ? H - B - 4 : T + 10}">175 M€</text>`;
-      strip.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Produit de chaque impôt sur une échelle logarithmique">${svg}</svg>`;
-    });
-    strip.addEventListener('pointermove', event => {
-      const dot = event.target.closest?.('.tx-dot'); if (!dot) { hideTip(); return; }
-      const t = byId(dot.dataset.id);
-      showTip(event, `<strong>${esc(t.name)}</strong><span class="tx-tip__value">${meur(t.amount)}</span><br>${esc(t.year)} · ${esc(t.category)}`);
-    });
+      strip.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Produit de chaque impôt sur une échelle logarithmique">${svg}${labels}</svg>`;
+    };
+    redraws.push(responsive(strip, drawStrip));
+    strip.addEventListener('pointermove', event => { const dot = event.target.closest?.('.tx-dot'); if (!dot) { hideTip(); return; } showTip(event, tipFor(byId.get(dot.dataset.id))); });
     strip.addEventListener('pointerleave', hideTip);
     strip.addEventListener('click', event => { const dot = event.target.closest?.('.tx-dot'); if (dot) { select(dot.dataset.id); $('ensemble').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth' }); } });
     const small = counted.filter(t => t.amount < 175);
-    $('txStripNote').textContent = `Ligne orange : 175 M€, seuil retenu par la Cour des comptes (2025) pour les « taxes à faible rendement » ; elle en compte 243. ${small.length} prélèvements de cette liste sont en dessous, pour ${meur(small.reduce((s, t) => s + t.amount, 0))} au total. Cliquez sur un point pour son détail.`;
+    $('txStripNote').textContent = `Ligne orange : 175 M€, seuil de la Cour des comptes pour les « taxes à faible rendement ». ${small.length} prélèvements au produit connu sont en dessous, pour ${meur(small.reduce((s, t) => s + t.amount, 0))} au total, soit ${pct(100 * small.reduce((s, t) => s + t.amount, 0) / totalListed, 2)} des recettes recensées. Les points se décalent verticalement quand ils se chevauchent. Cliquez sur un point pour sa fiche.`;
 
     /* ---------- Pareto ---------- */
-    const ranked = counted.slice().sort((a, b) => b.amount - a.amount);
     let run = 0; const cumulative = ranked.map(t => { run += t.amount; return { t, share: 100 * run / totalListed }; });
     const firstAt = s => cumulative.findIndex(c => c.share >= s) + 1;
     const pareto = $('txPareto');
@@ -258,23 +273,57 @@
       const x = i => L + (W - L - R) * (i / Math.max(1, n - 1)), y = v => T + (H - T - B) * (1 - v / 100);
       let svg = '';
       for (let v = 0; v <= 100; v += 25) svg += `<line class="tx-grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text class="tx-tick" x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v} %</text>`;
-      [1, 10, 20, 50, 100].filter(k => k <= n).forEach(k => { svg += `<text class="tx-tick" x="${x(k - 1)}" y="${H - 8}" text-anchor="middle">${k}</text>`; });
+      [1, 50, 100, 150].filter(k => k <= n && x(n - 1) - x(k - 1) > 30).concat(n).forEach(k => { svg += `<text class="tx-tick" x="${x(k - 1)}" y="${H - 8}" text-anchor="middle">${k}</text>`; });
       const d = cumulative.map((c, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(c.share).toFixed(1)}`).join('');
       svg += `<path class="tx-line-area" d="${d}L${x(n - 1)},${y(0)}L${x(0)},${y(0)}Z"/><path class="tx-line-path" d="${d}"/>`;
-      [80, 95].forEach(s => { const k = firstAt(s); if (k > 0) { const cx = x(k - 1), cy = y(cumulative[k - 1].share); svg += `<circle class="tx-focus" cx="${cx}" cy="${cy}" r="4.5"/><text class="tx-label" x="${cx + 8}" y="${cy + 16}">${k} impôts = ${s} %</text>`; } });
+      [80, 99].forEach((s, j) => { const k = firstAt(s); if (k > 0) { const cx = x(k - 1), cy = y(cumulative[k - 1].share); svg += `<circle class="tx-focus" cx="${cx}" cy="${cy}" r="4.5"/><text class="tx-label" x="${cx + 8}" y="${cy + (j ? 18 : 16)}">${k} impôts = ${s} %</text>`; } });
       pareto.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Part cumulée des recettes selon le nombre d’impôts">${svg}<g class="tx-hover"></g><rect class="tx-hit" x="${L}" y="0" width="${W - L - R}" height="${H}"/></svg>`;
       const hit = pareto.querySelector('.tx-hit'), hover = pareto.querySelector('.tx-hover');
       hit.addEventListener('pointermove', event => {
         const box = pareto.querySelector('svg').getBoundingClientRect(), mx = (event.clientX - box.left) * W / box.width;
         const i = Math.max(0, Math.min(n - 1, Math.round((mx - L) / (W - L - R) * (n - 1)))), c = cumulative[i];
         hover.innerHTML = `<line class="tx-cursor" x1="${x(i)}" x2="${x(i)}" y1="${T}" y2="${H - B}"/><circle class="tx-focus" cx="${x(i)}" cy="${y(c.share)}" r="5"/>`;
-        showTip(event, `<strong>${i + 1}<sup>e</sup> : ${esc(c.t.name)}</strong>${meur(c.t.amount)}<br>Les ${i + 1} premiers : <span class="tx-tip__value">${pct(c.share)}</span>`);
+        showTip(event, `<strong>${i + 1}<sup>e</sup> : ${esc(c.t.name)}</strong>${meur(c.t.amount)}<br>Les ${i + 1} premiers : <span class="tx-tip__value">${pct(c.share, c.share > 99 ? 2 : 1)}</span>`);
       });
       hit.addEventListener('pointerleave', () => { hover.innerHTML = ''; hideTip(); });
     });
-    $('txParetoNote').textContent = `Impôts classés du plus gros au plus petit (axe horizontal : rang). Les ${Math.min(5, cumulative.length)} premiers (${ranked.slice(0, 5).map(t => t.short || t.name).join(', ')}) font ${pct(cumulative[Math.min(4, cumulative.length - 1)]?.share)} des recettes listées.`;
+    const k99 = firstAt(99);
+    $('txParetoNote').textContent = `Prélèvements classés du plus gros au plus petit (axe horizontal : rang). Les cinq premiers (${ranked.slice(0, 5).map(t => t.short || t.name).join(', ')}) font ${pct(cumulative[4].share)} des recettes recensées ; les ${counted.length - k99} derniers, moins de 1 %.`;
 
-    hbars($('txTop'), ranked.slice(0, 15).map(t => ({ label: t.name, sub: `${esc(t.year)} · ${esc(t.beneficiary)}`, value: t.amount })), { format: meur });
+    /* ---------- Share of taxes vs share of money, per value of the colour scheme ---------- */
+    const shareEl = $('txShare');
+    const drawShare = () => {
+      const rows = groupsPresent(active).map(v => {
+        const n = active.filter(t => gval(t) === v).length, sum = counted.filter(t => gval(t) === v).reduce((s, t) => s + t.amount, 0);
+        return { v, n, sum, pn: 100 * n / active.length, ps: 100 * sum / totalListed };
+      });
+      shareEl.innerHTML = `<div class="tx-share__legend"><span><i class="is-count"></i>Part du nombre de prélèvements</span><span><i></i>Part de l’argent</span></div><ul class="tx-share">${rows.map(r => `<li><div class="tx-bars__line"><span>${esc(r.v)}</span><strong>${r.n} · ${meur(r.sum)}</strong></div>
+        <span class="tx-share__bar is-count" style="--c:${color(group, r.v)};--w:${r.pn.toFixed(2)}%"><b>${pct(r.pn, 0)}</b></span><span class="tx-share__bar" style="--c:${color(group, r.v)};--w:${r.ps.toFixed(2)}%"><b>${pct(r.ps, r.ps < 1 ? 1 : 0)}</b></span></li>`).join('')}</ul>`;
+    };
+    drawShare(); redraws.push(drawShare);
+    $('txShareNote').textContent = 'Barre claire : part des prélèvements en vigueur (produit connu ou non) ; barre foncée : part de l’argent recensé. L’écart entre les deux montre où se concentrent les petites taxes.';
+
+    /* ---------- Waffle: one cell per tax in force, grouped by collector ---------- */
+    const waffleEl = $('txWaffle');
+    const drawWaffle = () => {
+      const by = group === 'collector' ? 'base' : 'collector';
+      const blocks = GROUPS[by].order.filter(v => active.some(t => GROUPS[by].value(t) === v));
+      const order = GROUPS[group].order;
+      waffleEl.innerHTML = blocks.map(b => {
+        const items = active.filter(t => GROUPS[by].value(t) === b).sort((p, q) => (order.indexOf(gval(p)) + 99) % 99 - (order.indexOf(gval(q)) + 99) % 99 || (q.amount ?? -1) - (p.amount ?? -1));
+        const sum = items.reduce((s, t) => s + (t.partOf ? 0 : t.amount || 0), 0), miss = items.filter(t => t.amount == null).length;
+        return `<div class="tx-waffle__group"><h4>${esc(b)} <span>· ${items.length} prélèvements · ${meur(sum)}${miss ? ` · ${miss} au produit inconnu` : ''}</span></h4><div class="tx-waffle__cells">${items.map(t => `<button type="button" data-id="${esc(t.id)}" class="${t.amount == null ? 'is-unknown' : ''}" style="--cell:${color(group, gval(t))}" aria-label="${esc(t.name)} : ${t.amount == null ? 'produit inconnu' : meur(t.amount)}"></button>`).join('')}</div></div>`;
+      }).join('') + `<div class="tx-legend">${legendHtml(active, false)}<span><i class="is-hollow"></i>Case vide : produit inconnu <b>${unknown.length}</b></span></div>`;
+    };
+    drawWaffle(); redraws.push(drawWaffle);
+    waffleEl.addEventListener('pointermove', event => { const b = event.target.closest?.('[data-id]'); if (!b) { hideTip(); return; } showTip(event, tipFor(byId.get(b.dataset.id))); });
+    waffleEl.addEventListener('pointerleave', hideTip);
+    waffleEl.addEventListener('click', event => { const b = event.target.closest?.('[data-id]'); if (b) openDetail(b.dataset.id); });
+    const LY = data.lowYield;
+    $('txWaffleNote').innerHTML = `Groupées par administration qui collecte (ou par ce qui est taxé quand la couleur montre le collecteur). Couleur « Avis de la Cour » : la Cour des comptes propose de revoir 44 taxes dès le budget 2026, d’en réexaminer 30 d’ici 2027 et d’en rationaliser 99 autres (${link(`${LY.report}#page=12`, 'rapport, p. 11-12')}) ; son annexe n’en nomme qu’une partie, seules les taxes nommées sont colorées. Cliquez sur une case pour sa fiche.`;
+
+    hbars($('txTop'), ranked.slice(0, 15).map(t => ({ label: t.short || t.name, sub: `${esc(t.year)} · ${esc(t.beneficiary)}`, value: t.amount })), { format: meur });
+    hbars($('txBottom'), ranked.slice(-15).reverse().map(t => ({ label: t.name, sub: `${esc(t.year)} · ${esc(t.beneficiaryDetail || t.beneficiary)}`, value: t.amount })), { format: meur });
 
     /* ---------- Insee history: stacked categories ---------- */
     const cats = insee.lines.filter(l => !l.parent);
@@ -381,7 +430,8 @@
         for (let p = lo; p <= hi; p++) svg += `<line class="tx-grid" x1="${x(10 ** p)}" x2="${x(10 ** p)}" y1="${T}" y2="${H - B}"/><text class="tx-tick" x="${x(10 ** p)}" y="${H - 10}" text-anchor="middle">${nf(10 ** p, 2)} €</text>`;
         dots.forEach((r, i) => {
           const cy = T + rowH * i + rowH / 2 + (narrow ? 8 : 0), cx = x(r.per100);
-          svg += narrow ? `<text class="tx-tick tx-tick--strong" x="${L}" y="${cy - 12}">${esc(r.name)} (${esc(r.year)})</text>` : `<text class="tx-label" x="${L - 12}" y="${cy + 4}" text-anchor="end">${esc(r.name)} <tspan class="tx-label--muted">${esc(r.year)}</tspan></text>`;
+          const lab = `${r.name} (${r.year})`, maxc = Math.floor((W - 16) / 6.2);
+          svg += narrow ? `<text class="tx-tick tx-tick--strong" x="${L}" y="${cy - 12}">${esc(lab.length > maxc ? `${lab.slice(0, maxc - 1)}…` : lab)}</text>` : `<text class="tx-label" x="${L - 12}" y="${cy + 4}" text-anchor="end">${esc(r.name)} <tspan class="tx-label--muted">${esc(r.year)}</tspan></text>`;
           svg += `<line class="tx-axis" x1="${x(10 ** lo)}" x2="${cx}" y1="${cy}" y2="${cy}"/><circle class="tx-dot" data-i="${i}" cx="${cx.toFixed(1)}" cy="${cy}" r="6" fill="${r.per100 >= 5 ? 'var(--tx-8)' : 'var(--tx-1)'}"/><text class="tx-label" x="${cx + 10}" y="${cy + 4}">${r.range ? esc(r.range) : `${nf(r.per100, r.per100 < 1 ? 2 : 1)} €`}</text>`;
         });
         dotsEl.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Coût de collecte pour 100 euros perçus, échelle logarithmique">${svg}</svg>`;
@@ -392,139 +442,55 @@
         showTip(event, `<strong>${esc(r.name)}</strong><span class="tx-tip__value">${r.range ? esc(r.range) : `${nf(r.per100, 2)} €`} pour 100 € perçus</span><br>${esc(r.year)}${r.yield ? ` · rendement ${meur(r.yield)}` : ''}`);
       });
       dotsEl.addEventListener('pointerleave', hideTip);
-      $('txCostDotsNote').innerHTML = `Échelle logarithmique : chaque graduation multiplie le coût par dix. En rouge, plus de 5 € pour 100 €. Sources : ${[...new Map(dots.map(r => [r.url, r])).values()].map((r, i) => link(r.url, `[${i + 1}]`)).join(' ')}. Les coûts sont ceux du rapport cité, à sa date ; certaines taxes ont depuis été supprimées ou réformées.${C.noLossQuote ? ` La Cour des comptes (2025) : « ${esc(C.noLossQuote.text)} » (${link(C.noLossQuote.url, 'p. 47')}). Le cas le plus cité, la taxe sur les appareils automatiques (flippers, jeux vidéo), qui rapportait quelques centaines de milliers d’euros (${link('https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf', 'IGF, 2014')}), a été supprimée en 2015 (${link('https://www.senat.fr/questions/base/2015/qSEQ150114502.html', 'Sénat')}) sans que son coût de gestion ait été publié.` : ''}`;
+      $('txCostDotsNote').innerHTML = `Échelle logarithmique : chaque graduation multiplie le coût par dix. En rouge, plus de 5 € pour 100 €. Sources : ${[...new Map(dots.map(r => [r.url, r])).values()].map((r, i) => link(r.url, `[${i + 1}]`)).join(' ')}. Les coûts sont ceux du rapport cité, à sa date ; certaines taxes ont depuis été supprimées ou réformées.${C.noLossQuote ? ` Le cas le plus cité, la taxe sur les appareils automatiques (flippers, jeux vidéo), qui rapportait quelques centaines de milliers d’euros (${link('https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf', 'IGF, 2014')}), a été supprimée en 2015 (${link('https://www.senat.fr/questions/base/2015/qSEQ150114502.html', 'Sénat')}) sans que son coût de gestion ait été publié.` : ''}`;
     } else dotsEl.innerHTML = '<p class="tx-empty">Aucun coût publié.</p>';
     $('txCounts').innerHTML = (data.counts || []).map(c => `<div class="tx-count"><strong>${esc(c.value)}</strong><p>${esc(c.text)}</p>${link(c.url, c.title || 'source')}</div>`).join('');
 
-    /* ---------- The 243 low-yield taxes (Cour des comptes inventory) ---------- */
-    const LY = data.lowYield;
-    if (LY) {
-      const lyActive = t => t.state === 'en vigueur' || t.state === 'créée';
-      const scen = t => t.scenarios.length ? Math.min(...t.scenarios.map(s => s.scenario)) : 0;
-      const collGroup = t => /^DGFiP/.test(t.collector) ? 'DGFiP' : /^DGDDI/.test(t.collector) ? 'Douane (DGDDI)' : /^(URSSAF|ACOSS)/i.test(t.collector) ? 'Urssaf' : 'Collecteurs spécialisés';
-      const active = LY.taxes.filter(lyActive), known = active.filter(t => t.y2024 != null);
-      const R = LY.report, lyLink = (page, text) => link(`${R}#page=${page}`, text);
-      const scenCount = k => active.filter(t => scen(t) === k).length;
-      $('txLowKpis').innerHTML = [
-        ['Taxes à faible rendement en 2024', String(LY.totals.inForce2024), `moins de ${LY.threshold} M€ chacune ; ${LY.totals.removedSince2019} autres supprimées depuis 2019`],
-        ['Ce qu’elles rapportent', `${nf(LY.totals.yield2024 / 1000, 2)} Md€`, `pour les ${LY.totals.knownYield2024} dont le rendement est connu`],
-        ['Rendement inconnu', String(LY.totals.inForce2024 - LY.totals.knownYield2024), 'taxes dont ni l’État ni la Cour ne connaissent le produit'],
-        ['Visées par la Cour', '173', 'dans trois scénarios de suppression, fusion ou réexamen (44 + 30 + 99)']
-      ].map(([a, b, c]) => `<div class="kpi"><span>${esc(a)}</span><strong>${esc(b)}</strong><small>${esc(c)}</small></div>`).join('');
-      const Q = C.noLossQuote;
-      if (Q) $('txLowQuote').innerHTML = `« ${esc(Q.text)} »${link(Q.url, Q.title)}`;
-      const COLORS = {
-        scenario: { label: t => ['Non citée dans les scénarios', 'Scénario 1 : revenir dessus dès le budget 2026', 'Scénario 2 : réexaminer d’ici 2027', 'Scénario 3 : rationaliser (programmation)'][scen(t)], order: ['Scénario 1 : revenir dessus dès le budget 2026', 'Scénario 2 : réexaminer d’ici 2027', 'Scénario 3 : rationaliser (programmation)', 'Non citée dans les scénarios'] },
-        objective: { label: t => ({ 'Rendement': 'Rapporter de l’argent', 'Service rendu': 'Payer un service rendu', 'Incitation': 'Inciter', 'Correction défaillance marché': 'Corriger un marché' })[t.objective] || t.objective, order: ['Rapporter de l’argent', 'Payer un service rendu', 'Inciter', 'Corriger un marché'] },
-        payer: { label: t => t.payer, order: ['Entreprises', 'Particuliers', 'Autres'] }
-      };
-      let lyColor = 'scenario';
-      const cellColor = t => { const o = COLORS[lyColor], v = o.label(t), i = o.order.indexOf(v); return lyColor === 'scenario' && i === 3 ? 'var(--tx-other)' : i < 0 ? 'var(--tx-other)' : `var(--tx-${i + 1})`; };
-      const GROUP_ORDER = ['DGFiP', 'Douane (DGDDI)', 'Urssaf', 'Collecteurs spécialisés'];
-      const lyById = new Map(LY.taxes.map(t => [String(t.id), t]));
-      function drawWaffle() {
-        const o = COLORS[lyColor];
-        $('txWaffle').innerHTML = GROUP_ORDER.map(g => {
-          const items = active.filter(t => collGroup(t) === g).sort((a, b) => (scen(a) || 9) - (scen(b) || 9) || (b.y2024 ?? -1) - (a.y2024 ?? -1));
-          const sum = items.reduce((s, t) => s + (t.y2024 || 0), 0);
-          return `<div class="tx-waffle__group"><h4>${esc(g)} <span>· ${items.length} taxes · ${meur(sum)} connus</span></h4><div class="tx-waffle__cells">${items.map(t => `<button type="button" data-ly="${t.id}" class="${t.y2024 == null ? 'is-unknown' : ''}" style="background:${cellColor(t)};--cell:${cellColor(t)}" aria-label="${esc(t.label)} : ${t.y2024 == null ? 'rendement inconnu' : meur(t.y2024)}"></button>`).join('')}</div></div>`;
-        }).join('');
-        const counts = o.order.map(v => [v, active.filter(t => o.label(t) === v).length]).filter(([, n]) => n);
-        $('txWaffleLegend').innerHTML = counts.map(([v, n]) => `<span><i style="background:${lyColor === 'scenario' && v === o.order[3] ? 'var(--tx-other)' : `var(--tx-${o.order.indexOf(v) + 1})`}"></i>${esc(v)} <b>${n}</b></span>`).join('') + `<span><i class="is-hollow"></i>Case vide : rendement inconnu <b>${active.length - known.length}</b></span>`;
-      }
-      drawWaffle();
-      $('txWaffleNote').innerHTML = `Survolez une case pour la taxe, cliquez pour la retrouver dans le tableau. Les scénarios de la Cour visent 44, 30 et 99 taxes (${lyLink(12, 'rapport, p. 11-12')}) ; l’annexe ne nomme qu’une partie d’entre elles, seules les taxes nommées sont colorées. ${LY.unmatchedScenarioLines.length} taxes citées dans les scénarios n’ont pas de ligne correspondante dans l’inventaire : ${LY.unmatchedScenarioLines.map(u => esc(u.label)).join(', ')}.`;
-      $('txLowColor').addEventListener('click', event => { const b = event.target.closest('button'); if (!b) return; lyColor = b.dataset.color; $('txLowColor').querySelectorAll('button').forEach(n => n.classList.toggle('active', n === b)); drawWaffle(); });
-      const lyTip = t => `<strong>${esc(t.label)}</strong><span class="tx-tip__value">${t.y2024 == null ? 'rendement 2024 inconnu' : meur(t.y2024)}</span>${t.y2019 != null ? ` · ${meur(t.y2019)} en 2019` : ''}<br>${esc(t.payer)} · ${esc(t.collector)}<br>Au profit de : ${esc(t.beneficiary)}${scen(t) ? `<br>Scénario ${scen(t)} de la Cour` : ''}`;
-      $('txWaffle').addEventListener('pointermove', event => { const b = event.target.closest?.('[data-ly]'); if (!b) { hideTip(); return; } showTip(event, lyTip(lyById.get(b.dataset.ly))); });
-      $('txWaffle').addEventListener('pointerleave', hideTip);
-      $('txWaffle').addEventListener('click', event => { const b = event.target.closest?.('[data-ly]'); if (!b) return; const t = lyById.get(b.dataset.ly); $('txLowSearch').value = t.label; $('txLowState').value = ''; lyShowAll = true; drawLowTable(); $('txLowTable').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' }); });
-
-      // Known yields on a log axis, one row per objective.
-      const strip2 = $('txLowStrip');
-      responsive(strip2, W => {
-        const o = COLORS.objective, rows = o.order, narrow = W < 560, rowH = narrow ? 48 : 36, L = narrow ? 8 : 170, R = 14, T = 8, B = 30, H = T + B + rowH * rows.length;
-        const lo = -2, hi = 3, x = v => L + (W - L - R) * (Math.log10(Math.max(v, 0.01)) - lo) / (hi - lo);
-        let svg = '';
-        for (let p = lo; p <= hi; p++) svg += `<line class="tx-grid" x1="${x(10 ** p)}" x2="${x(10 ** p)}" y1="${T}" y2="${H - B}"/><text class="tx-tick" x="${x(10 ** p)}" y="${H - 10}" text-anchor="middle">${meur(10 ** p).replace(' ', ' ')}</text>`;
-        svg += `<line class="tx-ref" x1="${x(175)}" x2="${x(175)}" y1="${T}" y2="${H - B}"/><text class="tx-ref-label" x="${x(175) + 5}" y="${H - B - 4}">175 M€</text>`;
-        rows.forEach((r, i) => {
-          const cy = T + rowH * i + rowH / 2 + (narrow ? 8 : 0);
-          svg += narrow ? `<text class="tx-tick tx-tick--strong" x="${L}" y="${cy - 13}">${esc(r)}</text>` : `<text class="tx-label tx-label--muted" x="${L - 12}" y="${cy + 4}" text-anchor="end">${esc(r)}</text>`;
-          svg += `<line class="tx-axis" x1="${L}" x2="${W - R}" y1="${cy}" y2="${cy}" opacity=".25"/>`;
-          const placed = [];
-          known.filter(t => o.label(t) === r).sort((a, b) => b.y2024 - a.y2024).forEach(t => {
-            const cx = x(t.y2024); let dy = 0;
-            for (const k of [0, -6, 6, -12, 12]) { if (!placed.some(p => Math.abs(p.x - cx) < 8 && p.dy === k)) { dy = k; break; } }
-            placed.push({ x: cx, dy });
-            svg += `<circle class="tx-dot" data-ly="${t.id}" cx="${cx.toFixed(1)}" cy="${cy + dy}" r="4.5" fill="var(--tx-${i + 1})"/>`;
-          });
-        });
-        strip2.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Rendement 2024 des petites taxes, échelle logarithmique">${svg}</svg>`;
-      });
-      strip2.addEventListener('pointermove', event => { const d = event.target.closest?.('[data-ly]'); if (!d) { hideTip(); return; } showTip(event, lyTip(lyById.get(d.dataset.ly))); });
-      strip2.addEventListener('pointerleave', hideTip);
-      const under1 = known.filter(t => t.y2024 < 1).length, under10 = known.filter(t => t.y2024 < 10).length;
-      const med = known.map(t => t.y2024).sort((a, b) => a - b)[Math.floor(known.length / 2)];
-      $('txLowStripNote').innerHTML = `${under1} taxes rapportent moins d’un million d’euros, ${under10} moins de dix millions ; la moitié rapporte moins de ${meur(med)}. Trois taxes dépassent légèrement 175 M€ en 2024 mais restent dans l’inventaire car elles étaient sous le seuil en 2019. Source : ${link(LY.url, 'Cour des comptes, annexe « Listing des taxes concernées »')}.`;
-
-      const tally = key => { const m = new Map(); active.forEach(t => { const k = key(t); const r = m.get(k) || { n: 0, sum: 0, unknown: 0 }; r.n++; if (t.y2024 != null) r.sum += t.y2024; else r.unknown++; m.set(k, r); }); return [...m].sort((a, b) => b[1].n - a[1].n); };
-      hbars($('txLowBenef'), tally(t => t.beneficiary).slice(0, 12).map(([k, r]) => ({ label: k, sub: `${meur(r.sum)} connus${r.unknown ? ` · ${r.unknown} sans rendement connu` : ''}`, value: r.n })), { format: v => `${v} taxe${v > 1 ? 's' : ''}` });
-      hbars($('txLowCollect'), tally(collGroup).map(([k, r]) => ({ label: k, sub: `${meur(r.sum)} connus${r.unknown ? ` · ${r.unknown} sans rendement connu` : ''}`, value: r.n })), { format: v => `${v} taxe${v > 1 ? 's' : ''}` });
-      $('txLowCollectNote').innerHTML = `« Collecteurs spécialisés » : agences, ministères, organismes professionnels, collectivités… (${new Set(active.filter(t => collGroup(t) === 'Collecteurs spécialisés').map(t => t.collector)).size} collecteurs différents). Selon la Cour, la collecte y coûte de 3 à 30 fois plus cher, rapportée au rendement, qu’à la DGFiP (${lyLink(54, 'p. 54')}).`;
-
-      // Table
-      const sel = $('txLowCollector');
-      GROUP_ORDER.forEach(g => sel.insertAdjacentHTML('beforeend', `<option>${esc(g)}</option>`));
-      let lySort = 'y2024', lyDir = -1, lyShowAll = false;
-      const LCOLS = [['label', 'Taxe'], ['y2024', 'Rendement 2024', 'num'], ['y2019', '2019', 'num'], ['objective', 'Objectif'], ['payer', 'Qui paie'], ['collector', 'Collecteur'], ['beneficiary', 'Au profit de'], ['scen', 'Scénario'], ['state', 'État']];
-      function drawLowTable() {
-        const q = norm($('txLowSearch').value), st = $('txLowState').value, sc = $('txLowScenario').value, cg = sel.value;
-        let rows = LY.taxes.filter(t => (!q || norm(`${t.label} ${t.collector} ${t.beneficiary}`).includes(q)) && (!st || (st === 'active') === lyActive(t)) && (sc === '' || String(scen(t)) === sc) && (!cg || collGroup(t) === cg));
-        const val = (t, k) => k === 'scen' ? (scen(t) || 9) : k === 'y2024' || k === 'y2019' ? (t[k] ?? -1) : t[k];
-        rows.sort((a, b) => { const va = val(a, lySort), vb = val(b, lySort); return (typeof va === 'number' && typeof vb === 'number' ? va - vb : String(va || '').localeCompare(String(vb || ''), 'fr')) * lyDir; });
-        const total = rows.length, sum = rows.reduce((s, t) => s + (lyActive(t) ? t.y2024 || 0 : 0), 0);
-        if (!lyShowAll) rows = rows.slice(0, 50);
-        $('txLowTable').innerHTML = `<table class="data-table tx-table tx-low-table"><thead><tr>${LCOLS.map(([k, l, c]) => `<th${c ? ` class="${c}"` : ''} data-lysort="${k}" aria-sort="${lySort === k ? (lyDir > 0 ? 'ascending' : 'descending') : 'none'}">${l}</th>`).join('')}</tr></thead><tbody>${rows.map(t => `<tr><td class="tx-name">${esc(t.label)}</td><td class="num">${t.y2024 == null ? '<span class="muted">inconnu</span>' : meur(t.y2024)}</td><td class="num muted">${t.y2019 == null ? '–' : meur(t.y2019)}</td><td>${esc(COLORS.objective.label(t))}</td><td>${esc(t.payer)}</td><td class="muted">${esc(t.collector)}</td><td class="muted">${esc(t.beneficiary)}</td><td>${scen(t) ? `<span class="tx-scen s${scen(t)}" title="${esc(LY.scenarioLabels[scen(t)])}">${scen(t)}</span>` : ''}</td><td class="muted">${esc(t.state)}</td></tr>`).join('')}</tbody></table>${total > rows.length ? `<div class="tx-more"><button type="button" id="txLowAll">Afficher les ${total} taxes</button></div>` : ''}`;
-        $('txLowAll')?.addEventListener('click', () => { lyShowAll = true; drawLowTable(); });
-        $('txLowTableNote').innerHTML = `${total} taxe${total > 1 ? 's' : ''}${sum ? `, ${meur(sum)} de rendement 2024 connu pour celles en vigueur` : ''}. Montants : « enjeu financier » de l’annexe de la Cour, en euros courants. Scénarios : ${Object.entries(LY.scenarioLabels).map(([k, v]) => `${k} = ${esc(v)}`).join(' ; ')}. Le fichier source est versionné dans le dépôt (${esc(LY.file)}).`;
-      }
-      ['input', 'change'].forEach(ev => ['txLowSearch', 'txLowState', 'txLowScenario', 'txLowCollector'].forEach(id => $(id).addEventListener(ev, () => { lyShowAll = false; drawLowTable(); })));
-      $('txLowTable').addEventListener('click', event => { const th = event.target.closest('th[data-lysort]'); if (!th) return; const k = th.dataset.lysort; lyDir = lySort === k ? -lyDir : (k.startsWith('y') ? -1 : 1); lySort = k; drawLowTable(); });
-      drawLowTable();
-    }
+    if (C.noLossQuote) $('txQuote').innerHTML = `« ${esc(C.noLossQuote.text)} »${link(C.noLossQuote.url, C.noLossQuote.title)}`;
 
     /* ---------- Gaps ---------- */
     const gaps = C.gaps || [];
     $('txGapKpis').innerHTML = gaps.filter(g => g.kpi).map(g => `<div class="kpi"><span>${esc(g.label)}</span><strong>${esc(g.kpi)}</strong><small>${esc(g.sub || '')}</small></div>`).join('');
     $('txGapList').innerHTML = gaps.map(g => `<article class="gap"><h3>${esc(g.label)}</h3><p>${esc(g.text)}</p><p class="note">${link(g.url, g.title || 'source')}</p></article>`).join('') || '<p class="tx-empty">Aucune estimation officielle trouvée.</p>';
 
-    /* ---------- Full table ---------- */
-    const filters = { category: $('txFilterCategory'), beneficiary: $('txFilterBeneficiary'), collector: $('txFilterCollector') };
-    Object.entries(filters).forEach(([field, el]) => { [...new Set(taxes.map(t => t[field]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr')).forEach(v => el.insertAdjacentHTML('beforeend', `<option>${esc(v)}</option>`)); el.addEventListener('change', drawTable); });
+
+    /* ---------- Full table: every tax, curated list and Cour des comptes inventory ---------- */
+    const filters = { base: $('txFilterBase'), beneficiary: $('txFilterBeneficiary'), collector: $('txFilterCollector') };
+    Object.entries(filters).forEach(([field, el]) => {
+      const vals = [...new Set(ALL.map(t => t[field]).filter(Boolean))];
+      const order = GROUPS[field].order;
+      vals.sort((a, b) => ((order.indexOf(a) + 99) % 99) - ((order.indexOf(b) + 99) % 99) || a.localeCompare(b, 'fr')).forEach(v => el.insertAdjacentHTML('beforeend', `<option>${esc(v)}</option>`));
+    });
+    [1, 2, 3, 0].forEach(k => $('txFilterScenario').insertAdjacentHTML('beforeend', `<option value="${k}">${esc(SCEN_LABELS[k])}</option>`));
+    $('txFilterScenario').insertAdjacentHTML('beforeend', `<option value="none">${esc(SCEN_LABELS[4])}</option>`);
     let sortKey = 'amount', sortDir = -1, showAll = false;
-    $('txSearch').addEventListener('input', drawTable);
     const maxAmount = Math.max(...counted.map(t => t.amount));
-    const COLS = [['name', 'Impôt'], ['category', 'Catégorie'], ['amount', 'Produit', 'num'], ['', ''], ['year', 'Année'], ['beneficiary', 'Bénéficiaire'], ['collector', 'Collecteur'], ['costPct', 'Coût de collecte', 'num'], ['', 'Source']];
+    const COLS = [['name', 'Impôt ou taxe'], ['base', 'Ce qui est taxé'], ['amount', 'Produit', 'num'], ['', ''], ['year', 'Année'], ['beneficiary', 'Qui reçoit'], ['collector', 'Qui collecte'], ['costPct', 'Coût de collecte', 'num'], ['scenario', 'Cour'], ['', 'Source']];
     function drawTable() {
-      const q = norm($('txSearch').value);
-      let rows = taxes.filter(t => (!q || norm(`${t.name} ${t.acronym || ''} ${t.short || ''}`).includes(q)) && Object.entries(filters).every(([f, el]) => !el.value || t[f] === el.value));
-      const val = (t, k) => k === 'costPct' ? (t.cost?.pct ?? -1) : k === 'amount' ? (t.amount ?? -1) : t[k];
-      rows.sort((a, b) => { const va = val(a, sortKey), vb = val(b, sortKey); return (typeof va === 'number' && typeof vb === 'number' ? va - vb : String(va || '').localeCompare(String(vb || ''), 'fr')) * sortDir; });
-      const total = rows.length; if (!showAll) rows = rows.slice(0, 60);
-      $('txTable').innerHTML = `<table class="data-table tx-table"><thead><tr>${COLS.map(([k, label, cls]) => `<th${cls ? ` class="${cls}"` : ''}${k ? ` data-sort="${k}" aria-sort="${sortKey === k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"` : ''}>${label}</th>`).join('')}</tr></thead><tbody>${rows.map(t => `<tr class="${t.partOf ? 'is-sub' : ''}"><td><button type="button" class="tx-name tx-rowlink" data-id="${esc(t.id)}">${esc(t.name)}</button>${t.acronym ? ` <span class="muted">${esc(t.acronym)}</span>` : ''}${t.note ? `<br><span class="muted">${esc(t.note.length > 110 ? `${t.note.slice(0, 108)}…` : t.note)}</span>` : ''}</td><td><span class="tx-pill"><i style="background:${color('category', t.category)}"></i>${esc(t.category)}</span></td><td class="num">${t.amount == null ? '<span class="muted">non trouvé</span>' : `${approx(t)}${meur(t.amount)}${t.check === 'extrait' ? '<sup>*</sup>' : ''}`}</td><td class="tx-bar-cell">${t.amount ? `<span class="tx-minibar" style="width:${Math.max(2, 100 * Math.sqrt(t.amount / maxAmount)).toFixed(1)}%;background:${color('category', t.category)}"></span>` : ''}</td><td class="muted">${esc(t.year)}${t.status ? `<br>${esc(t.status)}` : ''}</td><td>${esc(t.beneficiary)}</td><td>${esc(t.collector)}</td><td class="num">${t.cost?.pct != null ? pct(t.cost.pct, 2) : t.cost?.meur != null ? meur(t.cost.meur) : '<span class="muted">non publié</span>'}</td><td class="tx-src">${link(t.source?.url, t.source?.title || 'source')}</td></tr>`).join('')}</tbody></table>${total > rows.length ? `<div class="tx-more"><button type="button" id="txShowAll">Afficher les ${total} lignes</button></div>` : ''}`;
+      const q = norm($('txSearch').value), sc = $('txFilterScenario').value, st = $('txFilterState').value;
+      let rows = ALL.filter(t => (!q || norm(`${t.name} ${t.acronym || ''} ${t.short || ''} ${t.beneficiaryDetail || ''} ${t.collectorDetail || ''}`).includes(q))
+        && Object.entries(filters).every(([f, el]) => !el.value || t[f] === el.value)
+        && (sc === '' || (sc === 'none' ? t.scenario == null : String(t.scenario) === sc))
+        && (!st || (st === 'active') === t.inForce));
+      // Unknown values always sort last, whatever the direction.
+      const val = (t, k) => k === 'costPct' ? (t.cost?.pct ?? null) : k === 'amount' ? (t.amount ?? null) : k === 'scenario' ? (t.scenario || null) : t[k] || null;
+      rows.sort((a, b) => { const va = val(a, sortKey), vb = val(b, sortKey); if (va == null || vb == null) return (va == null) - (vb == null); return (typeof va === 'number' && typeof vb === 'number' ? va - vb : String(va).localeCompare(String(vb), 'fr')) * sortDir; });
+      const total = rows.length, sum = rows.reduce((s, t) => s + (t.inForce && !t.partOf ? t.amount || 0 : 0), 0);
+      if (!showAll) rows = rows.slice(0, 60);
+      $('txTable').innerHTML = `<table class="data-table tx-table"><thead><tr>${COLS.map(([k, label, cls]) => `<th${cls ? ` class="${cls}"` : ''}${k ? ` data-sort="${k}" aria-sort="${sortKey === k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"` : ''}>${label}</th>`).join('')}</tr></thead><tbody>${rows.map(t => `<tr class="${t.partOf ? 'is-sub' : ''}${t.inForce ? '' : ' is-removed'}"><td class="tx-namecell"><button type="button" class="tx-name tx-rowlink" data-id="${esc(t.id)}">${esc(t.name)}</button>${t.acronym ? ` <span class="muted">${esc(t.acronym)}</span>` : ''}${t.note ? `<br><span class="muted">${esc(t.note.length > 90 ? `${t.note.slice(0, 88).replace(/\s+\S*$/, '')}…` : t.note)}</span>` : ''}</td><td><span class="tx-pill"><i style="background:${color('base', t.base)}"></i>${esc(t.base)}</span></td><td class="num">${t.amount == null ? '<span class="muted">inconnu</span>' : `${approx(t)}${meur(t.amount)}${t.check === 'extrait' ? '<sup>*</sup>' : ''}`}</td><td class="tx-bar-cell">${t.amount ? `<span class="tx-minibar" style="width:${Math.max(2, 100 * Math.sqrt(t.amount / maxAmount)).toFixed(1)}%;background:${color('base', t.base)}"></span>` : ''}</td><td class="muted">${esc(t.year)}${t.inForce ? '' : `<br>${esc(t.state)}`}</td><td>${esc(t.beneficiary)}${t.beneficiaryDetail && t.beneficiaryDetail !== t.beneficiary && t.origin === 'cour' ? `<br><span class="muted">${esc(t.beneficiaryDetail.length > 60 ? `${t.beneficiaryDetail.slice(0, 58)}…` : t.beneficiaryDetail)}</span>` : ''}</td><td>${esc(t.collector)}</td><td class="num">${t.cost?.range ? esc(t.cost.range) : t.cost?.pct != null ? pct(t.cost.pct, 2) : t.cost?.meur != null ? meur(t.cost.meur) : '<span class="muted">non publié</span>'}</td><td>${t.scenario ? `<span class="tx-scen s${t.scenario}" title="${esc(SCEN_LABELS[t.scenario])}">${t.scenario}</span>` : ''}</td><td class="tx-src">${link(t.source?.url, t.origin === 'cour' ? 'Cour des comptes' : (t.source?.title || 'source').split(/,| – | \(/)[0])}</td></tr>`).join('')}</tbody></table>${total > rows.length ? `<div class="tx-more"><button type="button" id="txShowAll">Afficher les ${total} lignes</button></div>` : ''}`;
       $('txShowAll')?.addEventListener('click', () => { showAll = true; drawTable(); });
-      $('txTableNote').textContent = `${total} ligne${total > 1 ? 's' : ''}. Cliquez sur un nom pour sa fiche complète. Barre : racine carrée du produit (pour que les petites taxes restent visibles). Lignes en retrait : fraction d’un autre impôt, non additionnée. * Chiffre relevé dans un extrait du document cité, à confirmer sur le document complet ; sans astérisque : lu dans le fichier Insee versionné. « ≈ », « au plus », « plus de » : estimation, plafond ou plancher, pas un montant encaissé.`;
+      $('txTableNote').textContent = `${total} ligne${total > 1 ? 's' : ''}${sum ? `, ${meur(sum)} de produit connu (fractions non additionnées)` : ''}. Barre : racine carrée du produit, pour que les petites taxes restent visibles. Lignes en retrait : fraction d’un autre impôt, non additionnée. * Chiffre relevé dans un extrait du document cité, à confirmer ; sans astérisque, lu dans le fichier Insee ou Cour des comptes versionné. « ≈ », « au plus », « plus de » : estimation, plafond ou plancher. Cour : scénario de la Cour des comptes (1 = revoir dès le budget 2026, 2 = réexaminer d’ici 2027, 3 = rationaliser).`;
     }
+    ['input', 'change'].forEach(ev => ['txSearch', 'txFilterBase', 'txFilterBeneficiary', 'txFilterCollector', 'txFilterScenario', 'txFilterState'].forEach(id => $(id).addEventListener(ev, () => { showAll = false; drawTable(); })));
     $('txTable').addEventListener('click', event => {
       const row = event.target.closest('.tx-rowlink');
-      if (row) { select(row.dataset.id); $('txDetail').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' }); return; }
+      if (row) { openDetail(row.dataset.id); return; }
       const th = event.target.closest('th[data-sort]'); if (!th) return;
       const k = th.dataset.sort; sortDir = sortKey === k ? -sortDir : (k === 'amount' || k === 'costPct' ? -1 : 1); sortKey = k; drawTable();
     });
     drawTable();
 
-    $('txSources').innerHTML = (data.sources || []).map(s => link(s.url, `${s.title} ↗`)).join('');
+    $('txSources').innerHTML = [...(data.sources || []), { title: 'Cour des comptes, inventaire des taxes à faible rendement', url: data.lowYield.url }].map(s => link(s.url, `${s.title} ↗`)).join('');
     FRL.keepHash();
   }
 })();
