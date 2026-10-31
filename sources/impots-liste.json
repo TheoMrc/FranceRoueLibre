@@ -1,0 +1,262 @@
+{
+ "retrieved": "2026-10-31",
+ "taxes": [
+  {
+   "id": "vat",
+   "name": "Taxe sur la valeur ajoutée (TVA)",
+   "amount": 208821.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Consommation",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "vat",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "imports",
+   "name": "Impôts et droits sur les importations",
+   "amount": 3577.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Taxes sectorielles et affectées",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "imports",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "ticpe",
+   "name": "Accises sur les produits énergétiques (TICPE)",
+   "amount": 30457.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Énergie et environnement",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "ticpe",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "tobacco",
+   "name": "Accises sur les tabacs",
+   "amount": 13598.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Santé, alcool, tabac, jeux",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "tobacco",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "payrolltax",
+   "name": "Taxe sur les salaires",
+   "amount": 17606.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Production et travail",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "payrolltax",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "tf",
+   "name": "Taxe foncière",
+   "amount": 44179.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Patrimoine et transactions",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "tf",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "cfe",
+   "name": "Cotisation foncière des entreprises (CFE)",
+   "amount": 8101.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Production et travail",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "cfe",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "cvae",
+   "name": "Cotisation sur la valeur ajoutée des entreprises (CVAE)",
+   "amount": 3749.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Production et travail",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "cvae",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "c3s",
+   "name": "Contribution sociale de solidarité des sociétés (C3S)",
+   "amount": 5337.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Production et travail",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "c3s",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "csg",
+   "name": "Contribution sociale généralisée (CSG)",
+   "amount": 156583.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Revenus",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "csg",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "crds",
+   "name": "Contribution au remboursement de la dette sociale (CRDS)",
+   "amount": 9270.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Revenus",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "crds",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "ir",
+   "name": "Impôt sur le revenu (avant crédits d’impôt)",
+   "amount": 103626.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Revenus",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "ir",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "is",
+   "name": "Impôt sur les sociétés (avant crédits d’impôt)",
+   "amount": 69473.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Bénéfices des sociétés",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "is",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "th",
+   "name": "Taxe d’habitation",
+   "amount": 2903.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Patrimoine et transactions",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "th",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "ifi",
+   "name": "Impôt sur la fortune (ISF puis IFI)",
+   "amount": 2714.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Patrimoine et transactions",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "ifi",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  },
+  {
+   "id": "dmtg",
+   "name": "Droits de mutation à titre gratuit (successions, donations)",
+   "amount": 21052.0,
+   "year": "2025",
+   "status": "provisoire",
+   "category": "Patrimoine et transactions",
+   "beneficiary": "État",
+   "collector": "DGFiP",
+   "payer": "Ménages",
+   "insee": "dmtg",
+   "source": {
+    "url": "https://www.insee.fr/fr/statistiques/2381408",
+    "title": "Insee"
+   }
+  }
+ ],
+ "counts": []
+}
