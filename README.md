@@ -26,6 +26,7 @@
 | **Recherche** | N’importe quel mot (« discrimination », « LGBT », « photovoltaïque »…) cherché dans 1,9 million de lignes de dépenses publiées, avec synthèse, montants, bénéficiaires et lignes surlignées. |
 | **Signaux** | Règles simples appliquées à toutes les données : marchés à offre unique, sans mise en concurrence, avenants qui font exploser les prix, montants calés sous les seuils, subventions à des structures fermées, communes en difficulté, retards de paiement… |
 | **Probité** | Atteintes à la probité jugées 2021–2025 (corruption, favoritisme, prise illégale d’intérêts, détournements) : affaires par infraction, condamnations et relaxes, peines ; ce qui n’est pas publié. |
+| **Assistant IA** | Bouton « Poser une question » sur chaque page : une IA (Gemini ou Claude) cherche dans les données du site et sur le web, puis répond avec ses sources. |
 | **Données** | Les 59 sources utilisées, et surtout ce qui n’est **pas** publié (hôpitaux, ARS, établissements scolaires, bénéficiaires des niches fiscales, prix unitaires des achats…). |
 
 **Un signal n’est ni une preuve ni une accusation** : c’est une question à poser à l’organisme concerné, avec la source pour la vérifier. Les données publiques contiennent des erreurs de saisie et des changements de périmètre ; chaque chiffre renvoie à sa source.
@@ -42,6 +43,8 @@
 ```
 node serve.mjs          # puis http://127.0.0.1:4173
 ```
+
+Avec l’assistant IA : `assistant.bat` (double-clic) lance l’API de recherche, l’API de l’assistant et l’aperçu, avec les clés du `.env` à la racine (celui de RevoFlow, ignoré par git).
 
 Le site est statique (`dist/`). Un serveur HTTP qui gère les requêtes partielles (`Range`) suffit : la recherche lit sa base SQLite par petits morceaux, sans la télécharger en entier.
 
@@ -112,6 +115,16 @@ Le site est statique et peut être servi avec `node serve.mjs` ou tout serveur H
 La charte reprend celle du site BioDevs : typographies Sora et Inter, thème clair par défaut avec thème sombre, dégradé sarcelle → bleu, sections pleine largeur séparées par leur fond plutôt que par des cadres, et le bouton de thème soleil/lune morphé.
 
 La carte est rendue par MapLibre GL (copie locale dans `dist/vendor/`, licence BSD) : les contours sont découpés en tuiles dans un worker et affichés par le GPU, ce qui rend le zoom (molette, pavé tactile, pincement, boutons + et −) et le déplacement fluides. Les couleurs sont appliquées par état d’entité, sans créer un nœud par commune. Les contours à 50 m des communes sont chargés par département visible à partir du zoom 7, ceux à 100 m des départements et régions au besoin. Ils décrivent des limites administratives, pas un fond de carte routier ou des images aériennes. La carte ouvre sur la France métropolitaine ; les territoires ultramarins restent accessibles par recherche, filtre et sélection dans les listes.
+
+### Assistant IA
+
+`server/assistant_api.py` (port 8018, derrière nginx sous `/api/assistant/`) répond aux questions des lecteurs avec Gemini (Vertex AI, crédits Google Cloud) ou Claude (API Anthropic). Le panneau `dist/assistant.js` n’apparaît que si l’API répond qu’un modèle est disponible ; sur un hébergement statique, rien ne change.
+
+**Cloisonnement.** Le modèle n’a que des outils en lecture seule (`server/assistant/tools.py`) : la recherche plein texte du site, une requête SQL `SELECT` sur l’index de recherche (ouvert en lecture seule et immuable, autorisateur SQLite qui refuse tout sauf la lecture, 5 s et 100 lignes au plus), les comptes d’une collectivité, la lecture d’une liste fermée de fichiers JSON de `dist/data`, et une recherche web exécutée par le fournisseur du modèle lui-même (Google Search pour Gemini, outil `web_search` pour Claude) : le serveur ne télécharge aucune page, n’exécute aucun code, n’écrit aucun fichier en dehors de son registre de dépenses et ne lit pas sa configuration. Sur le VPS, le service tourne sous un utilisateur jetable de systemd, système en lecture seule, sans dossier personnel, 256 Mo et une demi-core au plus ; les clés sont dans `/etc/francerouelibre/assistant.env` (root seulement) et la clé du compte de service Vertex AI est transmise par systemd (`LoadCredential`). Voir `deploy/assistant.env.example`.
+
+**Plafonds de dépense** (`server/assistant/budget.py`). Claude : 50 € au total. Gemini : 100 € au total et rien après le 17 novembre 2026 (inclus, heure de Paris). Les deux ensemble : 10 € par jour. Avant chaque appel, le pire cas (toute la requête au prix plein, toute la réponse autorisée, le maximum de recherches web) est réservé ; l’appel est refusé s’il pouvait dépasser un plafond, même avec d’autres questions en cours. Le coût réel, calculé à partir des jetons facturés et des prix publiés (1 $ compté pour 1 €, par prudence), est ensuite inscrit dans `spend.jsonl` (heure, modèle, jetons, coût ; jamais la question). Gemini répond en premier tant que ses crédits sont valables, Claude prend le relais. Le verrou de facturation de RevoFlow est repris : aucun appel Vertex AI si le projet n’est pas rattaché au compte de facturation d’essai. Dépenses : `python server/assistant_api.py --usage`.
+
+**Limites pour le public** : 15 questions par heure et 40 par jour et par adresse IP, 500 par jour en tout, 4 en même temps, 1 500 caractères par question, 8 appels au modèle par question ; nginx limite aussi le débit. Les questions ne sont pas enregistrées (voir les mentions légales). Tests : `python -m unittest tests/test_assistant.py`.
 
 ### Comptes publics nationaux
 
