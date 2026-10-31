@@ -391,7 +391,7 @@
         showTip(event, `<strong>${esc(r.name)}</strong><span class="tx-tip__value">${nf(r.per100, 2)} € pour 100 € perçus</span><br>${esc(r.year)}${r.yield ? ` · rendement ${meur(r.yield)}` : ''}`);
       });
       dotsEl.addEventListener('pointerleave', hideTip);
-      $('txCostDotsNote').innerHTML = `Échelle logarithmique : chaque graduation multiplie le coût par dix. En rouge, plus de 5 € pour 100 €. Sources : ${[...new Map(dots.map(r => [r.url, r])).values()].map((r, i) => link(r.url, `[${i + 1}]`)).join(' ')}. Les coûts sont ceux du rapport cité, à sa date ; certaines taxes ont depuis été supprimées ou réformées.`;
+      $('txCostDotsNote').innerHTML = `Échelle logarithmique : chaque graduation multiplie le coût par dix. En rouge, plus de 5 € pour 100 €. Sources : ${[...new Map(dots.map(r => [r.url, r])).values()].map((r, i) => link(r.url, `[${i + 1}]`)).join(' ')}. Les coûts sont ceux du rapport cité, à sa date ; certaines taxes ont depuis été supprimées ou réformées. Aucun rapport public récent trouvé ne chiffre une taxe dont la collecte coûterait plus qu’elle ne rapporte : le cas le plus cité, la taxe sur les appareils automatiques (flippers, jeux vidéo), qui rapportait quelques centaines de milliers d’euros (${link('https://www.vie-publique.fr/files/rapport/pdf/174000418.pdf', 'IGF, 2014')}), a été supprimée en 2015 (${link('https://www.senat.fr/questions/base/2015/qSEQ150114502.html', 'Sénat')}) sans que son coût de gestion ait été publié.`;
     } else dotsEl.innerHTML = '<p class="tx-empty">Aucun coût publié.</p>';
     $('txCounts').innerHTML = (data.counts || []).map(c => `<div class="tx-count"><strong>${esc(c.value)}</strong><p>${esc(c.text)}</p>${link(c.url, c.title || 'source')}</div>`).join('');
 
