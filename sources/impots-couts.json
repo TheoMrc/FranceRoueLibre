@@ -183,6 +183,46 @@
  },
  "perTax": [
   {
+   "tax": "TVA (gestion par la DGFiP)",
+   "pct": 0.38,
+   "range": "0,37 à 0,38 %",
+   "year": "2021-2023",
+   "note": "Taux d’intervention de la DGFiP pour la TVA, enquête complémentaire impôts (ECI).",
+   "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=53",
+   "title": "Cour des comptes, Les taxes à faible rendement (avril 2025), p. 53",
+   "check": "source"
+  },
+  {
+   "tax": "Impôt sur les sociétés (gestion par la DGFiP)",
+   "pct": 0.57,
+   "range": "0,51 à 0,57 %",
+   "year": "2021-2023",
+   "note": "Taux d’intervention de la DGFiP pour l’IS, même enquête.",
+   "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=53",
+   "title": "Cour des comptes, Les taxes à faible rendement (avril 2025), p. 53",
+   "check": "source"
+  },
+  {
+   "tax": "« Impôts divers » de la DGFiP, dont les petites taxes",
+   "pct": 0.28,
+   "range": "0,10 à 0,28 %",
+   "year": "2021-2023",
+   "note": "1 165 agents (2,7 % des effectifs de la DGFiP) gèrent cet agrégat.",
+   "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=53",
+   "title": "Cour des comptes, Les taxes à faible rendement (avril 2025), p. 53",
+   "check": "source"
+  },
+  {
+   "tax": "Taxes collectées par les comités professionnels de développement économique (CPDE)",
+   "pct": 3,
+   "range": "1 à 3 %",
+   "year": "2024",
+   "note": "Collecteurs spécialisés : 3 à 30 fois plus coûteux que la DGFiP pour ces taxes.",
+   "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=54",
+   "title": "Cour des comptes, Les taxes à faible rendement (avril 2025), p. 54",
+   "check": "source"
+  },
+  {
    "tax": "Prélèvements versés par les entreprises (233 prélèvements, 772,8 Md€)",
    "meur": 5160,
    "pct": 0.67,
@@ -245,7 +285,7 @@
    "title": "Cour des comptes, La mise en œuvre du prélèvement à la source (2022)"
   }
  ],
- "perTaxNote": "Aucun coût de collecte n’est publié pour l’impôt sur le revenu, l’impôt sur les sociétés, la TVA, la taxe foncière ou les droits de succession pris un à un : la DGFiP ne publie qu’un taux global.",
+ "perTaxNote": "Seuls la TVA, l’IS et l’agrégat « impôts divers » ont un coût publié par la DGFiP (dans le rapport de la Cour des comptes de 2025) ; rien pour l’impôt sur le revenu, la taxe foncière ou les droits de succession pris un à un. Les collecteurs généralistes (DGFiP, douane, Urssaf) ne suivent pas le coût des petites taxes impôt par impôt (Cour des comptes, 2025, p. 53).",
  "costDots": [
   {
    "name": "Droits sur les boissons, direction régionale la plus chère",
@@ -295,6 +335,34 @@
    "per100": 0.05,
    "year": "2011",
    "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf"
+  },
+  {
+   "name": "Comités professionnels (CPDE), taxes collectées",
+   "per100": 3,
+   "range": "1 à 3 €",
+   "year": "2024",
+   "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=54"
+  },
+  {
+   "name": "Impôt sur les sociétés (DGFiP)",
+   "per100": 0.57,
+   "range": "0,51 à 0,57 €",
+   "year": "2021-2023",
+   "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=53"
+  },
+  {
+   "name": "TVA (DGFiP)",
+   "per100": 0.38,
+   "range": "0,37 à 0,38 €",
+   "year": "2021-2023",
+   "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=53"
+  },
+  {
+   "name": "« Impôts divers » de la DGFiP, dont les petites taxes",
+   "per100": 0.28,
+   "range": "0,10 à 0,28 €",
+   "year": "2021-2023",
+   "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=53"
   }
  ],
  "compliance": {
@@ -346,5 +414,10 @@
    "title": "CGI, article 1641",
    "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069577/LEGISCTA000006147090/"
   }
- ]
+ ],
+ "noLossQuote": {
+  "text": "Si aucune taxe prise individuellement n’affiche a priori un coût de collecte supérieur à son rendement, la complexité d’ensemble que dessine ce paysage de gestion constitue en soi un enjeu de simplification.",
+  "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=47",
+  "title": "Cour des comptes, Les taxes à faible rendement (avril 2025), p. 47"
+ }
 }

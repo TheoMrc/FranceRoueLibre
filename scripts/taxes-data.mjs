@@ -1,5 +1,6 @@
 // dist/data/impots.json for the Impôts page: Insee tax lines 1995-2025 (sources/taxes-insee-detail.json), the curated list of
-// every tax with its yield and source (sources/impots-liste.json) and the published costs of collection (sources/impots-couts.json).
+// every tax with its yield and source (sources/impots-liste.json), the published costs of collection (sources/impots-couts.json)
+// and the Cour des comptes inventory of low-yield taxes (sources/taxes-faible-rendement.json).
 // GDP is recovered from Insee's own Md€ / %-of-GDP pairs, as on the home page. Run alone: node scripts/taxes-data.mjs
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,6 +18,7 @@ export function buildTaxesData(root = '.') {
   const population = read(src('insee-population.json'));
   const list = read(src('impots-liste.json'));
   const costs = read(src('impots-couts.json'));
+  const lowYield = read(src('taxes-faible-rendement.json'));
 
   const jan = new Map(population.january1.map(r => [r.year, r.population]));
   const pop = year => jan.has(year) && jan.has(year + 1) ? (jan.get(year) + jan.get(year + 1)) / 2 : jan.get(year) ?? null;
@@ -52,7 +54,7 @@ export function buildTaxesData(root = '.') {
   return {
     generated: list.retrieved, totals, macro,
     insee: { source: insee.source, publication: insee.publication, years: insee.years, status: insee.status, lines: insee.lines },
-    taxes: list.taxes, counts: list.counts || [], costs,
+    taxes: list.taxes, counts: list.counts || [], costs, lowYield,
     sources: [...(list.sources || []), ...(costs.sources || [])]
   };
 }

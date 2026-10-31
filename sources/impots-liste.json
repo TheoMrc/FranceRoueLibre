@@ -18,15 +18,15 @@
  "counts": [
   {
    "value": "243",
-   "text": "taxes à faible rendement (moins de 175 M€ chacune) recensées par la Cour des comptes en 2024, pour près de 6 Md€ au total. Il y en avait 305 cinq ans plus tôt.",
-   "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf",
-   "title": "Cour des comptes, Les taxes à faible rendement (avril 2025)"
+   "text": "taxes à faible rendement (moins de 175 M€ chacune) recensées par la Cour des comptes en 2024, pour 5 978 M€ au total. Il y en avait 305 en 2019.",
+   "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=20",
+   "title": "Cour des comptes, Les taxes à faible rendement (avril 2025), p. 20"
   },
   {
    "value": "117",
    "text": "de ces petites taxes dont la Cour des comptes n’a pas pu connaître le rendement, faute d’information publiée.",
-   "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf",
-   "title": "Cour des comptes (avril 2025)"
+   "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=20",
+   "title": "Cour des comptes, Les taxes à faible rendement (avril 2025), p. 20"
   },
   {
    "value": "309",
@@ -63,7 +63,14 @@
     "ref": "ligne « Taxe sur la valeur ajoutée (TVA) »"
    },
    "check": "source",
-   "note": "Produit total, toutes destinations. Les fractions reversées aux collectivités et à la Sécurité sociale font partie de ce montant."
+   "note": "Produit total, toutes destinations. Les fractions reversées aux collectivités et à la Sécurité sociale font partie de ce montant.",
+   "cost": {
+    "pct": 0.38,
+    "range": "0,37 à 0,38 %",
+    "year": "2021-2023",
+    "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=53",
+    "title": "Cour des comptes, Les taxes à faible rendement (avril 2025), p. 53"
+   }
   },
   {
    "id": "csg",
@@ -128,7 +135,14 @@
     "ref": "ligne « impôt sur les sociétés (IS), avant crédits d'impôt »"
    },
    "check": "source",
-   "note": "Avant crédits d’impôt (comptabilité nationale). Le produit net budgétaire de l’État est plus faible."
+   "note": "Avant crédits d’impôt (comptabilité nationale). Le produit net budgétaire de l’État est plus faible.",
+   "cost": {
+    "pct": 0.57,
+    "range": "0,51 à 0,57 %",
+    "year": "2021-2023",
+    "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=53",
+    "title": "Cour des comptes, Les taxes à faible rendement (avril 2025), p. 53"
+   }
   },
   {
    "id": "tf",

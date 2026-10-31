@@ -1,0 +1,4837 @@
+{
+ "source": "Cour des comptes, Les taxes à faible rendement, une rationalisation à poursuivre, rapport public thématique, avril 2025",
+ "url": "https://www.ccomptes.fr/fr/publications/les-taxes-faible-rendement-0",
+ "report": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf",
+ "file": "sources/ccomptes-taxes-faible-rendement-2025.xlsx",
+ "unit": "M€",
+ "threshold": 175,
+ "scenarioLabels": {
+  "1": "Revenir dès le budget 2026 sur ces taxes fragiles ou problématiques (simplifier ou supprimer)",
+  "2": "Réexaminer d’ici 2027 leur place dans quatre secteurs (médicament, contrôle sanitaire des aliments, formation professionnelle, services publics locaux)",
+  "3": "Rationaliser dans la prochaine loi de programmation (fusionner, découpler de l’affectataire, plafonner)"
+ },
+ "groups": [
+  {
+   "scenario": 1,
+   "label": "5 taxes complexes ou fragiles identifiées lors de l'enquête"
+  },
+  {
+   "scenario": 1,
+   "label": "22 taxes pouvant être supprimées selon la DLF"
+  },
+  {
+   "scenario": 1,
+   "label": "16 taxes sur les biens de l’industrie et de l’artisanat"
+  },
+  {
+   "scenario": 1,
+   "label": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+  },
+  {
+   "scenario": 2,
+   "label": "Pharmacie/médicament : rationaliser le nombre de taxes en renforçant les outils non fiscaux qui lient les entreprises du secteur et les pouvoirs publics"
+  },
+  {
+   "scenario": 2,
+   "label": "Contrôle sanitaire des aliments : réexaminer à moyen terme l’équilibre entre taxation sectorielle et financement budgétaire"
+  },
+  {
+   "scenario": 2,
+   "label": "Formation professionnelle : achever la rationalisation du financement"
+  },
+  {
+   "scenario": 2,
+   "label": "Le financement des services publics et des équipements locaux : une rationalisation à parachever"
+  },
+  {
+   "scenario": 3,
+   "label": "Simplifier le paysage fiscal en fusionnant les taxes additionnelles les plus complexes et les taxes redondantes"
+  },
+  {
+   "scenario": 3,
+   "label": "Reconsidérer les taxes de rendement affectées à l’État et à des tiers réalisant une mission de service public dont le produit annuel est inférieur à 25 M€"
+  },
+  {
+   "scenario": 3,
+   "label": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+  }
+ ],
+ "totals": {
+  "inForce2024": 243,
+  "knownYield2024": 126,
+  "yield2024": 5977.9,
+  "removedSince2019": 76
+ },
+ "unmatchedScenarioLines": [
+  {
+   "scenario": 1,
+   "group": "5 taxes complexes ou fragiles identifiées lors de l'enquête",
+   "label": "Taxe applicable aux maisons de jeux"
+  },
+  {
+   "scenario": 1,
+   "group": "5 taxes complexes ou fragiles identifiées lors de l'enquête",
+   "label": "Contribution annuelle sur les revenus locatifs"
+  },
+  {
+   "scenario": 1,
+   "group": "16 taxes sur les biens de l’industrie et de l’artisanat",
+   "label": "Taxe forfaitaire sur les petits envois"
+  },
+  {
+   "scenario": 1,
+   "group": "16 taxes sur les biens de l’industrie et de l’artisanat",
+   "label": "Taxe de compensation sur les produits d’origine agricole"
+  },
+  {
+   "scenario": 1,
+   "group": "16 taxes sur les biens de l’industrie et de l’artisanat",
+   "label": "Composante sur les eaux de laboratoire et boissons diverses"
+  },
+  {
+   "scenario": 3,
+   "group": "Simplifier le paysage fiscal en fusionnant les taxes additionnelles les plus complexes et les taxes redondantes",
+   "label": "Droit spécifique sur les boissons non alcooliques"
+  }
+ ],
+ "taxes": [
+  {
+   "id": 1,
+   "label": "Actes et écrits assujettis au timbre de dimension",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": 0.006,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 2,
+   "label": "Actes judiciaires et extrajudiciaires",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": 0.0003,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 3,
+   "label": "Certificats sanitaires et phytosanitaires",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI / Direction Générale de l'Alimentation (DGAL)",
+   "beneficiary": "Etablissement national des produits de l’agriculture et de la mer (FranceAgriMer)",
+   "y2019": 0.899,
+   "y2024": 0.84,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "label": "Contribution à la charge des laboratoires pharmaceutiques non conventionnés avec le comité économique des produits de santé",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "ACOSS",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 5,
+   "label": "Contribution à la garantie sur les métaux précieux/Contribution aux poinçonnages",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 6,
+   "label": "Contribution additionnelle aux prélèvements sociaux sur les produits de placement",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Organismes de sécurité sociale",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "label": "Contribution additionnelle aux primes ou cotisations d'assurance afférentes aux conventions d'assurance couvrant à titre exclusif ou principal les dommages aux sols, récoltes, cultures, bâtiments, et au cheptel mort ou vif affectés aux exploitations agricoles",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Fonds national de garantie des risques agricoles (FNGRA) / Fonds de calamités agricoles dans les départements d'outre-mer",
+   "y2019": 67.582,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "label": "Contribution annuelle acquittée par les personnes inscrites comme commissaires aux comptes et droit fixe sur chaque certification",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Compagnie nationale des commissaires aux comptes",
+   "beneficiary": "Haut conseil du commissariat aux comptes (H3C)",
+   "y2019": 14.757,
+   "y2024": 17.079,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 9,
+   "label": "Contribution annuelle au profit de l'Institut de radioprotection et de sûreté nucléaire",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Institut de radioprotection et de sûreté nucléaire (IRSN)",
+   "beneficiary": "Institut de radioprotection et de sûreté nucléaire (IRSN)",
+   "y2019": 62.758,
+   "y2024": 60.5078,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 10,
+   "label": "Contribution au fonds d’assurance formation des chefs d’entreprise inscrite au répertoire des métiers",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "URSSAF",
+   "beneficiary": "Fonds d'assurance formation (FAF) des professions concernées",
+   "y2019": 32.507,
+   "y2024": 93.0453,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Formation professionnelle : achever la rationalisation du financement"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "label": "Contribution au fonds de garantie des dommages consécutifs à des actes de prévention, de diagnostic ou de soins dispensés par des professionnels de santé",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Caisse centrale de réassurance (CCR)",
+   "beneficiary": "Fonds de garantie des dommages consécutifs à des actes de prévention, de diagnostic ou de soins (FADPS)",
+   "y2019": null,
+   "y2024": 8.7,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 12,
+   "label": "Contribution conventionnelle à la formation pour les entreprises de travail temporaire",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "Opérateurs de Compétences (OPCO)",
+   "beneficiary": "Fonds pour l'emploi du travail temporaire (FPETT)",
+   "y2019": null,
+   "y2024": 68.5,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 13,
+   "label": "Contribution de sécurité de la propriété maritime",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 14,
+   "label": "Contribution de solidarité territoriale",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Collectivités territoriales",
+   "y2019": null,
+   "y2024": null,
+   "state": "éphémère",
+   "scenarios": []
+  },
+  {
+   "id": 17,
+   "label": "Contribution des employeurs de main d'œuvre étrangère permanente",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "DGFiP",
+   "beneficiary": "Office français de l'immigration et de l'intégration (OFII)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "5 taxes complexes ou fragiles identifiées lors de l'enquête"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 18,
+   "label": "Contribution des employeurs de main d'œuvre étrangère saisonnière",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "DGFiP",
+   "beneficiary": "Office français de l'immigration et de l'intégration (OFII)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "5 taxes complexes ou fragiles identifiées lors de l'enquête"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 19,
+   "label": "Contribution des employeurs de main d'œuvre étrangère temporaire",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "DGFiP",
+   "beneficiary": "Office français de l'immigration et de l'intégration (OFII)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "5 taxes complexes ou fragiles identifiées lors de l'enquête"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 20,
+   "label": "Contribution des institutions financières",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": 0.077,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 21,
+   "label": "Contribution due par les entreprises fabriquant ou exploitant des dispositifs médicaux sur leurs dépenses de publicité",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "URSSAF",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": 44.698,
+   "y2024": 60.5807,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Pharmacie/médicament : rationaliser le nombre de taxes en renforçant les outils non fiscaux qui lient les entreprises du secteur et les pouvoirs publics"
+    }
+   ]
+  },
+  {
+   "id": 22,
+   "label": "Contribution due par les laboratoires sur leurs dépenses de publicité",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "URSSAF",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": 125.0,
+   "y2024": 146.9478,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Pharmacie/médicament : rationaliser le nombre de taxes en renforçant les outils non fiscaux qui lient les entreprises du secteur et les pouvoirs publics"
+    }
+   ]
+  },
+  {
+   "id": 23,
+   "label": "Contribution équivalente aux droits de plaidoirie",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Conseil National des Barreaux (CNB)",
+   "beneficiary": "Caisse nationale des barreaux français (CNBF)",
+   "y2019": 81.0,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 24,
+   "label": "Contribution forfaitaire des organismes assureurs et contribution forfaitaire des organismes participant à la gestion du régime prévu par la loi n° 2001-1128 du 30 novembre 2001",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Fonds commun des accidents du travail agricole (FCATA)",
+   "y2019": null,
+   "y2024": 4.0,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 25,
+   "label": "Contribution forfaitaire représentative des frais de réacheminement",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Office français de l'immigration et de l'intégration (OFII)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 26,
+   "label": "Contribution patronale au dialogue social (0,016%)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "URSSAF",
+   "beneficiary": "Association de Gestion du Fonds Paritaire National (AGFPN)",
+   "y2019": 98.045,
+   "y2024": 118.9,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 27,
+   "label": "Contribution perçue au profit de l'Institut national de prévention et d'éducation pour la santé (INPES)",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Institut national de prévention et d'éducation pour la santé (INPES)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 28,
+   "label": "Contribution salariale sur les carried-interests",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 29,
+   "label": "Contribution sociale à la charge des fournisseurs agréés de produits de tabac",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": 87.138,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 30,
+   "label": "Contribution spécifique à la formation professionnelle pour Saint Pierre et Miquelon",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "Collectivités territoriales",
+   "beneficiary": "France compétences",
+   "y2019": null,
+   "y2024": 0.3449,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 31,
+   "label": "Contribution spécifique pour le développement de la formation professionnelle initiale et continue dans les métiers des professions du bâtiment et des travaux publics",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "Comité de Concertation et de Coordination de l'Apprentissage du Bâtiment et des Travaux Publics (CCCA-BTP)",
+   "beneficiary": "Comité de concertation et de coordination de l’apprentissage du bâtiment et des travaux publics (CCCA-BTP) / Opérateur de compétences (OPCO) Constructys",
+   "y2019": null,
+   "y2024": 128.4348,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Formation professionnelle : achever la rationalisation du financement"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 32,
+   "label": "Taxe sur la cession de droits d'exploitation audiovisuelle des manifestations sportives mentionnée à l'article L. 455-29 (ex-Contribution sur la cession à un service de télévision des droits de diffusion de manifestations ou de compétitions sportives)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Centre national pour le développement du sport (CNDS)",
+   "y2019": 54.302,
+   "y2024": 59.665,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 34,
+   "label": "Contribution sur les activités privées de sécurité",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 35,
+   "label": "Contribution sur les avantages de préretraite d’entreprise",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "URSSAF",
+   "beneficiary": "Caisse nationale d'assurance-vieillesse (CNAV)",
+   "y2019": 80.0,
+   "y2024": 46.0,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 37,
+   "label": "Contribution sur les indemnités de mise à la retraite",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "Urssaf",
+   "beneficiary": "Caisse nationale d'assurance-vieillesse (CNAV)",
+   "y2019": 34.0,
+   "y2024": 33.806,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 38,
+   "label": "Contribution sur les mises jouées sur les paris sportifs de la Française des jeux et des nouveaux opérateurs",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Agence nationale du sport (ANS)",
+   "y2019": 139.913,
+   "y2024": 202.7321,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 40,
+   "label": "Contribution sur les ventes de produits alimentaires par les établissements d'hébergement ou de restauration",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Fonds de modernisation des hôtels, cafés et restaurants (FMHCR)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 41,
+   "label": "Contribution temporaire de solidarité",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Bénéfice",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "créée",
+   "scenarios": []
+  },
+  {
+   "id": 42,
+   "label": "Contribution vie étudiante et campus",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Centre régional des œuvres universitaires et scolaires (CROUS)",
+   "beneficiary": "Etablissements publics d'enseignement supérieur / Etablissements d'enseignement supérieur privés d'intérêt général / Centres régionaux des œuvres universitaires et scolaires (CROUS)",
+   "y2019": 138.5,
+   "y2024": 172.1517,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 43,
+   "label": "Contributions sociales sur les produits des jeux des casinos",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Organismes de sécurité sociale",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 44,
+   "label": "Contributions versées par la SNCF au titre des frais de surveillance et de contrôle des chemins de fer",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Ministère de la transition écologique et de la cohésion des territoires",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 45,
+   "label": "Contribution sur les boissons non alcooliques contenant des sucres ajoutés (ex-cotisation à la production sur les sucres)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 46,
+   "label": "Cotisation additionnelle versée par les organismes HLM et les SEM",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Bénéfice",
+   "collector": "Caisse de garantie du logement locatif social (CGLLS)",
+   "beneficiary": "Caisse de garantie du logement locatif social (CGLLS)",
+   "y2019": 76.484,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Simplifier le paysage fiscal en fusionnant les taxes additionnelles les plus complexes et les taxes redondantes"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 47,
+   "label": "Cotisation au profit des caisses d’assurances d’accidents agricoles d’Alsace-Moselle",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Caisses d'assurances d'accidents agricoles (CAAA) d'Alsace-Moselle",
+   "y2019": 2.0,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 48,
+   "label": "Cotisation BTP intempéries",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "URSSAF",
+   "beneficiary": "Union des caisses de France (UCF CIBTP)",
+   "y2019": 128.326,
+   "y2024": 128.3256,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 49,
+   "label": "Cotisation de solidarité à la charge des producteurs de blé et d'orge",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 52,
+   "label": "Cotisation versée par les organismes HLM",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Caisse de garantie du logement locatif social (CGLLS)",
+   "beneficiary": "Agence nationale de contrôle du logement social (ANCOLS)",
+   "y2019": 11.334,
+   "y2024": 11.334,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Simplifier le paysage fiscal en fusionnant les taxes additionnelles les plus complexes et les taxes redondantes"
+    }
+   ]
+  },
+  {
+   "id": 53,
+   "label": "Taxe sur la production et la distribution d'œuvres cinématographiques et taxe sur les spectacles cinématographiques (ex-Cotisations des entreprises cinématographiques)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Centre national du cinéma et de l'image animée (CNC)",
+   "beneficiary": "Centre national du cinéma et de l'image animée (CNC)",
+   "y2019": 9.225,
+   "y2024": 10.725,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Reconsidérer les taxes de rendement affectées à l’État et à des tiers réalisant une mission de service public dont le produit annuel est inférieur à 25 M€"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 54,
+   "label": "Cotisations perçues au titre de la participation des employeurs à l'effort de construction",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "Action Logement",
+   "beneficiary": "Budget général",
+   "y2019": 31.796,
+   "y2024": 26.4232,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 55,
+   "label": "CRDS sur le produit des jeux dans les casinos flottants",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Caisse d'amortissement de la dette sociale (CADES)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 56,
+   "label": "CRDS sur ventes de métaux ou objets précieux",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Production",
+   "collector": "DGFiP / DGDDI (exportation)",
+   "beneficiary": "Caisse d'amortissement de la dette sociale (CADES)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 57,
+   "label": "Droit affecté au fonds d’indemnisation de la profession d’avoués près les cours d’appel",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Ministère de la justice",
+   "beneficiary": "Fonds d'indemnisation de la profession d'avoués près des cours d'appel",
+   "y2019": 29.3,
+   "y2024": 28.9,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 58,
+   "label": "Droit annuel de francisation et de navigation en Corse ; Droit de passeport en Corse",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Collectivité territoriale de Corse",
+   "y2019": 4.567,
+   "y2024": 3.9686,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 59,
+   "label": "Taxe annuelle sur les engins maritimes à usage personnel (TAEMUP), fraction perçue sur les engins battant pavillon français (ex-Droit annuel de francisation et de navigation hors Corse - Fraction CELRL)",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "Direction générale des affaires maritimes, de la pêche et de l'aquaculture (DGAMPA)",
+   "beneficiary": "Conservatoire de l'espace littoral et des rivages lacustres",
+   "y2019": 38.5,
+   "y2024": 44.9,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 60,
+   "label": "Accise sur les alcools, fraction perçue sur les vins (ex-Droit de circulation sur les vins, cidres, poirés et hydromels)",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Caisse centrale de la mutualité sociale agricole (CCMSA)",
+   "y2019": 113.533,
+   "y2024": 105.8126,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 61,
+   "label": "Accise sur les alcools, fraction perçue sur les produits intermédiaires (ex-Droit de consommation sur les produits intermédiaires)",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Caisse centrale de la mutualité sociale agricole (CCMSA)",
+   "y2019": 64.811,
+   "y2024": 51.478,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 62,
+   "label": "Accise sur les tabacs, fraction perçue en outre-mer (ex-Droit de consommation sur les tabacs dans les DOM)",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Départements d’Outre-mer",
+   "y2019": 144.279,
+   "y2024": 8.5234,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 63,
+   "label": "Accise sur les tabacs, fraction perçue en Corse (ex-Droit de consommation sur les tabacs en Corse)",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Collectivité territoriale de Corse",
+   "y2019": 117.683,
+   "y2024": 199.8453,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 64,
+   "label": "Droit de licence sur la rémunération des débitants de tabac",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 65,
+   "label": "Taxe annuelle sur les engins maritimes à usage personnel, fraction perçue sur les engins ne battant pas pavillon français (ex-Droit de passeport (applicable aux grands navires de plaisance))",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": 0.16,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 66,
+   "label": "Droit de sécurité",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Etablissement public de sécurité ferroviaire (EPSF)",
+   "y2019": 20.131,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 67,
+   "label": "Taxe sur le renouvellement du permis de conduire mentionnée à l'article L. 421-168 (ex-Droit de timbre pour la délivrance du permis de conduire en cas de perte ou de vol)",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "France Titres, anciennement ANTS",
+   "beneficiary": "Budget général",
+   "y2019": 9.604,
+   "y2024": 8.78,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 68,
+   "label": "Droit de timbre sur les demandes de naturalisation, les demandes de réintégration dans la nationalité française et les déclarations d'acquisition de la nationalité en raison du mariage",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Ministère de l'intérieur",
+   "beneficiary": "Office français de l'immigration et de l'intégration (OFII)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 69,
+   "label": "Droit de validation du permis de chasse",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Office français de la biodiversité (OFB), anciennement ONCFS",
+   "beneficiary": "Office français de la biodiversité (OFB), anciennement ONCFS",
+   "y2019": 5.134,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 70,
+   "label": "Droit de visa de régularisation, taxe de renouvellement du titre de séjour, taxe applicable aux documents de circulation pour étrangers mineurs et taxe perçue à l'occasion de la délivrance du premier titre de séjour (et titre de 10 ans)",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Office français de l'immigration et de l'intégration (OFII)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 71,
+   "label": "Droit départemental de passage sur les ouvrages d'art reliant le continent aux îles maritimes",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Exploitants d'ouvrages d'art reliant le continent aux îles maritimes",
+   "beneficiary": "Départements",
+   "y2019": 45.378,
+   "y2024": 47.7394,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 72,
+   "label": "Droit d'examen du permis de chasse",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGDDI",
+   "beneficiary": "Office français de la biodiversité (OFB), anciennement ONCFS",
+   "y2019": 0.543,
+   "y2024": 0.6,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 73,
+   "label": "Droit d'immatriculation des opérateurs et agences de voyages",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 74,
+   "label": "Droit dû par les entreprises ferroviaires",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Autorité de régulation des transport (ART) (ex ARAFER)",
+   "beneficiary": "Autorité de régulation des transports (ART), anciennement ARAFER",
+   "y2019": 10.822,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 75,
+   "label": "Droit et contribution pour frais de contrôle",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Autorité des marchés financiers (AMF)",
+   "beneficiary": "Autorité des marchés financiers (AMF)",
+   "y2019": 107.791,
+   "y2024": 132.389,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 76,
+   "label": "Droit fixe dû par les opérateurs de jeux ou de paris en ligne",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 77,
+   "label": "Droit progressif sur l'enregistrement des produits homéopathiques",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agence nationale de sécurité du médicament et des produits de santé (ANSM)",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 78,
+   "label": "Droit progressif sur les demandes d'autorisation de mise sur le marché de médicaments",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agence nationale de sécurité du médicament et des produits de santé (ANSM)",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Pharmacie/médicament : rationaliser le nombre de taxes en renforçant les outils non fiscaux qui lient les entreprises du secteur et les pouvoirs publics"
+    }
+   ]
+  },
+  {
+   "id": 79,
+   "label": "Droit sur les inspections menées en vue de la délivrance d'un certificat de conformité",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGDDI",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 80,
+   "label": "Droit sur les produits bénéficiant d'une appellation d'origine ou d'une indication géographique protégée (INAO)",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Institut national de l'origine et de la qualité (INAO)",
+   "beneficiary": "Institut national de l'origine et de la qualité (INAO)",
+   "y2019": 6.95,
+   "y2024": 6.8,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 81,
+   "label": "Droits assimilés au droit d'octroi de mer sur les rhums et spiritueux à base d'alcool de cru",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Collectivités territoriales de l'outre-mer",
+   "y2019": 4.093,
+   "y2024": 4.0603,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 82,
+   "label": "Droits de plaidoirie",
+   "objective": "Correction défaillance marché",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Caisses des règlements pécuniaires des avocats (CARPA)",
+   "beneficiary": "Caisse nationale des barreaux français (CNBF)",
+   "y2019": 11.0,
+   "y2024": 5.0,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 83,
+   "label": "Droits d'enregistrement sur les mutations de jouissance (baux à durée limitée, concessions de licences d'exploitation de brevets)",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 84,
+   "label": "Droits d'enregistrement sur les mutations de jouissance (baux d'immeubles et commerciaux à durée limitée)",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 85,
+   "label": "Droits d'examen pour l'obtention des certificats de radiotélégraphique et radiotéléphonique",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 86,
+   "label": "Enregistrement des médicaments traditionnels à base de plantes",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agence nationale de sécurité du médicament et des produits de santé (ANSM)",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 87,
+   "label": "Fraction des droits de timbre sur les cartes nationales d'identité",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "France Titres, anciennement ANTS",
+   "y2019": 22.355,
+   "y2024": 23.92,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 89,
+   "label": "Fraction des produits annuels de la vente de biens confisqués",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGDDI",
+   "beneficiary": "Agence de gestion et de recouvrement des avoirs saisis et confisqués (AGRASC)",
+   "y2019": 148.09,
+   "y2024": 145.9,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 90,
+   "label": "Prélèvement sur les jeux de cercle en ligne",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général / Centre des monuments nationaux (CMN) / Communes",
+   "y2019": 11.506,
+   "y2024": 20.5058,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 91,
+   "label": "Fraction du produit des successions en déshérence",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Fondation du patrimoine",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 92,
+   "label": "Frais d'inscription au registre des exploitants de voitures de transport avec chauffeur",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Production",
+   "collector": "Ministère des transports et de la mobilité durable",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 93,
+   "label": "Garantie des matières d'or et d'argent",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général",
+   "y2019": 0.0531,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 94,
+   "label": "Imposition forfaitaire sur le matériel roulant circulant sur le réseau de transport ferroviaire et guidé géré par la RATP - IFER-STIF RATP",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Société des grands projets (SGP)",
+   "y2019": 73.8,
+   "y2024": 84.0144,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 95,
+   "label": "Imposition forfaitaire sur les centrales de production d’énergie électrique d’origine photovoltaïque ou hydraulique",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Communes / EPCI / Départements",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 96,
+   "label": "Imposition forfaitaire sur les éoliennes et les hydroliennes",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Communes / EPCI / Départements",
+   "y2019": 107.707,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 97,
+   "label": "Imposition forfaitaire sur les réseaux de gaz naturel et canalisations d’hydrocarbures",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Communes / EPCI / Départements",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 98,
+   "label": "Indemnité de défrichement",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Fonds forestier national (FFN)",
+   "y2019": 4.148,
+   "y2024": 3.0,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 100,
+   "label": "Majoration de la taxe sur les assurances de protection juridique au profit du Conseil national des barreaux",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Caisse nationale des barreaux français (CNBF)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 101,
+   "label": "Mutations à titre onéreux de meubles corporels",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": 0.262,
+   "y2024": 0.7672,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 102,
+   "label": "Mutations à titre onéreux d'immeubles et droits immobiliers",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": 16.913,
+   "y2024": 94.67,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Reconsidérer les taxes de rendement affectées à l’État et à des tiers réalisant une mission de service public dont le produit annuel est inférieur à 25 M€"
+    }
+   ]
+  },
+  {
+   "id": 103,
+   "label": "Participation au financement de la formation des intermittents correspondant au minimum à 2% des rémunérations versées",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "Association de gestion des Fonds de formation des Secteurs de la Culture, de la Communication et des Loisirs (AFDAS)",
+   "beneficiary": "France compétences",
+   "y2019": 30.246,
+   "y2024": 65.8318,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Formation professionnelle : achever la rationalisation du financement"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 104,
+   "label": "Participation au financement de la formation des professions non salariées (Artistes auteurs) correspondant au minimum à 0,1% au du montant annuel du plafond de la SS",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "URSSAF",
+   "beneficiary": "France compétences",
+   "y2019": 10.376,
+   "y2024": 12.8631,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Formation professionnelle : achever la rationalisation du financement"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 105,
+   "label": "Participation au financement de la formation des professions non salariées (hors artisanat, agriculture et pêche)",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "URSSAF",
+   "beneficiary": "Fonds d'assurance formation (FAF) des professions concernées",
+   "y2019": 176.893,
+   "y2024": 199.782,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 106,
+   "label": "Participation au financement de la formation des professions non salariées (Particuliers employeurs) correspondant au minimum à 0,15% au du montant annuel du plafond de la SS",
+   "objective": "Correction défaillance marché",
+   "payer": "Particuliers",
+   "base": "Production",
+   "collector": "URSSAF",
+   "beneficiary": "France compétences",
+   "y2019": 15.274,
+   "y2024": 18.2361,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Formation professionnelle : achever la rationalisation du financement"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 107,
+   "label": "Participation au financement de la formation des professions non salariées dans le domaine agricole",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Caisse centrale de mutualité sociale agricole (CMSA)",
+   "beneficiary": "Fonds pour la formation des entrepreneurs du vivant (VIVEA)",
+   "y2019": 62.442,
+   "y2024": 59.4135,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Formation professionnelle : achever la rationalisation du financement"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 108,
+   "label": "Participation au financement de la formation des travailleurs indépendants et des employeurs de la pêche maritime ou des cultures marines",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Fonds d’assurance formation interprofessionnel et national dédié aux PME-PMI (Agefos-PME)",
+   "y2019": 0.43,
+   "y2024": 0.4782,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Formation professionnelle : achever la rationalisation du financement"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 109,
+   "label": "Participation des concessionnaires de la liaison fixe Trans-Manche au fonctionnement de la commission intergouvernementale et du comité de sécurité chargés de superviser la construction et l'exploitation de l'ouvrage",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Commission intergouvernementale de la liaison Trans-Manche (CIG)",
+   "beneficiary": "Commission intergouvernementale de la liaison Trans-Manche (CIG)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 110,
+   "label": "Participation financière du demandeur du certificat (taxe dite « Expadon 2 »)",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 111,
+   "label": "Taxe pour non raccordement à l’égout - Participation pour le financement de l'assainissement collectif (PAC)",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Production",
+   "collector": "Collectivités territoriales / EPCI",
+   "beneficiary": "Communes",
+   "y2019": 0.979,
+   "y2024": 1.331,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 114,
+   "label": "Permis de chasser",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Office français de la biodiversité (OFB), anciennement ONCFS",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 115,
+   "label": "Prélèvement \"assurance frontière\" automobile",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 116,
+   "label": "Prélèvement complémentaire 2011-2015 sur les sommes misées sur les jeux exploités par la Française des jeux en vue du financement des enceintes sportives destinées à accueillir \"l'UEFA Euro 2016\"",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Agence nationale du sport (ANS)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 117,
+   "label": "Prélèvement complémentaire sur le produit brut des jeux dans les casinos installés à bord des navires de commerce transporteurs de passagers battant pavillon français",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 118,
+   "label": "Prélèvement progressif sur le produit brut des jeux dans les casinos installés à bord des navires de commerce transporteurs de passagers battant pavillon français",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Organismes de secours et de sauvetage en mer agréés (Art L742-9 Code de la sécurité intérieure)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 119,
+   "label": "Prélèvement sur la participation des employeurs à l'effort de construction (PEEC)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "Action Logement",
+   "beneficiary": "Agence nationale de contrôle du logement social (ANCOLS)",
+   "y2019": 6.45,
+   "y2024": 6.45,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Reconsidérer les taxes de rendement affectées à l’État et à des tiers réalisant une mission de service public dont le produit annuel est inférieur à 25 M€"
+    }
+   ]
+  },
+  {
+   "id": 120,
+   "label": "Prélèvement sur les biens, droits et produits placés dans un trust",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Reconsidérer les taxes de rendement affectées à l’État et à des tiers réalisant une mission de service public dont le produit annuel est inférieur à 25 M€"
+    }
+   ]
+  },
+  {
+   "id": 121,
+   "label": "Prélèvement sur les contrats d'assurance-vie en déshérence ; Prélèvement sur les contrats participation et intéressement en déshérence",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Caisse nationale d'assurance-vieillesse (CNAV)",
+   "y2019": 14.695,
+   "y2024": 19.8798,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 122,
+   "label": "Prélèvement spécial sur les bénéfices résultant de la vente, la location ou l'exploitation d'œuvres pornographiques ou d'incitation à la violence",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Bénéfice",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général / Centre national du cinéma et de l'image animée (CNC)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 125,
+   "label": "Prélèvements progressifs dus par les clubs de jeu",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 127,
+   "label": "Prélèvements sur les entreprises d'assurance",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": 161.421,
+   "y2024": 154.6371,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 128,
+   "label": "Prélèvements sur les numéros surtaxés pour les jeux et concours radiodiffusés et télévisés",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 129,
+   "label": "Quote-part des intérêts servis par la Caisse des dépôts et consignations sur les fonds déposés",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Fonds de financement des dossiers impécunieux (FFDI)",
+   "y2019": null,
+   "y2024": 51.0,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 130,
+   "label": "Redevance d'archéologie préventive",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Institut national de recherches archéologiques préventives (INRAP) / Fonds nationale pour l'archéologie préventive (FNAP) / Communes",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 131,
+   "label": "Redevance due par les opérateurs agréés de paris hippiques en ligne",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "France galop / Société d’encouragement à l’élevage du cheval français (SECF)",
+   "y2019": 63.896,
+   "y2024": 62.42,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 133,
+   "label": "Redevance due par les titulaires de titres d'exploitation de mines d'hydrocarbures liquides ou gazeux au large de Saint-Pierre-et-Miquelon",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Collectivité territoriale de Saint-Pierre-et-Miquelon",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 134,
+   "label": "Redevance géothermie",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Collectivités territoriales",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 135,
+   "label": "Redevance hydraulique (ex-taxe hydraulique)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Voies navigables de France (VNF)",
+   "beneficiary": "Voies navigables de France (VNF)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 136,
+   "label": "Redevance perçue à l’occasion de l’introduction des familles étrangères en France",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Production",
+   "collector": "Office Français de l'immigration et de l'intégration (OFII)",
+   "beneficiary": "Office français de l'immigration et de l'intégration (OFII)",
+   "y2019": 0.862,
+   "y2024": 0.8,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 137,
+   "label": "Redevance pour certification bois et plants de vigne",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Etablissement national des produits de l’agriculture et de la mer (FranceAgriMer)",
+   "beneficiary": "Etablissement national des produits de l’agriculture et de la mer (FranceAgriMer)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 138,
+   "label": "Redevance pour contrôle vétérinaire à l'expédition (taxe dite \"Certivéto\")",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Etablissement national des produits de l’agriculture et de la mer (FranceAgriMer)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Contrôle sanitaire des aliments : réexaminer à moyen terme l’équilibre entre taxation sectorielle et financement budgétaire"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 139,
+   "label": "Redevance pour délivrance initiale du permis de chasse",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Office français de la biodiversité (OFB), anciennement ONCFS",
+   "beneficiary": "Office français de la biodiversité (OFB), anciennement ONCFS",
+   "y2019": 0.865,
+   "y2024": 0.9,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 140,
+   "label": "Redevance pour examen du code de la route",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Opérateurs privés agréés par l'État (La Poste, SGS, etc.)",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 141,
+   "label": "Redevance pour l’agrément des établissements du secteur de l’alimentation animale",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Contrôle sanitaire des aliments : réexaminer à moyen terme l’équilibre entre taxation sectorielle et financement budgétaire"
+    }
+   ]
+  },
+  {
+   "id": 142,
+   "label": "Redevance pour l'accès aux installations et aux services collectifs d'un site nordique dédié à la pratique du ski de fond et aux loisirs de neige non motorisés autres que le ski alpin (part communale + part intercommunale)",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Production",
+   "collector": "Collectivités territoriales",
+   "beneficiary": "Communes / EPCI",
+   "y2019": 4.351,
+   "y2024": 3.6728,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 143,
+   "label": "Redevance pour le contrôle vétérinaire à l'importation de produits animaux ou d'origine animale, d'animaux vivants",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Contrôle sanitaire des aliments : réexaminer à moyen terme l’équilibre entre taxation sectorielle et financement budgétaire"
+    }
+   ]
+  },
+  {
+   "id": 144,
+   "label": "Redevance pour les contrôles vétérinaires et phytosanitaires des végétaux à l'importation",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Contrôle sanitaire des aliments : réexaminer à moyen terme l’équilibre entre taxation sectorielle et financement budgétaire"
+    }
+   ]
+  },
+  {
+   "id": 145,
+   "label": "Redevance pour obstacle sur les cours d'eau",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agences de l'eau",
+   "beneficiary": "Agences de l'eau",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 146,
+   "label": "Redevance pour pollution de l'eau d'origine non domestique",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agences de l'eau",
+   "beneficiary": "Agences de l'eau",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 147,
+   "label": "Redevance pour protection du milieu aquatique",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Fédérations de protection du milieu aquatique",
+   "beneficiary": "Agences de l'eau",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 148,
+   "label": "Redevance pour stockage d'eau en période d'étiage",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agences de l'eau",
+   "beneficiary": "Agences de l'eau",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 149,
+   "label": "Redevance relative aux contrôles renforcés à l’importation des denrées alimentaires d’origine non animale",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Contrôle sanitaire des aliments : réexaminer à moyen terme l’équilibre entre taxation sectorielle et financement budgétaire"
+    }
+   ]
+  },
+  {
+   "id": 150,
+   "label": "Redevance sanitaire d'abattage",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": 49.2815,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Contrôle sanitaire des aliments : réexaminer à moyen terme l’équilibre entre taxation sectorielle et financement budgétaire"
+    }
+   ]
+  },
+  {
+   "id": 151,
+   "label": "Redevance sanitaire de découpage",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Contrôle sanitaire des aliments : réexaminer à moyen terme l’équilibre entre taxation sectorielle et financement budgétaire"
+    }
+   ]
+  },
+  {
+   "id": 152,
+   "label": "Redevance sanitaire de première mise sur le marché des produits de la pêche ou de l’aquaculture",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Contrôle sanitaire des aliments : réexaminer à moyen terme l’équilibre entre taxation sectorielle et financement budgétaire"
+    }
+   ]
+  },
+  {
+   "id": 153,
+   "label": "Redevance sanitaire de transformation des produits de la pêche et de l’aquaculture",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Contrôle sanitaire des aliments : réexaminer à moyen terme l’équilibre entre taxation sectorielle et financement budgétaire"
+    }
+   ]
+  },
+  {
+   "id": 154,
+   "label": "Redevance sanitaire liée à la certification des végétaux à l’exportation",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Directions régionales de l'agriculture et de la forêt (DRAAF)",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Contrôle sanitaire des aliments : réexaminer à moyen terme l’équilibre entre taxation sectorielle et financement budgétaire"
+    }
+   ]
+  },
+  {
+   "id": 155,
+   "label": "Redevance sanitaire pour le contrôle de certaines substances et de leurs résidus",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    },
+    {
+     "scenario": 2,
+     "group": "Contrôle sanitaire des aliments : réexaminer à moyen terme l’équilibre entre taxation sectorielle et financement budgétaire"
+    }
+   ]
+  },
+  {
+   "id": 156,
+   "label": "Redevance sur la production des mines d'hydrocarbures liquides ou gazeux",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général / Caisse autonome nationale de sécurité sociale dans les mines (CANSSM)",
+   "y2019": 5.0,
+   "y2024": 4.0,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 157,
+   "label": "Redevance sur les gisements d’hydrocarbures en mer (plateau continental)",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général / Régions",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 158,
+   "label": "Redevance sur les paris hippiques en ligne",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": 1.0,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 159,
+   "label": "Redevance versée par Réseau ferré de France au titre des frais de surveillance et de contrôle",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Ministère de la transition écologique et de la cohésion des territoires",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 160,
+   "label": "Redevance sur les produits biocides",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agence nationale de sécurité sanitaire (ANSES)",
+   "beneficiary": "Agence nationale de sécurité sanitaire (Anses)",
+   "y2019": null,
+   "y2024": 3.583,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 161,
+   "label": "Redevances communale et départementale des mines (part communale + part intercommunale + part départementale)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Communes / Départements",
+   "y2019": 19.395,
+   "y2024": 19.0147,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 162,
+   "label": "Redevances cynégétiques",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Office français de la biodiversité (OFB), anciennement ONCFS",
+   "beneficiary": "Office français de la biodiversité (OFB), anciennement ONCFS",
+   "y2019": 45.365,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 163,
+   "label": "Redevances de l’eau dans les départements d’outre-mer",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "Agences de l'eau",
+   "beneficiary": "Offices de l'eau d'outre-mer",
+   "y2019": 28.0,
+   "y2024": 28.0,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 164,
+   "label": "Redevances d'usage des fréquences radioélectriques (part ANFR)",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 165,
+   "label": "Redevances perçues par l'INPI",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Institut National de la Propriété Industrielle (INPI)",
+   "beneficiary": "Institut national de la propriété industrielle (INPI)",
+   "y2019": 234.837,
+   "y2024": 170.0,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 166,
+   "label": "Redevances perçues pour la surveillance des établissements de jeux, hippodromes et cynodromes",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 167,
+   "label": "Redevances pour pollutions diffuses",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "Agences de l'eau",
+   "beneficiary": "Agences de l'eau / Office national de l'eau et des milieux aquatiques (ONEMA)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 168,
+   "label": "Redevances proportionnelles sur l'énergie hydraulique",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Ministère de la transition écologique et de la cohésion des territoires",
+   "beneficiary": "Budget général / Communes / Départements",
+   "y2019": 2.258,
+   "y2024": 19.9157,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 170,
+   "label": "Redevances UMTS 2G et 3G",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Autorité de régulation des communications électroniques et des postes (ARCEP)",
+   "beneficiary": "Caisse nationale d'assurance-vieillesse (CNAV)",
+   "y2019": 23.0,
+   "y2024": 33.732,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 171,
+   "label": "Surtaxe sur les eaux minérales",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Communes / Départements",
+   "y2019": 22.587,
+   "y2024": 19.9893,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 172,
+   "label": "Tarification des déplacements urbains/Péage urbain",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Collectivités territoriales / EPCI",
+   "beneficiary": "Collectivités territoriales",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 173,
+   "label": "TA-TINB - Taxe additionnelle à la taxe sur les installations nucléaires de base dite \"Accompagnement\"",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Groupements d'intérêt public \"Objectif Meuse\" / Groupements d'intérêt public \"Haute-Marne\"",
+   "y2019": 57.232,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 174,
+   "label": "TA-TINB - Taxe additionnelle à la taxe sur les installations nucléaires de base dite \"de stockage\"",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Communes, départements et EPCI proches de centres de stockage de déchets radioactifs",
+   "y2019": 3.3,
+   "y2024": 3.3,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 176,
+   "label": "TA-TINB - Taxe additionnelle à la taxe sur les installations nucléaires de base dite \"Recherche\"",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Agence nationale pour la gestion des déchets radioactifs (Andra)",
+   "y2019": 64.35,
+   "y2024": 63.2374,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Simplifier le paysage fiscal en fusionnant les taxes additionnelles les plus complexes et les taxes redondantes"
+    }
+   ]
+  },
+  {
+   "id": 177,
+   "label": "Taxe à l'essieu sur les véhicules immatriculés dans un État étranger taxant les véhicules immatriculés en France",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 178,
+   "label": "Taxe additionnelle à la TASCOM",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Simplifier le paysage fiscal en fusionnant les taxes additionnelles les plus complexes et les taxes redondantes"
+    }
+   ]
+  },
+  {
+   "id": 180,
+   "label": "Taxe additionnelle à la taxe sur les certificats d'immatriculation (malus première immatriculation)",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 181,
+   "label": "Taxe additionnelle à la taxe sur les certificats d'immatriculation (malus véhicules polluants)",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 182,
+   "label": "Taxe additionnelle à la taxe sur les certificats d'immatriculation des véhicules de tourisme (Art 34 LFI 2018)",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Professionnels du commerce de l'automobile titulaires d'une commission délivrée par l'administration des finances et ministère intérieur",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 183,
+   "label": "Taxe additionnelle à l'imposition forfaitaire des entreprises de réseaux des Stations Radio (TA-IFER Stations Radio)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Agence nationale de sécurité sanitaire (Anses) / Agence nationale des fréquences (ANFr)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 184,
+   "label": "Taxe additionnelle au droit de bail",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 185,
+   "label": "Taxe additionnelle départementale à la taxe de séjour",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Communes / Groupements de communes",
+   "beneficiary": "Départements",
+   "y2019": 49.943,
+   "y2024": 71.4027,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 186,
+   "label": "Taxe additionnelle régionale de 15% à la taxe de séjour IDF",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Région Ile-de-France",
+   "beneficiary": "Société des grands projets (SGP)",
+   "y2019": 1.5,
+   "y2024": 15.0,
+   "state": "créée",
+   "scenarios": []
+  },
+  {
+   "id": 187,
+   "label": "Taxe additionnelle sur les certificats d'immatriculation perçue au profit des communes de Saint-Martin et Saint-Barthélemy",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Commune de Saint-Martin / Commune de Saint Barthélémy",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 189,
+   "label": "Taxe affectée au financement d’un nouveau Centre Technique Industriel de la plasturgie et des composites",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGDDI",
+   "beneficiary": "Centre technique industriel de la plasturgie et des composites (CTIPC)",
+   "y2019": 6.376,
+   "y2024": 7.44,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 190,
+   "label": "Taxe affectée au financement de l'institut des corps gras",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "Etablissement national des produits de l’agriculture et de la mer (FranceAgriMer)",
+   "beneficiary": "Institut des corps gras (ITERG)",
+   "y2019": 0.509,
+   "y2024": 0.6025,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 191,
+   "label": "Taxes sur l'affectation des véhicules à des fins économiques, taxe annuelle sur le transport lourd de marchandises (ex-taxe spéciale sur certains véhicules routiers (TSVR) / véhicules lourds et ex-taxe à l’essieu)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": 175.2607,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 192,
+   "label": "Taxe annuelle due par les laboratoires de biologie médicale",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agences régionales de santé (ARS)",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": null,
+   "y2024": 71.0,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 193,
+   "label": "Taxe annuelle due sur les résidences mobiles terrestres",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Collectivités territoriales",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 194,
+   "label": "Taxe annuelle sur la vente des produits phytopharmaceutiques",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Agence nationale de sécurité sanitaire (Anses)",
+   "y2019": 4.42,
+   "y2024": 4.179,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Pharmacie/médicament : rationaliser le nombre de taxes en renforçant les outils non fiscaux qui lient les entreprises du secteur et les pouvoirs publics"
+    }
+   ]
+  },
+  {
+   "id": 197,
+   "label": "Taxe annuelle sur les engins maritimes à usage personnel (TAEMUP) – Part \"filière de responsabilité élargie du producteur\"",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Guichet unique de la fiscalité de la plaisance (GUFIP)",
+   "beneficiary": "Filière de responsabilité élargie du producteur (REP) relative aux navires de plaisance et de sport hors d’usage (NPSHU)",
+   "y2019": 0.876,
+   "y2024": 44.9,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 198,
+   "label": "Taxe annuelle sur les engins maritimes à usage personnel (TAEMUP) – Part \"organismes de secours et de sauvetage en mer agréés\"",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Guichet unique de la fiscalité de la plaisance (GUFIP)",
+   "beneficiary": "Organismes de secours et de sauvetage en mer agréés (Art L742-9 Code de la sécurité intérieure)",
+   "y2019": null,
+   "y2024": 44.9,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 199,
+   "label": "Taxe annuelle sur les locaux à usage de bureaux, les locaux commerciaux, les locaux de stockage et les surfaces de stationnement annexées à ces catégories de locaux perçue dans la région Ile-de-France",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Fonds national d'aide au logement (FNAL)",
+   "y2019": 116.1,
+   "y2024": 24.2,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 200,
+   "label": "Taxe annuelle sur les logements vacants",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Agence nationale de l’habitat (ANAH)",
+   "y2019": 87.456,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 201,
+   "label": "Taxe annuelle sur les médicaments pharmaceutiques vétérinaires",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agence nationale de sécurité sanitaire (ANSES)",
+   "beneficiary": "Agence nationale de sécurité sanitaire (Anses)",
+   "y2019": 3.701,
+   "y2024": 4.45,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Pharmacie/médicament : rationaliser le nombre de taxes en renforçant les outils non fiscaux qui lient les entreprises du secteur et les pouvoirs publics"
+    },
+    {
+     "scenario": 3,
+     "group": "Reconsidérer les taxes de rendement affectées à l’État et à des tiers réalisant une mission de service public dont le produit annuel est inférieur à 25 M€"
+    }
+   ]
+  },
+  {
+   "id": 202,
+   "label": "Contribution annuelle sur les premières ventes de médicaments et produits de santé ayant bénéficié d'une autorisation de mise sur le marché (ex-Taxe annuelle sur les premières ventes de médicaments et produits de santé ayant bénéficié d'une autorisation de mise sur le marché)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agence nationale de sécurité du médicament et des produits de santé (ANSM)",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": 3.0,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 203,
+   "label": "Taxe applicable aux demandes de validation d'une attestation d'accueil",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Communes",
+   "beneficiary": "Office français de l'immigration et de l'intégration (OFII)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 204,
+   "label": "Taxe applicable aux radioamateurs",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 205,
+   "label": "Accise sur les énergies - fraction perçue sur l'électricité (ex-Taxe communale sur la consommation finale d'électricité (TCFE) - Part intercommunale)",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGDDI",
+   "beneficiary": "Communes / Départements",
+   "y2019": 38.715,
+   "y2024": 31.8383,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 206,
+   "label": "Taxe de balayage",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "Direction générale des collectivités locales (DGCL)",
+   "beneficiary": "Communes",
+   "y2019": 110.34,
+   "y2024": 117.5111,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 207,
+   "label": "Taxe de protection des obtentions végétales",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "Comité de protection des obtentions végétales (CPOV)",
+   "beneficiary": "Comité de protection des obtentions végétales (CPOV)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 210,
+   "label": "Taxe départementale additionnelle à certains droits d'enregistrement",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Départements",
+   "y2019": 146.943,
+   "y2024": 122.2052,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 211,
+   "label": "Taxe destinée à financer le développement de la formation professionnelle dans les transports routiers",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "Ministère des transports et de la mobilité durable",
+   "beneficiary": "AFTRAL, anciennement AFT-IFTIM",
+   "y2019": 63.426,
+   "y2024": 62.0,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Formation professionnelle : achever la rationalisation du financement"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 212,
+   "label": "Taxe d'habitation sur les logements vacants",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Communes / EPCI",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Simplifier le paysage fiscal en fusionnant les taxes additionnelles les plus complexes et les taxes redondantes"
+    }
+   ]
+  },
+  {
+   "id": 213,
+   "label": "Taxe due par les concessionnaires de mines d'or, les amodiataires des concessions de mines d'or et les titulaires de permis et d'autorisations d'exploitation de mines d'or exploitées en Guyane (taxe additionnelle aurifère)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Collectivités territoriales de l'outre-mer",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 214,
+   "label": "Majoration du prix du billet d'avion des passagers embarqués dans les DOM (ex-Taxe due par les entreprises de transport public aérien et maritime sur les passagers embarqués dans les DOM)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGDDI",
+   "beneficiary": "Collectivités territoriales de l'outre-mer",
+   "y2019": 6.6,
+   "y2024": 48.8306,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 215,
+   "label": "Majoration du prix du billet d'avion des passagers embarqués en Corse et taxe sur le transport maritime de passagers (ex-Taxe due par les entreprises de transport public aérien et maritime sur les passagers embarqués et débarqués en Corse)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Collectivité territoriale de Corse",
+   "y2019": 39.429,
+   "y2024": 51.8257,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 216,
+   "label": "Accise sur les tabacs, fraction perçue en France continentale (ex-Taxe et droits de consommation sur les tabacs)",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": 67.0,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 217,
+   "label": "Taxe exceptionnelle sur la réserve de capitalisation (exit-tax)",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Caisse nationale d'allocations familiales (CNAF)",
+   "y2019": 1.0,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 218,
+   "label": "Taxe forfaitaire représentative des droits et frais payés par l'adjudicataire du droit de pêche et de chasse",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Office français de la biodiversité (OFB), anciennement ONCFS",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 219,
+   "label": "Taxe forfaitaire sur la cession à titre onéreux des terrains nus qui ont été rendus constructibles du fait de leur classement",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Communes",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 221,
+   "label": "Taxe forfaitaire sur les cessions à titre onéreux ou les exportations de métaux précieux, de bijoux, d'objets d’art, d'antiquités",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP / DGDDI (exportation)",
+   "beneficiary": "Budget général",
+   "y2019": 107.323,
+   "y2024": 115.6919,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 224,
+   "label": "Accise sur les énergies, fraction perçue sur les charbons (ex-Taxe intérieure sur les houilles, les lignites et les cokes (TICHLC))",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 225,
+   "label": "Taxe perçue lors de la mise sur le marché de médicaments vétérinaires",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agence nationale de sécurité sanitaire (ANSES)",
+   "beneficiary": "Agence nationale de sécurité sanitaire (Anses)",
+   "y2019": 3.738,
+   "y2024": 4.607,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Pharmacie/médicament : rationaliser le nombre de taxes en renforçant les outils non fiscaux qui lient les entreprises du secteur et les pouvoirs publics"
+    }
+   ]
+  },
+  {
+   "id": 226,
+   "label": "Taxe portant sur les quantités de farines, semoules et gruaux de blé tendre livrées ou mises en œuvre en vue de la consommation humaine",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Caisse centrale de la mutualité sociale agricole (CCMSA)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 227,
+   "label": "Taxe pour création de locaux à usage de bureaux, de locaux commerciaux et de locaux de stockage (TCBCE)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Ministère de la transition écologique et de la cohésion des territoires",
+   "beneficiary": "Région Ile-de-France",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 228,
+   "label": "Taxe pour frais de chambre de métiers d'Alsace",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Chambres de métiers et de l'artisanat (CMA) d'Alsace",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 229,
+   "label": "Taxe pour frais de chambre de métiers de Moselle",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Chambres de métiers et de l'artisanat (CMA) de Moselle",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 230,
+   "label": "Taxe sur les recettes de l'exploitation du réseau autoroutier concédé mentionnée à l'article L. 421-181 (ex-Taxe pour frais de contrôle due par les concessionnaires d'autoroutes)",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Agence de financement des inrastructures de transport de France (AFITF)",
+   "y2019": 2.816,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 231,
+   "label": "Taxe pour frais de contrôle sur les activités de transport public routier de personne",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Autorité de régulation des transports (ART), anciennement ARAFER",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 232,
+   "label": "Taxe fixe pour la gestion des certificats d'immatriculation des véhicules",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Professionnels du commerce de l'automobile titulaires d'une commission délivrée par l'administration des finances et ministère intérieur",
+   "beneficiary": "France Titres, anciennement ANTS",
+   "y2019": 46.4,
+   "y2024": 42.0,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 234,
+   "label": "Taxe pour le développement de la formation professionnelle dans les métiers de réparation de l’automobile, du cycle et du motocycle",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "DGFiP",
+   "beneficiary": "Association nationale pour la formation automobile (ANFA)",
+   "y2019": 33.476,
+   "y2024": 28.0,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Formation professionnelle : achever la rationalisation du financement"
+    },
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 235,
+   "label": "Taxe pour le développement de l'industrie de la conservation des produits agricoles",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Centre technique de la conservation des produits agricoles (CTCPA)",
+   "beneficiary": "Centre technique de la conservation des produits agricoles (CTCPA)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 236,
+   "label": "Taxes sur les produits de l'industrie et de l'artisanat, fraction sur les biens des industries du papier (ex-Taxe pour le développement des industries de fabrication du papier, du carton et de la pâte de cellulose)",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Centre technique de l’industrie des papiers, cartons et celluloses (CTP)",
+   "y2019": 1.238,
+   "y2024": 2.8,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 237,
+   "label": "Taxes sur les produits de l'industrie et de l'artisanat, fraction sur les biens des industries de la construction métallique, de la mécanique,… (ex-Taxe pour le développement des industries de la mécanique, de la construction métallique, des matériels etc…)",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Comité de coordination des centres de recherche en mécanique (COREM), DGFiP, DGDDI",
+   "beneficiary": "Centre technique des industries mécaniques (CETIM) / Centre technique industriel de la construction métallique(CTICM) / Centre Technique des Industries Aérauliques et Thermiques (CETIAT) / Instituts de soudure",
+   "y2019": 73.404,
+   "y2024": 115.1,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Réformer les taxes de rendement affectées à des tiers autres que l'État, la sécurité sociale et les collectivités territoriales"
+    }
+   ]
+  },
+  {
+   "id": 238,
+   "label": "Taxes sur les produits de l'industrie et de l'artisanat, fraction perçue sur les biens des industries de l'ameublement (ex-Taxe pour le développement des industries de l'ameublement ainsi que les industries du bois)",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Comité professionnel de développement économique des industries françaises de l’ameublement (CODIFAB), DGFiP, DGDDI",
+   "beneficiary": "Comité professionnel de développement des industries françaises de l’ameublement et du bois (CODIFAB) / Institut Technologique Forêt Cellulose Bois-construction Ameublement (FCBA) / Centre technique des industries mécaniques (CETIM)",
+   "y2019": 13.242,
+   "y2024": 13.07,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 239,
+   "label": "Taxes sur les produits de l'industrie et de l'artisanat, fraction perçue sur les biens des industries de l'habillement (ex-Taxe pour le développement des industries de l'habillement)",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Comité de développement et de promotion de l'habillement (DEFI), DGFiP, DGDDI",
+   "beneficiary": "Comité de développement et de promotion des industries du textile et de l’habillement (DEFI)",
+   "y2019": 9.685,
+   "y2024": 9.95,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 240,
+   "label": "Taxes sur les produits de l'industrie et de l'artisanat, fraction perçue sur les biens des industries de l'horlogerie, de la bijouterie-joaillerie, de l'orfèvrerie et des arts de la table (ex-Taxes sur les produits de l'industrie et de l'artisanat Taxe pour le développement des industries de l'horlogerie, bijouterie, joaillerie, orfèvrerie et arts de la table)",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Comité Francéclat, DGFiP, DGDDI",
+   "beneficiary": "Comité professionnel de développement économique au service des secteurs de l’horlogerie, de la bijouterie, de la joaillerie, de l’orfèvrerie et des arts de la table (Francéclat)",
+   "y2019": 12.677,
+   "y2024": 19.5,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 241,
+   "label": "Taxes sur les produits de l'industrie et de l'artisanat, fraction perçue sur les biens des industries du béton, fraction perçue sur les biens des industries des matériaux de construction en terre cuite, raction perçue sur les biens des industries des roches ornementales et de constructionf (ex-Taxe pour le développement des industries du béton, de la terre cuite et des roches ornementales et de construction)",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Centres techniques des matériaux et composants pour la construction (CTMCC), DGDDI",
+   "beneficiary": "Centre technique de matériaux naturels de construction (CTMNC) / Centre d'études et de recherches de l'industrie du béton (CERIB)",
+   "y2019": 13.097,
+   "y2024": 15.0,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 242,
+   "label": "Taxes sur les produits de l'industrie et de l'artisanat, fraction perçue sur les biens des industries du cuir, de la chaussure et de la maroquinerie (ex-Taxe pour le développement des industries du cuir, de la maroquinerie, de la ganterie et de la chaussure)",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Centre technique du cuir (CTC), DGFiP, DGDDI",
+   "beneficiary": "Centre technique du cuir (CTC)",
+   "y2019": 14.679,
+   "y2024": 18.781,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 243,
+   "label": "Taxe pour l'évaluation et le contrôle de la mise sur le marché des produits phytopharmaceutiques et des matières fertilisantes",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agence nationale de sécurité sanitaire (ANSES)",
+   "beneficiary": "Agence nationale de sécurité sanitaire (Anses)",
+   "y2019": 10.495,
+   "y2024": 10.0,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Pharmacie/médicament : rationaliser le nombre de taxes en renforçant les outils non fiscaux qui lient les entreprises du secteur et les pouvoirs publics"
+    }
+   ]
+  },
+  {
+   "id": 245,
+   "label": "Taxe spéciale d'équipement au profit de l'EPA de Guyane",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Etablissement public foncier et d’aménagement (EPFA) en Guyane",
+   "y2019": 3.886,
+   "y2024": 4.3,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 246,
+   "label": "Taxe spéciale d'équipement au profit de l'EPF de Lorraine",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Etablissement public foncier (EPF) de Lorraine",
+   "y2019": 24.154,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 247,
+   "label": "Taxe spéciale d'équipement au profit de l'EPF de Normandie",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Etablissement public foncier (EPF) de Normandie",
+   "y2019": 14.272,
+   "y2024": 11.064,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 248,
+   "label": "Taxe spéciale d'équipement au profit de l'EPF de PACA",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Etablissement public foncier (EPF) de PACA",
+   "y2019": 54.931,
+   "y2024": 41.7,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 249,
+   "label": "Taxe spéciale d'équipement au profit de l'établissement public Société du Grand Paris",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Société des grands projets (SGP)",
+   "y2019": 117.0,
+   "y2024": 67.0796,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 251,
+   "label": "Taxe spéciale sur la publicité télévisée",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": 47.46,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Le financement des services publics et des équipements locaux : une rationalisation à parachever"
+    }
+   ]
+  },
+  {
+   "id": 252,
+   "label": "Taxe spéciale sur les huiles végétales, fluides ou concrètes, destinées à l'alimentation humaine",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI / DGFiP",
+   "beneficiary": "Caisse centrale de la mutualité sociale agricole (CCMSA)",
+   "y2019": 140.0,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 253,
+   "label": "Taxe spécifique pour la Chambre nationale de la batellerie artisanale",
+   "objective": "Correction défaillance marché",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Voies navigables de France (VNF)",
+   "beneficiary": "Chambre nationale de batellerie artisanale (CNBA)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 254,
+   "label": "Taxe sur la publicité diffusée au moyen de documents imprimés (ex-Taxe sur certaines dépenses de publicité)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": 23.111,
+   "y2024": 17.9127,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "16 taxes sur les biens de l’industrie et de l’artisanat"
+    }
+   ]
+  },
+  {
+   "id": 256,
+   "label": "Taxe sur la cession à titre onéreux des terrains nus rendus constructibles",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Agence de services et de paiement (ASP)",
+   "y2019": 27.426,
+   "y2024": 16.0,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Simplifier le paysage fiscal en fusionnant les taxes additionnelles les plus complexes et les taxes redondantes"
+    }
+   ]
+  },
+  {
+   "id": 257,
+   "label": "Taxe sur la livraison en France de postes émetteurs-récepteurs fonctionnant sur les canaux banalisés",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 258,
+   "label": "Taxe sur la publicité diffusée par les chaînes de télévision/éditeurs de service",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 259,
+   "label": "Taxe sur la publicité diffusée par voie de radiodiffusion sonore et de télévision",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 260,
+   "label": "Taxe sur la transformation de contrats en cours en contrats euro-croissance",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 262,
+   "label": "Taxe sur le chiffre d'affaires des exploitants agricoles",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 263,
+   "label": "Taxe sur la mise à disposition de phonogrammes et de vidéomusiques / Taxe sur le chiffre d'affaires des plateformes d'écoute de musique en ligne/Taxe sur les services de streaming musical",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Centre national de la musique (CNM)",
+   "y2019": null,
+   "y2024": 13.0,
+   "state": "créée",
+   "scenarios": []
+  },
+  {
+   "id": 264,
+   "label": "Taxe sur le non paiement de la participation des employeurs au financement de la formation professionnelle continue",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "URSSAF",
+   "beneficiary": "Budget général",
+   "y2019": 34.042,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 265,
+   "label": "Taxe sur le permis de conduire des bateaux de plaisance à moteur, fraction perçue sur les candidatures aux examens et fraction perçue sur les délivrances du titre",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 266,
+   "label": "Taxe sur le résultat des entreprises ferroviaires",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Bénéfice",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 267,
+   "label": "Taxe sur le sucre/Taxe sur l'ajout de sucre à la vendange",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 268,
+   "label": "Taxe sur l'édition des ouvrages de librairie",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Centre national du livre (CNL)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 270,
+   "label": "Taxe sur les actes des huissiers de justice",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 271,
+   "label": "Taxe sur les activités commerciales non salariées à durée saisonnière",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Communes",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 273,
+   "label": "Taxe sur les appareils de reproduction ou d'impression",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP / DGDDI (importation hors UE)",
+   "beneficiary": "Centre national du livre (CNL)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 275,
+   "label": "Taxe sur les boissons édulcorées",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": 39.027,
+   "y2024": 45.0,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 278,
+   "label": "Taxe sur les céréales",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Etablissement national des produits de l’agriculture et de la mer (FranceAgriMer)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 280,
+   "label": "Taxe sur les contrats d'échange sur défaut d'un Etat de l'Union européenne",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 282,
+   "label": "Taxe sur les déchets réceptionnés dans une installation de stockage ou un incinérateur de déchets ménagers",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Direction générale des collectivités locales (DGCL)",
+   "beneficiary": "Communes",
+   "y2019": 18.108,
+   "y2024": 19.6994,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 283,
+   "label": "Taxe sur les déclarations et notifications de produits du tabac",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": 1.0,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 284,
+   "label": "Taxe sur les déclarations et notifications des produits du vapotage",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Agence nationale de sécurité sanitaire (Anses)",
+   "y2019": 8.0,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 285,
+   "label": "Taxe sur les demandes de visa ou de renouvellement de visa de publicité et sur les dépôts de publicité pharmaceutiques",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agence nationale de sécurité du médicament et des produits de santé (ANSM)",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Pharmacie/médicament : rationaliser le nombre de taxes en renforçant les outils non fiscaux qui lient les entreprises du secteur et les pouvoirs publics"
+    }
+   ]
+  },
+  {
+   "id": 287,
+   "label": "Taxe sur les entreprises ayant bénéficié de quotas d'émission de gaz à effet de serre",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 288,
+   "label": "Taxe sur les éoliennes maritimes",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Communes",
+   "y2019": 107.707,
+   "y2024": 8.0278,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 289,
+   "label": "Taxe sur les excédents de provisions des entreprises d'assurances de dommages",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 290,
+   "label": "Taxe sur la mise en relation par voie électronique en vue de fournir certaines prestations de transport dite ARPE (ex-Taxe sur les exploitants de plateformes de mises en relation par voie électronique en vue de fournir certaines prestations de transport)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Autorité des relations sociales des plateformes d'emploi (ARPE)",
+   "y2019": null,
+   "y2024": 1.425,
+   "state": "créée",
+   "scenarios": []
+  },
+  {
+   "id": 291,
+   "label": "Taxe sur les loyers élevés dans les logements de petite surface",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 293,
+   "label": "Taxe sur les nuisances sonores aériennes",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Direction générale de l’aviation civile (DGAC)",
+   "beneficiary": "Certains exploitants d'aérodromes",
+   "y2019": 49.526,
+   "y2024": 48.09,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 294,
+   "label": "Taxe sur les ordres annulés dans le cadre d’opérations à haute fréquence",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 295,
+   "label": "Taxe sur les papiers graphiques",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "EcoFolio",
+   "beneficiary": "EcoFolio",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 296,
+   "label": "Taxe sur le transport de passagers maritimes embarqués à destination d'espaces naturels protégés",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGDDI",
+   "beneficiary": "Personne publique assurant la gestion de l'espace naturel protégé concerné ou commune d'implantation de l'espace",
+   "y2019": 3.626,
+   "y2024": 4.5,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 297,
+   "label": "Taxe sur les permis de conduire",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Régions",
+   "y2019": 2.83,
+   "y2024": 0.0488,
+   "state": "supprimée",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "16 taxes sur les biens de l’industrie et de l’artisanat"
+    }
+   ]
+  },
+  {
+   "id": 298,
+   "label": "Taxe sur les plus-values de cession de logements sociaux",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 299,
+   "label": "Taxe sur les plus-values immobilières (PVI) autres que terrains à bâtir",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Caisse de garantie du logement locatif social (CGLLS)",
+   "y2019": 90.571,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 300,
+   "label": "Taxe sur les premières ventes de dispositifs médicaux",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 301,
+   "label": "Taxe sur les prémix",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGDDI",
+   "beneficiary": "Caisse nationale d'assurance-maladie (CNAM)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 302,
+   "label": "Taxe sur les primes d'assurances",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Fonds de garantie des assurances obligatoires de dommages (FGAO)",
+   "beneficiary": "Fonds de garantie des assurances obligatoires de dommages (FGAO)",
+   "y2019": 93.0,
+   "y2024": 107.2087,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 304,
+   "label": "Taxe sur les produits de la fonderie",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "Centre technique des industries de la fonderie (CTIF)",
+   "beneficiary": "Centre technique interprofessionnel des fruits et légumes (CTIFL)",
+   "y2019": 5.519,
+   "y2024": 7.44,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 305,
+   "label": "Taxe sur les produits de la mer/Taxe sur les produits de la pêche maritime",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "Halles à marée (pour Franceagrimer) / DGDDI (importation)",
+   "beneficiary": "Etablissement national des produits de l’agriculture et de la mer (FranceAgriMer)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 306,
+   "label": "Taxe sur les produits de tabac",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Départements",
+   "beneficiary": "Agence nationale de sécurité sanitaire (Anses)",
+   "y2019": 1.86,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 307,
+   "label": "Taxe sur les remontées mécaniques (communes)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "Communes",
+   "beneficiary": "Communes",
+   "y2019": 39.513,
+   "y2024": 70.9626,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 308,
+   "label": "Taxe sur les remontées mécaniques (départements)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "Départements",
+   "beneficiary": "Départements",
+   "y2019": 19.052,
+   "y2024": 70.9626,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 309,
+   "label": "Taxe sur les services d’informations ou interactifs à caractère pornographique et qui font l’objet d’une publicité",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 310,
+   "label": "Taxe sur les spectacles vivants (ex-taxe sur les spectacles de variété)",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Centre national de la chanson des variétés et du jazz (CNV), Société des auteurs, compositeurs et éditeurs de musique (SACEM)",
+   "beneficiary": "Centre national de la musique (CNM) / Centre national de la chanson, des variétés et du jazz (CNV) (jusqu'en 2020)",
+   "y2019": 36.004,
+   "y2024": 32.0,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 311,
+   "label": "Taxe sur les spectacles perçue au profit de l’Association pour le soutien du théâtre privé",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Association pour le Soutien du Théâtre Privé (ASTP) / Société des auteurs, compositeurs et éditeurs de musique (SACEM) / Société des auteurs et compositeurs dramatiques (SACD)",
+   "beneficiary": "Association pour le soutien du théâtre privé (ASTP)",
+   "y2019": 8.0,
+   "y2024": 8.5,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 312,
+   "label": "Taxe sur les surfaces de stationnement",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Société des grands projets (SGP)",
+   "y2019": 4.0,
+   "y2024": 15.8961,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "17 taxes potentiellement complexes, car reposant sur des assiettes ad hoc et devant être spontanément liquidées par les contribuables."
+    }
+   ]
+  },
+  {
+   "id": 313,
+   "label": "Taxe sur les titres de séjour et de voyage électroniques",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Ministère de l'intérieur",
+   "beneficiary": "France Titres, anciennement ANTS",
+   "y2019": 18.085,
+   "y2024": 20.9,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 315,
+   "label": "Taxe sur les ventes et locations de vidéogrammes destinés à l'usage privé du public",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Centre national du cinéma et de l'image animée (CNC)",
+   "y2019": 34.223,
+   "y2024": 139.5,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 316,
+   "label": "Taxe sur les voyageurs de commerce",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 317,
+   "label": "Taxe sur l'exploration de gîtes géothermiques à haute température",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Collectivités territoriales",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 318,
+   "label": "Taxe sur l'exploration d'hydrocarbures",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Collectivité territoriale de Guyane / Collectivité territoriale de Martinique",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 320,
+   "label": "Taxes dans le domaine funéraire (convois, inhumations et crémations)",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Communes",
+   "y2019": 6.15,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 322,
+   "label": "Taxes spéciales d'équipement 50 pas géométrique Guadeloupe",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Zone des 50 pas géométriques de Guadeloupe",
+   "y2019": 1.415,
+   "y2024": 0.997,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 323,
+   "label": "Taxes spéciales d'équipement 50 pas géométrique Martinique",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Zone des 50 pas géométriques de Martinique",
+   "y2019": 1.415,
+   "y2024": 0.975,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 325,
+   "label": "Taxes sur les stations et liaisons radioélectriques privées",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "Agence nationale des fréquences (ANFr)",
+   "beneficiary": "Budget général",
+   "y2019": 25.537,
+   "y2024": 24.7244,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Reconsidérer les taxes de rendement affectées à l’État et à des tiers réalisant une mission de service public dont le produit annuel est inférieur à 25 M€"
+    }
+   ]
+  },
+  {
+   "id": 326,
+   "label": "Taxe incitative relative à l'utilisation d'énergie renouvelable dans le transport (TIRUERT) (remplace la TGAP carburants fossiles)",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 327,
+   "label": "TGAP déchets",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 328,
+   "label": "TGAP émissions polluantes",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général / Agence de l'environnement et de la maîtrise de l'énergie (ADEME)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 329,
+   "label": "TGAP lessives",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général / Agence de l'environnement et de la maîtrise de l'énergie (ADEME)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 1,
+     "group": "16 taxes sur les biens de l’industrie et de l’artisanat"
+    }
+   ]
+  },
+  {
+   "id": 330,
+   "label": "TGAP lubrifiants",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général / Agence de l'environnement et de la maîtrise de l'énergie (ADEME)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 331,
+   "label": "TGAP matériaux d'extraction",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général / Agence de l'environnement et de la maîtrise de l'énergie (ADEME)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 332,
+   "label": "Taxe sur les spectacles cinématographiques (ex-TSA - Taxe sur le prix des entrées aux séances organisées par les exploitants d’établissements de spectacles cinématographiques)",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Centre national du cinéma et de l'image animée (CNC)",
+   "beneficiary": "Centre national du cinéma et de l'image animée (CNC)",
+   "y2019": 154.402,
+   "y2024": 143.0,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 334,
+   "label": "Versement pour sous-densité",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Communes",
+   "y2019": null,
+   "y2024": 0.2202,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 335,
+   "label": "Versement transport dû par les entreprises de plus de 9 salariés implantées en province",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "Collectivités territoriales",
+   "beneficiary": "Autorités organisatrices des transports urbains",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 336,
+   "label": "Taxe sur les services de contenus audiovisuels à la demande",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "Centre national du cinéma et de l'image animée (CNC)",
+   "beneficiary": "Centre national du cinéma et de l'image animée (CNC)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 337,
+   "label": "Taxe sur la publicité diffusée au moyen de services de contenus audiovisuels à la demande (CIBS, art.L454-16) (ex- CGI, art 1609 sexdecies B)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Centre national du cinéma et de l'image animée (CNC)",
+   "beneficiary": "Centre national du cinéma et de l'image animée (CNC)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": [
+    {
+     "scenario": 3,
+     "group": "Reconsidérer les taxes de rendement affectées à l’État et à des tiers réalisant une mission de service public dont le produit annuel est inférieur à 25 M€"
+    }
+   ]
+  },
+  {
+   "id": 338,
+   "label": "Taxe sur les services de communication électronique",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 339,
+   "label": "Taxe spéciale due en cas de non-respect de l’engagement de conserver pendant 5 ans les parts de FCPR ou FCPI",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 340,
+   "label": "Taxe pour le financement du fonds de soutien aux collectivités territoriales ayant contracté des produits structurés",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 341,
+   "label": "Sommes constatées par les clubs de jeux au titre des \"orphelins\"",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Centre communal d'action sociale de la ville de Paris",
+   "y2019": null,
+   "y2024": null,
+   "state": "créée",
+   "scenarios": []
+  },
+  {
+   "id": 342,
+   "label": "Contribution salariale sur les attributions d'options de souscription ou d'achat des actions",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Caisse nationale d'allocations familiales (CNAF)",
+   "y2019": null,
+   "y2024": 92.0,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 343,
+   "label": "Taxe pour frais de chambre de métiers (CMA)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "URSSAF",
+   "beneficiary": "Chambres de métiers et d'artisanat (CMA)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 344,
+   "label": "Taxe pour les chambres de commerce et d'industrie (TCCI)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "URSSAF",
+   "beneficiary": "Chambres de commerce et d'industrie (CCI)",
+   "y2019": 0.86,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 345,
+   "label": "Contribution des diffuseurs d'oeuvres au financement de la protection sociale des artistes auteurs",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "URSSAF",
+   "beneficiary": "Organismes de sécurité sociale / Action sociale des artistes-auteurs (AGESSA)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 346,
+   "label": "Contribution aux unions régionales des professionnels de santé (CURPS)",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "URSSAF",
+   "beneficiary": "Unions régionales des Professionnels de santé URPS",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 347,
+   "label": "Soulte rhum et tafias",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGDDI",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 348,
+   "label": "Taxe sur l'utilisation des bandes \" 700 MHz \" et \" 800 MHz \" du spectre radioélectrique",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "Agence nationale des fréquences (ANFr)",
+   "beneficiary": "Agence nationale des fréquences (ANFr)",
+   "y2019": null,
+   "y2024": null,
+   "state": "en vigueur",
+   "scenarios": []
+  },
+  {
+   "id": 349,
+   "label": "Taxe additionnelle à la taxe de séjour dans les départements des Bouches-du-Rhône, du Var et des Alpes-Maritimes",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Communes / Groupements de communes",
+   "beneficiary": "Société de la Ligne Nouvelle Provence Côte d'Azur",
+   "y2019": null,
+   "y2024": null,
+   "state": "créée",
+   "scenarios": []
+  },
+  {
+   "id": 350,
+   "label": "Taxe additionnelle à la taxe de séjour dans les départements de la Gironde, des Landes, du Lot-et-Garonne, des Pyrénées-Atlantiques, de la Haute-Garonne, du Gers, des Hautes-Pyrénées, de l'Ariège, du Lot, du Tarn et du Tarn-et-Garonne",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Communes / Groupements de communes",
+   "beneficiary": "Société du Grand Projet du Sud-Ouest (SGPSO)",
+   "y2019": null,
+   "y2024": null,
+   "state": "créée",
+   "scenarios": []
+  },
+  {
+   "id": 351,
+   "label": "Taxe additionnelle à la taxe de séjour dans les départements de l'Hérault, de l'Aude et des Pyrénées-Orientales",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "Communes / Groupements de communes",
+   "beneficiary": "Société de la Ligne Nouvelle Montpellier-Perpignan",
+   "y2019": null,
+   "y2024": null,
+   "state": "créée",
+   "scenarios": []
+  },
+  {
+   "id": 352,
+   "label": "Taxe spéciale complémentaire à la taxe spéciale d'équipement destinée au financement du GPSO",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Société du Grand Projet Ferroviaire du Sud-Ouest (SGPSO)",
+   "y2019": null,
+   "y2024": null,
+   "state": "créée",
+   "scenarios": []
+  },
+  {
+   "id": 353,
+   "label": "Taxe spéciale d’équipement affectée à la SGPSO",
+   "objective": "Rendement",
+   "payer": "Autres",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Société du Grand Projet Ferroviaire du Sud-Ouest (SGPSO)",
+   "y2019": null,
+   "y2024": null,
+   "state": "créée",
+   "scenarios": []
+  },
+  {
+   "id": 354,
+   "label": "Taxe additionnelle sur le foncier non-bâti",
+   "objective": "Rendement",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Collectivités territoriales",
+   "y2019": null,
+   "y2024": 94.2,
+   "state": "créée",
+   "scenarios": [
+    {
+     "scenario": 2,
+     "group": "Le financement des services publics et des équipements locaux : une rationalisation à parachever"
+    }
+   ]
+  },
+  {
+   "id": 355,
+   "label": "Taxe forfaitaire sur les contrats à durée déterminée dits d'usage",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Organismes de sécurité sociale",
+   "y2019": null,
+   "y2024": null,
+   "state": "éphémère",
+   "scenarios": []
+  },
+  {
+   "id": 357,
+   "label": "Droit enregistrement des actes constatant la cession à titre onéreux d'un fonds agricole, ainsi que les actes constatant la cession de gré à gré d'un navire de pêche artisanale et du matériel servant à son exploitation",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Masse salariale",
+   "collector": "URSSAF",
+   "beneficiary": "Inconnu",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 358,
+   "label": "Droits sur les déclarations et notifications de produit du tabac à Wallis-et-Futuna",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Bénéfice",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 359,
+   "label": "Redevance due par les sociétés parisiennes de courses de chevaux",
+   "objective": "Service rendu",
+   "payer": "Autres",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 360,
+   "label": "Redevances acquittées par les opérateurs privés pour l'utilisation des bandes de fréquences comprises entre 694 mégahertz et 790 mégahertz",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Agence nationale de sécurité sanitaire (Anses)",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 361,
+   "label": "Taxe forfaitaire sur l'intervention occasionnée par l'usage d'une fréquence ou d'une installation radioélectrique sans autorisation",
+   "objective": "Rendement",
+   "payer": "Entreprises",
+   "base": "Production",
+   "collector": "DGFiP",
+   "beneficiary": "Sociétés-mères de courses de chevaux",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 362,
+   "label": "Taxe annuelle sur les locaux à usage de bureaux, les locaux commerciaux, les locaux de stockage et les surfaces de stationnement perçue dans les départements des Bouches-du-Rhône, du Var et des Alpes-Maritimes",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "créée",
+   "scenarios": []
+  },
+  {
+   "id": 363,
+   "label": "Taxe spéciale sur les films pornographiques ou d'incitation à la violence",
+   "objective": "Incitation",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 364,
+   "label": "Droits fixes d'enregistrment (contrats de mariage, successions, legs, inventaires,…) et autres actes",
+   "objective": "Service rendu",
+   "payer": "Particuliers",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 365,
+   "label": "Droits d'enregistrement dus sur certains actes relatifs à la vie des sociétés",
+   "objective": "Service rendu",
+   "payer": "Entreprises",
+   "base": "Consommation",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  },
+  {
+   "id": 366,
+   "label": "Taxe annuelle sur la détention de véhicules polluants",
+   "objective": "Incitation",
+   "payer": "Entreprises",
+   "base": "Capital",
+   "collector": "DGFiP",
+   "beneficiary": "Budget général",
+   "y2019": null,
+   "y2024": null,
+   "state": "supprimée",
+   "scenarios": []
+  }
+ ]
+}
