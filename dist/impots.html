@@ -95,7 +95,7 @@
 
     <section class="section section--alt" id="un-a-un" aria-labelledby="txOneTitle">
       <div class="container">
-        <div class="section__head"><span class="eyebrow">Du plus gros au plus petit</span><h2 id="txOneTitle">Quelques géants, une longue traîne</h2><p class="lead">Les mêmes impôts sur une échelle logarithmique : chaque graduation multiplie le montant par dix. Une poignée d’impôts fait l’essentiel des recettes, des dizaines d’autres rapportent moins de 150 millions d’euros.</p></div>
+        <div class="section__head"><span class="eyebrow">Du plus gros au plus petit</span><h2 id="txOneTitle">Quelques géants, une longue traîne</h2><p class="lead">Les mêmes impôts sur une échelle logarithmique : chaque graduation multiplie le montant par dix. Une poignée d’impôts fait l’essentiel des recettes, des dizaines d’autres rapportent moins de 175 millions d’euros.</p></div>
         <div class="panel"><h3>Chaque impôt, par ordre de grandeur</h3><div id="txStrip" class="tx-strip"></div><p class="note" id="txStripNote"></p></div>
         <div class="grid-2 tx-onebyone">
           <div class="panel"><h3>Part cumulée des recettes</h3><div id="txPareto" class="tx-pareto"></div><p class="note" id="txParetoNote"></p></div>
@@ -122,23 +122,17 @@
         <div class="kpis" id="txCostKpis"></div>
         <div class="grid-2">
           <div class="panel"><h3>Pour 100 € collectés, ce que dépense chaque administration</h3><div id="txCollectors"></div><p class="note" id="txCollectorsNote"></p></div>
-          <div class="panel"><h3>Coût de gestion de la DGFiP, en % des recettes</h3><div id="txDgfip" class="tx-line"></div><p class="note" id="txDgfipNote"></p></div>
+          <div class="panel"><h3>Coût de gestion de la DGFiP, en % des recettes brutes</h3><div id="txDgfip" class="tx-line"></div><p class="note" id="txDgfipNote"></p></div>
         </div>
-        <div class="grid-2">
-          <div class="panel"><h3>Comparaison internationale (OCDE)</h3><div id="txOecd"></div><p class="note" id="txOecdNote"></p></div>
-          <div class="panel"><h3>Ce que l’État facture aux collectivités pour lever leurs impôts</h3><div id="txFees"></div><p class="note" id="txFeesNote"></p></div>
-        </div>
+        <div class="panel panel--wide"><h3>Ce que l’État facture en plus des impôts locaux pour les lever</h3><div id="txFees"></div><p class="note" id="txFeesNote"></p></div>
         <div class="panel panel--wide"><h3>Coût de collecte impôt par impôt, quand il est publié</h3><div id="txPerTaxCost" class="table-wrap"></div><p class="note" id="txPerTaxCostNote"></p></div>
       </div>
     </section>
 
     <section class="section" id="petites" aria-labelledby="txSmallTitle">
       <div class="container">
-        <div class="section__head"><span class="eyebrow">Taxes à faible rendement</span><h2 id="txSmallTitle">Les petites taxes qui coûtent cher</h2><p class="lead">Rendement et coût de collecte des taxes pour lesquelles un rapport public donne les deux. Au-dessus de la diagonale, la taxe coûte plus qu’elle ne rapporte.</p></div>
-        <div class="grid-2">
-          <div class="panel"><h3>Rendement et coût, taxe par taxe</h3><div id="txScatter" class="tx-scatter"></div><p class="note" id="txScatterNote"></p></div>
-          <div class="panel"><h3>Coût pour 100 € collectés</h3><div id="txCostly"></div><p class="note" id="txCostlyNote"></p></div>
-        </div>
+        <div class="section__head"><span class="eyebrow">Taxes à faible rendement</span><h2 id="txSmallTitle">Les petites taxes qui coûtent cher</h2><p class="lead">Plus de deux cents taxes rapportent moins de 175 millions d’euros chacune. Pour la plupart, personne ne publie ce que coûte leur collecte : les rares chiffres disponibles montrent des écarts de un à plusieurs centaines selon la taxe.</p></div>
+        <div class="panel"><h3>Coût de collecte pour 100 € perçus</h3><div id="txCostDots" class="tx-strip"></div><p class="note" id="txCostDotsNote"></p></div>
         <div id="txCounts" class="tx-counts"></div>
       </div>
     </section>

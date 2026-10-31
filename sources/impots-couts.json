@@ -1,17 +1,350 @@
 {
+ "retrieved": "2026-10-31",
+ "method": "Chiffres relevés dans des extraits des documents cités (les documents complets n’ont pas pu être ouverts depuis l’environnement de construction) : à confirmer sur le document. Les reprises par la presse ou des think tanks ne sont pas retenues.",
  "dgfip": [
+  {
+   "year": 1999,
+   "net": 1.4,
+   "url": "https://questions.assemblee-nationale.fr/dyn/14/questions/QANR5L14QE51667.pdf",
+   "title": "Réponse ministérielle à la QE AN n° 51667 (14e lég.)",
+   "method": "DGI, rapporté aux recettes (nettes d'après la comparaison faite dans la réponse : -14 % jusqu'en 2010 sur recettes nettes)",
+   "check": "extrait"
+  },
+  {
+   "year": 2010,
+   "gross": 1.04,
+   "net": 1.2,
+   "url": "https://questions.assemblee-nationale.fr/dyn/14/questions/QANR5L14QE51667.pdf",
+   "title": "Réponse ministérielle à la QE AN n° 51667 (14e lég.)",
+   "method": "DGFiP, recettes brutes / recettes nettes",
+   "check": "extrait"
+  },
   {
    "year": 2014,
    "gross": 0.86,
    "net": 1.01,
-   "url": "https://www.assemblee-nationale.fr/dyn/14/questions/QANR5L14QE51667.pdf",
-   "title": "Réponse ministérielle, question écrite n° 51667 (14e législature)"
+   "url": "https://questions.assemblee-nationale.fr/dyn/14/questions/QANR5L14QE51667.pdf",
+   "title": "Réponse ministérielle à la QE AN n° 51667 (14e lég.) ; confirmé (0,86 %) par le cahier statistique DGFiP 2016",
+   "method": "DGFiP",
+   "check": "extrait"
+  },
+  {
+   "year": 2015,
+   "gross": 0.82,
+   "url": "https://www.economie.gouv.fr/files/files/directions_services/dgfip/Rapport/2016/RA2016_cahierstats_0607_web.pdf",
+   "title": "DGFiP, Rapport d'activité 2016 – cahier statistique",
+   "method": "DGFiP, recettes brutes (méthode antérieure au PAP 2018)",
+   "check": "extrait"
+  },
+  {
+   "year": 2016,
+   "gross": 0.78,
+   "url": "https://www.economie.gouv.fr/files/files/directions_services/dgfip/Rapport/2016/RA2016_cahierstats_0607_web.pdf",
+   "title": "DGFiP, Rapport d'activité 2016 – cahier statistique",
+   "method": "DGFiP, recettes brutes, méthode antérieure",
+   "check": "extrait"
+  },
+  {
+   "year": 2017,
+   "gross": 0.84,
+   "url": "https://www.budget.gouv.fr/sites/performance_publique/files/farandole/ressources/2018/rap/pdf/RAP2018_BG_Gestion_finances_publiques_ressources_humaines.pdf",
+   "title": "RAP 2018, programme 156, sous-indicateur 3.1.1",
+   "method": "DGFiP, méthode harmonisée (PAP 2018)",
+   "check": "extrait",
+   "uncertain": true
+  },
+  {
+   "year": 2018,
+   "gross": 0.81,
+   "url": "https://www.budget.gouv.fr/sites/performance_publique/files/farandole/ressources/2018/rap/pdf/RAP2018_BG_Gestion_finances_publiques_ressources_humaines.pdf",
+   "title": "RAP 2018, programme 156, sous-indicateur 3.1.1",
+   "method": "DGFiP, méthode harmonisée (PAP 2018)",
+   "check": "extrait"
+  },
+  {
+   "year": 2019,
+   "gross": 0.73,
+   "url": "https://www.economie.gouv.fr/files/files/directions_services/dgfip/Rapport/2021/ra_cahier_stat_2021.pdf",
+   "title": "DGFiP, cahier statistique 2021",
+   "method": "DGFiP, recettes brutes (indicateur SPIB-01 / 3.1.1)",
+   "check": "extrait",
+   "uncertain": true
+  },
+  {
+   "year": 2020,
+   "gross": 0.71,
+   "url": "https://www.economie.gouv.fr/files/files/directions_services/dgfip/Rapport/2021/ra_cahier_stat_2021.pdf",
+   "title": "DGFiP, cahier statistique 2021",
+   "method": "DGFiP, recettes brutes",
+   "check": "extrait",
+   "uncertain": true
+  },
+  {
+   "year": 2021,
+   "gross": 0.74,
+   "url": "https://www.economie.gouv.fr/files/files/directions_services/dgfip/Rapport/2023/ra_2023_cahierstat.pdf",
+   "title": "DGFiP, cahier statistique 2023 (et cahier 2021)",
+   "method": "DGFiP, recettes brutes",
+   "check": "extrait"
+  },
+  {
+   "year": 2022,
+   "gross": 0.67,
+   "url": "https://www.economie.gouv.fr/files/files/directions_services/dgfip/Rapport/2024/ra_2024_cahierstat.pdf",
+   "title": "DGFiP, Rapport d'activité 2024 – cahier statistique, 3.1.1 [SPIB-01]",
+   "method": "DGFiP, recettes brutes",
+   "check": "extrait"
+  },
+  {
+   "year": 2023,
+   "gross": 0.58,
+   "url": "https://www.economie.gouv.fr/files/files/directions_services/dgfip/Rapport/2024/ra_2024_cahierstat.pdf",
+   "title": "DGFiP, cahier statistique 2024 ; RAP 2024 programme 156",
+   "method": "DGFiP, recettes brutes ; valeur révisée",
+   "check": "extrait"
+  },
+  {
+   "year": 2024,
+   "gross": 0.54,
+   "url": "https://www.assemblee-nationale.fr/dyn/dyn/contenu/visualisation/906955/file/Gestion_finances_publiques.pdf",
+   "title": "RAP 2024, mission Gestion des finances publiques, programme 156, sous-indicateur 3.1.1 ; cahier statistique 2024",
+   "method": "DGFiP, dépenses directes et indirectes de gestion des impôts / recettes fiscales brutes collectées par la DGFiP",
+   "check": "extrait"
   }
  ],
- "collectors": [],
+ "dgfipNote": "Taux d’intervention sur l’impôt : coût de gestion des impôts par la DGFiP (agents, informatique, fonctions support) rapporté aux recettes fiscales brutes. La méthode a changé plusieurs fois (DGI seule en 1999, méthode harmonisée avec la douane en 2018, accises reprises de la douane en 2024, valeur 2023 révisée de 0,68 % à 0,58 %) : la tendance est solide, pas chaque écart d’une année à l’autre. En 1999 : 1,40 % (DGI, recettes nettes).",
+ "collectors": [
+  {
+   "name": "DGFiP (impôts)",
+   "scope": "coût de gestion / recettes brutes",
+   "per100": 0.54,
+   "year": 2024,
+   "url": "https://www.assemblee-nationale.fr/dyn/dyn/contenu/visualisation/906955/file/Gestion_finances_publiques.pdf",
+   "title": "RAP 2024, programme 156, indicateur 3.1.1"
+  },
+  {
+   "name": "Douane (DGDDI)",
+   "scope": "coût de collecte des droits et taxes",
+   "per100": 0.46,
+   "year": 2021,
+   "url": "https://www.budget.gouv.fr/files/uploads/extract/2021/PLR/BG/PGM/302/FR_2021_PLR_BG_PGM_302_PERF.html",
+   "title": "RAP 2021, programme 302, indicateur 3.1.1"
+  },
+  {
+   "name": "Urssaf (cotisations et contributions sociales)",
+   "scope": "coût du recouvrement",
+   "per100": 0.313,
+   "year": 2024,
+   "url": "https://evaluation.securite-sociale.fr/home/financement/212-reduire-le-cout-du-recouvrem.html",
+   "title": "REPSS Financement, indicateur 2.12"
+  },
+  {
+   "name": "Moyenne des administrations fiscales (OCDE, 46 pays)",
+   "scope": "coût / recettes nettes",
+   "per100": 0.683,
+   "year": 2022,
+   "url": "https://www.oecd.org/en/publications/tax-administration-2025_cc015ce8-en/full-report/budget-and-workforce_d4c1cec8.html",
+   "title": "OCDE, Tax Administration 2025",
+   "focus": true
+  }
+ ],
+ "collectorsNote": "Chaque administration calcule son ratio à sa façon (coûts complets ou directs, recettes brutes ou nettes) : les comparaisons sont des ordres de grandeur. La douane a changé de méthode en 2022 (0,57 €) et la prévision 2024 (0,84 €) intègre le transfert des accises vers la DGFiP ; la dernière réalisation comparable trouvée est 2021. Le ratio de la France dans les tableaux de l’OCDE n’a pas pu être lu : seule la moyenne est montrée.",
  "oecd": [],
- "localFees": [],
- "perTax": [],
- "costly": [],
- "gaps": []
+ "localFees": [
+  {
+   "tax": "Taxes foncières, CFE (parts communales et intercommunales), GEMAPI",
+   "rate": 3.0,
+   "detail": "1 % d’assiette et de recouvrement + 2 % de dégrèvements et non-valeurs",
+   "law": "CGI, art. 1641",
+   "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069577/LEGISCTA000006147090/",
+   "check": "extrait"
+  },
+  {
+   "tax": "Taxe d’enlèvement des ordures ménagères, parts des syndicats",
+   "rate": 8.0,
+   "detail": "4,4 % d’assiette et de recouvrement + 3,6 % de dégrèvements et non-valeurs",
+   "law": "CGI, art. 1641",
+   "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069577/LEGISCTA000006147090/",
+   "check": "à confirmer sur le texte en vigueur"
+  },
+  {
+   "tax": "Taxes spéciales d’équipement (établissements publics fonciers)",
+   "rate": 9.0,
+   "detail": "5,4 % d’assiette et de recouvrement + 3,6 % de dégrèvements et non-valeurs",
+   "law": "CGI, art. 1641",
+   "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069577/LEGISCTA000006147090/",
+   "check": "à confirmer sur le texte en vigueur"
+  }
+ ],
+ "localFeesNote": "Frais ajoutés à l’avis d’imposition et payés par le contribuable, en plus de l’impôt local : ils rémunèrent l’État pour l’établissement, le recouvrement, les dégrèvements et les impayés.",
+ "localFeesTotal": {
+  "text": "En 2015, ces frais ont rapporté 2,36 Md€ ; l’État n’en a conservé que 876 M€, le reste étant reversé aux départements et régions, alors que la gestion des impôts locaux lui coûtait directement 3,8 Md€.",
+  "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/20170201-rapport-gestion-fiscalite-directe-locale-dgfip.pdf"
+ },
+ "perTax": [
+  {
+   "tax": "Prélèvements versés par les entreprises (233 prélèvements, 772,8 Md€)",
+   "meur": 5160,
+   "pct": 0.67,
+   "year": "2014",
+   "note": "Coût de collecte pour les administrations (DGFiP, douane, Urssaf…), hors plus petites taxes.",
+   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/20160720-rapport-collecte-prelevements-entreprises.pdf",
+   "title": "Cour des comptes, Simplifier la collecte des prélèvements versés par les entreprises (2016)"
+  },
+  {
+   "tax": "Impôts locaux (taxe foncière, taxe d’habitation, CFE) gérés par la DGFiP",
+   "meur": 3800,
+   "year": "2015",
+   "note": "Coût direct pour l’État, à comparer aux 2,36 Md€ de frais facturés.",
+   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/20170201-rapport-gestion-fiscalite-directe-locale-dgfip.pdf",
+   "title": "Cour des comptes, La gestion de la fiscalité directe locale par la DGFiP (2017)"
+  },
+  {
+   "tax": "Accise sur les produits énergétiques (TICPE), part douane",
+   "meur": 31.66,
+   "pct": 0.12,
+   "year": "2011",
+   "note": "Produit 25,8 Md€.",
+   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf",
+   "title": "Cour des comptes, Les missions fiscales de la douane (RPA 2014)",
+   "uncertain": true
+  },
+  {
+   "tax": "Droits sur les tabacs",
+   "pct": 0.05,
+   "year": "2011",
+   "note": "Produit ≈ 11,6 Md€.",
+   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf",
+   "title": "Cour des comptes (RPA 2014)",
+   "uncertain": true
+  },
+  {
+   "tax": "Droits sur les boissons (douane), moyenne nationale",
+   "pct": 1.18,
+   "year": "2011",
+   "note": "De 0,37 % à 38,65 % selon les directions régionales.",
+   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf",
+   "title": "Cour des comptes (RPA 2014)",
+   "uncertain": true
+  },
+  {
+   "tax": "Taxe sur les farines (au profit de la MSA)",
+   "meur": 18.3,
+   "pct": 28.6,
+   "year": "2012",
+   "note": "Rendement 64 M€ ; coût jugé « manifestement disproportionné » par la Cour des comptes.",
+   "url": "https://www.senat.fr/questions/base/2015/qSEQ151018272.html",
+   "title": "Sénat, question écrite n° 18272 (2015)"
+  },
+  {
+   "tax": "Prélèvement à la source de l’impôt sur le revenu (mise en place)",
+   "meur": 214.6,
+   "year": "2015-2019",
+   "note": "Coût du projet pour la DGFiP, ponctuel et non annuel, hors autres administrations.",
+   "url": "https://www.ccomptes.fr/sites/default/files/2023-10/20220125-S2021-2295-mise-en-oeuvre-prelevement-a-la-source.pdf",
+   "title": "Cour des comptes, La mise en œuvre du prélèvement à la source (2022)"
+  }
+ ],
+ "perTaxNote": "Aucun coût de collecte n’est publié pour l’impôt sur le revenu, l’impôt sur les sociétés, la TVA, la taxe foncière ou les droits de succession pris un à un : la DGFiP ne publie qu’un taux global.",
+ "costDots": [
+  {
+   "name": "Droits sur les boissons, direction régionale la plus chère",
+   "per100": 38.65,
+   "year": "2011",
+   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf"
+  },
+  {
+   "name": "Taxe sur les farines",
+   "per100": 28.6,
+   "year": "2012",
+   "yield": 64,
+   "url": "https://www.senat.fr/questions/base/2015/qSEQ151018272.html"
+  },
+  {
+   "name": "Droits sur les boissons, moyenne",
+   "per100": 1.18,
+   "year": "2011",
+   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf"
+  },
+  {
+   "name": "Prélèvements des entreprises, ensemble",
+   "per100": 0.67,
+   "year": "2014",
+   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/20160720-rapport-collecte-prelevements-entreprises.pdf"
+  },
+  {
+   "name": "DGFiP, ensemble des impôts",
+   "per100": 0.54,
+   "year": "2024",
+   "url": "https://www.assemblee-nationale.fr/dyn/dyn/contenu/visualisation/906955/file/Gestion_finances_publiques.pdf"
+  },
+  {
+   "name": "Urssaf, ensemble des prélèvements sociaux",
+   "per100": 0.313,
+   "year": "2024",
+   "url": "https://evaluation.securite-sociale.fr/home/financement/212-reduire-le-cout-du-recouvrem.html"
+  },
+  {
+   "name": "Accise sur les produits énergétiques (TICPE)",
+   "per100": 0.12,
+   "year": "2011",
+   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf"
+  },
+  {
+   "name": "Droits sur les tabacs",
+   "per100": 0.05,
+   "year": "2011",
+   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf"
+  }
+ ],
+ "compliance": {
+  "label": "Temps passé par une entreprise type",
+  "value": "139 h/an",
+  "sub": "pour ses déclarations et paiements d’impôts et cotisations (10,3 paiements par an), Banque mondiale, Doing Business 2020 (données 2018)",
+  "url": "https://www.doingbusiness.org/content/dam/doingBusiness/country/f/france/FRA.pdf"
+ },
+ "gaps": [
+  {
+   "label": "Écart de TVA",
+   "kpi": "12 Md€",
+   "sub": "6 % de la TVA due en 2023",
+   "text": "Différence entre la TVA qui aurait dû être payée et celle encaissée (fraude, faillites, erreurs, optimisation). Moyenne de l’Union européenne : 9,5 %.",
+   "url": "https://data.consilium.europa.eu/doc/document/ST-16801-2025-ADD-10/en/pdf",
+   "title": "Commission européenne, document de travail des services (2025)"
+  },
+  {
+   "label": "Contrôle fiscal : notifié",
+   "kpi": "17,1 Md€",
+   "sub": "droits et pénalités notifiés en 2025",
+   "text": "Montants réclamés après un contrôle fiscal de la DGFiP (≈ 9,8 Md€ de contrôles externes, 7,3 Md€ de contrôles sur pièces).",
+   "url": "https://www.economie.gouv.fr/actualites/lutte-contre-la-fraude-un-controle-fiscal-toujours-plus-efficace-en-2025",
+   "title": "Ministère de l’Économie (2026)"
+  },
+  {
+   "label": "Contrôle fiscal : encaissé",
+   "kpi": "11,4 Md€",
+   "sub": "effectivement encaissés en 2025",
+   "text": "Sommes encaissées dans l’année sur les créances de contrôle fiscal, y compris d’années antérieures : notifié et encaissé ne portent pas sur les mêmes dossiers.",
+   "url": "https://www.economie.gouv.fr/actualites/lutte-contre-la-fraude-un-controle-fiscal-toujours-plus-efficace-en-2025",
+   "title": "Ministère de l’Économie (2026)"
+  }
+ ],
+ "sources": [
+  {
+   "title": "DGFiP, rapports annuels de performance (programme 156)",
+   "url": "https://www.assemblee-nationale.fr/dyn/dyn/contenu/visualisation/906955/file/Gestion_finances_publiques.pdf"
+  },
+  {
+   "title": "Cour des comptes, collecte des prélèvements des entreprises (2016)",
+   "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/20160720-rapport-collecte-prelevements-entreprises.pdf"
+  },
+  {
+   "title": "OCDE, Tax Administration 2025",
+   "url": "https://www.oecd.org/en/publications/tax-administration-2025_cc015ce8-en/full-report/budget-and-workforce_d4c1cec8.html"
+  },
+  {
+   "title": "CGI, article 1641",
+   "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069577/LEGISCTA000006147090/"
+  }
+ ]
 }

@@ -28,6 +28,8 @@ TOPICS = [
 
 STATIC = [
     {'id': 'insee-comptes', 'title': 'Comptes nationaux des administrations publiques (tableaux 3.101, 3.105, 3.201, 3.215, ratios, impôts)', 'topic': 'Comptes nationaux', 'publisher': 'Insee', 'period': '1959–2025', 'url': 'https://www.insee.fr/fr/statistiques/8988845'},
+    {'id': 'impots-rendements', 'title': 'Rendement de chaque impôt et taxe : Insee (comptes nationaux), Voies et moyens, Cour des comptes, Sécurité sociale, OFGL/DGCL, rapports parlementaires (relevé manuel, sources/impots-liste.json)', 'topic': 'Fiscalité', 'publisher': 'Insee, Cour des comptes, Parlement, DGCL', 'period': '2022–2025', 'url': 'https://www.insee.fr/fr/statistiques/2381408'},
+    {'id': 'impots-couts', 'title': 'Coût de collecte des impôts : taux d’intervention DGFiP, douane, Urssaf, frais de gestion (CGI art. 1641), Cour des comptes (relevé manuel, sources/impots-couts.json)', 'topic': 'Fiscalité', 'publisher': 'DGFiP, DGDDI, Urssaf, Cour des comptes', 'period': '1999–2025', 'url': 'https://www.assemblee-nationale.fr/dyn/dyn/contenu/visualisation/906955/file/Gestion_finances_publiques.pdf'},
     {'id': 'dgcl-projets', 'title': 'Projets financés par les dotations d’investissement (DETR, DSIL, DPV, DSID)', 'topic': 'Subventions', 'publisher': 'DGCL', 'period': '2025', 'url': 'https://www.data.gouv.fr/datasets/projets-finances-par-les-dotations-de-soutien-a-linvestissement-des-collectivites-territoriales'},
     {'id': 'eurostat-cofog', 'title': 'Dépenses des administrations publiques par fonction et par nature (CFAP/COFOG)', 'topic': 'Comptes nationaux', 'publisher': 'Eurostat (données Insee)', 'period': '1995–2024', 'url': 'https://ec.europa.eu/eurostat/databrowser/view/gov_10a_exp/default/table?lang=fr'},
     {'id': 'cpv-2008', 'title': 'Vocabulaire commun pour les marchés publics (CPV 2008), libellés français', 'topic': 'Commande publique', 'publisher': 'Office des publications de l’UE', 'period': '2008', 'url': 'https://op.europa.eu/fr/web/eu-vocabularies/cpv'},
@@ -36,6 +38,7 @@ STATIC = [
 
 # Checked in the data.gouv.fr, data.economie.gouv.fr and data.ofgl.fr catalogues on 27 October 2026.
 GAPS = [
+    {'title': 'Coût de collecte de chaque impôt', 'state': 'none', 'text': 'La DGFiP ne publie qu’un taux de gestion global (0,54 % des recettes brutes en 2024) : aucun coût par impôt (IR, IS, TVA, taxe foncière, successions…). La Cour des comptes ignore même le rendement de 117 des 243 petites taxes recensées en 2024.'},
     {'title': 'Hôpitaux publics', 'state': 'none', 'text': 'Aucun jeu national ouvert des comptes financiers des ≈ 1 300 établissements publics de santé (≈ 100 Md€ de charges). Les indicateurs Hospidiag/ScanSanté sont consultables mais pas téléchargeables en masse.'},
     {'title': 'Agences régionales de santé et FIR', 'state': 'partial', 'text': 'Le fonds d’intervention régional (plusieurs Md€ par an) n’est publié ligne à ligne que par l’ARS Pays de la Loire (2025). Les 17 autres ARS ne publient pas leurs subventions en données ouvertes.'},
     {'title': 'CPTS et exercice coordonné', 'state': 'none', 'text': 'Les financements des communautés professionnelles territoriales de santé (accord conventionnel interprofessionnel) ne sont pas publiés par structure.'},
