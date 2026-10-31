@@ -849,8 +849,8 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 /* ---------- Impôts page (impots.html) ---------- */
 /* Categorical slots, validated (dataviz validator) on the panel surfaces of each theme; colours carry identity only,
    text stays in ink tokens, and every chart has the table at the bottom of the page as its text view. */
-:root { --tx-1: #2a78d6; --tx-2: #eb6834; --tx-3: #1baf7a; --tx-4: #eda100; --tx-5: #e87ba4; --tx-6: #008300; --tx-7: #6250d6; --tx-8: #e34948; --tx-other: #94a3b8; }
-[data-theme="dark"] { --tx-1: #3987e5; --tx-2: #d95926; --tx-3: #199e70; --tx-4: #c98500; --tx-5: #d55181; --tx-6: #008300; --tx-7: #9085e9; --tx-8: #e66767; --tx-other: #64748b; }
+:root { --tx-none: #cbd5e1; --tx-1: #2a78d6; --tx-2: #eb6834; --tx-3: #1baf7a; --tx-4: #eda100; --tx-5: #e87ba4; --tx-6: #008300; --tx-7: #6250d6; --tx-8: #e34948; --tx-other: #94a3b8; }
+[data-theme="dark"] { --tx-none: #3b4b5e; --tx-1: #3987e5; --tx-2: #d95926; --tx-3: #199e70; --tx-4: #c98500; --tx-5: #d55181; --tx-6: #008300; --tx-7: #9085e9; --tx-8: #e66767; --tx-other: #64748b; }
 .tx-index { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: var(--sp-3); }
 .tx-index a { padding: .4rem .85rem; border-radius: var(--r-pill); background: var(--c-surface-2); color: var(--c-ink); font-size: .82rem; font-weight: 600; transition: background .2s var(--ease); }
 .tx-index a:hover { background: var(--c-line); }
@@ -959,3 +959,36 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .tx-scen.s1 { background: var(--tx-1); } .tx-scen.s2 { background: var(--tx-2); } .tx-scen.s3 { background: var(--tx-3); color: #0d1b2a; }
 .tx-low-table td.tx-name { min-width: 260px; }
 #faible-rendement .tx-filters .select-wrap { flex: 0 1 230px; }
+
+/* Impôts page, global charts (one colour scheme for all) */
+.tx-color { max-width: 100%; }
+@media (max-width: 680px) { .tx-color { border-radius: var(--r-md); } .tx-color button { flex: 1 1 auto; } }
+.tx-color button { white-space: nowrap; }
+.tx-waffle__cells button { background: var(--cell); }
+.tx-legend--cols { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.tx-legend--cols span { justify-content: space-between; }
+.tx-legend--cols span b { margin-left: auto; padding-left: .6rem; white-space: nowrap; }
+.tx-share__legend { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; margin-bottom: .8rem; color: var(--c-muted); font-size: .76rem; }
+.tx-share__legend span { display: inline-flex; align-items: center; gap: .4rem; }
+.tx-share__legend i { width: .75rem; height: .75rem; border-radius: 3px; background: var(--c-body); }
+.tx-share__legend i.is-count { opacity: .35; }
+.tx-share { display: grid; gap: .75rem; padding: 0; list-style: none; }
+.tx-share li { display: grid; gap: .2rem; }
+.tx-share__bar { position: relative; display: block; height: 14px; border-radius: 3px; background: var(--c-surface-2); }
+.section--alt .panel .tx-share__bar { background: var(--c-surface); }
+.tx-share__bar::before { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--w); min-width: 2px; border-radius: 3px; background: var(--c); }
+.tx-share__bar.is-count::before { opacity: .38; }
+.tx-share__bar b { position: absolute; top: 50%; left: calc(var(--w) + 6px); transform: translateY(-50%); color: var(--c-body); font-size: .7rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tx-table tr.is-removed td { opacity: .6; }
+.tx-table .tx-namecell { min-width: 240px; }
+.tx-detail .tx-scen { vertical-align: 1px; }
+.tx-scen { white-space: nowrap; }
+@media (max-width: 680px) { .section__head-row .tx-color { width: 100%; } }
+.tx-share .tx-bars__line { display: flex; justify-content: space-between; gap: 1rem; color: var(--c-ink); font-size: .86rem; }
+.tx-share .tx-bars__line strong { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tx-halo { paint-order: stroke; stroke: var(--c-surface); stroke-width: 4px; stroke-linejoin: round; }
+.section--alt .panel .tx-halo { stroke: var(--c-bg); }
+.section--alt .tx-count { background: var(--c-bg); }
+.tx-pill { white-space: nowrap; }
+.tx-table .tx-bar-cell { min-width: 90px; }
+.tx-table .tx-src { min-width: 110px; }

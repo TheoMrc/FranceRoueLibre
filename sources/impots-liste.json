@@ -49,7 +49,6 @@
    "amount": 208821.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Consommation",
    "beneficiary": "Partagé",
    "beneficiaryDetail": "État, Sécurité sociale et collectivités (fractions)",
    "collector": "DGFiP",
@@ -70,7 +69,8 @@
     "year": "2021-2023",
     "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=53",
     "title": "Cour des comptes, Les taxes à faible rendement (avril 2025), p. 53"
-   }
+   },
+   "base": "Consommation"
   },
   {
    "id": "csg",
@@ -79,7 +79,6 @@
    "amount": 156583.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Revenus",
    "beneficiary": "Sécurité sociale",
    "collector": "Urssaf",
    "collectorDetail": "Urssaf (revenus d’activité et de remplacement), DGFiP (revenus du patrimoine)",
@@ -92,7 +91,8 @@
     "ref": "ligne « contribution sociale généralisée (CSG) »"
    },
    "check": "source",
-   "note": "Hors CSG sur les jeux, comptée par l’Insee avec les prélèvements sur les jeux."
+   "note": "Hors CSG sur les jeux, comptée par l’Insee avec les prélèvements sur les jeux.",
+   "base": "Revenus des ménages"
   },
   {
    "id": "ir",
@@ -101,7 +101,6 @@
    "amount": 103626.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Revenus",
    "beneficiary": "État",
    "collector": "DGFiP",
    "collectorDetail": "DGFiP (prélèvement à la source par les employeurs et caisses)",
@@ -114,7 +113,8 @@
     "ref": "ligne « impôt sur le revenu des personnes physiques (IRPP), avant crédits d'impôt »"
    },
    "check": "source",
-   "note": "Avant crédits d’impôt (comptabilité nationale). Le produit net budgétaire de l’État est plus faible."
+   "note": "Avant crédits d’impôt (comptabilité nationale). Le produit net budgétaire de l’État est plus faible.",
+   "base": "Revenus des ménages"
   },
   {
    "id": "is",
@@ -123,7 +123,6 @@
    "amount": 69473.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Bénéfices des sociétés",
    "beneficiary": "État",
    "collector": "DGFiP",
    "payer": "Entreprises",
@@ -142,7 +141,8 @@
     "year": "2021-2023",
     "url": "https://www.ccomptes.fr/sites/default/files/2025-04/20250417-Taxes-a-faible-rendement_0.pdf#page=53",
     "title": "Cour des comptes, Les taxes à faible rendement (avril 2025), p. 53"
-   }
+   },
+   "base": "Bénéfices des sociétés"
   },
   {
    "id": "tf",
@@ -151,7 +151,6 @@
    "amount": 44179.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Patrimoine et transactions",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Communes et intercommunalités",
    "collector": "DGFiP",
@@ -163,7 +162,8 @@
     "ref": "ligne « taxe foncière »"
    },
    "check": "source",
-   "note": "Propriétés bâties et non bâties."
+   "note": "Propriétés bâties et non bâties.",
+   "base": "Patrimoine"
   },
   {
    "id": "ticpe",
@@ -172,7 +172,6 @@
    "amount": 30457.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Énergie et environnement",
    "beneficiary": "Partagé",
    "beneficiaryDetail": "État, régions et départements (fractions)",
    "collector": "Douane (DGDDI)",
@@ -191,7 +190,8 @@
     "year": "2011",
     "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf",
     "title": "Cour des comptes, RPA 2014 (part douane, à confirmer)"
-   }
+   },
+   "base": "Consommation"
   },
   {
    "id": "dmtg",
@@ -200,7 +200,6 @@
    "amount": 21052.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Patrimoine et transactions",
    "beneficiary": "État",
    "collector": "DGFiP",
    "payer": "Ménages",
@@ -210,7 +209,8 @@
     "title": "Insee, comptes nationaux annuels, tableau « Impôts » (28 août 2026)",
     "ref": "ligne « dont droits de mutation à titre gratuit »"
    },
-   "check": "source"
+   "check": "source",
+   "base": "Patrimoine"
   },
   {
    "id": "payrolltax",
@@ -219,7 +219,6 @@
    "amount": 17606.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Production et travail",
    "beneficiary": "Sécurité sociale",
    "collector": "DGFiP",
    "payer": "Entreprises",
@@ -231,7 +230,8 @@
     "ref": "ligne « dont taxes sur les salaires »"
    },
    "check": "source",
-   "note": "Due par les employeurs non assujettis à la TVA (banques, assurances, associations, hôpitaux…)."
+   "note": "Due par les employeurs non assujettis à la TVA (banques, assurances, associations, hôpitaux…).",
+   "base": "Salaires"
   },
   {
    "id": "tobacco",
@@ -240,7 +240,6 @@
    "amount": 13598.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Santé, alcool, tabac, jeux",
    "beneficiary": "Sécurité sociale",
    "beneficiaryDetail": "Assurance maladie",
    "collector": "Douane (DGDDI)",
@@ -257,7 +256,8 @@
     "year": "2011",
     "url": "https://www.ccomptes.fr/sites/default/files/EzPublish/3_1_1_missions_fiscales_douane_Tome_I.pdf",
     "title": "Cour des comptes, RPA 2014 (à confirmer)"
-   }
+   },
+   "base": "Consommation"
   },
   {
    "id": "crds",
@@ -266,7 +266,6 @@
    "amount": 9270.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Revenus",
    "beneficiary": "Sécurité sociale",
    "beneficiaryDetail": "Caisse d’amortissement de la dette sociale (CADES)",
    "collector": "Urssaf",
@@ -279,7 +278,8 @@
     "title": "Insee, comptes nationaux annuels, tableau « Impôts » (28 août 2026)",
     "ref": "ligne « contribution au remboursement de la dette sociale (CRDS) »"
    },
-   "check": "source"
+   "check": "source",
+   "base": "Revenus des ménages"
   },
   {
    "id": "cfe",
@@ -288,7 +288,6 @@
    "amount": 8101.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Production et travail",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Communes et intercommunalités",
    "collector": "DGFiP",
@@ -300,7 +299,8 @@
     "title": "Insee, comptes nationaux annuels, tableau « Impôts » (28 août 2026)",
     "ref": "ligne « cotisation foncière des entreprises »"
    },
-   "check": "source"
+   "check": "source",
+   "base": "Production"
   },
   {
    "id": "c3s",
@@ -309,7 +309,6 @@
    "amount": 5337.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Production et travail",
    "beneficiary": "Sécurité sociale",
    "collector": "Urssaf",
    "payer": "Entreprises",
@@ -321,7 +320,8 @@
     "ref": "ligne « contribution sociale de solidarité des sociétés »"
    },
    "check": "source",
-   "note": "Due par les entreprises dont le chiffre d’affaires dépasse 19 M€."
+   "note": "Due par les entreprises dont le chiffre d’affaires dépasse 19 M€.",
+   "base": "Production"
   },
   {
    "id": "cvae",
@@ -330,7 +330,6 @@
    "amount": 3749.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Production et travail",
    "beneficiary": "État",
    "beneficiaryDetail": "État depuis 2023 (compensée aux collectivités par de la TVA)",
    "collector": "DGFiP",
@@ -343,7 +342,8 @@
     "ref": "ligne « cotisation sur la valeur ajoutée des entreprises »"
    },
    "check": "source",
-   "note": "En cours de suppression."
+   "note": "En cours de suppression.",
+   "base": "Production"
   },
   {
    "id": "imports",
@@ -352,7 +352,6 @@
    "amount": 3577.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Consommation",
    "beneficiary": "Union européenne",
    "beneficiaryDetail": "Union européenne (ressource propre), la France conservant des frais de perception",
    "collector": "Douane (DGDDI)",
@@ -364,7 +363,8 @@
     "ref": "ligne « Impôts et droits sur les importations »"
    },
    "check": "source",
-   "note": "Impôts et droits sur les importations (comptabilité nationale), dont droits de douane."
+   "note": "Impôts et droits sur les importations (comptabilité nationale), dont droits de douane.",
+   "base": "Consommation"
   },
   {
    "id": "th",
@@ -373,7 +373,6 @@
    "amount": 2903.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Patrimoine et transactions",
    "beneficiary": "Collectivités locales",
    "collector": "DGFiP",
    "payer": "Ménages",
@@ -384,7 +383,8 @@
     "ref": "ligne « taxe d'habitation »"
    },
    "check": "source",
-   "note": "Depuis 2023, sur les résidences secondaires et les logements vacants seulement."
+   "note": "Depuis 2023, sur les résidences secondaires et les logements vacants seulement.",
+   "base": "Patrimoine"
   },
   {
    "id": "ifi",
@@ -393,7 +393,6 @@
    "amount": 2714.0,
    "year": "2025",
    "status": "provisoire",
-   "category": "Patrimoine et transactions",
    "beneficiary": "État",
    "collector": "DGFiP",
    "payer": "Ménages",
@@ -405,7 +404,8 @@
     "ref": "ligne « impôt sur la fortune (IFI, ex ISF) »"
    },
    "check": "source",
-   "note": "Impôt de solidarité sur la fortune jusqu’en 2017, impôt sur la fortune immobilière depuis."
+   "note": "Impôt de solidarité sur la fortune jusqu’en 2017, impôt sur la fortune immobilière depuis.",
+   "base": "Patrimoine"
   },
   {
    "id": "fraction-tva-collectivites",
@@ -415,7 +415,6 @@
    "amount": 51800,
    "year": "2024",
    "status": "exécution",
-   "category": "Consommation",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Collectivités locales",
    "collector": "DGFiP",
@@ -428,7 +427,8 @@
     "ref": "« Les fractions de TVA perçues par l'ensemble des collectivités s'élèvent à 52,5 Md€ en 2025 contre 51,8 Md€ en 2024 »"
    },
    "check": "extrait",
-   "note": "Partie de la TVA, déjà comprise dans la ligne TVA : non additionnée. Compense la suppression de la taxe d’habitation sur les résidences principales, de la CVAE et de la part départementale de taxe foncière. En 2024 : départements 40 %, régions 30,5 %, intercommunalités 26,8 %, communes 2,7 %."
+   "note": "Partie de la TVA, déjà comprise dans la ligne TVA : non additionnée. Compense la suppression de la taxe d’habitation sur les résidences principales, de la CVAE et de la part départementale de taxe foncière. En 2024 : départements 40 %, régions 30,5 %, intercommunalités 26,8 %, communes 2,7 %.",
+   "base": "Consommation"
   },
   {
    "id": "forfait-social",
@@ -437,7 +437,6 @@
    "amount": 6600,
    "year": "2025",
    "status": "exécution",
-   "category": "Production et travail",
    "beneficiary": "Sécurité sociale",
    "beneficiaryDetail": "Sécurité sociale",
    "collector": "Urssaf",
@@ -450,7 +449,8 @@
     "ref": "« le forfait social (+4,0% et 6,6 Md€) » (2025)"
    },
    "check": "extrait",
-   "note": "Contribution patronale sur l’épargne salariale, l’intéressement et la participation."
+   "note": "Contribution patronale sur l’épargne salariale, l’intéressement et la participation.",
+   "base": "Salaires"
   },
   {
    "id": "tsa-complementaires",
@@ -460,7 +460,6 @@
    "amount": 6170,
    "year": "2024",
    "status": "exécution",
-   "category": "Taxes sectorielles et affectées",
    "beneficiary": "Sécurité sociale",
    "beneficiaryDetail": "Sécurité sociale (dont financement de la Complémentaire santé solidaire)",
    "collector": "Urssaf",
@@ -472,7 +471,8 @@
     "ref": "Citant la CCSS de mai 2026 : 6,17 Md€ en 2024, puis 6,56 Md€ en 2025 et 6,82 Md€ en 2026"
    },
    "check": "extrait",
-   "note": "Taxe sur les contrats de complémentaire santé (13,27 % pour les contrats responsables)."
+   "note": "Taxe sur les contrats de complémentaire santé (13,27 % pour les contrats responsables).",
+   "base": "Consommation"
   },
   {
    "id": "teom",
@@ -482,7 +482,6 @@
    "amount": 8996,
    "year": "2024",
    "status": "exécution",
-   "category": "Énergie et environnement",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Collectivités locales",
    "collector": "DGFiP",
@@ -494,7 +493,8 @@
     "ref": "Tableau : « TEOM 8 996 9 234 238 2,6% » (M€ ; 2024, 2025, écart, %) ; autre document OFGL : « près de 9 Md€ en 2024 »"
    },
    "check": "extrait",
-   "note": "Lecture de l’année dans le tableau source à confirmer."
+   "note": "Lecture de l’année dans le tableau source à confirmer.",
+   "base": "Patrimoine"
   },
   {
    "id": "cufpa",
@@ -504,7 +504,6 @@
    "amount": 10798,
    "year": "2024",
    "status": "exécution",
-   "category": "Production et travail",
    "beneficiary": "Opérateurs et agences",
    "beneficiaryDetail": "Opérateurs et agences (France compétences)",
    "collector": "Urssaf",
@@ -517,7 +516,8 @@
     "ref": "« Contributions form. prof. et apprentissage » : budget initial 10 908 M€, réalisé 10 798 M€ (écart −110 M€)"
    },
    "check": "extrait",
-   "note": "Contributions des employeurs reçues par France compétences (1,68 % de la masse salariale), dont la taxe d’apprentissage."
+   "note": "Contributions des employeurs reçues par France compétences (1,68 % de la masse salariale), dont la taxe d’apprentissage.",
+   "base": "Salaires"
   },
   {
    "id": "versement-mobilite",
@@ -527,7 +527,6 @@
    "amount": 5471,
    "year": "2024",
    "status": "exécution",
-   "category": "Production et travail",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Collectivités locales (AOM, dont Île-de-France Mobilités)",
    "collector": "Urssaf",
@@ -539,7 +538,8 @@
     "ref": "Tableau : « Versement mobilité (VM) 7 1 108 4 356 0 0 5 471 +6,0% » (M€)"
    },
    "check": "extrait",
-   "note": "Payé par les employeurs d’au moins 11 salariés, pour financer les transports en commun. Toutes autorités organisatrices de la mobilité."
+   "note": "Payé par les employeurs d’au moins 11 salariés, pour financer les transports en commun. Toutes autorités organisatrices de la mobilité.",
+   "base": "Salaires"
   },
   {
    "id": "dmto-departements",
@@ -549,7 +549,6 @@
    "amount": 9900,
    "year": "2024",
    "status": "exécution",
-   "category": "Patrimoine et transactions",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Collectivités locales (départements)",
    "collector": "DGFiP",
@@ -561,7 +560,8 @@
     "ref": "« le produit des DMTO décroit de - 13,5 % en 2024 pour un montant total de 9,9 Md€ »"
    },
    "check": "extrait",
-   "note": "« Frais de notaire » : part des départements seulement, hors taxe additionnelle communale. 11,9 Md€ en 2025 selon l’OFGL."
+   "note": "« Frais de notaire » : part des départements seulement, hors taxe additionnelle communale. 11,9 Md€ en 2025 selon l’OFGL.",
+   "base": "Patrimoine"
   },
   {
    "id": "tsca-departements",
@@ -571,7 +571,6 @@
    "amount": 9400,
    "year": "2024",
    "status": "exécution",
-   "category": "Patrimoine et transactions",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Collectivités locales (départements)",
    "collector": "DGFiP",
@@ -583,7 +582,8 @@
     "ref": "« La taxe sur les conventions d'assurance (TSCA) a progressé de + 5,8 % en 2024 et représente 9,4 Md€ »"
    },
    "check": "extrait",
-   "note": "Part des départements seulement, dont 1,45 Md€ pour les services d’incendie et de secours. Le produit total, parts État et Sécurité sociale comprises, n’a pas été trouvé."
+   "note": "Part des départements seulement, dont 1,45 Md€ pour les services d’incendie et de secours. Le produit total, parts État et Sécurité sociale comprises, n’a pas été trouvé.",
+   "base": "Consommation"
   },
   {
    "id": "fdj-prelevements",
@@ -592,7 +592,6 @@
    "amount": 4700,
    "year": "2024",
    "status": "exécution",
-   "category": "Santé, alcool, tabac, jeux",
    "beneficiary": "Partagé",
    "beneficiaryDetail": "Mixte : État, Sécurité sociale, ANS, CMN…",
    "collector": "DGFiP",
@@ -604,7 +603,8 @@
     "ref": "« les prélèvements publics auxquels la FDJ est soumise s'élèvent à 4,7 Md€ en 2024, contre un peu plus de 3,6 Md€ en 2019 »"
    },
    "check": "extrait",
-   "note": "Ensemble de plusieurs prélèvements sur les jeux de la Française des jeux. Hors PMU, casinos et jeux en ligne : l’ensemble des 33 prélèvements sur les jeux rapporte ≈ 7 Md€ par an (CPO)."
+   "note": "Ensemble de plusieurs prélèvements sur les jeux de la Française des jeux. Hors PMU, casinos et jeux en ligne : l’ensemble des 33 prélèvements sur les jeux rapporte ≈ 7 Md€ par an (CPO).",
+   "base": "Consommation"
   },
   {
    "id": "fiscalite-alcools",
@@ -613,7 +613,6 @@
    "amount": 4200,
    "year": "2024",
    "status": "estimation",
-   "category": "Santé, alcool, tabac, jeux",
    "beneficiary": "Sécurité sociale",
    "beneficiaryDetail": "Sécurité sociale",
    "collector": "Douane (DGDDI)",
@@ -625,7 +624,8 @@
     "ref": "Les rendements liés à l'alcool « sont restés autour de 4,2 Md€ entre 2017 et 2024 » ; ils « incluent les droits sur les alcools forts, sur les bières, sur les vins, cidres et poirés, ainsi que la cotisation sociale sur les alcools »"
    },
    "check": "extrait",
-   "note": "Ordre de grandeur (« autour de »). Droits sur les alcools, bières, vins et cidres et cotisation sécurité sociale."
+   "note": "Ordre de grandeur (« autour de »). Droits sur les alcools, bières, vins et cidres et cotisation sécurité sociale.",
+   "base": "Consommation"
   },
   {
    "id": "cotisation-secu-alcools",
@@ -635,7 +635,6 @@
    "amount": 700,
    "year": "n. c.",
    "status": "estimation",
-   "category": "Santé, alcool, tabac, jeux",
    "beneficiary": "Sécurité sociale",
    "beneficiaryDetail": "Sécurité sociale",
    "collector": "Douane (DGDDI)",
@@ -648,7 +647,8 @@
     "ref": "« Le produit est de plus de 4 milliards d'euros, dont 0,7 milliard d'euros pour la cotisation spéciale sur les boissons alcooliques » ; « applicable qu'aux boissons titrant plus de 18% »"
    },
    "check": "extrait",
-   "note": "Partie des droits sur les alcools, déjà comprise dans la ligne « Alcools » : non additionnée. Année de référence non précisée."
+   "note": "Partie des droits sur les alcools, déjà comprise dans la ligne « Alcools » : non additionnée. Année de référence non précisée.",
+   "base": "Consommation"
   },
   {
    "id": "redevances-agences-eau",
@@ -657,7 +657,6 @@
    "amount": 2317.07,
    "year": "2024",
    "status": "exécution",
-   "category": "Énergie et environnement",
    "beneficiary": "Opérateurs et agences",
    "beneficiaryDetail": "Opérateurs et agences (6 agences de l'eau)",
    "collector": "Autres collecteurs",
@@ -669,7 +668,8 @@
     "ref": "« Le montant total des redevances encaissées par les agences de l'eau (dont les majorations…) au titre de l'année 2024 s'élève à 2 317,07 M€ » ; redevances sous plafond : 2 271,25 M€ (plafond 2 347,62 M€)"
    },
    "check": "extrait",
-   "note": "Plusieurs redevances (prélèvement d’eau, pollution, pollutions diffuses)."
+   "note": "Plusieurs redevances (prélèvement d’eau, pollution, pollutions diffuses).",
+   "base": "Production"
   },
   {
    "id": "ifer",
@@ -679,7 +679,6 @@
    "amount": 1894,
    "year": "2024",
    "status": "exécution",
-   "category": "Production et travail",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Collectivités locales",
    "collector": "DGFiP",
@@ -691,7 +690,8 @@
     "title": "Rapport de l'OFGL 2025, annexes 6 à 8 (fiscalité locale)",
     "ref": "Tableau : « IFER 1 894 1 988 94 4,9% » ; guide statistique DGCL : l'IFER « progresse de + 4,1 % à 1,89 Md€ »"
    },
-   "check": "extrait"
+   "check": "extrait",
+   "base": "Production"
   },
   {
    "id": "ttf",
@@ -701,7 +701,6 @@
    "amount": 1860,
    "year": "2024",
    "status": "exécution",
-   "category": "Patrimoine et transactions",
    "beneficiary": "État",
    "beneficiaryDetail": "État (fraction affectée au FSD jusqu'en 2024 : 528 M€/an)",
    "collector": "DGFiP",
@@ -714,7 +713,8 @@
     "ref": "« passant de 1 860 millions d'euros en 2024 à 2 526 millions d'euros en 2025, soit une augmentation de près de 36 % » ; « Créée en 2012 »"
    },
    "check": "extrait",
-   "note": "Taux de 0,3 % en 2024, relevé à 0,4 % en 2025."
+   "note": "Taux de 0,3 % en 2024, relevé à 0,4 % en 2025.",
+   "base": "Patrimoine"
   },
   {
    "id": "clause-sauvegarde-medicament",
@@ -723,7 +723,6 @@
    "amount": 1600,
    "year": "2024",
    "status": "plafond",
-   "category": "Santé, alcool, tabac, jeux",
    "beneficiary": "Sécurité sociale",
    "beneficiaryDetail": "Sécurité sociale",
    "collector": "Urssaf",
@@ -735,7 +734,8 @@
     "ref": "« plafonnement de la clause pour les médicaments à 1,6 Md€ en 2023 et 2024 » ; question Sénat 2026 : « passant de 680 millions d'euros en 2021 à plus de 1,6 milliard d'euros en 2024 »"
    },
    "check": "extrait",
-   "note": "Plafond légal, pas le montant effectivement encaissé."
+   "note": "Plafond légal, pas le montant effectivement encaissé.",
+   "base": "Production"
   },
   {
    "id": "octroi-de-mer",
@@ -744,7 +744,6 @@
    "amount": 1550,
    "year": "n. c.",
    "status": "estimation",
-   "category": "Consommation",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Collectivités locales (outre-mer : communes ~3/4, régions/CT ~1/4)",
    "collector": "Douane (DGDDI)",
@@ -756,7 +755,8 @@
     "ref": "« 1,55 milliard d'euros de recettes pour les collectivités »"
    },
    "check": "extrait",
-   "note": "Taxe sur les biens importés ou produits dans les départements d’outre-mer. Année non précisée dans la source ; la Cour des comptes évoque « près de 1,5 milliard d’euros »."
+   "note": "Taxe sur les biens importés ou produits dans les départements d’outre-mer. Année non précisée dans la source ; la Cour des comptes évoque « près de 1,5 milliard d’euros ».",
+   "base": "Consommation"
   },
   {
    "id": "taxe-amenagement",
@@ -766,7 +766,6 @@
    "amount": 1500,
    "year": "2024",
    "status": "exécution",
-   "category": "Patrimoine et transactions",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Collectivités locales (bloc communal, départements, région IDF)",
    "collector": "DGFiP",
@@ -778,7 +777,8 @@
     "ref": "« son rendement est passé de 2,3 milliards d'euros en 2023 à 1,5 milliard d'euros en 2024, soit une diminution de 31 % »"
    },
    "check": "extrait",
-   "note": "Montant encaissé ; 1,6 Md€ de titres émis la même année selon une réponse ministérielle."
+   "note": "Montant encaissé ; 1,6 Md€ de titres émis la même année selon une réponse ministérielle.",
+   "base": "Patrimoine"
   },
   {
    "id": "cehr",
@@ -788,7 +788,6 @@
    "amount": 1460,
    "year": "2022",
    "status": "exécution",
-   "category": "Revenus",
    "beneficiary": "État",
    "beneficiaryDetail": "État",
    "collector": "DGFiP",
@@ -800,7 +799,8 @@
     "ref": "Rendement « de 1,46 milliard d'euros », prélevé sur les revenus de 58 700 foyers fiscaux (année 2022)"
    },
    "check": "extrait",
-   "note": "Dernière année d’exécution trouvée : 2022."
+   "note": "Dernière année d’exécution trouvée : 2022.",
+   "base": "Revenus des ménages"
   },
   {
    "id": "tascom",
@@ -810,7 +810,6 @@
    "amount": 1039,
    "year": "2024",
    "status": "exécution",
-   "category": "Production et travail",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Collectivités locales (bloc communal)",
    "collector": "DGFiP",
@@ -822,7 +821,8 @@
     "ref": "« Le produit TASCOM s'établit à 976 M€ en 2025 (1 039 M€ en 2024) et revient totalement au profit du bloc communal »"
    },
    "check": "extrait",
-   "note": "Payée par les commerces de plus de 400 m²."
+   "note": "Payée par les commerces de plus de 400 m².",
+   "base": "Production"
   },
   {
    "id": "taxe-sejour",
@@ -831,7 +831,6 @@
    "amount": 1000,
    "year": "2024",
    "status": "plancher",
-   "category": "Consommation",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Collectivités locales (+ taxes additionnelles départementale et IDF Mobilités)",
    "collector": "Autres collecteurs",
@@ -843,7 +842,8 @@
     "ref": "Le rendement de la taxe de séjour « a dépassé pour la première fois 1 milliard d'euros en 2024 »"
    },
    "check": "extrait",
-   "note": "Plancher : le produit « a dépassé » 1 Md€."
+   "note": "Plancher : le produit « a dépassé » 1 Md€.",
+   "base": "Consommation"
   },
   {
    "id": "taxe-bureaux-idf",
@@ -853,7 +853,6 @@
    "amount": 998.1,
    "year": "2024",
    "status": "exécution",
-   "category": "Patrimoine et transactions",
    "beneficiary": "Partagé",
    "beneficiaryDetail": "Mixte : région Île-de-France, FNAL, Société du Grand Paris",
    "collector": "DGFiP",
@@ -865,7 +864,9 @@
     "ref": "« Le produit de la taxe, dont le rendement était de 998,1 millions d'euros en 2024, est affecté sous certains plafonds à la région d'Île-de-France, au FNAL et à la SGP » ; autre tableau Sénat : « Rendement en 2024 · 231,8 · 700,1 · 66,2 · 998,1 »"
    },
    "check": "extrait",
-   "note": "Le document exact portant ce chiffre reste à confirmer ; la seule fraction affectée à la Société du Grand Paris est de 718 M€."
+   "note": "Le document exact portant ce chiffre reste à confirmer ; la seule fraction affectée à la Société du Grand Paris est de 718 M€. La Cour des comptes retient 24,2 M€ en 2024, la seule part affectée au Fonds national d’aide au logement.",
+   "base": "Patrimoine",
+   "courId": 199
   },
   {
    "id": "tsn",
@@ -875,7 +876,6 @@
    "amount": 785,
    "year": "2024",
    "status": "exécution",
-   "category": "Taxes sectorielles et affectées",
    "beneficiary": "État",
    "beneficiaryDetail": "État",
    "collector": "DGFiP",
@@ -887,7 +887,8 @@
     "ref": "« pour un rendement de 785 millions d'euros en 2024 » (taxe de 3 % visant une trentaine d'entreprises)"
    },
    "check": "extrait",
-   "note": "D’autres documents parlementaires citent environ 700 M€."
+   "note": "D’autres documents parlementaires citent environ 700 M€.",
+   "base": "Production"
   },
   {
    "id": "teit-ld",
@@ -897,7 +898,6 @@
    "amount": 600,
    "year": "2024",
    "status": "estimation",
-   "category": "Taxes sectorielles et affectées",
    "beneficiary": "Opérateurs et agences",
    "beneficiaryDetail": "Opérateurs et agences (AFITF)",
    "collector": "DGFiP",
@@ -910,7 +910,8 @@
     "ref": "« le rendement attendu est de 600 millions d'euros pour 2024 dont 480 millions des SCA et 120 millions des aéroports »"
    },
    "check": "extrait",
-   "note": "Évaluation faite avant l’entrée en vigueur, pas le produit encaissé."
+   "note": "Évaluation faite avant l’entrée en vigueur, pas le produit encaissé.",
+   "base": "Production"
   },
   {
    "id": "crim",
@@ -920,7 +921,6 @@
    "amount": 600,
    "year": "2023",
    "status": "exécution",
-   "category": "Énergie et environnement",
    "beneficiary": "État",
    "beneficiaryDetail": "État",
    "collector": "DGFiP",
@@ -932,7 +932,8 @@
     "ref": "Versements des producteurs « ont rapporté 0,6 Md€ au budget de l'État » (rendement initialement estimé à 12,3 Md€ en LFI, 2,7 Md€ en LFFG)"
    },
    "check": "extrait",
-   "note": "Prélèvement temporaire sur les producteurs d’électricité."
+   "note": "Prélèvement temporaire sur les producteurs d’électricité.",
+   "base": "Production"
   },
   {
    "id": "gemapi",
@@ -942,7 +943,6 @@
    "amount": 546,
    "year": "2024",
    "status": "exécution",
-   "category": "Énergie et environnement",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Collectivités locales",
    "collector": "DGFiP",
@@ -954,7 +954,8 @@
     "ref": "Produit « environ 546 M€ en 2024, contre 458 M€ en 2023 »"
    },
    "check": "extrait",
-   "note": "Lecture du document source à confirmer."
+   "note": "Lecture du document source à confirmer.",
+   "base": "Patrimoine"
   },
   {
    "id": "tfc-cci",
@@ -964,7 +965,6 @@
    "amount": 525,
    "year": "2024",
    "status": "plafond",
-   "category": "Taxes sectorielles et affectées",
    "beneficiary": "Opérateurs et agences",
    "beneficiaryDetail": "Opérateurs et agences (CCI France / réseau des CCI)",
    "collector": "DGFiP",
@@ -976,7 +976,8 @@
     "ref": "« Le projet de loi de finances pour 2024 a maintenu à hauteur de 525 M€ le plafond de la taxe pour frais de chambres qui sera affecté à CCI France en 2024 » (TA-CFE 280 M€, TA-CVAE 245,1 M€)"
    },
    "check": "extrait",
-   "note": "Plafond d’affectation, pas le produit encaissé."
+   "note": "Plafond d’affectation, pas le produit encaissé.",
+   "base": "Production"
   },
   {
    "id": "ttap-solidarite",
@@ -986,7 +987,6 @@
    "amount": 459.69,
    "year": "2024",
    "status": "exécution",
-   "category": "Taxes sectorielles et affectées",
    "beneficiary": "Opérateurs et agences",
    "beneficiaryDetail": "Opérateurs et agences (FSD 208,95 M€ ; AFITF 250,74 M€)",
    "collector": "Autres collecteurs",
@@ -998,7 +998,8 @@
     "ref": "« Pour l'année 2024, le plafond net (hors frais de recouvrement et de gestion des taxes) d'affectation fixé à 459,69 M€ a été atteint » ; reversé « 208,95 M€ nets au FSD et 250,74 M€ nets à l'AFITF »"
    },
    "check": "extrait",
-   "note": "Montant reversé aux bénéficiaires (plafond atteint). Forte hausse en 2025."
+   "note": "Montant reversé aux bénéficiaires (plafond atteint). Forte hausse en 2025.",
+   "base": "Consommation"
   },
   {
    "id": "soda-sucres",
@@ -1007,7 +1008,6 @@
    "amount": 443,
    "year": "2023",
    "status": "exécution",
-   "category": "Santé, alcool, tabac, jeux",
    "beneficiary": "Sécurité sociale",
    "beneficiaryDetail": "Sécurité sociale",
    "collector": "Douane (DGDDI)",
@@ -1019,7 +1019,9 @@
     "ref": "Contribution sur les boissons à sucres ajoutés : 443 millions d'euros (2023)"
    },
    "check": "extrait",
-   "note": "Barème réformé le 1er mars 2025."
+   "note": "Barème réformé le 1er mars 2025.",
+   "base": "Consommation",
+   "courId": 45
   },
   {
    "id": "cnc-tst-e",
@@ -1029,7 +1031,6 @@
    "amount": 261.4,
    "year": "2024",
    "status": "exécution",
-   "category": "Taxes sectorielles et affectées",
    "beneficiary": "Opérateurs et agences",
    "beneficiaryDetail": "Opérateurs et agences (CNC)",
    "collector": "Autres collecteurs",
@@ -1040,7 +1041,8 @@
     "title": "Sénat, rapport général PLF 2026 n°139, mission « Médias, livre et industries culturelles » (tableau exécution 2024 des taxes affectées au CNC)",
     "ref": "Tableau « Exécuté 2024 » : TST-E 261,4 M€"
    },
-   "check": "extrait"
+   "check": "extrait",
+   "base": "Production"
   },
   {
    "id": "cnc-tst-d",
@@ -1050,7 +1052,6 @@
    "amount": 231.3,
    "year": "2024",
    "status": "exécution",
-   "category": "Taxes sectorielles et affectées",
    "beneficiary": "Opérateurs et agences",
    "beneficiaryDetail": "Opérateurs et agences (CNC)",
    "collector": "Autres collecteurs",
@@ -1061,7 +1062,8 @@
     "title": "Sénat, rapport général PLF 2026 n°139, mission « Médias, livre et industries culturelles » (tableau exécution 2024 des taxes affectées au CNC)",
     "ref": "Tableau « Exécuté 2024 » : TST-D 231,3 M€"
    },
-   "check": "extrait"
+   "check": "extrait",
+   "base": "Production"
   },
   {
    "id": "cnc-tsv",
@@ -1071,7 +1073,6 @@
    "amount": 175.5,
    "year": "2024",
    "status": "exécution",
-   "category": "Taxes sectorielles et affectées",
    "beneficiary": "Opérateurs et agences",
    "beneficiaryDetail": "Opérateurs et agences (CNC)",
    "collector": "Autres collecteurs",
@@ -1083,7 +1084,8 @@
     "ref": "Tableau « Exécuté 2024 » : TSV 175,5 M€ ; total des taxes affectées au CNC : 809,9 M€"
    },
    "check": "extrait",
-   "note": "Les quatre taxes du CNC totalisent 809,9 M€ en 2024."
+   "note": "Les quatre taxes du CNC totalisent 809,9 M€ en 2024.",
+   "base": "Consommation"
   },
   {
    "id": "cnc-tsa",
@@ -1093,7 +1095,6 @@
    "amount": 141.7,
    "year": "2024",
    "status": "exécution",
-   "category": "Taxes sectorielles et affectées",
    "beneficiary": "Opérateurs et agences",
    "beneficiaryDetail": "Opérateurs et agences (CNC)",
    "collector": "Autres collecteurs",
@@ -1104,7 +1105,10 @@
     "title": "Sénat, rapport général PLF 2026 n°139, mission « Médias, livre et industries culturelles » (tableau exécution 2024 des taxes affectées au CNC)",
     "ref": "TSA : « 141,7 M€ en 2024 » ; « devrait rapporter 134 M€, contre 141,7 M€ en 2024, en raison d'une fréquentation en retrait »"
    },
-   "check": "extrait"
+   "check": "extrait",
+   "base": "Consommation",
+   "courId": 332,
+   "amountFrom": "cour"
   },
   {
    "id": "soda-edulcorants",
@@ -1113,7 +1117,6 @@
    "amount": 43,
    "year": "2023",
    "status": "exécution",
-   "category": "Santé, alcool, tabac, jeux",
    "beneficiary": "Sécurité sociale",
    "beneficiaryDetail": "Sécurité sociale",
    "collector": "Douane (DGDDI)",
@@ -1124,7 +1127,10 @@
     "title": "Sénat, MECSS, rapport n°638 (2023-2024)",
     "ref": "Boissons édulcorées : 43 millions d'euros (2023)"
    },
-   "check": "extrait"
+   "check": "extrait",
+   "base": "Consommation",
+   "courId": 275,
+   "amountFrom": "cour"
   },
   {
    "id": "accise-electricite",
@@ -1132,7 +1138,6 @@
    "short": "Accise électricité",
    "year": "2024",
    "status": "exécution",
-   "category": "Énergie et environnement",
    "beneficiary": "État",
    "beneficiaryDetail": "État",
    "collector": "DGFiP",
@@ -1144,7 +1149,8 @@
     "ref": ""
    },
    "check": "extrait",
-   "note": "Produit 2024 non trouvé dans une source lisible."
+   "note": "Produit 2024 non trouvé dans une source lisible.",
+   "base": "Consommation"
   },
   {
    "id": "tgap",
@@ -1153,7 +1159,6 @@
    "short": "TGAP",
    "year": "2024",
    "status": "exécution",
-   "category": "Énergie et environnement",
    "beneficiary": "État",
    "beneficiaryDetail": "État",
    "collector": "Douane (DGDDI)",
@@ -1165,7 +1170,8 @@
     "ref": ""
    },
    "check": "extrait",
-   "note": "Produit 2024 non trouvé dans une source lisible."
+   "note": "Produit 2024 non trouvé dans une source lisible.",
+   "base": "Production"
   },
   {
    "id": "malus-co2-masse",
@@ -1173,7 +1179,6 @@
    "short": "Malus automobile",
    "year": "2024",
    "status": "exécution",
-   "category": "Énergie et environnement",
    "beneficiary": "État",
    "beneficiaryDetail": "État",
    "collector": "DGFiP",
@@ -1185,49 +1190,8 @@
     "ref": ""
    },
    "check": "extrait",
-   "note": "Produit 2024 non trouvé dans une source officielle."
-  },
-  {
-   "id": "thlv",
-   "name": "Taxe sur les logements vacants / taxe d'habitation sur les logements vacants",
-   "acronym": "TLV / THLV",
-   "short": "Logements vacants",
-   "year": "2024",
-   "status": "exécution",
-   "category": "Patrimoine et transactions",
-   "beneficiary": "Partagé",
-   "beneficiaryDetail": "Mixte : État (TLV) et collectivités (THLV)",
-   "collector": "DGFiP",
-   "collectorDetail": "DGFiP",
-   "payer": "Ménages",
-   "source": {
-    "url": "https://www.collectivites-locales.gouv.fr/files/files/Etudes-et-statistiques/BIS/2025/BIS%20196%20THRS%20THLV%20v2.pdf",
-    "title": "DGCL, BIS n°196",
-    "ref": "Agrégat THRS + majoration + THLV = 3 Md€ en 2024"
-   },
-   "check": "extrait",
-   "note": "Produit isolé non trouvé."
-  },
-  {
-   "id": "tfc-cma",
-   "name": "Taxe pour frais de chambres de métiers et de l'artisanat",
-   "acronym": "TFCMA",
-   "short": "Chambres de métiers",
-   "year": "2024",
-   "status": "exécution",
-   "category": "Taxes sectorielles et affectées",
-   "beneficiary": "Opérateurs et agences",
-   "beneficiaryDetail": "Opérateurs et agences (CMA France)",
-   "collector": "DGFiP",
-   "collectorDetail": "DGFiP",
-   "payer": "Entreprises",
-   "source": {
-    "url": "https://www.senat.fr/rap/r25-877/r25-8770.html",
-    "title": "Sénat, rapport d'information n°877 sur la mission d'accompagnement des entreprises par les CCI et CMA",
-    "ref": "Plafond « passé de 280 millions d'euros en 2013 à 150,4 millions d'euros en 2026 »"
-   },
-   "check": "extrait",
-   "note": "Produit 2024 non trouvé."
+   "note": "Produit 2024 non trouvé dans une source officielle.",
+   "base": "Consommation"
   },
   {
    "id": "cartes-grises",
@@ -1235,7 +1199,6 @@
    "short": "Cartes grises",
    "year": "2023",
    "status": "estimation",
-   "category": "Énergie et environnement",
    "beneficiary": "Collectivités locales",
    "beneficiaryDetail": "Collectivités locales (régions)",
    "collector": "DGFiP",
@@ -1247,7 +1210,31 @@
     "ref": "Les régions ont perçu « environ 2 Md€ » en 2023 (contre 2,3 Md€ en 2019)"
    },
    "check": "extrait",
-   "note": "Produit 2024 non trouvé dans une source officielle."
+   "note": "Produit 2024 non trouvé dans une source officielle.",
+   "base": "Consommation"
   }
- ]
+ ],
+ "courPartOf": {
+  "_comment": "Lignes de l’inventaire de la Cour des comptes qui sont une fraction d’un impôt de la liste, déjà compris dans son montant : elles restent visibles mais ne sont pas additionnées.",
+  "63": "tobacco",
+  "216": "tobacco",
+  "62": "tobacco",
+  "60": "fiscalite-alcools",
+  "61": "fiscalite-alcools",
+  "55": "crds",
+  "56": "crds",
+  "94": "ifer",
+  "95": "ifer",
+  "96": "ifer",
+  "97": "ifer",
+  "327": "tgap",
+  "328": "tgap",
+  "329": "tgap",
+  "331": "tgap",
+  "354": "tf",
+  "212": "th",
+  "335": "versement-mobilite",
+  "38": "fdj-prelevements",
+  "116": "fdj-prelevements"
+ }
 }

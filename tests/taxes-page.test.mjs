@@ -30,19 +30,32 @@ test('page totals come from the national accounts, not from the sum of the list'
   assert.ok(data.macro.every(m => m.gdp > 0));
 });
 
-test('every tax line is sourced, uniquely identified, and fractions are not counted twice', () => {
-  assert.ok(data.taxes.length >= 40);
-  // Lines read from document excerpts are flagged, Insee lines are not.
-  assert.ok(data.taxes.filter(t => t.insee).every(t => t.check === 'source'));
-  assert.ok(data.taxes.filter(t => !t.insee).every(t => t.check === 'extrait'));
-  const ids = new Set(data.taxes.map(t => t.id));
-  assert.equal(ids.size, data.taxes.length);
-  for (const t of data.taxes) {
-    assert.ok(t.name && t.category && t.beneficiary && t.collector && t.payer, t.id);
+test('one list for every chart: every tax once, sourced, fractions never added twice', () => {
+  const all = data.all;
+  const ids = new Set(all.map(t => t.id));
+  assert.equal(ids.size, all.length);
+  // Curated list + Cour des comptes inventory, overlaps merged once.
+  const courIds = all.filter(t => t.courId != null).map(t => t.courId);
+  assert.equal(new Set(courIds).size, courIds.length);
+  assert.equal(courIds.length, 319);
+  assert.equal(all.filter(t => t.inForce).length, 292);
+  for (const t of all) {
+    assert.ok(t.name && t.base && t.beneficiary && t.collector && t.payer, t.id);
+    assert.ok(['Consommation', 'Revenus des ménages', 'Production', 'Salaires', 'Patrimoine', 'Bénéfices des sociétés'].includes(t.base), t.id);
     if (t.amount != null) assert.match(t.source.url, /^https:\/\//, t.id);
     if (t.partOf) assert.ok(ids.has(t.partOf), t.id);
     if (t.cost) assert.match(t.cost.url, /^https:\/\//, t.id);
+    // Lines read in the versioned Insee or Cour des comptes files carry check: 'source'; excerpt readings are flagged.
+    assert.ok(['source', 'extrait'].includes(t.check), t.id);
+    if (t.origin === 'cour' || t.insee) assert.equal(t.check, 'source', t.id);
   }
+  // A Cour line that is a fraction of a listed tax points to it and is not added.
+  assert.equal(all.find(t => t.courId === 63).partOf, 'tobacco');
+  // Merged lines: the cinema ticket tax takes the amount read in the Cour file.
+  const tsa = all.find(t => t.id === 'cnc-tsa');
+  assert.equal(tsa.courId, 332); assert.equal(tsa.amount, 143); assert.equal(tsa.check, 'source');
+  // Unknown amounts stay unknown.
+  assert.ok(all.filter(t => t.inForce && t.amount == null).length >= 117);
 });
 
 test('published collection costs carry their source', () => {
@@ -59,7 +72,7 @@ test('built file is up to date', () => {
 });
 
 test('low-yield tax inventory reproduces the Cour des comptes totals', () => {
-  const ly = data.lowYield;
+  const ly = { ...data.lowYield, taxes: JSON.parse(fs.readFileSync('sources/taxes-faible-rendement.json', 'utf8')).taxes };
   const active = ly.taxes.filter(t => t.state === 'en vigueur' || t.state === 'créée');
   assert.equal(ly.taxes.length, 319);
   assert.equal(active.length, 243);
