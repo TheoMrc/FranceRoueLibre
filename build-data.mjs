@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { writeWebData } from './scripts/web-data.mjs';
+import { writeTaxesData } from './scripts/taxes-data.mjs';
 
 function parseCsv(source) {
   const rows = [];
@@ -122,6 +123,7 @@ fs.copyFileSync('sources/national-accounts-3201.json', 'dist/data/national-accou
 fs.copyFileSync('sources/national-sectors-3215.json', 'dist/data/national-sectors-3215.json');
 fs.copyFileSync('sources/national-debt.json', 'dist/data/national-debt.json');
 fs.copyFileSync('sources/insee-population.json', 'dist/data/insee-population.json');
+writeTaxesData();
 fs.writeFileSync('dist/data/departments.geojson', JSON.stringify(boundaries));
 // Higher-resolution geometry is split by department and loaded only on close zoom.
 const detailCommunes = JSON.parse(gunzipSync(fs.readFileSync('sources/communes-50m.geojson.gz')));

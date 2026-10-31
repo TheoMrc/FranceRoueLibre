@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tous les impôts et taxes en France, un par un : ce que chacun rapporte, qui le paie, qui le reçoit, et ce que coûte sa collecte.">
+  <title>Impôts et taxes · FranceRoueLibre</title>
+  <link rel="canonical" href="https://francerouelibre.fr/impots.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="FranceRoueLibre">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="Impôts et taxes · FranceRoueLibre">
+  <meta property="og:description" content="Tous les impôts et taxes en France, un par un : ce que chacun rapporte, qui le paie, qui le reçoit, et ce que coûte sa collecte.">
+  <meta property="og:url" content="https://francerouelibre.fr/impots.html">
+  <meta property="og:image" content="https://francerouelibre.fr/og.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="FranceRoueLibre : où part l’argent public ? Dépenses, aides, marchés publics et dette, territoire par territoire.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Impôts et taxes · FranceRoueLibre">
+  <meta name="twitter:description" content="Tous les impôts et taxes en France, un par un : ce que chacun rapporte, qui le paie, qui le reçoit, et ce que coûte sa collecte.">
+  <meta name="twitter:image" content="https://francerouelibre.fr/og.png">
+  <script>
+    (function () {
+      var theme = null;
+      try { theme = localStorage.getItem('frl-theme'); } catch (e) {}
+      if (theme !== 'light' && theme !== 'dark') theme = 'light'; // light by default, dark only when chosen with the toggle
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="./common.js"></script>
+  <script defer src="./impots.js"></script>
+  <script defer src="./search-bar.js"></script>
+</head>
+<body class="subpage">
+  <header class="site-header" id="siteHeader">
+    <div class="container nav">
+      <a class="brand brand--lockup" href="index.html" aria-label="FranceRoueLibre, accueil">
+        <svg class="brand__mark" width="40" height="40" viewBox="0 0 48 48" fill="none" aria-hidden="true"><defs><linearGradient id="g7" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#0e7490"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><path d="M24 4l17 10v20L24 44 7 34V14z" stroke="url(#g7)" stroke-width="3" stroke-linejoin="round"/><path d="M14 17l7 7 5-4 9 11" stroke="#e11d48" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 31 H35 V25" stroke="#e11d48" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="brand__sep" aria-hidden="true"></span>
+        <span class="brand__name"><span>France</span><span class="gradient-text">RoueLibre</span></span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="index.html#explorer">Carte</a></li>
+        <li><a href="index.html#circuit">Circuit</a></li>
+        <li><a href="index.html#comptes">Comptes</a></li>
+        <li><a href="impots.html" aria-current="page">Impôts</a></li>
+        <li><a href="aides.html">Aides</a></li>
+        <li><a href="marches.html">Marchés</a></li>
+        <li><a href="signaux.html">Signaux</a></li>
+        <li><a href="donnees.html">Données</a></li>
+      </ul>
+      <div class="nav__actions">
+      <a class="nav-github" href="https://github.com/TheoMrc/FranceRoueLibre" target="_blank" rel="noopener noreferrer" aria-label="Code source sur GitHub" title="Code source sur GitHub"><svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg></a>
+      <button class="theme-toggle-btn tbtn-morph" id="themeToggle" type="button" aria-label="Changer de thème" title="Changer de thème">
+        <span class="tbtn-halo" aria-hidden="true"></span>
+        <svg class="tbtn-svg-morph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <mask id="theme-morph-mask"><rect width="32" height="32" fill="white"/><circle class="mask-moon-bite" cx="23" cy="11" r="6.5" fill="black"/></mask>
+          <circle class="morph-core" cx="16" cy="16" r="6" fill="currentColor" mask="url(#theme-morph-mask)"/>
+          <g class="morph-rays" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="16" y1="3" x2="16" y2="6"/><line x1="16" y1="26" x2="16" y2="29"/><line x1="3" y1="16" x2="6" y2="16"/><line x1="26" y1="16" x2="29" y2="16"/>
+            <line x1="6.81" y1="6.81" x2="8.93" y2="8.93"/><line x1="23.07" y1="23.07" x2="25.19" y2="25.19"/><line x1="6.81" y1="25.19" x2="8.93" y2="23.07"/><line x1="23.07" y1="8.93" x2="25.19" y2="6.81"/>
+          </g>
+        </svg>
+      </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero hero--page">
+      <div class="hero__bg" aria-hidden="true"></div>
+      <div class="container"><div class="hero__inner">
+        <span class="eyebrow">Impôts, taxes et prélèvements</span>
+        <h1>Ce que rapporte chaque impôt, <span class="gradient-text">et ce que coûte sa collecte.</span></h1>
+        <p class="hero__lead">Tous les prélèvements recensés, un par un : leur produit, qui les paie, qui les reçoit, qui les collecte, ce que l’administration dépense pour les percevoir, et les petites taxes qui rapportent à peine plus qu’elles ne coûtent.</p>
+        <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#un-a-un">Un par un</a><a href="#histoire">Depuis 1995</a><a href="#collecte">Coût de collecte</a><a href="#petites">Petites taxes</a><a href="#ecarts">Fraude et écarts</a><a href="#tableau">Tableau complet</a><a href="#methode">Méthode</a></nav>
+      </div></div>
+    </section>
+
+    <section class="section" id="ensemble" aria-labelledby="txAllTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Vue d’ensemble</span><h2 id="txAllTitle">Tous les impôts, à la même échelle</h2><p class="lead">Chaque rectangle est un impôt ou une taxe, sa surface est son produit annuel. Survolez ou touchez un rectangle pour le détail ; les couleurs regroupent les impôts par ce qu’ils taxent.</p></div>
+        <div class="kpis" id="txKpis"></div>
+        <div class="tx-controls"><div class="chip-select" id="txGroup" role="group" aria-label="Couleur des rectangles"><button type="button" data-group="category" class="active">Ce qui est taxé</button><button type="button" data-group="beneficiary">Qui reçoit</button><button type="button" data-group="collector">Qui collecte</button><button type="button" data-group="payer">Qui paie</button></div></div>
+        <div class="tx-map-layout">
+          <div class="panel tx-map-panel"><div id="txTreemap" class="tx-treemap" aria-describedby="txTreemapNote"></div><div id="txLegend" class="tx-legend"></div><p class="note" id="txTreemapNote"></p></div>
+          <aside class="panel tx-detail" id="txDetail" aria-live="polite"><p class="note">Sélectionnez un impôt pour voir son détail.</p></aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="un-a-un" aria-labelledby="txOneTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Du plus gros au plus petit</span><h2 id="txOneTitle">Quelques géants, une longue traîne</h2><p class="lead">Les mêmes impôts sur une échelle logarithmique : chaque graduation multiplie le montant par dix. Une poignée d’impôts fait l’essentiel des recettes, des dizaines d’autres rapportent moins de 175 millions d’euros.</p></div>
+        <div class="panel"><h3>Chaque impôt, par ordre de grandeur</h3><div id="txStrip" class="tx-strip"></div><p class="note" id="txStripNote"></p></div>
+        <div class="grid-2 tx-onebyone">
+          <div class="panel"><h3>Part cumulée des recettes</h3><div id="txPareto" class="tx-pareto"></div><p class="note" id="txParetoNote"></p></div>
+          <div class="panel"><h3>Les quinze plus gros</h3><div id="txTop"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="histoire" aria-labelledby="txHistTitle">
+      <div class="container">
+        <div class="section__head-row"><div class="section__head"><span class="eyebrow">Comptes nationaux Insee · 1995–2025</span><h2 id="txHistTitle">Trente ans d’impôts</h2><p class="lead">Les huit grandes catégories d’impôts de la comptabilité nationale, empilées. Cotisations sociales non comprises.</p></div>
+          <div class="chip-select" id="txHistUnit" role="group" aria-label="Unité"><button type="button" data-unit="md" class="active">Md€</button><button type="button" data-unit="pib">% du PIB</button><button type="button" data-unit="hab">€ par habitant</button></div></div>
+        <div class="panel"><div id="txStack" class="tx-stack"></div><div id="txStackLegend" class="tx-legend"></div><p class="note" id="txStackNote"></p></div>
+        <div class="panel panel--wide tx-series">
+          <div class="panel__head"><h3 id="txSeriesTitle">Un impôt dans le temps</h3><label class="select-wrap"><span class="sr-only">Impôt affiché</span><select id="txSeriesPick"></select></label></div>
+          <div id="txSeries" class="tx-line"></div><p class="note" id="txSeriesNote"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="collecte" aria-labelledby="txCostTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Coût de collecte</span><h2 id="txCostTitle">Combien coûte la perception de l’impôt ?</h2><p class="lead">Ce que dépensent les administrations (agents, informatique, locaux) pour asseoir, contrôler et recouvrer les impôts, rapporté à ce qu’elles encaissent. Le coût supporté par les contribuables eux-mêmes (déclarations, comptabilité, conseil) n’est pas compris.</p></div>
+        <div class="kpis" id="txCostKpis"></div>
+        <div class="grid-2">
+          <div class="panel"><h3>Pour 100 € collectés, ce que dépense chaque administration</h3><div id="txCollectors"></div><p class="note" id="txCollectorsNote"></p></div>
+          <div class="panel"><h3>Coût de gestion de la DGFiP, en % des recettes brutes</h3><div id="txDgfip" class="tx-line"></div><p class="note" id="txDgfipNote"></p></div>
+        </div>
+        <div class="panel panel--wide"><h3>Ce que l’État facture en plus des impôts locaux pour les lever</h3><div id="txFees"></div><p class="note" id="txFeesNote"></p></div>
+        <div class="panel panel--wide"><h3>Coût de collecte impôt par impôt, quand il est publié</h3><div id="txPerTaxCost" class="table-wrap"></div><p class="note" id="txPerTaxCostNote"></p></div>
+      </div>
+    </section>
+
+    <section class="section" id="petites" aria-labelledby="txSmallTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Taxes à faible rendement</span><h2 id="txSmallTitle">Les petites taxes qui coûtent cher</h2><p class="lead">Plus de deux cents taxes rapportent moins de 175 millions d’euros chacune. Pour la plupart, personne ne publie ce que coûte leur collecte : les rares chiffres disponibles montrent des écarts de un à plusieurs centaines selon la taxe.</p></div>
+        <div class="panel"><h3>Coût de collecte pour 100 € perçus</h3><div id="txCostDots" class="tx-strip"></div><p class="note" id="txCostDotsNote"></p></div>
+        <div id="txCounts" class="tx-counts"></div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="ecarts" aria-labelledby="txGapTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Ce qui n’est pas perçu</span><h2 id="txGapTitle">Fraude, écarts et contrôle</h2><p class="lead">L’impôt dû n’est pas toujours l’impôt encaissé. Estimations officielles de l’écart de recouvrement et résultats du contrôle.</p></div>
+        <div class="kpis" id="txGapKpis"></div>
+        <div id="txGapList" class="gap-grid"></div>
+      </div>
+    </section>
+
+    <section class="section" id="tableau" aria-labelledby="txTableTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Toutes les lignes</span><h2 id="txTableTitle">Tableau complet</h2><p class="lead">Chaque impôt avec son produit, son année, son bénéficiaire, son collecteur, son coût de collecte quand il est connu, et le document qui donne le chiffre. Cliquez sur un en-tête pour trier.</p></div>
+        <div class="tx-filters"><label class="search-field"><span class="sr-only">Rechercher un impôt</span><input id="txSearch" type="search" placeholder="TVA, taxe de séjour, accise…" autocomplete="off"></label><label class="select-wrap"><span class="sr-only">Catégorie</span><select id="txFilterCategory"><option value="">Toutes catégories</option></select></label><label class="select-wrap"><span class="sr-only">Bénéficiaire</span><select id="txFilterBeneficiary"><option value="">Tous bénéficiaires</option></select></label><label class="select-wrap"><span class="sr-only">Collecteur</span><select id="txFilterCollector"><option value="">Tous collecteurs</option></select></label></div>
+        <div id="txTable" class="table-wrap"></div>
+        <p class="note" id="txTableNote"></p>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="methode" aria-labelledby="txMethodTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Méthode</span><h2 id="txMethodTitle">Lire ces chiffres sans se tromper</h2></div>
+        <div class="gap-grid tx-method">
+          <article class="gap"><h3>Des périmètres qui ne s’additionnent pas</h3><p>Le produit d’un impôt est donné par sa meilleure source (loi de finances, comptes de la Sécurité sociale, comptes des collectivités, douane). Ces sources n’ont pas toutes la même année ni la même définition (brut ou net des remboursements, avant ou après crédits d’impôt). Le total affiché en haut est celui des comptes nationaux de l’Insee, pas la somme des lignes.</p></article>
+          <article class="gap"><h3>Fractions et doubles comptes</h3><p>Une partie de la TVA, de l’accise sur les énergies ou de la taxe sur les salaires est reversée à la Sécurité sociale ou aux collectivités. Ces fractions sont signalées et ne sont jamais ajoutées une seconde fois dans les graphiques.</p></article>
+          <article class="gap"><h3>Coût de collecte</h3><p>Il n’existe pas de comptabilité analytique publique du coût de chaque impôt. Les taux globaux (DGFiP, douane, Urssaf) viennent des rapports de performance ; les coûts impôt par impôt ne sont montrés que lorsqu’un rapport public (Cour des comptes, IGF, Parlement) les a chiffrés. Aucun coût n’est estimé ici par simple règle de trois.</p></article>
+          <article class="gap"><h3>Cotisations sociales</h3><p>Les cotisations sociales (retraite, maladie, chômage…) sont des prélèvements obligatoires mais pas des impôts au sens de la comptabilité nationale. Elles figurent à part, pour comparaison.</p></article>
+        </div>
+        <p class="source-links" id="txSources"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div><div class="footer__brand">FranceRoueLibre</div><p>Cartographie des dépenses publiques · données ouvertes</p><p class="footer__legal">Site indépendant, sans lien avec l’État ni avec une administration. Contact : <a href="mailto:stonks@francerouelibre.fr">stonks@francerouelibre.fr</a> · <a href="mentions.html">Mentions légales et confidentialité</a></p></div>
+      <div class="footer__links"><a href="index.html#explorer">Carte</a><a href="index.html#circuit">Circuit</a><a href="index.html#comptes">Comptes</a><a href="impots.html">Impôts</a><a href="aides.html">Aides</a><a href="marches.html">Marchés</a><a href="signaux.html">Signaux</a><a href="donnees.html">Données</a><a class="footer__github" href="https://github.com/TheoMrc/FranceRoueLibre" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg>Code source</a></div>
+    </div>
+  </footer>
+</body>
+</html>
