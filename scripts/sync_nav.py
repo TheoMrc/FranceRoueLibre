@@ -1,5 +1,5 @@
 """One menu for every page. The structure lives here; this script rewrites the <ul class="nav__links"> block of every
-page in dist/ (and adds dist/nav.js and dist/collapse.js), so that adding a page means adding one line below and running:
+page in dist/ (and adds dist/nav.js, dist/collapse.js and dist/assistant.js), so that adding a page means adding one line below and running:
     python scripts/sync_nav.py
 On the home page, the map, circuit and accounts links stay in-page anchors."""
 import pathlib
@@ -125,6 +125,8 @@ def sync(path):
                             '<script defer src="./nav.js"></script>\n  <script defer src="./search-bar.js"></script>', 1)
         if 'src="./nav.js"' not in text:
             raise SystemExit(f'{path.name}: add <script defer src="./nav.js"></script> by hand')
+    if 'src="./assistant.js"' not in text:  # AI assistant panel (shown only when its API answers)
+        text = text.replace('<script defer src="./nav.js"></script>', '<script defer src="./nav.js"></script>\n  <script defer src="./assistant.js"></script>', 1)
     # Footer: every page of the menu, in menu order, then the source code link kept as it is.
     fstart = text.find('<div class="footer__links">')
     if fstart >= 0:

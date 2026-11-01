@@ -33,6 +33,7 @@ write_conf() {
   {
     echo "# francerouelibre.fr – written by deploy/vps.sh (FranceRoueLibre repo), static files from $WEB"
     echo "limit_req_zone \$binary_remote_addr zone=frl_api:10m rate=5r/s;"
+echo "limit_req_zone \$binary_remote_addr zone=frl_ai:10m rate=3r/s;"
     # Own access log, without query strings (searched words never reach the disk), read by frl-stats
     cat <<'NGX'
 map $http_referer $frl_referer { default $http_referer; "~^(?<frl_ref_base>[^?]*)\?" $frl_ref_base; }
@@ -85,6 +86,13 @@ NGX
     location /data/search/db/ { gzip off; add_header Cache-Control "no-cache" always; add_header Strict-Transport-Security "max-age=31536000" always; }
     location ~ \.geojson$ { default_type application/json; expires 10m; }
     # Search API (server/search_api.py, systemd unit francerouelibre-search)
+    # AI assistant (server/assistant_api.py, systemd unit francerouelibre-assistant); answers 502 when not installed
+    location /api/assistant/ {
+        limit_req zone=frl_ai burst=10 nodelay; limit_req_status 429;
+        client_max_body_size 64k;
+        proxy_pass http://127.0.0.1:8018; proxy_read_timeout 30s;
+        proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr;
+    }
     location /api/ {
         limit_req zone=frl_api burst=20 nodelay; limit_req_status 429;
         proxy_pass http://127.0.0.1:8017; proxy_read_timeout 20s;
@@ -144,6 +152,71 @@ if [ "$(cat "$LIB/service.md5" 2>/dev/null)" != "$SIG" ] || ! systemctl is-activ
 else echo "search API unchanged, not restarted"; fi
 curl -s --retry 10 --retry-connrefused --retry-delay 1 --max-time 30 http://127.0.0.1:8017/api/health; echo
 sudo -n systemctl --no-pager --lines=3 status francerouelibre-search | grep -E "Active|Memory|columns|NumPy|CPU"
+
+echo "== AI assistant"
+# Installed only when /etc/francerouelibre/assistant.env exists (keys, root only, never in the repo; see
+# deploy/assistant.env.example). Sandboxed service: throwaway system user, read-only system, no home, its own state
+# folder for the spending ledger, 256 Mo and half a core at most. The Vertex AI service account key, if present, is
+# handed to the service by systemd (LoadCredential) and readable by it alone.
+AENV=/etc/francerouelibre/assistant.env
+if sudo -n test -f "$AENV"; then
+  APY=/usr/bin/python3
+  if [ -x "$LIB/venv/bin/python" ]; then
+    "$LIB/venv/bin/python" -c 'import google.auth, requests' 2>/dev/null || "$LIB/venv/bin/pip" install -q --disable-pip-version-check google-auth requests
+    APY=$LIB/venv/bin/python
+  fi
+  CRED=""
+  if sudo -n test -f /etc/francerouelibre/vertex-sa.json; then
+    CRED=$'LoadCredential=vertex.json:/etc/francerouelibre/vertex-sa.json\nEnvironment=GOOGLE_APPLICATION_CREDENTIALS=%d/vertex.json'
+  fi
+  sudo -n tee /etc/systemd/system/francerouelibre-assistant.service > /dev/null <<UNIT
+[Unit]
+Description=FranceRoueLibre AI assistant API (deploy/vps.sh)
+After=network-online.target francerouelibre-search.service
+Wants=network-online.target
+
+[Service]
+DynamicUser=yes
+StateDirectory=francerouelibre-assistant
+EnvironmentFile=$AENV
+Environment=ASSISTANT_ENV_FILE=/dev/null ASSISTANT_DATA_DIR=$WEB/data ASSISTANT_SEARCH_DB=$DBF ASSISTANT_SEARCH_API=http://127.0.0.1:8017
+$CRED
+ExecStart=$APY $DIR/server/assistant_api.py --port 8018
+Restart=on-failure
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallFilter=@system-service
+MemoryMax=256M
+CPUQuota=50%
+Nice=10
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+  sudo -n systemctl daemon-reload
+  sudo -n systemctl enable --quiet francerouelibre-assistant
+  ASIG=$(cat "$DIR"/server/assistant_api.py "$DIR"/server/assistant/*.py /etc/systemd/system/francerouelibre-assistant.service | md5sum | cut -d' ' -f1)
+  ASIG=$ASIG$(sudo -n md5sum "$AENV" | cut -c1-8)
+  if [ "$(cat "$LIB/assistant.md5" 2>/dev/null)" != "$ASIG" ] || ! systemctl is-active --quiet francerouelibre-assistant; then
+    sudo -n systemctl restart francerouelibre-assistant && echo "$ASIG" > "$LIB/assistant.md5" && echo "assistant restarted"
+  else echo "assistant unchanged, not restarted"; fi
+  curl -s --retry 5 --retry-connrefused --retry-delay 1 --max-time 20 http://127.0.0.1:8018/api/assistant/status; echo
+  sudo -n env STATE_DIRECTORY=/var/lib/francerouelibre-assistant ASSISTANT_ENV_FILE="$AENV" "$APY" "$DIR/server/assistant_api.py" --usage 2>/dev/null || true
+else
+  echo "not installed ($AENV missing, see deploy/assistant.env.example)"
+  if systemctl is-active --quiet francerouelibre-assistant 2>/dev/null; then sudo -n systemctl disable --now francerouelibre-assistant; fi
+fi
 
 echo "== visit statistics (frl-stats)"
 # CLI over the access log (server/frl_stats.py); a nightly timer keeps daily counts once the logs are rotated away
