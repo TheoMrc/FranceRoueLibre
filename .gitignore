@@ -12,3 +12,4 @@ __pycache__/
 ugap/data/
 ugap/raw_samples/
 .env
+.assistant
