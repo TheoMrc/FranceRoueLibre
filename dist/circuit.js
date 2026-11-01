@@ -262,6 +262,26 @@
     yearText.setAttribute('class', 'cx-year');
     yearText.textContent = flows.year;
     pool.forEach((node, key) => { if (!node.dataset.live) { node.remove(); pool.delete(key); } });
+    fitViewBox();
+  }
+
+  /* Long labels of the side columns run past the 0..W drawing area. Widen the viewBox to hold them, so they are not cut
+     where the chart is clipped (the phone layout scrolls sideways). Extents only grow, so the drawing never jumps. */
+  let vbLeft = 0, vbRight = W;
+  const narrow = window.matchMedia?.('(max-width: 680px)');
+  narrow?.addEventListener?.('change', () => { vbLeft = 0; vbRight = W; fitViewBox(); });
+  function fitViewBox() {
+    if (!narrow?.matches) {  // wide screens: the labels overflow into the page margin, visible
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.style.removeProperty('--cx-scale'); return;
+    }
+    let box;
+    try { box = gLabels.getBBox(); } catch { return; }
+    if (!box.width) return;
+    const left = Math.min(vbLeft, Math.floor(box.x - 6)), right = Math.max(vbRight, Math.ceil(box.x + box.width + 6));
+    if (left === vbLeft && right === vbRight && svg.getAttribute('viewBox') === `${vbLeft} 0 ${vbRight - vbLeft} ${H}`) return;
+    vbLeft = left; vbRight = right;
+    svg.setAttribute('viewBox', `${vbLeft} 0 ${vbRight - vbLeft} ${H}`);
+    svg.style.setProperty('--cx-scale', ((vbRight - vbLeft) / W).toFixed(3));  // keeps the text size on phones
   }
 
   function drawDebt(year) {

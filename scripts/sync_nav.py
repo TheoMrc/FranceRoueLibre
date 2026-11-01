@@ -1,5 +1,5 @@
 """One menu for every page. The structure lives here; this script rewrites the <ul class="nav__links"> block of every
-page in dist/ (and adds dist/nav.js, dist/collapse.js and dist/assistant.js), so that adding a page means adding one line below and running:
+page in dist/ (and adds dist/nav.js, dist/collapse.js, dist/assistant.js, dist/scroll-hint.js and dist/touch-hover.js), so that adding a page means adding one line below and running:
     python scripts/sync_nav.py
 On the home page, the map, circuit and accounts links stay in-page anchors."""
 import pathlib
@@ -140,6 +140,9 @@ def sync(path):
             raise SystemExit(f'{path.name}: add <script defer src="./nav.js"></script> by hand')
     if 'src="./assistant.js"' not in text:  # AI assistant panel (shown only when its API answers)
         text = text.replace('<script defer src="./nav.js"></script>', '<script defer src="./nav.js"></script>\n  <script defer src="./assistant.js"></script>', 1)
+    for extra in ('scroll-hint.js', 'touch-hover.js'):  # sideways scrollers made visible; chart tooltips by touch
+        if f'src="./{extra}"' not in text:
+            text = text.replace('<script defer src="./nav.js"></script>', f'<script defer src="./nav.js"></script>\n  <script defer src="./{extra}"></script>', 1)
     # Header: « Soutenir » and X before the GitHub link (rewritten each time). search-bar.js puts its form first.
     text = re.sub(r'[ \t]*<a class="nav-support".*?</a><a class="nav-github nav-x".*?</a>\n', '', text, flags=re.S)
     i = text.find('<div class="nav__actions">')
