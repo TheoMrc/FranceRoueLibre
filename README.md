@@ -26,7 +26,7 @@
 | **Recherche** | N’importe quel mot (« discrimination », « LGBT », « photovoltaïque »…) cherché dans 1,9 million de lignes de dépenses publiées, avec synthèse, montants, bénéficiaires et lignes surlignées. |
 | **Signaux** | Règles simples appliquées à toutes les données : marchés à offre unique, sans mise en concurrence, avenants qui font exploser les prix, montants calés sous les seuils, subventions à des structures fermées, communes en difficulté, retards de paiement… |
 | **Probité** | Atteintes à la probité jugées 2021–2025 (corruption, favoritisme, prise illégale d’intérêts, détournements) : affaires par infraction, condamnations et relaxes, peines ; ce qui n’est pas publié. |
-| **Le Limier** | Agent d’enquête IA, bouton « Poser une question » sur chaque page : Gemini ou Claude cherche dans les données du site et sur le web, puis répond avec ses sources. |
+| **La Loupe** | Agent IA, bouton « Poser une question » sur chaque page : Gemini ou Claude cherche dans les données du site et sur le web, puis répond avec ses sources. |
 | **Données** | Les 59 sources utilisées, et surtout ce qui n’est **pas** publié (hôpitaux, ARS, établissements scolaires, bénéficiaires des niches fiscales, prix unitaires des achats…). |
 
 **Un signal n’est ni une preuve ni une accusation** : c’est une question à poser à l’organisme concerné, avec la source pour la vérifier. Les données publiques contiennent des erreurs de saisie et des changements de périmètre ; chaque chiffre renvoie à sa source.
@@ -44,7 +44,7 @@
 node serve.mjs          # puis http://127.0.0.1:4173
 ```
 
-Avec le Limier (agent IA) : `assistant.bat` (double-clic) lance l’API de recherche, l’API de l’assistant et l’aperçu, avec les clés du `.env` à la racine (celui de RevoFlow, ignoré par git).
+Avec la Loupe (agent IA) : `assistant.bat` (double-clic) lance l’API de recherche, l’API de l’assistant et l’aperçu, avec les clés du `.env` à la racine (celui de RevoFlow, ignoré par git).
 
 Le site est statique (`dist/`). Un serveur HTTP qui gère les requêtes partielles (`Range`) suffit : la recherche lit sa base SQLite par petits morceaux, sans la télécharger en entier.
 
@@ -116,7 +116,7 @@ La charte reprend celle du site BioDevs : typographies Sora et Inter, thème cla
 
 La carte est rendue par MapLibre GL (copie locale dans `dist/vendor/`, licence BSD) : les contours sont découpés en tuiles dans un worker et affichés par le GPU, ce qui rend le zoom (molette, pavé tactile, pincement, boutons + et −) et le déplacement fluides. Les couleurs sont appliquées par état d’entité, sans créer un nœud par commune. Les contours à 50 m des communes sont chargés par département visible à partir du zoom 7, ceux à 100 m des départements et régions au besoin. Ils décrivent des limites administratives, pas un fond de carte routier ou des images aériennes. La carte ouvre sur la France métropolitaine ; les territoires ultramarins restent accessibles par recherche, filtre et sélection dans les listes.
 
-### Le Limier (agent d’enquête IA)
+### La Loupe (agent IA)
 
 `server/assistant_api.py` (port 8018, derrière nginx sous `/api/assistant/`) répond aux questions des lecteurs avec Gemini (Vertex AI, crédits Google Cloud) ou Claude (API Anthropic). Le panneau `dist/assistant.js` n’apparaît que si l’API répond qu’un modèle est disponible ; sur un hébergement statique, rien ne change.
 
@@ -128,7 +128,7 @@ La carte est rendue par MapLibre GL (copie locale dans `dist/vendor/`, licence B
 
 **Tester l’interface sans dépenser** : `assistant_demo.bat` (ou `python server/assistant_api.py --fake`) remplace Gemini et Claude par de faux modèles (`server/assistant/fake.py`) qui passent par la vraie boucle et les vrais outils locaux, avec des délais réalistes, sans aucun appel réseau. Des mots dans la question choisissent un scénario : « erreur » (Gemini échoue, Claude prend le relais), « panne », « long », « commune » ou « ville » suivi d’un nom, « web ». Le panneau affiche alors un badge « Démo ».
 
-**Choix du modèle** : un petit bouton à gauche de la zone de saisie passe d’Auto (logo du Limier : le premier modèle disponible répond, l’autre prend le relais) à Gemini puis à Claude, avec leurs logos (`dist/img/ai/`, icône de Claude d’Icons8, créditée dans les mentions légales).
+**Choix du modèle** : un petit bouton à gauche de la zone de saisie passe d’Auto (logo de la Loupe : le premier modèle disponible répond, l’autre prend le relais) à Gemini puis à Claude, avec leurs logos (`dist/img/ai/`, icône de Claude d’Icons8, créditée dans les mentions légales).
 
 ### Comptes publics nationaux
 

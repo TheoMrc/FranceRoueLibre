@@ -105,13 +105,13 @@
   const fab = document.createElement('button');
   fab.type = 'button'; fab.className = 'ai-fab'; fab.hidden = true;
   fab.setAttribute('aria-haspopup', 'dialog'); fab.setAttribute('aria-expanded', 'false');
-  fab.innerHTML = `<span class="ai-fab__icon">${LOGO('ai-logo--mono')}</span><span class="ai-fab__text"><strong>Poser une question</strong><small>Le Limier · données publiques et web</small></span>`;
+  fab.innerHTML = `<span class="ai-fab__icon">${LOGO('ai-logo--mono')}</span><span class="ai-fab__text"><strong>Poser une question</strong><small>La Loupe · données publiques et web</small></span>`;
   const panel = document.createElement('section');
   panel.className = 'ai-panel'; panel.hidden = true;
-  panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Le Limier, agent d’enquête de FranceRoueLibre');
+  panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'La Loupe, agent IA de FranceRoueLibre');
   panel.innerHTML = `
     <header class="ai-head">
-      <div class="ai-head__brand">${LOGO('ai-logo--head')}<div><strong>Le Limier</strong><small>Fouille les données et le web</small></div><span class="ai-demo" hidden>Démo</span></div>
+      <div class="ai-head__brand">${LOGO('ai-logo--head')}<div><strong>La Loupe</strong><small>Fouille les données et le web</small></div><span class="ai-demo" hidden>Démo</span></div>
       <button type="button" class="ai-icon" data-act="history" title="Historique" aria-label="Historique">${ICON.history}</button>
       <button type="button" class="ai-icon" data-act="new" title="Nouvelle discussion" aria-label="Nouvelle discussion">${ICON.plus}</button>
       <button type="button" class="ai-icon" data-act="close" title="Fermer" aria-label="Fermer">${ICON.close}</button>
@@ -138,7 +138,7 @@
   const hist = $('.ai-hist'), histList = $('.ai-hist__list'), live = $('.ai-sr'), headLogo = $('.ai-logo--head');
 
   // ------------------------------------------------------------------------------------------------ model switch
-  /* One small button cycles Auto (the Limier's logo: the first model available answers, the other takes over if it
+  /* One small button cycles Auto (the Loupe's logo: the first model available answers, the other takes over if it
      fails) → Gemini → Claude, skipping a model that cannot answer now. */
   const modes = () => ['auto', ...status.providers.filter(p => p.available).map(p => p.id)];
   const modeIcon = p => p === 'auto' || !logoOK[p] ? (p === 'auto' ? LOGO() : `<i class="ai-model__dot ai-model__dot--${esc(p)}"></i>`) : `<img src="${PROVIDERS[p].img}" alt="">`;
@@ -349,7 +349,7 @@
         }
       }
     } catch (e) {
-      m.error = e.message || 'Le Limier est injoignable.';
+      m.error = e.message || 'La Loupe est injoignable.';
     }
     m.running = false;
     m.steps.forEach(s => { if (!s.done) Object.assign(s, { done: true, ok: false }); });

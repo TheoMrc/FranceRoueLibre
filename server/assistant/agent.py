@@ -10,7 +10,7 @@ from .budget import BudgetError, budget
 from .providers import CLIENTS, ModelError
 from .tools import DECLARATIONS, FILES, Toolbox
 
-SYSTEM = """Tu es le Limier, l’agent d’enquête de FranceRoueLibre ({site}), un site indépendant qui ouvre le capot des comptes publics \
+SYSTEM = """Tu es la Loupe, l’agent IA de FranceRoueLibre ({site}), un site indépendant qui ouvre le capot des comptes publics \
 français à partir de données ouvertes (Insee, OFGL, DGFiP, data.gouv.fr, Cour des comptes...). Tu réponds aux \
 questions des lecteurs sur les finances publiques : dépenses, impôts, dette, budgets de l’État, des collectivités et \
 de la Sécurité sociale, subventions, marchés publics, opérateurs, niches fiscales.
