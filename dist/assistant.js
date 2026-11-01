@@ -1,39 +1,67 @@
 /* AI assistant panel, on every page (server/assistant_api.py behind /api/assistant/). It only shows when the server
    says a model can answer: on the static preview without the API, or once the budgets are spent, nothing appears.
-   The conversation stays in this tab (sessionStorage) and is sent with each question; the server keeps nothing. */
+   Conversations are kept in this browser (localStorage, « Historique ») and sent with each question; the server keeps
+   nothing. Test the animations without spending a token: assistant_demo.bat (or assistant_api.py --fake).
+   Official logos of the models, if present, are shown in the model switch: dist/img/ai/gemini.svg and claude.svg. */
 (() => {
   const API = 'api/assistant/';
-  const KEY = 'frl-assistant';
+  const STORE = 'frl-assistant-v2', UI = 'frl-assistant-ui';
+  const MAX_CONVS = 30, MAX_MSGS = 40;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const PROVIDERS = { gemini: { label: 'Gemini', img: './img/ai/gemini.svg' }, claude: { label: 'Claude', img: './img/ai/claude.svg' } };
   const EXAMPLES = [
     'Combien Rennes dépense-t-elle en frais de personnel, et par habitant ?',
     'Quelles subventions publiques pour la vidéoprotection, et à qui ?',
     'Combien coûtent les niches fiscales en 2026 ?',
   ];
-  let state = { messages: [], open: false, provider: 'auto' };
-  let status = null, busy = null;
+  let status = null, busy = null, provider = 'auto', store = { v: 1, convs: [], current: null };
+  const logoOK = {};
 
+  // ------------------------------------------------------------------------------------------------ helpers
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const load = () => { try { Object.assign(state, JSON.parse(sessionStorage.getItem(KEY) || '{}')); } catch { /* private mode */ } };
-  const save = () => { try { sessionStorage.setItem(KEY, JSON.stringify({ ...state, messages: state.messages.slice(-20) })); } catch { /* full or blocked */ } };
+  const read = (s, k, d) => { try { return JSON.parse(s.getItem(k)) ?? d; } catch { return d; } };
+  const write = (s, k, v) => { try { s.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const label = p => PROVIDERS[p]?.label || p;
+  const when = t => {
+    const d = (Date.now() - t) / 1000;
+    if (d < 60) return 'à l’instant';
+    if (d < 3600) return `il y a ${Math.round(d / 60)} min`;
+    if (d < 86400) return `il y a ${Math.round(d / 3600)} h`;
+    return new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  };
 
-  /* Answers use a small subset of Markdown: paragraphs, lists, **bold**, [links](https://…). Everything is escaped
-     first, and only http(s) or site-relative links become anchors. */
+  /* The logo: a hexagonal speech bubble drawn in one stroke, a magnifying glass, a spark in the lens. Its parts are
+     animated by assistant.css (thinking, writing, idle). Colours come from the shared gradient defined below. */
+  const LOGO = (cls = '') => `<svg class="ai-logo ${cls}" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path class="l-bubble" pathLength="100" d="M24 4L41 14V34L24 44L16.5 39.6L6 45.5L10.8 36.2L7 34V14Z"/><g class="l-lens"><circle cx="22" cy="21" r="8.5"/><path d="M28.3 27.3L33.3 32.3"/></g><path class="l-spark" d="M22 15.6Q22.8 20.2 27.4 21Q22.8 21.8 22 26.4Q21.2 21.8 16.6 21Q21.2 20.2 22 15.6Z"/></svg>`;
+  const DEFS = '<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><linearGradient id="ai-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#0e7490"/><stop offset="1" stop-color="#2563eb"/></linearGradient><linearGradient id="ai-grad-dark" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#2cc2dc"/><stop offset="1" stop-color="#5b8ef7"/></linearGradient></defs></svg>';
+  const ICON = {
+    history: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    send: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    stop: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></svg>',
+    back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  };
+  const provBadge = (p, text = label(p)) => p ? `<span class="ai-prov ai-prov--${esc(p)}">${logoOK[p] ? `<img src="${PROVIDERS[p].img}" alt="">` : '<i aria-hidden="true"></i>'}<span>${esc(text)}</span></span>` : '';
+
+  /* Answers use a small subset of Markdown: paragraphs, lists, **bold**, *italic*, [links](https://…). Everything is
+     escaped first, and only http(s) or site-relative links become anchors. */
   function inline(text) {
     let s = esc(text);
-    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    s = s.replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/|\.\/)?[^\s)]+)\)/g, (m, label, url) => {
-      if (/^(javascript|data|vbscript):/i.test(url.replace(/&amp;/g, '&'))) return label;
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/(^|[\s(])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
+    s = s.replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/|\.\/)?[^\s)]+)\)/g, (m, text, url) => {
+      if (/^(javascript|data|vbscript):/i.test(url.replace(/&amp;/g, '&'))) return text;
       const ext = /^https?:/i.test(url) && !/^https?:\/\/(www\.)?francerouelibre\.fr/i.test(url);
-      return `<a href="${url}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''}>${label}</a>`;
+      return `<a href="${url}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''}>${text}</a>`;
     });
-    s = s.replace(/(^|[\s(])(https?:\/\/[^\s<)]+[^\s<).,;:!?])/g, '$1<a href="$2" target="_blank" rel="noopener noreferrer">$2</a>');
-    return s;
+    return s.replace(/(^|[\s(])(https?:\/\/[^\s<)]+[^\s<).,;:!?])/g, '$1<a href="$2" target="_blank" rel="noopener noreferrer">$2</a>');
   }
   function markdown(text) {
     const out = [];
-    let list = null;
-    const flush = () => { if (list) { out.push(`<${list.tag}>${list.items.map(i => `<li>${inline(i)}</li>`).join('')}</${list.tag}>`); list = null; } };
-    let para = [];
+    let list = null, para = [];
+    const flushList = () => { if (list) { out.push(`<${list.tag}>${list.items.map(i => `<li>${inline(i)}</li>`).join('')}</${list.tag}>`); list = null; } };
     const flushPara = () => { if (para.length) { out.push(`<p>${inline(para.join(' '))}</p>`); para = []; } };
     for (const raw of String(text || '').split('\n')) {
       const line = raw.trim();
@@ -41,128 +69,329 @@
       if (bullet || num) {
         flushPara();
         const tag = bullet ? 'ul' : 'ol';
-        if (!list || list.tag !== tag) { flush(); list = { tag, items: [] }; }
+        if (!list || list.tag !== tag) { flushList(); list = { tag, items: [] }; }
         list.items.push((bullet || num)[1]);
-      } else if (!line) { flushPara(); flush(); }
-      else if (head) { flushPara(); flush(); out.push(`<p><strong>${inline(head[1])}</strong></p>`); }
-      else { flush(); para.push(line); }
+      } else if (!line) { flushPara(); flushList(); }
+      else if (head) { flushPara(); flushList(); out.push(`<p class="ai-h">${inline(head[1])}</p>`); }
+      else { flushList(); para.push(line); }
     }
-    flushPara(); flush();
+    flushPara(); flushList();
     return out.join('');
+  }
+
+  // ------------------------------------------------------------------------------------------------ storage
+  function loadStore() {
+    const s = read(localStorage, STORE, null);
+    if (s && Array.isArray(s.convs)) store = { v: 1, convs: s.convs.filter(c => c && Array.isArray(c.messages)), current: s.current || null };
+    provider = read(localStorage, UI, {}).provider || 'auto';
+  }
+  function saveStore() {
+    store.convs = store.convs.filter(c => c.messages.length).sort((a, b) => b.updated - a.updated).slice(0, MAX_CONVS);
+    store.convs.forEach(c => { c.messages = c.messages.slice(-MAX_MSGS); });
+    if (!write(localStorage, STORE, store) && store.convs.length > 1) { store.convs.pop(); saveStore(); }
+  }
+  const current = () => store.convs.find(c => c.id === store.current) || null;
+  function startConv(question) {
+    const c = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), title: question.slice(0, 90), updated: Date.now(), messages: [] };
+    store.convs.unshift(c); store.current = c.id;
+    return c;
   }
 
   // ------------------------------------------------------------------------------------------------ elements
   const css = document.createElement('link');
   css.rel = 'stylesheet'; css.href = './assistant.css';
+  const defs = document.createElement('div');
+  defs.innerHTML = DEFS;
   const fab = document.createElement('button');
   fab.type = 'button'; fab.className = 'ai-fab'; fab.hidden = true;
-  fab.setAttribute('aria-haspopup', 'dialog');
-  fab.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z" fill="currentColor"/><path d="M18.5 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="currentColor"/></svg><span>Poser une question</span>';
+  fab.setAttribute('aria-haspopup', 'dialog'); fab.setAttribute('aria-expanded', 'false');
+  fab.innerHTML = `<span class="ai-fab__icon">${LOGO('ai-logo--mono')}</span><span class="ai-fab__text"><strong>Poser une question</strong><small>Assistant IA · données publiques</small></span>`;
   const panel = document.createElement('section');
   panel.className = 'ai-panel'; panel.hidden = true;
   panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Assistant IA de FranceRoueLibre');
   panel.innerHTML = `
     <header class="ai-head">
-      <div><strong>Assistant IA</strong><small>Données du site et recherche web</small></div>
-      <label class="ai-model"><span class="ai-sr">Modèle</span><select></select></label>
-      <button type="button" class="ai-icon" data-act="reset" title="Nouvelle discussion" aria-label="Nouvelle discussion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      <button type="button" class="ai-icon" data-act="close" title="Fermer" aria-label="Fermer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <div class="ai-head__brand">${LOGO('ai-logo--head')}<div><strong>Assistant</strong><small>Données publiques et web</small></div><span class="ai-demo" hidden>Démo</span></div>
+      <button type="button" class="ai-icon" data-act="history" title="Historique" aria-label="Historique">${ICON.history}</button>
+      <button type="button" class="ai-icon" data-act="new" title="Nouvelle discussion" aria-label="Nouvelle discussion">${ICON.plus}</button>
+      <button type="button" class="ai-icon" data-act="close" title="Fermer" aria-label="Fermer">${ICON.close}</button>
     </header>
-    <div class="ai-log" aria-live="polite"></div>
+    <div class="ai-models" role="radiogroup" aria-label="Modèle"><span class="ai-models__thumb" aria-hidden="true"></span></div>
+    <div class="ai-body">
+      <div class="ai-log"></div>
+      <aside class="ai-hist" aria-label="Historique des discussions" hidden>
+        <div class="ai-hist__head"><button type="button" class="ai-icon" data-act="hist-close" aria-label="Retour">${ICON.back}</button><strong>Historique</strong><button type="button" class="ai-link" data-act="hist-clear">Tout effacer</button></div>
+        <p class="ai-hist__note">Gardé dans ce navigateur seulement.</p>
+        <ul class="ai-hist__list"></ul>
+      </aside>
+    </div>
     <form class="ai-form">
-      <p class="ai-note">Réponses rédigées par une IA (Gemini ou Claude) : elle peut se tromper, vérifiez avec les sources. Vos questions sont envoyées à Google ou à Anthropic : n’y mettez pas d’informations personnelles. <a href="mentions.html#assistant">En savoir plus</a></p>
       <div class="ai-row">
         <textarea rows="1" placeholder="Votre question sur l’argent public…" aria-label="Votre question"></textarea>
-        <button type="submit" class="ai-send" aria-label="Envoyer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button type="submit" class="ai-send" aria-label="Envoyer">${ICON.send}</button>
       </div>
-    </form>`;
-  const log = panel.querySelector('.ai-log'), form = panel.querySelector('.ai-form'), input = panel.querySelector('textarea');
-  const select = panel.querySelector('select'), send = panel.querySelector('.ai-send');
+      <p class="ai-note">Réponses rédigées par une IA, à vérifier avec les sources. Vos questions sont envoyées à Google ou à Anthropic : n’y mettez pas d’informations personnelles. <a href="mentions.html#assistant">En savoir plus</a></p>
+    </form>
+    <p class="ai-sr" aria-live="polite"></p>`;
+  const $ = s => panel.querySelector(s);
+  const log = $('.ai-log'), form = $('.ai-form'), input = $('textarea'), send = $('.ai-send'), models = $('.ai-models');
+  const hist = $('.ai-hist'), histList = $('.ai-hist__list'), live = $('.ai-sr'), headLogo = $('.ai-logo--head');
 
-  // ------------------------------------------------------------------------------------------------ rendering
-  function stepsHtml(steps, running) {
-    if (!steps?.length) return running ? '<p class="ai-wait">Réflexion…</p>' : '';
-    const items = steps.map(s => `<li class="${s.done ? (s.ok ? 'is-ok' : 'is-bad') : 'is-run'}">${esc(s.label)}${s.summary ? ` <small>${esc(s.summary)}</small>` : ''}</li>`).join('');
-    const last = steps[steps.length - 1];
-    return `<details class="ai-steps"${running ? ' open' : ''}><summary>${running ? esc(last.label) + '…' : `${steps.length} étape${steps.length > 1 ? 's' : ''} de recherche`}</summary><ol>${items}</ol></details>`;
+  // ------------------------------------------------------------------------------------------------ model switch
+  function renderModels() {
+    const opts = [['auto', 'Auto', null], ...status.providers.map(p => [p.id, p.label, p])];
+    models.querySelectorAll('button').forEach(b => b.remove());
+    for (const [id, text, p] of opts) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.dataset.p = id; b.setAttribute('role', 'radio');
+      b.innerHTML = id === 'auto' ? `${LOGO('ai-logo--tiny')}<span>${text}</span>` : provBadge(id, text);
+      if (p && !p.available) { b.disabled = true; b.title = `${text} : ${p.reason}`; }
+      else if (p?.until) b.title = `${text} : disponible jusqu’au ${new Date(p.until).toLocaleDateString('fr-FR')}`;
+      else if (id === 'auto') b.title = 'Le premier modèle disponible répond, l’autre prend le relais en cas de panne';
+      b.addEventListener('click', () => { provider = id; write(localStorage, UI, { provider }); syncModels(true); });
+      models.appendChild(b);
+    }
+    syncModels(false);
   }
-  function messageHtml(m, i) {
-    if (m.role === 'user') return `<div class="ai-msg ai-msg--user">${esc(m.text).replace(/\n/g, '<br>')}</div>`;
-    const sources = (m.sources || []).length ? `<div class="ai-sources"><span>Sources web :</span>${m.sources.map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>`).join('')}</div>` : '';
-    const searches = (m.searches || []).length ? `<div class="ai-sources ai-searches"><span>Recherches Google :</span>${m.searches.map(q => `<a href="https://www.google.com/search?q=${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">${esc(q)}</a>`).join('')}</div>` : '';
-    const meta = m.label ? `<div class="ai-meta">${esc(m.label)}${m.s ? ` · ${Math.round(m.s)} s` : ''}</div>` : '';
-    const body = m.error ? `<p class="ai-error">${esc(m.error)}</p>` : markdown(m.text);
-    return `<div class="ai-msg ai-msg--bot" data-i="${i}">${stepsHtml(m.steps, m.running)}${m.running ? '' : body + sources + searches + meta}</div>`;
+  function syncModels(animate) {
+    let on = models.querySelector(`button[data-p="${provider}"]:not(:disabled)`);
+    if (!on) { provider = 'auto'; on = models.querySelector('button[data-p="auto"]'); }
+    models.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b === on)));
+    const thumb = models.querySelector('.ai-models__thumb');
+    thumb.classList.toggle('no-anim', !animate);
+    requestAnimationFrame(() => { thumb.style.width = on.offsetWidth + 'px'; thumb.style.transform = `translateX(${on.offsetLeft}px)`; });
   }
-  function render() {
-    const intro = `<div class="ai-msg ai-msg--bot ai-intro"><p>Bonjour ! Je cherche dans les données publiées sur ce site (comptes des collectivités, budget de l’État, impôts, subventions, marchés publics…) et sur le web pour répondre à vos questions.</p><div class="ai-examples">${EXAMPLES.map(e => `<button type="button">${esc(e)}</button>`).join('')}</div></div>`;
-    log.innerHTML = intro + state.messages.map(messageHtml).join('');
-    log.scrollTop = log.scrollHeight;
-    const running = !!busy;
-    send.classList.toggle('is-stop', running);
-    send.setAttribute('aria-label', running ? 'Arrêter' : 'Envoyer');
-    send.innerHTML = running ? '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></svg>'
-      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // ------------------------------------------------------------------------------------------------ messages
+  const nearBottom = () => log.scrollHeight - log.scrollTop - log.clientHeight < 90;
+  const stick = was => { if (was) log.scrollTop = log.scrollHeight; };
+
+  function introHtml() {
+    return `<div class="ai-intro">${LOGO('ai-logo--intro')}<p><strong>Une question sur l’argent public ?</strong><br>Je cherche dans les données publiées sur ce site (comptes des collectivités, budget de l’État, impôts, subventions, marchés publics…) et sur le web, puis je réponds avec mes sources.</p><div class="ai-examples">${EXAMPLES.map((e, i) => `<button type="button" style="--i:${i}">${esc(e)}</button>`).join('')}</div></div>`;
   }
-  function openPanel(open) {
-    state.open = open; save();
-    panel.hidden = !open; fab.hidden = open || !status?.enabled;
-    fab.setAttribute('aria-expanded', String(open));
-    if (open) { render(); setTimeout(() => input.focus(), 30); } else fab.focus();
+  function userEl(m) {
+    const el = document.createElement('div');
+    el.className = 'ai-msg ai-msg--user';
+    el.innerHTML = `<div class="ai-bubble">${esc(m.text).replace(/\n/g, '<br>')}</div>`;
+    return el;
+  }
+  /* One answer. Built once, then updated piece by piece while it runs, so the animations are not restarted. */
+  function botView(m) {
+    const el = document.createElement('div');
+    el.className = 'ai-msg ai-msg--bot';
+    el.innerHTML = `<div class="ai-av">${LOGO()}<span class="ai-av__p" title=""></span></div><div class="ai-card"><div class="ai-notes"></div><details class="ai-steps" hidden><summary></summary><ol></ol></details><div class="ai-think" hidden></div><div class="ai-text"></div><div class="ai-extra"></div><div class="ai-foot"></div></div>`;
+    const q = s => el.querySelector(s);
+    const v = {
+      el,
+      setRunning(on) { el.classList.toggle('is-running', on); },
+      think(text) {
+        const t = q('.ai-think');
+        el.classList.toggle('is-thinking', !!text);
+        if (!text) { t.hidden = true; return; }
+        t.hidden = false;
+        t.innerHTML = `<span class="ai-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ai-shimmer">${esc(text)}</span>`;
+      },
+      step(s, fresh) {
+        const d = q('.ai-steps');
+        d.hidden = false;
+        const li = document.createElement('li');
+        li.className = s.done ? (s.ok ? 'is-ok' : 'is-bad') : 'is-run';
+        if (!fresh) li.classList.add('no-anim');
+        li.innerHTML = `<span class="ai-step__label">${esc(s.label)}</span>${s.summary ? `<small>${esc(s.summary)}</small>` : ''}`;
+        q('.ai-steps ol').appendChild(li);
+        v.summary(m.running);
+      },
+      stepDone(s) {
+        const li = q('.ai-steps ol li:last-child');
+        if (!li) return;
+        li.className = s.ok ? 'is-ok' : 'is-bad';
+        if (s.summary) li.insertAdjacentHTML('beforeend', `<small>${esc(s.summary)}</small>`);
+      },
+      summary(running) {
+        const n = m.steps.length, d = q('.ai-steps');
+        d.querySelector('summary').textContent = running ? 'Recherches en cours' : `${n} étape${n > 1 ? 's' : ''} de recherche`;
+        d.open = !!running;
+      },
+      note(n) {
+        if (!n || !PROVIDERS[n.from] || !PROVIDERS[n.to]) return;
+        q('.ai-notes').insertAdjacentHTML('beforeend', `<p class="ai-switch"><strong>${esc(label(n.from))}</strong> n’a pas pu répondre. <strong>${esc(label(n.to))}</strong> prend le relais.</p>`);
+      },
+      provider(p) {
+        const av = q('.ai-av'), b = q('.ai-av__p');
+        if (b.dataset.p === p) return;
+        b.dataset.p = p || ''; b.title = p ? label(p) : '';
+        b.innerHTML = p && logoOK[p] ? `<img src="${PROVIDERS[p].img}" alt="">` : '';
+        av.classList.remove('is-flip'); void av.offsetWidth; av.classList.add('is-flip');
+      },
+      text(html) { q('.ai-text').innerHTML = html; },
+      async type(text) {
+        const box = q('.ai-text');
+        if (reduce.matches || !text) { box.innerHTML = markdown(text); return; }
+        el.classList.add('is-writing');
+        const total = text.length, dur = Math.min(4200, Math.max(700, total * 10)), t0 = performance.now();
+        await new Promise(done => {
+          const tick = now => {
+            const k = Math.min(1, (now - t0) / dur), was = nearBottom();
+            let n = Math.ceil(total * (1 - Math.pow(1 - k, 1.6)));
+            const space = text.indexOf(' ', n);
+            if (k < 1 && space > 0 && space - n < 12) n = space;  // whole words only
+            box.innerHTML = markdown(text.slice(0, n));
+            if (k < 1) {
+              const last = box.querySelector('p:last-child, li:last-child') || box;
+              last.insertAdjacentHTML('beforeend', '<span class="ai-caret" aria-hidden="true"></span>');
+              stick(was);
+              requestAnimationFrame(tick);
+            } else { stick(was); done(); }
+          };
+          requestAnimationFrame(tick);
+        });
+        el.classList.remove('is-writing');
+      },
+      finish() {
+        v.think(null); v.setRunning(false);
+        if (m.steps.length) v.summary(false);
+        const parts = [];
+        if (m.sources?.length) parts.push(`<div class="ai-chips"><span>Sources web</span>${m.sources.map((s, i) => `<a style="--i:${i}" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>`).join('')}</div>`);
+        if (m.searches?.length) parts.push(`<div class="ai-chips ai-chips--search"><span>Recherches Google</span>${m.searches.map((s, i) => `<a style="--i:${i + 2}" href="https://www.google.com/search?q=${encodeURIComponent(s)}" target="_blank" rel="noopener noreferrer">${esc(s)}</a>`).join('')}</div>`);
+        q('.ai-extra').innerHTML = parts.join('');
+        q('.ai-foot').innerHTML = m.provider ? `${provBadge(m.provider, m.label || label(m.provider))}${m.s ? `<span>${Math.round(m.s)} s</span>` : ''}` : '';
+        if (m.error) q('.ai-text').innerHTML = `<p class="ai-error">${esc(m.error)}</p>`;
+      },
+    };
+    if (m.provider) v.provider(m.provider);
+    return v;
+  }
+  function staticBot(m) {
+    const v = botView(m);
+    v.el.classList.add('no-anim');
+    (m.notes || []).forEach(n => v.note(n));
+    (m.steps || []).forEach(s => v.step({ ...s, done: true }, false));
+    v.text(markdown(m.text));
+    v.finish();
+    return v.el;
+  }
+  function renderLog() {
+    const c = current();
+    log.innerHTML = '';
+    if (!c || !c.messages.length) { log.innerHTML = introHtml(); return; }
+    for (const m of c.messages) log.appendChild(m.role === 'user' ? userEl(m) : staticBot(m));
+    log.querySelectorAll('.ai-msg').forEach(e => e.classList.add('no-anim'));
+    log.style.scrollBehavior = 'auto';
+    requestAnimationFrame(() => { log.scrollTop = log.scrollHeight; log.style.scrollBehavior = ''; });
   }
 
   // ------------------------------------------------------------------------------------------------ asking
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  function setBusy(on) {
+    panel.classList.toggle('is-busy', on);
+    fab.classList.toggle('is-busy', on);
+    send.classList.toggle('is-stop', on);
+    send.setAttribute('aria-label', on ? 'Arrêter' : 'Envoyer');
+    send.innerHTML = on ? ICON.stop : ICON.send;
+    models.querySelectorAll('button').forEach(b => { b.inert = on; });
+  }
   async function ask(text) {
     text = text.trim();
     if (!text || busy) return;
     const limit = status?.limits?.question_chars || 1500;
     if (text.length > limit) text = text.slice(0, limit);
-    state.messages.push({ role: 'user', text });
-    const bot = { role: 'assistant', text: '', steps: [], running: true };
-    state.messages.push(bot);
+    const c = current() || startConv(text);
+    const intro = log.querySelector('.ai-intro');
+    if (intro) intro.remove();
+    const history = c.messages.filter(m => !m.error && m.text).map(m => ({ role: m.role, text: m.text }));
+    history.push({ role: 'user', text });
+    c.messages.push({ role: 'user', text }); c.updated = Date.now(); saveStore();
+    log.appendChild(userEl({ text }));
+    send.classList.add('is-sent');
+    setTimeout(() => send.classList.remove('is-sent'), 450);
     input.value = ''; autosize();
-    busy = { cancel: false, job: null };
-    render();
-    const history = state.messages.filter(m => !m.running && !m.error && m.text).map(m => ({ role: m.role, text: m.text }));
+    const m = { role: 'assistant', text: '', steps: [], notes: [], running: true, provider: null };
+    const v = botView(m);
+    v.setRunning(true); v.think('Réflexion');
+    log.appendChild(v.el); log.scrollTop = log.scrollHeight;
+    busy = { job: null };
+    setBusy(true);
     try {
       const r = await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history, provider: state.provider }) });
+        body: JSON.stringify({ messages: history.slice(-11), provider }) });
       const data = await r.json().catch(() => ({}));
       if (!r.ok || !data.job) throw new Error(data.error || `Erreur ${r.status}`);
       busy.job = data.job;
       let after = 0, fails = 0;
       for (;;) {
-        await sleep(800);
+        await sleep(650);
         let j;
         try {
           const res = await fetch(`${API}job/${data.job}?after=${after}`);
           j = await res.json();
           if (!res.ok) throw new Error(j.error || `Erreur ${res.status}`);
           fails = 0;
-        } catch (e) { if (++fails > 5) throw e; continue; }
+        } catch (e) { if (++fails > 6) throw e; continue; }
         after = j.next;
+        const was = nearBottom();
         for (const ev of j.events) {
-          if (ev.type === 'model') bot.label = ev.label;
-          if (ev.type === 'tool_start') bot.steps.push({ label: ev.label });
-          if (ev.type === 'tool_done') Object.assign(bot.steps[bot.steps.length - 1] || {}, { done: true, ok: ev.ok, summary: ev.summary });
+          if (ev.type === 'model') { m.provider = ev.provider; m.label = ev.label; v.provider(ev.provider); }
+          if (ev.type === 'think') v.think(m.steps.length ? 'Analyse des résultats' : 'Réflexion');
+          if (ev.type === 'tool_start') { const s = { label: ev.label }; m.steps.push(s); v.think(null); v.step(s, true); }
+          if (ev.type === 'tool_done') { const s = m.steps[m.steps.length - 1]; if (s) { Object.assign(s, { ok: ev.ok, summary: ev.summary, done: true }); v.stepDone(s); } }
+          if (ev.type === 'switch') {
+            const note = { from: ev.from, to: ev.to };
+            m.notes.push(note); v.note(note);
+          }
         }
+        stick(was);
         if (j.done) {
           const res = j.result || {};
-          Object.assign(bot, { running: false, text: res.reply || '', error: res.error || '', sources: res.sources || [], searches: res.searches || [], label: res.label || bot.label, s: res.s });
+          Object.assign(m, { text: res.reply || '', error: res.error || '', sources: res.sources || [], searches: res.searches || [],
+            label: res.label || m.label, provider: res.provider || m.provider, s: res.s });
           break;
         }
-        render();
       }
     } catch (e) {
-      Object.assign(bot, { running: false, error: e.message || 'Assistant injoignable.' });
+      m.error = e.message || 'Assistant injoignable.';
     }
-    bot.steps.forEach(s => { s.done = true; if (s.ok === undefined) s.ok = false; });
+    m.running = false;
+    m.steps.forEach(s => { if (!s.done) Object.assign(s, { done: true, ok: false }); });
+    v.think(null);
+    if (!m.error) await v.type(m.text);
+    v.finish();
+    if (m.error) v.el.classList.add('has-error');
+    live.textContent = m.error ? `Erreur : ${m.error}` : `Réponse : ${m.text.replace(/[*#[\]]/g, '').slice(0, 600)}`;
+    delete m.running;
+    c.messages.push(m); c.updated = Date.now(); saveStore();
     busy = null;
-    save(); render();
-    if (!state.open) fab.classList.add('has-news');
+    setBusy(false);
+    if (panel.hidden) fab.classList.add('has-news');
   }
 
+  // ------------------------------------------------------------------------------------------------ history
+  function renderHistory() {
+    histList.innerHTML = store.convs.length ? store.convs.map((c, i) => `<li style="--i:${i}"><button type="button" class="ai-hist__open" data-id="${esc(c.id)}"${c.id === store.current ? ' aria-current="true"' : ''}><span>${esc(c.title)}</span><small>${when(c.updated)} · ${c.messages.filter(m => m.role === 'user').length} question(s)</small></button><button type="button" class="ai-icon" data-del="${esc(c.id)}" aria-label="Supprimer cette discussion">${ICON.trash}</button></li>`).join('')
+      : '<li class="ai-hist__empty">Aucune discussion pour l’instant.</li>';
+  }
+  function showHistory(on) {
+    if (busy && on) return;
+    hist.hidden = !on;
+    panel.classList.toggle('has-hist', on);
+    if (on) { renderHistory(); hist.querySelector('button')?.focus(); }
+  }
+
+  // ------------------------------------------------------------------------------------------------ open / close
+  function openPanel(open) {
+    if (open === !panel.hidden) return;
+    write(sessionStorage, UI, { open });
+    if (open) {
+      panel.hidden = false; fab.hidden = true; fab.classList.remove('has-news');
+      panel.classList.remove('is-closing');
+      headLogo.classList.remove('is-drawn'); void headLogo.offsetWidth; headLogo.classList.add('is-drawn');
+      syncModels(false);
+      setTimeout(() => input.focus(), 60);
+    } else {
+      showHistory(false);
+      panel.classList.add('is-closing');
+      setTimeout(() => { panel.hidden = true; panel.classList.remove('is-closing'); fab.hidden = false; fab.focus(); }, reduce.matches ? 0 : 180);
+    }
+    fab.setAttribute('aria-expanded', String(open));
+  }
   function autosize() { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 140) + 'px'; }
 
   form.addEventListener('submit', e => {
@@ -176,13 +405,38 @@
   panel.addEventListener('click', e => {
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'close') openPanel(false);
-    if (act === 'reset' && !busy) { state.messages = []; save(); render(); input.focus(); }
+    if (act === 'new' && !busy) { store.current = null; showHistory(false); renderLog(); input.focus(); }
+    if (act === 'history') showHistory(hist.hidden);
+    if (act === 'hist-close') showHistory(false);
+    if (act === 'hist-clear' && store.convs.length && confirm('Effacer toutes les discussions gardées dans ce navigateur ?')) {
+      store = { v: 1, convs: [], current: null }; saveStore(); renderHistory(); renderLog();
+    }
+    const open = e.target.closest('.ai-hist__open');
+    if (open) { store.current = open.dataset.id; write(localStorage, STORE, store); showHistory(false); renderLog(); }
+    const del = e.target.closest('[data-del]');
+    if (del) {
+      const li = del.closest('li');
+      li.classList.add('is-leaving');
+      setTimeout(() => {
+        store.convs = store.convs.filter(c => c.id !== del.dataset.del);
+        if (store.current === del.dataset.del) { store.current = null; renderLog(); }
+        saveStore(); renderHistory();
+      }, reduce.matches ? 0 : 220);
+    }
   });
-  panel.addEventListener('keydown', e => { if (e.key === 'Escape') openPanel(false); });
-  select.addEventListener('change', () => { state.provider = select.value; save(); });
-  fab.addEventListener('click', () => { fab.classList.remove('has-news'); openPanel(true); });
+  panel.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!hist.hidden) showHistory(false); else openPanel(false); } });
+  fab.addEventListener('click', () => openPanel(true));
+
+  /* The open button folds to its icon while the reader scrolls down a page, and unfolds when they scroll back up. */
+  let lastY = scrollY;
+  addEventListener('scroll', () => {
+    const y = scrollY;
+    if (Math.abs(y - lastY) > 24) { fab.classList.toggle('is-compact', y > lastY && y > 300); lastY = y; }
+  }, { passive: true });
+  addEventListener('resize', () => { if (!panel.hidden) syncModels(false); });
 
   // ------------------------------------------------------------------------------------------------ start
+  const probe = p => new Promise(done => { const i = new Image(); i.onload = () => done(logoOK[p] = true); i.onerror = () => done(false); i.src = PROVIDERS[p].img; });
   async function start() {
     try {
       const ctrl = new AbortController();
@@ -192,17 +446,16 @@
       status = await r.json();
     } catch { return; }
     if (!status?.enabled) return;
-    load();
-    state.messages = state.messages.filter(m => !m.running);
-    const ok = status.providers.filter(p => p.available);
-    select.innerHTML = '<option value="auto">Auto</option>' + ok.map(p => `<option value="${esc(p.id)}">${esc(p.label)}</option>`).join('');
-    if (![...select.options].some(o => o.value === state.provider)) state.provider = 'auto';
-    select.value = state.provider;
-    select.parentElement.hidden = ok.length < 2;
-    input.maxLength = status.limits?.question_chars || 1500;
+    await Promise.all(Object.keys(PROVIDERS).map(probe));
+    loadStore();
     document.head.appendChild(css);
-    document.body.append(fab, panel);
-    if (state.open) openPanel(true); else fab.hidden = false;
+    document.body.append(defs, fab, panel);
+    $('.ai-demo').hidden = !status.demo;
+    input.maxLength = status.limits?.question_chars || 1500;
+    renderModels();
+    renderLog();
+    if (read(sessionStorage, UI, {}).open) openPanel(true);
+    else { fab.hidden = false; fab.classList.add('is-intro'); setTimeout(() => fab.classList.remove('is-intro'), 4000); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

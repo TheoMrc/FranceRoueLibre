@@ -124,7 +124,11 @@ La carte est rendue par MapLibre GL (copie locale dans `dist/vendor/`, licence B
 
 **Plafonds de dépense** (`server/assistant/budget.py`). Claude : 50 € au total. Gemini : 100 € au total et rien après le 17 novembre 2026 (inclus, heure de Paris). Les deux ensemble : 10 € par jour. Avant chaque appel, le pire cas (toute la requête au prix plein, toute la réponse autorisée, le maximum de recherches web) est réservé ; l’appel est refusé s’il pouvait dépasser un plafond, même avec d’autres questions en cours. Le coût réel, calculé à partir des jetons facturés et des prix publiés (1 $ compté pour 1 €, par prudence), est ensuite inscrit dans `spend.jsonl` (heure, modèle, jetons, coût ; jamais la question). Gemini répond en premier tant que ses crédits sont valables, Claude prend le relais. Le verrou de facturation de RevoFlow est repris : aucun appel Vertex AI si le projet n’est pas rattaché au compte de facturation d’essai. Dépenses : `python server/assistant_api.py --usage`.
 
-**Limites pour le public** : 15 questions par heure et 40 par jour et par adresse IP, 500 par jour en tout, 4 en même temps, 1 500 caractères par question, 8 appels au modèle par question ; nginx limite aussi le débit. Les questions ne sont pas enregistrées (voir les mentions légales). Tests : `python -m unittest tests/test_assistant.py`.
+**Limites pour le public** : 15 questions par heure et 40 par jour et par adresse IP, 500 par jour en tout, 4 en même temps, 1 500 caractères par question, 8 appels au modèle par question ; nginx limite aussi le débit. Les questions ne sont pas enregistrées par le serveur ; les discussions sont gardées dans le navigateur du lecteur (historique, 30 au plus). Tests : `python -m unittest tests/test_assistant.py`.
+
+**Tester l’interface sans dépenser** : `assistant_demo.bat` (ou `python server/assistant_api.py --fake`) remplace Gemini et Claude par de faux modèles (`server/assistant/fake.py`) qui passent par la vraie boucle et les vrais outils locaux, avec des délais réalistes, sans aucun appel réseau. Des mots dans la question choisissent un scénario : « erreur » (Gemini échoue, Claude prend le relais), « panne », « long », « commune » ou « ville » suivi d’un nom, « web ». Le panneau affiche alors un badge « Démo ».
+
+**Logos des modèles** : le sélecteur Auto / Gemini / Claude affiche les logos officiels s’ils sont déposés dans `dist/img/ai/gemini.svg` et `dist/img/ai/claude.svg` (kits presse de Google et d’Anthropic, selon leurs règles d’usage) ; sinon une pastille de couleur.
 
 ### Comptes publics nationaux
 
