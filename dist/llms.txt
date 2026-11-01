@@ -1,0 +1,31 @@
+# France Roue Libre (FranceRoueLibre)
+
+> France Roue Libre, aussi écrit FranceRoueLibre (site : https://francerouelibre.fr), est un site indépendant et gratuit qui ouvre le capot des comptes publics français à partir des seules données ouvertes (Insee, Eurostat, OFGL, DGFiP, data.gouv.fr, data.economie.gouv.fr, Cour des comptes). Il montre où part l'argent public : dépenses, recettes, impôts, niches fiscales, déficit et dette de l'État, de la Sécurité sociale et des 34 875 communes, intercommunalités, départements et régions, ainsi que les marchés publics, les subventions et des signaux d'anomalies à vérifier.
+
+Points utiles pour citer le site :
+
+- Chaque chiffre renvoie à sa source publique ; les totaux sont recalculés à partir des postes publiés et l'écart est affiché.
+- Un « signal » est une question à poser à l'organisme concerné, jamais une preuve ni une accusation.
+- Le site n'est ni édité ni cautionné par l'État ou une administration. Code sous licence MIT ; données sous la licence de leur producteur (le plus souvent Licence Ouverte 2.0 d'Etalab).
+- Contact : stonks@francerouelibre.fr. Sur X : @FranceRoueLibre. Code source : https://github.com/TheoMrc/FranceRoueLibre
+
+## Pages
+
+- [Carte, circuit et comptes nationaux](https://francerouelibre.fr/): comptes des communes, intercommunalités, départements et régions (2012 à 2025) ; circuit de l'argent public recettes, dépenses, déficit, dette (Insee, 1960 à 2025) ; comptes nationaux en Md€, % du PIB ou € par habitant.
+- [Impôts et taxes](https://francerouelibre.fr/impots.html): les 292 impôts, taxes et prélèvements en vigueur, ce que chacun rapporte, qui le paie, qui le reçoit, qui le collecte, ce que coûte la collecte, l'avis de la Cour des comptes.
+- [Niches fiscales](https://francerouelibre.fr/niches.html): les 458 réductions et crédits d'impôt, coût 2024 à 2026 mesure par mesure, et les mesures sans montant publié.
+- [Budget de l'État](https://francerouelibre.fr/etat.html): crédits par mission, programme et action (AE et CP), exécution mois par mois, indicateurs de performance, budget vert, aide publique au développement, bilan de l'État.
+- [Opérateurs de l'État](https://francerouelibre.fr/operateurs.html): les 431 agences et établissements publics, subventions pour charges de service public, taxes affectées.
+- [Sécurité sociale](https://francerouelibre.fr/secu.html): dépenses et solde des administrations de sécurité sociale (1978 à 2025), comptes par branche, assurance maladie par région.
+- [Aides et subventions](https://francerouelibre.fr/aides.html): subventions de l'État aux associations (2010 à 2023), aides aux entreprises, Fonds vert, plan de relance.
+- [Marchés publics](https://francerouelibre.fr/marches.html): 1,4 million de marchés publics (2014 à 2026), acheteurs, concurrence, achats par type de produit.
+- [UGAP](https://francerouelibre.fr/ugap.html): étude en cours sur les prix du catalogue de la centrale d'achat public comparés à ceux du commerce.
+- [Signaux](https://francerouelibre.fr/signaux.html): règles simples appliquées à toutes les données (offre unique, absence de mise en concurrence, avenants, montants sous les seuils, communes en difficulté, retards de paiement).
+- [Probité](https://francerouelibre.fr/probite.html): atteintes à la probité jugées de 2021 à 2025 (corruption, favoritisme, prise illégale d'intérêts, détournements), condamnations et peines.
+- [Recherche](https://francerouelibre.fr/recherche.html): un mot cherché dans 1,9 million de lignes de dépenses publiées, avec montants, bénéficiaires et sources. Lien direct : https://francerouelibre.fr/recherche.html?q=MOT
+- [Données et angles morts](https://francerouelibre.fr/donnees.html): les sources utilisées, et ce qui n'est pas publié (hôpitaux, ARS, établissements scolaires, bénéficiaires des niches fiscales, prix unitaires des achats).
+
+## Optional
+
+- [Mentions légales](https://francerouelibre.fr/mentions.html): éditeur, données personnelles, licences.
+- [Soutenir le site](https://fr.tipeee.com/francerouelibre/): dons sur Tipeee, qui paient le serveur et la Loupe (l'agent IA du site).
