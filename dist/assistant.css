@@ -94,16 +94,24 @@
 .ai-link { font: inherit; font-size: .8rem; color: var(--c-teal-600); background: none; border: 0; cursor: pointer; padding: .3rem; }
 
 /* model switch: one small button at the left of the question box, cycling Auto -> Gemini -> Claude */
-.ai-model { position: relative; flex: none; align-self: flex-end; width: 36px; height: 36px; margin: 2px 0 2px 4px; display: grid; place-items: center; border-radius: 10px;
-  border: 1px solid var(--c-line); background: var(--c-bg); cursor: pointer; perspective: 200px; transition: border-color .2s, transform .25s var(--ai-spring); }
-.ai-model:hover { border-color: var(--c-teal-500); transform: translateY(-1px); }
+.ai-model { position: relative; flex: none; align-self: flex-end; width: 38px; height: 38px; margin: 1px 0 1px 3px; display: grid; place-items: center; border-radius: 50%;
+  border: 0; background: transparent; cursor: pointer; perspective: 200px; transition: background .2s, transform .25s var(--ai-spring); }
+.ai-model:hover { background: rgba(8, 145, 178, .1); }
+/* two small arrows under the logo: it can be switched */
+.ai-model__swap { position: absolute; right: 1px; bottom: 1px; width: 13px; height: 13px; border-radius: 50%; display: grid; place-items: center; background: var(--c-surface); color: var(--c-muted); transition: color .2s, transform .4s var(--ai-spring); }
+.ai-model__swap svg { width: 9px; height: 9px; }
+.ai-model:hover .ai-model__swap { color: var(--c-teal-600); transform: rotate(180deg); }
 .ai-model:active { transform: scale(.92); }
 .ai-model:focus-visible { outline: 2px solid var(--c-teal-500); outline-offset: 2px; }
 .ai-model:disabled { opacity: .55; cursor: default; transform: none; }
 .ai-model[hidden] { display: none; }
-.ai-model__icon { display: grid; place-items: center; width: 22px; height: 22px; }
-.ai-model__icon .ai-logo { width: 22px; height: 22px; }
-.ai-model__icon img { width: 20px; height: 20px; object-fit: contain; }
+.ai-model__icon { display: grid; place-items: center; width: 26px; height: 26px; }
+.ai-model__icon .ai-logo { width: 26px; height: 26px; }
+.ai-model__icon img { width: 24px; height: 24px; object-fit: contain; }
+/* the Claude icon sits low in its square (body and legs in the bottom 60 %): lift it to the optical centre */
+.ai-model__icon img[src$="claude.svg"] { transform: translateY(-4.5px); }
+.ai-av__p img[src$="claude.svg"] { transform: translateY(-2px); }
+.ai-prov img[src$="claude.svg"] { transform: translateY(-2.5px); }
 .ai-model__dot { width: 12px; height: 12px; border-radius: 50%; background: #2563eb; }
 .ai-model__dot--claude { background: #d97706; }
 .ai-model.is-switch .ai-model__icon { animation: ai-flip .5s var(--ai-spring); }
@@ -135,9 +143,9 @@
 .ai-bubble { max-width: 85%; padding: .6rem .85rem; border-radius: 16px 16px 4px 16px; background: var(--brand-gradient); color: #fff; overflow-wrap: anywhere; }
 .ai-msg--user:not(.no-anim) .ai-bubble { animation: ai-pop .4s var(--ai-spring) both; transform-origin: 100% 100%; }
 @keyframes ai-pop { from { transform: scale(.7); opacity: 0; } }
-.ai-av { position: relative; flex: none; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--c-surface); border: 1px solid var(--c-line); perspective: 200px; }
-.ai-av .ai-logo { width: 22px; height: 22px; }
-.ai-av__p { position: absolute; right: -5px; bottom: -5px; width: 16px; height: 16px; border-radius: 50%; background: var(--c-bg); border: 1px solid var(--c-line); display: grid; place-items: center; }
+.ai-av { position: relative; flex: none; width: 34px; height: 34px; display: grid; place-items: center; perspective: 200px; }
+.ai-av .ai-logo { width: 34px; height: 34px; }
+.ai-av__p { position: absolute; right: -4px; bottom: -3px; width: 16px; height: 16px; border-radius: 50%; background: var(--c-bg); border: 1px solid var(--c-line); display: grid; place-items: center; }
 .ai-av__p:empty::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #2563eb; }
 .ai-av__p[data-p="claude"]:empty::after { background: #d97706; }
 .ai-av__p[data-p=""] { display: none; }
@@ -147,7 +155,7 @@
 .is-running .ai-av .l-lens { animation: ai-scan 1.6s ease-in-out infinite; }
 .is-running .ai-av .l-spark { animation: ai-throb 1.1s ease-in-out infinite; }
 .is-writing .ai-av .l-spark { animation: ai-spin 1.2s linear infinite; }
-.ai-card { min-width: 0; flex: 1; max-width: calc(100% - 40px); padding: .65rem .85rem; border-radius: 4px 16px 16px 16px; background: var(--c-surface); border: 1px solid var(--c-line); overflow-wrap: anywhere; }
+.ai-card { min-width: 0; flex: 1; max-width: calc(100% - 42px); padding: .65rem .85rem; border-radius: 4px 16px 16px 16px; background: var(--c-surface); border: 1px solid var(--c-line); overflow-wrap: anywhere; }
 .ai-card:empty { display: none; }
 .ai-text p { margin: 0 0 .55rem; }
 .ai-text > :last-child { margin-bottom: 0; }

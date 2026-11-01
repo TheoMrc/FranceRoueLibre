@@ -126,7 +126,7 @@
     </div>
     <form class="ai-form">
       <div class="ai-row">
-        <button type="button" class="ai-model"><span class="ai-model__icon"></span><span class="ai-model__tip" aria-hidden="true"></span></button>
+        <button type="button" class="ai-model"><span class="ai-model__icon"></span><span class="ai-model__swap" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M2 4.5h7.5L7.5 2.5M10 7.5H2.5l2 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ai-model__tip" aria-hidden="true"></span></button>
         <textarea rows="1" placeholder="Votre question sur l’argent public…" aria-label="Votre question"></textarea>
         <button type="submit" class="ai-send" aria-label="Envoyer">${ICON.send}</button>
       </div>
