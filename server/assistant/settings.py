@@ -83,6 +83,9 @@ DAILY_BUDGET_EUR = _float('ASSISTANT_DAILY_EUR', 10)
 # Prices are in US dollars; 1.0 counts one dollar as one euro, which overestimates the spending (safe side).
 USD_EUR = _float('ASSISTANT_USD_EUR', 1.0)
 # Which provider answers first; the next one takes over when a cap or the date stops it.
+# Never more than 90 $ of Claude in all (all of Théo's API credits), whatever CLAUDE_BUDGET_EUR says.
+CLAUDE_MAX_USD = 90
+CLAUDE_BUDGET_EUR = min(CLAUDE_BUDGET_EUR, CLAUDE_MAX_USD * USD_EUR)
 ORDER = [p for p in _str('ASSISTANT_ORDER', 'gemini,claude').lower().replace(' ', '').split(',') if p in ('gemini', 'claude')]
 
 # ---------------------------------------------------------------- limits of one conversation and of the public
