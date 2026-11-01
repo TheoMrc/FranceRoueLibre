@@ -93,21 +93,30 @@
 .ai-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .ai-link { font: inherit; font-size: .8rem; color: var(--c-teal-600); background: none; border: 0; cursor: pointer; padding: .3rem; }
 
-/* model switch: a sliding thumb under the chosen model */
-.ai-models { position: relative; display: flex; gap: 2px; margin: 0 .9rem .6rem; padding: 3px; border-radius: 12px; background: var(--c-surface); border: 1px solid var(--c-line); }
-.ai-models__thumb { position: absolute; top: 3px; bottom: 3px; left: 0; border-radius: 9px; background: var(--c-bg); box-shadow: 0 1px 3px rgba(13, 27, 42, .14), 0 0 0 1px var(--c-line);
-  transition: transform .4s var(--ai-spring), width .4s var(--ai-spring); }
-.ai-models__thumb.no-anim { transition: none; }
-.ai-models button { position: relative; z-index: 1; flex: 1; display: flex; align-items: center; justify-content: center; gap: .4rem; min-height: 34px;
-  font: 600 .8rem/1 var(--font-body); color: var(--c-muted); background: none; border: 0; border-radius: 9px; cursor: pointer; transition: color .2s; }
-.ai-models button[aria-checked="true"] { color: var(--c-ink); }
-.ai-models button:disabled { opacity: .45; cursor: not-allowed; }
-.ai-models button:focus-visible { outline: 2px solid var(--c-teal-500); }
+/* model switch: one small button at the left of the question box, cycling Auto -> Gemini -> Claude */
+.ai-model { position: relative; flex: none; align-self: flex-end; width: 36px; height: 36px; margin: 2px 0 2px 4px; display: grid; place-items: center; border-radius: 10px;
+  border: 1px solid var(--c-line); background: var(--c-bg); cursor: pointer; perspective: 200px; transition: border-color .2s, transform .25s var(--ai-spring); }
+.ai-model:hover { border-color: var(--c-teal-500); transform: translateY(-1px); }
+.ai-model:active { transform: scale(.92); }
+.ai-model:focus-visible { outline: 2px solid var(--c-teal-500); outline-offset: 2px; }
+.ai-model:disabled { opacity: .55; cursor: default; transform: none; }
+.ai-model[hidden] { display: none; }
+.ai-model__icon { display: grid; place-items: center; width: 22px; height: 22px; }
+.ai-model__icon .ai-logo { width: 22px; height: 22px; }
+.ai-model__icon img { width: 20px; height: 20px; object-fit: contain; }
+.ai-model__dot { width: 12px; height: 12px; border-radius: 50%; background: #2563eb; }
+.ai-model__dot--claude { background: #d97706; }
+.ai-model.is-switch .ai-model__icon { animation: ai-flip .5s var(--ai-spring); }
+.ai-model__tip { position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); padding: .2rem .55rem; border-radius: 999px; white-space: nowrap; pointer-events: none;
+  font: 600 .72rem/1.3 var(--font-body); color: #fff; background: var(--c-ink); opacity: 0; }
+[data-theme="dark"] .ai-model__tip { color: var(--c-bg); }
+.ai-model:hover .ai-model__tip, .ai-model:focus-visible .ai-model__tip { opacity: 1; transition: opacity .15s .3s; }
+.ai-model.is-switch .ai-model__tip { animation: ai-tip 1.3s var(--ai-ease) both; }
+@keyframes ai-tip { 0% { opacity: 0; transform: translate(-50%, 6px); } 15%, 75% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -4px); } }
 .ai-prov { display: inline-flex; align-items: center; gap: .35rem; }
 .ai-prov img { width: 15px; height: 15px; object-fit: contain; }
 .ai-prov i { width: 8px; height: 8px; border-radius: 50%; background: #2563eb; }
 .ai-prov--claude i { background: #d97706; }
-.ai-models button[aria-checked="true"] .ai-prov i { animation: ai-spark-in .45s var(--ai-spring); }
 
 /* ---------------------------------------------------------------------------------------------------- conversation */
 .ai-body { position: relative; flex: 1; min-height: 0; display: flex; border-top: 1px solid var(--c-line); }

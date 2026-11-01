@@ -2,7 +2,7 @@
    says a model can answer: on the static preview without the API, or once the budgets are spent, nothing appears.
    Conversations are kept in this browser (localStorage, « Historique ») and sent with each question; the server keeps
    nothing. Test the animations without spending a token: assistant_demo.bat (or assistant_api.py --fake).
-   Official logos of the models, if present, are shown in the model switch: dist/img/ai/gemini.svg and claude.svg. */
+   The model button shows the models' logos from dist/img/ai/ (gemini.svg, claude.svg: Icons8, credited in mentions.html). */
 (() => {
   const API = 'api/assistant/';
   const STORE = 'frl-assistant-v2', UI = 'frl-assistant-ui';
@@ -105,18 +105,17 @@
   const fab = document.createElement('button');
   fab.type = 'button'; fab.className = 'ai-fab'; fab.hidden = true;
   fab.setAttribute('aria-haspopup', 'dialog'); fab.setAttribute('aria-expanded', 'false');
-  fab.innerHTML = `<span class="ai-fab__icon">${LOGO('ai-logo--mono')}</span><span class="ai-fab__text"><strong>Poser une question</strong><small>Assistant IA · données publiques</small></span>`;
+  fab.innerHTML = `<span class="ai-fab__icon">${LOGO('ai-logo--mono')}</span><span class="ai-fab__text"><strong>Poser une question</strong><small>Le Limier · données publiques et web</small></span>`;
   const panel = document.createElement('section');
   panel.className = 'ai-panel'; panel.hidden = true;
-  panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Assistant IA de FranceRoueLibre');
+  panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Le Limier, agent d’enquête de FranceRoueLibre');
   panel.innerHTML = `
     <header class="ai-head">
-      <div class="ai-head__brand">${LOGO('ai-logo--head')}<div><strong>Assistant</strong><small>Données publiques et web</small></div><span class="ai-demo" hidden>Démo</span></div>
+      <div class="ai-head__brand">${LOGO('ai-logo--head')}<div><strong>Le Limier</strong><small>Fouille les données et le web</small></div><span class="ai-demo" hidden>Démo</span></div>
       <button type="button" class="ai-icon" data-act="history" title="Historique" aria-label="Historique">${ICON.history}</button>
       <button type="button" class="ai-icon" data-act="new" title="Nouvelle discussion" aria-label="Nouvelle discussion">${ICON.plus}</button>
       <button type="button" class="ai-icon" data-act="close" title="Fermer" aria-label="Fermer">${ICON.close}</button>
     </header>
-    <div class="ai-models" role="radiogroup" aria-label="Modèle"><span class="ai-models__thumb" aria-hidden="true"></span></div>
     <div class="ai-body">
       <div class="ai-log"></div>
       <aside class="ai-hist" aria-label="Historique des discussions" hidden>
@@ -127,6 +126,7 @@
     </div>
     <form class="ai-form">
       <div class="ai-row">
+        <button type="button" class="ai-model"><span class="ai-model__icon"></span><span class="ai-model__tip" aria-hidden="true"></span></button>
         <textarea rows="1" placeholder="Votre question sur l’argent public…" aria-label="Votre question"></textarea>
         <button type="submit" class="ai-send" aria-label="Envoyer">${ICON.send}</button>
       </div>
@@ -134,40 +134,42 @@
     </form>
     <p class="ai-sr" aria-live="polite"></p>`;
   const $ = s => panel.querySelector(s);
-  const log = $('.ai-log'), form = $('.ai-form'), input = $('textarea'), send = $('.ai-send'), models = $('.ai-models');
+  const log = $('.ai-log'), form = $('.ai-form'), input = $('textarea'), send = $('.ai-send'), modelBtn = $('.ai-model');
   const hist = $('.ai-hist'), histList = $('.ai-hist__list'), live = $('.ai-sr'), headLogo = $('.ai-logo--head');
 
   // ------------------------------------------------------------------------------------------------ model switch
-  function renderModels() {
-    const opts = [['auto', 'Auto', null], ...status.providers.map(p => [p.id, p.label, p])];
-    models.querySelectorAll('button').forEach(b => b.remove());
-    for (const [id, text, p] of opts) {
-      const b = document.createElement('button');
-      b.type = 'button'; b.dataset.p = id; b.setAttribute('role', 'radio');
-      b.innerHTML = id === 'auto' ? `${LOGO('ai-logo--tiny')}<span>${text}</span>` : provBadge(id, text);
-      if (p && !p.available) { b.disabled = true; b.title = `${text} : ${p.reason}`; }
-      else if (p?.until) b.title = `${text} : disponible jusqu’au ${new Date(p.until).toLocaleDateString('fr-FR')}`;
-      else if (id === 'auto') b.title = 'Le premier modèle disponible répond, l’autre prend le relais en cas de panne';
-      b.addEventListener('click', () => { provider = id; write(localStorage, UI, { provider }); syncModels(true); });
-      models.appendChild(b);
-    }
-    syncModels(false);
+  /* One small button cycles Auto (the Limier's logo: the first model available answers, the other takes over if it
+     fails) → Gemini → Claude, skipping a model that cannot answer now. */
+  const modes = () => ['auto', ...status.providers.filter(p => p.available).map(p => p.id)];
+  const modeIcon = p => p === 'auto' || !logoOK[p] ? (p === 'auto' ? LOGO() : `<i class="ai-model__dot ai-model__dot--${esc(p)}"></i>`) : `<img src="${PROVIDERS[p].img}" alt="">`;
+  function syncModel(animate) {
+    if (!modes().includes(provider)) provider = 'auto';
+    const name = provider === 'auto' ? 'Auto' : label(provider);
+    const info = status.providers.find(p => p.id === provider);
+    const help = provider === 'auto' ? 'le premier modèle disponible répond, l’autre prend le relais en cas de panne'
+      : `${name} répond seul${info?.until ? ` (disponible jusqu’au ${new Date(info.until).toLocaleDateString('fr-FR')})` : ''}`;
+    modelBtn.querySelector('.ai-model__icon').innerHTML = modeIcon(provider);
+    modelBtn.querySelector('.ai-model__tip').textContent = name;
+    modelBtn.dataset.p = provider;
+    modelBtn.title = `Modèle : ${name}, ${help}. Cliquer pour changer.`;
+    modelBtn.setAttribute('aria-label', `Modèle : ${name}. Changer de modèle`);
+    modelBtn.hidden = modes().length < 2;
+    if (animate) { modelBtn.classList.remove('is-switch'); void modelBtn.offsetWidth; modelBtn.classList.add('is-switch'); }
   }
-  function syncModels(animate) {
-    let on = models.querySelector(`button[data-p="${provider}"]:not(:disabled)`);
-    if (!on) { provider = 'auto'; on = models.querySelector('button[data-p="auto"]'); }
-    models.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b === on)));
-    const thumb = models.querySelector('.ai-models__thumb');
-    thumb.classList.toggle('no-anim', !animate);
-    requestAnimationFrame(() => { thumb.style.width = on.offsetWidth + 'px'; thumb.style.transform = `translateX(${on.offsetLeft}px)`; });
-  }
+  modelBtn.addEventListener('click', () => {
+    const list = modes();
+    provider = list[(list.indexOf(provider) + 1) % list.length];
+    write(localStorage, UI, { provider });
+    syncModel(true);
+    live.textContent = `Modèle : ${provider === 'auto' ? 'Auto' : label(provider)}`;
+  });
 
   // ------------------------------------------------------------------------------------------------ messages
   const nearBottom = () => log.scrollHeight - log.scrollTop - log.clientHeight < 90;
   const stick = was => { if (was) log.scrollTop = log.scrollHeight; };
 
   function introHtml() {
-    return `<div class="ai-intro">${LOGO('ai-logo--intro')}<p><strong>Une question sur l’argent public ?</strong><br>Je cherche dans les données publiées sur ce site (comptes des collectivités, budget de l’État, impôts, subventions, marchés publics…) et sur le web, puis je réponds avec mes sources.</p><div class="ai-examples">${EXAMPLES.map((e, i) => `<button type="button" style="--i:${i}">${esc(e)}</button>`).join('')}</div></div>`;
+    return `<div class="ai-intro">${LOGO('ai-logo--intro')}<p><strong>Une question sur l’argent public ?</strong><br>Je fouille les données publiées sur ce site (comptes des collectivités, budget de l’État, impôts, subventions, marchés publics…) et sur le web, puis je réponds avec mes sources.</p><div class="ai-examples">${EXAMPLES.map((e, i) => `<button type="button" style="--i:${i}">${esc(e)}</button>`).join('')}</div></div>`;
   }
   function userEl(m) {
     const el = document.createElement('div');
@@ -287,7 +289,7 @@
     send.classList.toggle('is-stop', on);
     send.setAttribute('aria-label', on ? 'Arrêter' : 'Envoyer');
     send.innerHTML = on ? ICON.stop : ICON.send;
-    models.querySelectorAll('button').forEach(b => { b.inert = on; });
+    modelBtn.disabled = on;
   }
   async function ask(text) {
     text = text.trim();
@@ -347,7 +349,7 @@
         }
       }
     } catch (e) {
-      m.error = e.message || 'Assistant injoignable.';
+      m.error = e.message || 'Le Limier est injoignable.';
     }
     m.running = false;
     m.steps.forEach(s => { if (!s.done) Object.assign(s, { done: true, ok: false }); });
@@ -383,7 +385,6 @@
       panel.hidden = false; fab.hidden = true; fab.classList.remove('has-news');
       panel.classList.remove('is-closing');
       headLogo.classList.remove('is-drawn'); void headLogo.offsetWidth; headLogo.classList.add('is-drawn');
-      syncModels(false);
       setTimeout(() => input.focus(), 60);
     } else {
       showHistory(false);
@@ -433,7 +434,6 @@
     const y = scrollY;
     if (Math.abs(y - lastY) > 24) { fab.classList.toggle('is-compact', y > lastY && y > 300); lastY = y; }
   }, { passive: true });
-  addEventListener('resize', () => { if (!panel.hidden) syncModels(false); });
 
   // ------------------------------------------------------------------------------------------------ start
   const probe = p => new Promise(done => { const i = new Image(); i.onload = () => done(logoOK[p] = true); i.onerror = () => done(false); i.src = PROVIDERS[p].img; });
@@ -452,7 +452,8 @@
     document.body.append(defs, fab, panel);
     $('.ai-demo').hidden = !status.demo;
     input.maxLength = status.limits?.question_chars || 1500;
-    renderModels();
+    if (matchMedia('(max-width: 680px)').matches) input.placeholder = 'Votre question…';
+    syncModel(false);
     renderLog();
     if (read(sessionStorage, UI, {}).open) openPanel(true);
     else { fab.hidden = false; fab.classList.add('is-intro'); setTimeout(() => fab.classList.remove('is-intro'), 4000); }
