@@ -132,6 +132,8 @@
 .ai-intro { margin: auto 0; text-align: center; padding: .5rem .4rem; }
 .ai-intro p { margin: 0 0 1rem; color: var(--c-body); }
 .ai-intro strong { color: var(--c-ink); font-family: var(--font-display); font-size: 1.05rem; }
+.ai-support { margin: .9rem 0 0 !important; font-size: .78rem; color: var(--c-muted) !important; animation: ai-in .45s 1s var(--ai-ease) both; }
+.ai-support a { color: var(--c-teal-600); }
 .ai-examples { display: flex; flex-direction: column; gap: .45rem; }
 .ai-examples button { text-align: left; font: inherit; font-size: .86rem; color: var(--c-ink); background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 12px;
   padding: .6rem .8rem; cursor: pointer; animation: ai-in .45s calc(.6s + var(--i) * .1s) var(--ai-ease) both; transition: border-color .2s, transform .25s var(--ai-spring), background .2s; }

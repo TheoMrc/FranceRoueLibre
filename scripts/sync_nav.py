@@ -49,6 +49,19 @@ RELATED = {
     'donnees.html': [('impots.html#a-publier', 'Ce que le gouvernement devrait publier sur les impôts'), ('signaux.html', 'Ce qu’on peut déjà tirer des données publiées')],
 }
 
+# Donations and social account: a « Soutenir » button and the X logo in every header, the same links in every footer.
+SUPPORT_URL = 'https://fr.tipeee.com/francerouelibre/'
+X_URL = 'https://x.com/FranceRoueLibre'
+HEART = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.5 8.2 3.4 4.8 6.8 4.6c2-.1 3.6 1 5.2 3 1.6-2 3.2-3.1 5.2-3 3.4.2 5.3 3.6 4.1 6.7-1.8 4.6-9.3 9.2-9.3 9.2z" fill="currentColor"/></svg>'
+# X logo: Simple Icons (CC0-1.0), https://simpleicons.org
+X_ICON = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" fill="currentColor" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg>'
+HEADER_EXTRA = (f'<a class="nav-support" href="{SUPPORT_URL}" target="_blank" rel="noopener" title="Soutenir FranceRoueLibre sur Tipeee">'
+                f'{HEART}<span>Soutenir</span></a>'
+                f'<a class="nav-github nav-x" href="{X_URL}" target="_blank" rel="noopener noreferrer" aria-label="FranceRoueLibre sur X" '
+                f'title="FranceRoueLibre sur X">{X_ICON.format(s=16)}</a>')
+FOOTER_EXTRA = (f'<a class="footer__github" href="{X_URL}" target="_blank" rel="noopener noreferrer">{X_ICON.format(s=13)}@FranceRoueLibre</a>'
+                f'<a class="footer__github footer__support" href="{SUPPORT_URL}" target="_blank" rel="noopener">{HEART.replace("16", "15")}Soutenir sur Tipeee</a>')
+
 CHEVRON = '<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
 
@@ -127,7 +140,14 @@ def sync(path):
             raise SystemExit(f'{path.name}: add <script defer src="./nav.js"></script> by hand')
     if 'src="./assistant.js"' not in text:  # AI assistant panel (shown only when its API answers)
         text = text.replace('<script defer src="./nav.js"></script>', '<script defer src="./nav.js"></script>\n  <script defer src="./assistant.js"></script>', 1)
-    # Footer: every page of the menu, in menu order, then the source code link kept as it is.
+    # Header: « Soutenir » and X before the GitHub link (rewritten each time). search-bar.js puts its form first.
+    text = re.sub(r'[ \t]*<a class="nav-support".*?</a><a class="nav-github nav-x".*?</a>\n', '', text, flags=re.S)
+    i = text.find('<div class="nav__actions">')
+    if i >= 0:
+        j = text.find('\n', i) + 1
+        ind = re.match(r'[ \t]*', text[j:]).group(0)
+        text = text[:j] + ind + HEADER_EXTRA + '\n' + text[j:]
+    # Footer: every page of the menu, in menu order, then the source code link kept as it is, X and Tipeee.
     fstart = text.find('<div class="footer__links">')
     if fstart >= 0:
         fend = text.find('</div>', fstart)
@@ -144,7 +164,7 @@ def sync(path):
                 links.append((label, f'#{h[1]}' if home and len(h) == 2 else target))
             else:
                 links += [(t, h) for t, h, _ in target]
-        text = text[:fstart] + '<div class="footer__links">' + ''.join(f'<a href="{h}">{esc(t)}</a>' for t, h in links) + code + text[fend:]
+        text = text[:fstart] + '<div class="footer__links">' + ''.join(f'<a href="{h}">{esc(t)}</a>' for t, h in links) + code + FOOTER_EXTRA + text[fend:]
     # Related pages, just before the end of <main>; rewritten each time.
     start = text.find('<section class="section related"')
     if start >= 0:

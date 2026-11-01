@@ -169,7 +169,7 @@
   const stick = was => { if (was) log.scrollTop = log.scrollHeight; };
 
   function introHtml() {
-    return `<div class="ai-intro">${LOGO('ai-logo--intro')}<p><strong>Une question sur l’argent public ?</strong><br>Je fouille les données publiées sur ce site (comptes des collectivités, budget de l’État, impôts, subventions, marchés publics…) et sur le web, puis je réponds avec mes sources.</p><div class="ai-examples">${EXAMPLES.map((e, i) => `<button type="button" style="--i:${i}">${esc(e)}</button>`).join('')}</div></div>`;
+    return `<div class="ai-intro">${LOGO('ai-logo--intro')}<p><strong>Une question sur l’argent public ?</strong><br>Je fouille les données publiées sur ce site (comptes des collectivités, budget de l’État, impôts, subventions, marchés publics…) et sur le web, puis je réponds avec mes sources.</p><div class="ai-examples">${EXAMPLES.map((e, i) => `<button type="button" style="--i:${i}">${esc(e)}</button>`).join('')}</div><p class="ai-support">La Loupe vit de vos dons : <a href="https://fr.tipeee.com/francerouelibre/" target="_blank" rel="noopener">la soutenir sur Tipeee</a></p></div>`;
   }
   function userEl(m) {
     const el = document.createElement('div');
