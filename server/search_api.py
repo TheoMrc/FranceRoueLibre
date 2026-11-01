@@ -15,6 +15,7 @@ Python standard library only. The index is opened read-only (immutable). Run beh
   python3 server/search_api.py --db /var/lib/francerouelibre/frl-search.sqlite3 --port 8017
 """
 import argparse
+import collections
 import functools
 import json
 import re
@@ -34,6 +35,15 @@ WORD = re.compile(r'[^\W_]+', re.UNICODE)
 DB_PATH = None
 _db = None
 LOCK = threading.Lock()  # one connection, one search at a time: its page cache stays warm between requests
+# Under a rush: answers already computed are served without waiting for the lock (RESULTS, also cached by nginx);
+# at most MAX_WAITING requests wait for it, each WAIT seconds at most, the others get 503 at once and the page falls
+# back to its own search in the browser (recherche.js).
+MAX_WAITING = 16
+WAIT = 10
+RESULTS = collections.OrderedDict()
+RESULTS_MAX = 500
+RESULTS_LOCK = threading.Lock()
+WAITING = [0]
 
 
 def connection():
@@ -185,13 +195,34 @@ class Handler(BaseHTTPRequestHandler):
         if not match:
             return self.send(400, {'error': 'empty query'})
         started = time.monotonic()
+        with RESULTS_LOCK:
+            cached = RESULTS.get(match)
+            if cached is not None:
+                RESULTS.move_to_end(match)
+        if cached is not None:
+            return self.send(200, dict(cached, ms=round(1000 * (time.monotonic() - started))))
+        with RESULTS_LOCK:
+            if WAITING[0] >= MAX_WAITING:
+                return self.send(503, {'error': 'busy'}, cache=False)
+            WAITING[0] += 1
         try:
-            with LOCK:
+            if not LOCK.acquire(timeout=WAIT):
+                return self.send(503, {'error': 'busy'}, cache=False)
+            try:
                 result = dict(search(match))
+            finally:
+                LOCK.release()
         except sqlite3.OperationalError as error:
             interrupted = 'interrupt' in str(error)
             return self.send(503 if interrupted else 400, {'error': 'too slow' if interrupted else 'bad query'}, cache=False)
-        result['ms'] = round(1000 * (time.monotonic() - started))
+        finally:
+            with RESULTS_LOCK:
+                WAITING[0] -= 1
+        with RESULTS_LOCK:
+            RESULTS[match] = result
+            while len(RESULTS) > RESULTS_MAX:
+                RESULTS.popitem(last=False)
+        result = dict(result, ms=round(1000 * (time.monotonic() - started)))
         self.send(200, result)
 
     def log_message(self, *args):  # nginx already logs requests (and drops the query string after 14 days)

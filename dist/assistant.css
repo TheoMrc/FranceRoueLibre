@@ -244,6 +244,13 @@
 .ai-send.is-stop svg { animation: ai-spark-in .35s var(--ai-spring); }
 .ai-note { margin: .45rem .2rem 0; font-size: .69rem; line-height: 1.35; color: var(--c-muted); }
 .ai-note a { color: inherit; }
+.ai-form[hidden] { display: none; }
+.ai-credits { border-top: 1px solid var(--c-line); padding: .8rem .95rem .9rem; background: var(--c-bg); font-size: .85rem; line-height: 1.45; color: var(--c-ink); animation: ai-in .4s var(--ai-ease) both; }
+.ai-credits p { margin: 0 0 .6rem; }
+.ai-donate { display: inline-flex; align-items: center; gap: .4rem; padding: .5rem .9rem; border-radius: 999px; font-weight: 700; font-size: .82rem; text-decoration: none; color: #fff; background: var(--ai-red); transition: transform .25s var(--ai-spring), filter .2s; }
+.ai-donate::before { content: "\2665"; }
+.ai-donate:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.ai-text .ai-donate { margin-top: .5rem; }
 
 @media (max-width: 680px) {
   .ai-fab { padding: 6px; gap: 0; }

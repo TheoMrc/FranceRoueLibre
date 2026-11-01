@@ -93,7 +93,14 @@ MAX_HISTORY = _int('ASSISTANT_MAX_HISTORY', 10)            # previous messages k
 PER_IP_HOUR = _int('ASSISTANT_PER_IP_HOUR', 15)
 PER_IP_DAY = _int('ASSISTANT_PER_IP_DAY', 40)
 DAILY_QUESTIONS = _int('ASSISTANT_DAILY_QUESTIONS', 500)   # all visitors together
-MAX_JOBS = _int('ASSISTANT_MAX_JOBS', 4)                   # questions answered at the same time
+MAX_JOBS = _int('ASSISTANT_MAX_JOBS', 6)                   # questions answered at the same time
+# Waiting line in front of those workers. Beyond QUEUE_MAX questions waiting, new ones are refused at once (shedding);
+# a question still waiting after QUEUE_WAIT seconds is dropped, so is one whose page stopped asking for it (ABANDON).
+QUEUE_MAX = _int('ASSISTANT_QUEUE_MAX', 24)
+QUEUE_WAIT = _int('ASSISTANT_QUEUE_WAIT', 180)
+ABANDON = _int('ASSISTANT_ABANDON', 90)
+# Shown with the "no more credits" message (Tipeee page of the site).
+DONATE_URL = _str('ASSISTANT_DONATE_URL', 'https://fr.tipeee.com/francerouelibre/')
 ALLOWED_ORIGINS = [o for o in _str('ASSISTANT_ALLOWED_ORIGINS', 'https://francerouelibre.fr,https://www.francerouelibre.fr,'
                                    'http://127.0.0.1:4173,http://localhost:4173').split(',') if o]
 

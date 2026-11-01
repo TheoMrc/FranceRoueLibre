@@ -4,7 +4,12 @@ POST /api/assistant/ask          {"messages": [{"role": "user"|"assistant", "tex
                                   -> {"job": id}   the question is answered in the background
 GET  /api/assistant/job/<id>?after=N  -> {"events": [...], "next": N, "done": bool, "result": {...}}
 POST /api/assistant/job/<id>/cancel
-GET  /api/assistant/status       -> which models can answer now (no amount of money is published)
+GET  /api/assistant/status       -> which models can answer now (no amount of money is published), whether the site
+                                    still has credits (else a message and the donation link), length of the queue
+
+Questions wait in a bounded queue in front of ASSISTANT_MAX_JOBS workers: the job then reports its place in line
+("queue": n). A full queue refuses new questions at once, a question waiting too long or no longer polled by its
+page is dropped without spending anything.
 
 Public safeguards, on top of the hard spending caps of assistant/budget.py: questions per address per hour and per
 day, questions per day for everyone, questions answered at once, size of a request, browsers of other sites refused
@@ -42,6 +47,27 @@ JOBS: dict = {}
 JOBS_LOCK = threading.Lock()
 HITS = collections.defaultdict(collections.deque)  # address -> times of its questions (last 24 h)
 DAY = {'day': '', 'n': 0}
+QUEUE: collections.deque = collections.deque()  # ids of the jobs waiting for a worker
+WORK = threading.Condition(JOBS_LOCK)
+WORKERS: list = []
+BUSY = 'La Loupe est très demandée en ce moment : réessayez dans quelques minutes.'
+
+
+def no_credits() -> str:
+    """Message when no model can answer because of the spending caps (or the end of a trial period)."""
+    reasons = [budget().refusal(p) or '' for p in S.ORDER if CLIENTS[p].configured()]
+    if reasons and all('plafond du jour' in r for r in reasons):
+        return ('La Loupe a dépensé tout son budget du jour : elle revient demain. FranceRoueLibre est gratuit, sans '
+                'publicité et payé de sa poche par son auteur : un don permet de garder la Loupe ouverte plus longtemps.')
+    return ('FranceRoueLibre n’a plus de crédits pour faire tourner la Loupe. Le site est gratuit, sans publicité et payé '
+            'de sa poche par son auteur : si la Loupe vous est utile, un don permet de la relancer.')
+
+
+def credits_info() -> dict | None:
+    """None while a model can answer, else what the page shows instead of the question box."""
+    if pick_provider()[0] is not None:
+        return None
+    return {'credits': False, 'error': no_credits(), 'donate': S.DONATE_URL}
 
 
 def _gc() -> None:
@@ -62,8 +88,8 @@ def admit(ip: str) -> str | None:
             DAY.update(day=today, n=0)
         if DAY['n'] >= S.DAILY_QUESTIONS:
             return 'L’assistant a reçu trop de questions aujourd’hui : revenez demain.'
-        if sum(1 for j in JOBS.values() if not j['done']) >= S.MAX_JOBS:
-            return 'L’assistant est occupé : réessayez dans une minute.'
+        if len(QUEUE) >= S.QUEUE_MAX:
+            return BUSY
         if any(j['ip'] == ip and not j['done'] for j in JOBS.values()):
             return 'Une question est déjà en cours : attendez sa réponse.'
         q = HITS[ip]
@@ -87,8 +113,10 @@ def status() -> dict:
         until = S.GEMINI_UNTIL if p == 'gemini' else S.CLAUDE_UNTIL
         providers.append({'id': p, 'label': cls.label, 'available': why is None, 'reason': why,
                           'until': until.isoformat() if until else None})
-    chosen, _ = pick_provider()
-    return {'enabled': chosen is not None, 'demo': DEMO['on'], 'providers': providers,
+    configured = any(CLIENTS[p].configured() for p in S.ORDER)
+    lack = credits_info()
+    return {'enabled': configured, 'credits': lack is None, 'credits_message': lack['error'] if lack else None,
+            'donate': S.DONATE_URL, 'queue': len(QUEUE), 'demo': DEMO['on'], 'providers': providers,
             'limits': {'per_hour': S.PER_IP_HOUR, 'per_day': S.PER_IP_DAY, 'question_chars': S.MAX_QUESTION_CHARS}}
 
 
@@ -100,7 +128,59 @@ def run_job(job: dict, messages: list, provider: str | None) -> None:
     except Exception as exc:  # noqa: BLE001 - never a stack trace to the reader
         print(f'job failed: {type(exc).__name__}: {exc}', file=sys.stderr, flush=True)
         job['result'] = {'error': 'Erreur interne de l’assistant.'}
+    if (job['result'] or {}).get('error') and not job['cancel']:
+        lack = credits_info()  # the caps stopped every model: say so, with the donation link
+        if lack:
+            job['result'] = dict(job['result'], **lack)
     job['done'] = True
+
+
+def worker() -> None:
+    while True:
+        with WORK:
+            while not QUEUE:
+                WORK.wait()
+            job = JOBS.get(QUEUE.popleft())
+            if not job or job['done']:
+                continue
+            job['state'] = 'running'
+        now = time.time()
+        if job['cancel'] or now - job['seen'] > S.ABANDON:
+            job.update(result={'error': 'Question abandonnée.'}, done=True)
+        elif now - job['t'] > S.QUEUE_WAIT:
+            job.update(result={'error': BUSY, 'busy': True}, done=True)
+        else:
+            run_job(job, job.pop('messages'), job['provider'])
+
+
+def start_workers() -> None:
+    with JOBS_LOCK:
+        while len(WORKERS) < S.MAX_JOBS:
+            t = threading.Thread(target=worker, daemon=True)
+            t.start()
+            WORKERS.append(t)
+
+
+def enqueue(ip: str, messages: list, provider: str | None) -> str:
+    start_workers()
+    jid = secrets.token_urlsafe(18)
+    now = time.time()
+    job = {'t': now, 'seen': now, 'ip': ip, 'events': [], 'done': False, 'result': None, 'cancel': False,
+           'state': 'queued', 'messages': messages, 'provider': provider}
+    with WORK:
+        JOBS[jid] = job
+        QUEUE.append(jid)
+        WORK.notify()
+    return jid
+
+
+def place(jid: str) -> int:
+    """1 when this job is next in line, 0 when it is no longer waiting."""
+    with JOBS_LOCK:
+        try:
+            return QUEUE.index(jid) + 1
+        except ValueError:
+            return 0
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -127,16 +207,19 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == '/api/assistant/status':
             return self.send(200, status())
         if url.path.startswith('/api/assistant/job/'):
-            job = JOBS.get(url.path.rsplit('/', 1)[-1])
+            jid = url.path.rsplit('/', 1)[-1]
+            job = JOBS.get(jid)
             if not job:
                 return self.send(404, {'error': 'question inconnue ou expirée'})
+            job['seen'] = time.time()
             try:
                 after = max(0, int((parse_qs(url.query).get('after') or ['0'])[0]))
             except ValueError:
                 after = 0
             events = job['events'][after:]
             done = job['done']
-            return self.send(200, {'events': events, 'next': after + len(events), 'done': done,
+            waiting = place(jid) if job['state'] == 'queued' and not done else 0
+            return self.send(200, {'events': events, 'next': after + len(events), 'done': done, 'queue': waiting,
                                    'result': job['result'] if done else None})
         return self.send(404, {'error': 'not found'})
 
@@ -149,6 +232,8 @@ class Handler(BaseHTTPRequestHandler):
             job = JOBS.get(url.path.split('/')[-2])
             if job and job['ip'] == self.client_ip():
                 job['cancel'] = True
+                if job['state'] == 'queued' and not job['done']:  # never reaches a worker: answered now
+                    job.update(result={'error': 'Question annulée.'}, done=True)
             return self.send(200, {'ok': bool(job)})
         if url.path != '/api/assistant/ask':
             return self.send(404, {'error': 'not found'})
@@ -169,16 +254,14 @@ class Handler(BaseHTTPRequestHandler):
         if len(question) > S.MAX_QUESTION_CHARS:
             return self.send(400, {'error': f'question trop longue ({S.MAX_QUESTION_CHARS} caractères au plus)'})
         provider = body.get('provider') if body.get('provider') in CLIENTS else None
+        lack = credits_info()
+        if lack:
+            return self.send(402, lack)
         ip = self.client_ip()
         refused = admit(ip)
         if refused:
-            return self.send(429, {'error': refused})
-        jid = secrets.token_urlsafe(18)
-        job = {'t': time.time(), 'ip': ip, 'events': [], 'done': False, 'result': None, 'cancel': False}
-        with JOBS_LOCK:
-            JOBS[jid] = job
-        threading.Thread(target=run_job, args=(job, messages, provider), daemon=True).start()
-        return self.send(202, {'job': jid})
+            return self.send(429 if refused != BUSY else 503, {'error': refused, 'busy': refused == BUSY})
+        return self.send(202, {'job': enqueue(ip, messages, provider)})
 
     def log_message(self, *args):  # nginx logs the requests (without query strings)
         pass
@@ -221,6 +304,7 @@ def main():
     st = status()
     print('assistant: ' + ', '.join(f'{p["label"]} {"prêt" if p["available"] else p["reason"]}' for p in st['providers']),
           flush=True)
+    start_workers()
     ThreadingHTTPServer.daemon_threads = True
     ThreadingHTTPServer(('127.0.0.1', args.port), Handler).serve_forever()
 

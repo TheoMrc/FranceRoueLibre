@@ -5,6 +5,9 @@
 # 2. Let's Encrypt certificate once the DNS points here (webroot, nginx keeps running)
 # 3. nginx vhost (HTTP only until the certificate exists, then HTTPS with http and www redirected to https://francerouelibre.fr)
 # 4. nginx -t, reload, live check
+# Built for rushes (thousands of visitors in a few minutes): text files are gzipped once at deploy time and served as
+# they are (gzip_static, no CPU per visit), open files are cached, HTTP/2, the search API sits behind nginx's cache,
+# nginx gets more connections per worker, and a 2 Go swap file guards the shared VPS against running out of memory.
 set -euo pipefail
 DIR=/var/www/francerouelibre
 WEB=/var/www/francerouelibre-web
@@ -23,6 +26,19 @@ else
 fi
 git -C "$DIR" log -1 --oneline
 du -sh "$DIR/dist" "$DIR/.git"
+echo "== precompress (gzip -9 next to each text file, served as is by nginx: no CPU per visit)"
+# Only new or changed files (a .gz keeps the time of its source); a .gz whose source is gone is removed. The search
+# index is read by range requests: never compressed.
+find "$DIR/dist" -type f -name '*.gz' ! -path "$DIR/dist/data/search/db/*" -print0 | while IFS= read -r -d '' gz; do
+  [ -f "${gz%.gz}" ] || rm -f "$gz"; done
+n=0
+while IFS= read -r -d '' f; do
+  if [ ! -f "$f.gz" ] || [ "$f" -nt "$f.gz" ] || [ "$f.gz" -nt "$f" ]; then
+    nice -n 15 gzip -9 -n -k -f "$f" && touch -r "$f" "$f.gz"; n=$((n + 1)); fi
+done < <(find "$DIR/dist" -type f \( -name '*.html' -o -name '*.css' -o -name '*.js' -o -name '*.mjs' -o -name '*.json' \
+  -o -name '*.geojson' -o -name '*.svg' -o -name '*.wasm' -o -name '*.txt' -o -name '*.xml' \) -size +1k \
+  ! -path "$DIR/dist/data/search/db/*" -print0)
+echo "$n file(s) compressed, $(find "$DIR/dist" -name '*.gz' ! -path '*/search/db/*' | wc -l) in all"
 echo "== publish (only changed files, swapped at the end)"
 command -v rsync >/dev/null || sudo -n apt-get install -y -q rsync
 [ -d "$WEB" ] || { sudo -n mkdir -p "$WEB" && sudo -n chown "$ME":"$ME" "$WEB"; }
@@ -34,6 +50,8 @@ write_conf() {
     echo "# francerouelibre.fr – written by deploy/vps.sh (FranceRoueLibre repo), static files from $WEB"
     echo "limit_req_zone \$binary_remote_addr zone=frl_api:10m rate=5r/s;"
 echo "limit_req_zone \$binary_remote_addr zone=frl_ai:10m rate=3r/s;"
+    # Answers of the search API, shared by all visitors: keys in memory (20 Mo), answers on disk (500 Mo at most)
+    echo "proxy_cache_path /var/cache/nginx/frl levels=1:2 keys_zone=frl_search:20m max_size=500m inactive=2h use_temp_path=off;"
     # Own access log, without query strings (searched words never reach the disk), read by frl-stats
     cat <<'NGX'
 map $http_referer $frl_referer { default $http_referer; "~^(?<frl_ref_base>[^?]*)\?" $frl_ref_base; }
@@ -48,7 +66,7 @@ server {
     location / { return 301 https://francerouelibre.fr$request_uri; }
 }
 server {
-    listen 443 ssl; listen [::]:443 ssl;
+    listen 443 ssl; listen [::]:443 ssl; http2 on;
     server_name www.francerouelibre.fr;
     ssl_certificate     /etc/letsencrypt/live/francerouelibre.fr/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/francerouelibre.fr/privkey.pem;
@@ -57,7 +75,7 @@ server {
     return 301 https://francerouelibre.fr$request_uri;
 }
 server {
-    listen 443 ssl; listen [::]:443 ssl;
+    listen 443 ssl; listen [::]:443 ssl; http2 on;
     server_name francerouelibre.fr;
     ssl_certificate     /etc/letsencrypt/live/francerouelibre.fr/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/francerouelibre.fr/privkey.pem;
@@ -79,6 +97,9 @@ NGX
     charset utf-8;
     gzip on; gzip_vary on; gzip_proxied any; gzip_comp_level 6; gzip_min_length 512;
     gzip_types text/plain text/css application/javascript text/javascript application/json application/geo+json image/svg+xml application/wasm;
+    # The .gz written at deploy time (gzip -9) are sent as they are; on-the-fly gzip only for what has none
+    gzip_static on;
+    open_file_cache max=20000 inactive=120s; open_file_cache_valid 60s; open_file_cache_errors on;
     location / { try_files $uri $uri/ =404; expires 10m; }
     # Let's Encrypt (^~ wins over the dotfile rule below)
     location ^~ /.well-known/acme-challenge/ { root /var/www/francerouelibre/dist; default_type text/plain; }
@@ -92,6 +113,18 @@ NGX
         client_max_body_size 64k;
         proxy_pass http://127.0.0.1:8018; proxy_read_timeout 30s;
         proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr;
+    }
+    # Search API behind nginx's cache: a search already made by someone (10 min, the API's Cache-Control) is answered
+    # by nginx; when many visitors type the same words at once, one request reaches the API (proxy_cache_lock); the
+    # last answer is served while the API is busy or restarting.
+    location = /api/search {
+        limit_req zone=frl_api burst=20 nodelay; limit_req_status 429;
+        proxy_cache frl_search; proxy_cache_lock on; proxy_cache_lock_timeout 12s; proxy_cache_background_update on;
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        add_header X-Cache $upstream_cache_status always;
+        add_header Strict-Transport-Security "max-age=31536000" always;
+        proxy_pass http://127.0.0.1:8017; proxy_read_timeout 20s;
+        proxy_set_header Host $host; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
     location /api/ {
         limit_req zone=frl_api burst=20 nodelay; limit_req_status 429;
@@ -114,6 +147,7 @@ STAMP=$(md5sum "$WEB/data/search/meta.json" | cut -d' ' -f1)
 if [ ! -f "$DBF" ] || [ "$(cat "$LIB/meta.md5" 2>/dev/null)" != "$STAMP" ]; then
   cat "$WEB"/data/search/db/frl-search.sqlite3.* > "$DBF.tmp" && mv -f "$DBF.tmp" "$DBF" && echo "$STAMP" > "$LIB/meta.md5"
   chmod a+r "$DBF"; echo "index rebuilt: $(du -h "$DBF" | cut -f1)"
+  sudo -n find /var/cache/nginx/frl -type f -delete 2>/dev/null || true  # cached answers came from the old index
 fi
 # NumPy (vectorised totals, 4 to 5 times faster on very common words) in a private virtualenv: nothing is installed
 # system-wide, so the other sites of the VPS are not affected. Without it the API falls back to SQL aggregations.
@@ -262,6 +296,27 @@ apply_conf() {
   else echo "nginx -t FAILED: previous vhost restored"; sudo -n test -f "$CONF.prev" && sudo -n cp -f "$CONF.prev" "$CONF"; sudo -n nginx -t; return 1; fi
 }
 
+echo "== capacity (shared settings, applied once)"
+# nginx: 4096 connections per worker instead of 768 (Ubuntu's default), enough open files for them. Checked with
+# nginx -t, the previous nginx.conf is put back if it fails.
+NCONF=/etc/nginx/nginx.conf
+if ! sudo -n grep -qE '^\s*worker_connections 4096;' "$NCONF"; then
+  sudo -n cp -f "$NCONF" "$NCONF.bak-frl"
+  sudo -n sed -i -E 's/^(\s*)worker_connections\s+[0-9]+;/\1worker_connections 4096;/' "$NCONF"
+  sudo -n grep -q '^worker_rlimit_nofile' "$NCONF" || sudo -n sed -i '/^worker_processes/a worker_rlimit_nofile 16384;' "$NCONF"
+  if sudo -n nginx -t 2>/dev/null; then echo "nginx.conf: 4096 connections per worker"
+  else sudo -n cp -f "$NCONF.bak-frl" "$NCONF"; echo "nginx.conf change refused by nginx -t: previous file restored"; fi
+fi
+sudo -n mkdir -p /var/cache/nginx/frl && sudo -n chown www-data:www-data /var/cache/nginx/frl
+# 2 Go swap file (the VPS had none): a burst of memory on any site slows down instead of being killed.
+if [ -z "$(swapon --show --noheadings)" ] && [ ! -e /swapfile ]; then
+  sudo -n fallocate -l 2G /swapfile && sudo -n chmod 600 /swapfile && sudo -n mkswap -q /swapfile && sudo -n swapon /swapfile
+  grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' | sudo -n tee -a /etc/fstab > /dev/null
+fi
+printf 'vm.swappiness = 10\nnet.ipv4.tcp_max_syn_backlog = 4096\n' | sudo -n tee /etc/sysctl.d/90-francerouelibre.conf > /dev/null
+sudo -n sysctl -q -p /etc/sysctl.d/90-francerouelibre.conf
+echo "swap: $(swapon --show --noheadings | awk '{print $3}' | head -1) · RAM free: $(free -m | awk '/Mem:/{print $7}') Mo"
+
 echo "== nginx (http)"
 if ! sudo -n test -f "$CERT"; then apply_conf 0; fi
 
@@ -277,6 +332,9 @@ fi
 if sudo -n test -f "$CERT"; then
   echo "== nginx (https)"; apply_conf 1
 fi
+
+echo "== warm-up (home page files read once, so the first visitors are served from memory)"
+cat "$WEB"/*.gz "$WEB"/vendor/*.gz "$WEB"/data/web/*.gz "$WEB"/data/*.gz > /dev/null 2>&1 || true
 
 echo "== live check"
 for u in http://francerouelibre.fr/ http://www.francerouelibre.fr/ https://www.francerouelibre.fr/ https://francerouelibre.fr/ https://francerouelibre.fr/data/search/meta.json; do

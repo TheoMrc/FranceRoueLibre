@@ -1,5 +1,7 @@
 /* AI assistant panel, on every page (server/assistant_api.py behind /api/assistant/). It only shows when the server
-   says a model can answer: on the static preview without the API, or once the budgets are spent, nothing appears.
+   says a model is configured: on the static preview without the API nothing appears; once the budgets are spent, the
+   question box gives way to a message and the donation link (Tipeee). While the server is busy the question waits in
+   line and the panel shows its place.
    Conversations are kept in this browser (localStorage, « Historique ») and sent with each question; the server keeps
    nothing. Test the animations without spending a token: assistant_demo.bat (or assistant_api.py --fake).
    The model button shows the models' logos from dist/img/ai/ (gemini.svg, claude.svg: Icons8, credited in mentions.html). */
@@ -257,7 +259,7 @@
         if (m.searches?.length) parts.push(`<div class="ai-chips ai-chips--search"><span>Recherches Google</span>${m.searches.map((s, i) => `<a style="--i:${i + 2}" href="https://www.google.com/search?q=${encodeURIComponent(s)}" target="_blank" rel="noopener noreferrer">${esc(s)}</a>`).join('')}</div>`);
         q('.ai-extra').innerHTML = parts.join('');
         q('.ai-foot').innerHTML = m.provider ? `${provBadge(m.provider, m.label || label(m.provider))}${m.s ? `<span>${Math.round(m.s)} s</span>` : ''}` : '';
-        if (m.error) q('.ai-text').innerHTML = `<p class="ai-error">${esc(m.error)}</p>`;
+        if (m.error) q('.ai-text').innerHTML = `<p class="ai-error">${esc(m.error)}</p>${m.donate ? donateLink(m.donate) : ''}`;
       },
     };
     if (m.provider) v.provider(m.provider);
@@ -283,6 +285,16 @@
   }
 
   // ------------------------------------------------------------------------------------------------ asking
+  /* No more credits (spending caps reached): the question box gives way to the message and the donation link. */
+  const donateLink = url => `<a class="ai-donate" href="${esc(url)}" target="_blank" rel="noopener">Soutenir FranceRoueLibre sur Tipeee</a>`;
+  function noCredits(info) {
+    if (status) Object.assign(status, { credits: false, credits_message: info.error, donate: info.donate || status.donate });
+    let box = panel.querySelector('.ai-credits');
+    if (!box) { box = document.createElement('div'); box.className = 'ai-credits'; form.before(box); }
+    const url = info.donate || status?.donate;
+    box.innerHTML = `<p>${esc(info.error)}</p>${url ? donateLink(url) : ''}`;
+    form.hidden = true;
+  }
   function setBusy(on) {
     panel.classList.toggle('is-busy', on);
     fab.classList.toggle('is-busy', on);
@@ -316,9 +328,11 @@
       const r = await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history.slice(-11), provider }) });
       const data = await r.json().catch(() => ({}));
-      if (!r.ok || !data.job) throw new Error(data.error || `Erreur ${r.status}`);
+      if (data.credits === false) { m.donate = data.donate; noCredits(data); }
+      if (!r.ok || !data.job) throw new Error(data.error || (r.status === 503 || r.status === 502 || r.status === 504
+        ? 'La Loupe est très demandée en ce moment : réessayez dans quelques minutes.' : `Erreur ${r.status}`));
       busy.job = data.job;
-      let after = 0, fails = 0;
+      let after = 0, fails = 0, queued = '';
       for (;;) {
         await sleep(650);
         let j;
@@ -329,6 +343,8 @@
           fails = 0;
         } catch (e) { if (++fails > 6) throw e; continue; }
         after = j.next;
+        const line = j.queue ? (j.queue === 1 ? 'Vous êtes le prochain dans la file' : `File d’attente : ${j.queue - 1} question${j.queue > 2 ? 's' : ''} avant la vôtre`) : '';
+        if (line !== queued) { if (line || queued) v.think(line || 'Réflexion'); queued = line; }
         const was = nearBottom();
         for (const ev of j.events) {
           if (ev.type === 'model') { m.provider = ev.provider; m.label = ev.label; v.provider(ev.provider); }
@@ -343,6 +359,7 @@
         stick(was);
         if (j.done) {
           const res = j.result || {};
+          if (res.credits === false) { m.donate = res.donate; noCredits(res); }
           Object.assign(m, { text: res.reply || '', error: res.error || '', sources: res.sources || [], searches: res.searches || [],
             label: res.label || m.label, provider: res.provider || m.provider, s: res.s });
           break;
@@ -455,6 +472,7 @@
     if (matchMedia('(max-width: 680px)').matches) input.placeholder = 'Votre question…';
     syncModel(false);
     renderLog();
+    if (status.credits === false) noCredits({ error: status.credits_message, donate: status.donate });
     if (read(sessionStorage, UI, {}).open) openPanel(true);
     else { fab.hidden = false; fab.classList.add('is-intro'); setTimeout(() => fab.classList.remove('is-intro'), 4000); }
   }

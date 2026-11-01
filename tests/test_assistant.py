@@ -186,5 +186,73 @@ class FakeAndFallbackTest(unittest.TestCase):
         self.assertTrue(r['sources'])
         self.assertIn('tool_start', [e['type'] for e in events])
 
+
+class QueueTest(unittest.TestCase):
+    """Waiting line, shedding and the no-credits answer of assistant_api.py (no model is called)."""
+
+    def setUp(self):
+        import assistant_api as A
+        self.A = A
+        self.saved = (S.QUEUE_MAX, S.QUEUE_WAIT, S.ABANDON, S.MAX_JOBS, A.run_job, A.credits_info)
+        A.JOBS.clear(); A.QUEUE.clear(); A.HITS.clear(); A.DAY.update(day='', n=0)
+        self.gate = __import__('threading').Event()
+        self.ran = []
+
+        def fake_run(job, messages, provider):
+            self.ran.append(messages[-1]['text'])
+            self.gate.wait(5)
+            job.update(result={'reply': 'ok'}, done=True)
+        A.run_job = fake_run
+
+    def tearDown(self):
+        self.gate.set()
+        S.QUEUE_MAX, S.QUEUE_WAIT, S.ABANDON, S.MAX_JOBS, self.A.run_job, self.A.credits_info = self.saved
+        self.A.QUEUE.clear()
+
+    def ask(self, text, ip):
+        return self.A.enqueue(ip, [{'role': 'user', 'text': text}], None)
+
+    def wait_until(self, cond):
+        import time
+        for _ in range(200):
+            if cond():
+                return True
+            time.sleep(0.01)
+        return False
+
+    def test_places_and_shedding(self):
+        A = self.A
+        S.MAX_JOBS, S.QUEUE_MAX = max(len(A.WORKERS), 1), 2
+        busy = [self.ask(f'q{i}', f'10.0.0.{i}') for i in range(len(A.WORKERS) or 1)]
+        self.assertTrue(self.wait_until(lambda: len(self.ran) == len(busy)))
+        a, b = self.ask('a', '10.1.0.1'), self.ask('b', '10.1.0.2')
+        self.assertEqual((A.place(a), A.place(b)), (1, 2))
+        self.assertEqual(A.admit('10.1.0.3'), A.BUSY)          # queue full: refused at once
+        A.QUEUE.pop()                                          # a place frees up
+        self.assertIsNone(A.admit('10.1.0.4'))
+        self.gate.set()
+        self.assertTrue(self.wait_until(lambda: A.JOBS[a]['done']))
+
+    def test_abandoned_and_stale_jobs_are_dropped(self):
+        A = self.A
+        S.MAX_JOBS = max(len(A.WORKERS), 1)
+        self.gate.set()
+        old = self.ask('gone', '10.2.0.1')
+        A.JOBS[old]['seen'] -= S.ABANDON + 1
+        self.assertTrue(self.wait_until(lambda: A.JOBS[old]['done']))
+        self.assertNotIn('gone', self.ran)
+        late = self.ask('late', '10.2.0.2')
+        A.JOBS[late].update(t=A.JOBS[late]['t'] - S.QUEUE_WAIT - 1)
+        self.assertTrue(self.wait_until(lambda: A.JOBS[late]['done']))
+        self.assertTrue(A.JOBS[late]['result'].get('busy'))
+
+    def test_no_credits(self):
+        A = self.A
+        A.credits_info = lambda: {'credits': False, 'error': 'plus de crédits', 'donate': S.DONATE_URL}
+        st = A.status()
+        self.assertFalse(st['credits'])
+        self.assertEqual(st['credits_message'], 'plus de crédits')
+        self.assertIn('tipeee', st['donate'])
+
 if __name__ == '__main__':
     unittest.main()

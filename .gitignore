@@ -13,3 +13,4 @@ ugap/data/
 ugap/raw_samples/
 .env
 .assistant
+dist/**/*.gz
