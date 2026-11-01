@@ -10,7 +10,7 @@ from .budget import BudgetError, budget
 from .providers import CLIENTS, ModelError
 from .tools import DECLARATIONS, FILES, Toolbox
 
-SYSTEM = """Tu es l’assistant de FranceRoueLibre ({site}), un site indépendant qui ouvre le capot des comptes publics \
+SYSTEM = """Tu es la Loupe, l’agent IA de FranceRoueLibre ({site}), un site indépendant qui ouvre le capot des comptes publics \
 français à partir de données ouvertes (Insee, OFGL, DGFiP, data.gouv.fr, Cour des comptes...). Tu réponds aux \
 questions des lecteurs sur les finances publiques : dépenses, impôts, dette, budgets de l’État, des collectivités et \
 de la Sécurité sociale, subventions, marchés publics, opérateurs, niches fiscales.
@@ -131,14 +131,8 @@ def history_to_contents(messages: List[dict]) -> List[dict]:
     return contents
 
 
-def answer(messages: List[dict], provider: Optional[str] = None, on_event: Callable[[dict], None] = lambda e: None,
-           cancelled: Callable[[], bool] = lambda: False) -> dict:
-    contents = history_to_contents(messages)
-    if not contents or contents[-1]['role'] != 'user':
-        return {'error': 'Question vide.'}
-    chosen, why = pick_provider(provider)
-    if not chosen:
-        return {'error': f'Assistant indisponible pour le moment ({why}).'}
+def _run(chosen: str, contents: List[dict], on_event: Callable[[dict], None], cancelled: Callable[[], bool]) -> dict:
+    """The tool loop with one provider."""
     client = CLIENTS[chosen]()
     box = Toolbox(client)
     on_event({'type': 'model', 'provider': chosen, 'label': client.label, 'model': client.model})
@@ -149,6 +143,7 @@ def answer(messages: List[dict], provider: Optional[str] = None, on_event: Calla
             if cancelled():
                 reply = 'Arrêté à votre demande.'
                 break
+            on_event({'type': 'think', 'step': step})
             content = client.generate(contents, system, DECLARATIONS)
             parts = content.get('parts') or []
             contents.append({'role': 'model', 'parts': parts})
@@ -179,8 +174,38 @@ def answer(messages: List[dict], provider: Optional[str] = None, on_event: Calla
                 responses.append({'text': 'Dernière étape : réponds maintenant avec ce que tu as, sans appeler d’outil.'})
             contents.append({'role': 'user', 'parts': responses})
     except (ModelError, BudgetError) as exc:
-        return {'error': str(exc), 'provider': chosen, 'sources': box.sources, 'searches': box.queries}
+        return {'error': str(exc), 'retry': True, 'provider': chosen, 'label': client.label,
+                'sources': box.sources, 'searches': box.queries}
     return {'reply': reply or 'Je n’ai pas trouvé de réponse fiable ; essayez de reformuler la question.',
             'provider': chosen, 'label': client.label, 'model': client.model, 'sources': box.sources,
             'searches': box.queries,
             'calls': client.calls, 'cost_eur': round(client.eur, 4), 's': round(time.time() - started, 1)}
+
+
+def answer(messages: List[dict], provider: Optional[str] = None, on_event: Callable[[dict], None] = lambda e: None,
+           cancelled: Callable[[], bool] = lambda: False) -> dict:
+    """A model chosen by the reader answers alone; in « Auto », when one fails (error, cap, end date), the next one
+    in ASSISTANT_ORDER takes the question over from the start."""
+    contents = history_to_contents(messages)
+    if not contents or contents[-1]['role'] != 'user':
+        return {'error': 'Question vide.'}
+    order = [provider] if provider in CLIENTS else list(S.ORDER)
+    reasons, previous, result = [], None, None
+    for p in order:
+        if not CLIENTS[p].configured():
+            reasons.append(f'{CLIENTS[p].label} : non configuré')
+            continue
+        why = budget().refusal(p)
+        if why:
+            reasons.append(f'{CLIENTS[p].label} : {why}')
+            continue
+        if previous:
+            on_event({'type': 'switch', 'from': previous['provider'], 'to': p, 'reason': previous['error']})
+        result = _run(p, [dict(c, parts=list(c['parts'])) for c in contents], on_event, cancelled)
+        if not result.get('retry') or cancelled():
+            break
+        previous = result
+    if result is None:
+        return {'error': f'Assistant indisponible pour le moment ({" ; ".join(reasons) or "aucun modèle"}).'}
+    result.pop('retry', None)
+    return result

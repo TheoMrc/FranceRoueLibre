@@ -143,5 +143,48 @@ class DataFilesTest(unittest.TestCase):
         self.assertLess(len(json.dumps(r, ensure_ascii=False)), 400)
 
 
+
+class FakeAndFallbackTest(unittest.TestCase):
+    """The fake models (assistant_api.py --fake) go through the real loop; in « Auto » a failing model hands over."""
+    def setUp(self):
+        from assistant import agent, fake, providers
+        self.saved = dict(providers.CLIENTS)
+        fake.install()
+        fake.FakeClient._wait = lambda self, lo=0, hi=0: None
+        self.agent = agent
+        self.dir = tempfile.TemporaryDirectory()
+        B._budget = B.Budget(Path(self.dir.name) / 'spend.jsonl', {'claude': (1, None), 'gemini': (1, None)}, 0)
+
+    def tearDown(self):
+        from assistant import providers
+        providers.CLIENTS.update(self.saved)
+        B._budget = None
+        self.dir.cleanup()
+
+    def ask(self, q, provider=None):
+        events = []
+        return self.agent.answer([{'role': 'user', 'text': q}], provider, on_event=events.append), events
+
+    def test_switch_to_the_next_model(self):
+        r, events = self.ask('test erreur')
+        self.assertEqual(r.get('provider'), 'claude', r)
+        self.assertTrue(r.get('reply'))
+        self.assertIn('switch', [e['type'] for e in events])
+
+    def test_chosen_model_does_not_hand_over(self):
+        r, events = self.ask('test erreur', 'gemini')
+        self.assertIn('error', r)
+        self.assertNotIn('switch', [e['type'] for e in events])
+
+    def test_both_down(self):
+        r, _ = self.ask('panne totale')
+        self.assertIn('error', r)
+        self.assertNotIn('retry', r)
+
+    def test_web_scenario(self):
+        r, events = self.ask('recherche web sur la dette')
+        self.assertTrue(r['sources'])
+        self.assertIn('tool_start', [e['type'] for e in events])
+
 if __name__ == '__main__':
     unittest.main()
