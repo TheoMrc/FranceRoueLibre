@@ -395,6 +395,40 @@
   }
 
   // ------------------------------------------------------------------------------------------------ open / close
+  /* Phones: the panel fills the screen under the site header, the page behind no longer scrolls nor reacts, and the
+     panel follows the visible area when the keyboard opens (iOS scrolls the visual viewport, not the layout one). */
+  const phone = matchMedia('(max-width: 680px)');
+  let savedY = 0;
+  function lockPage(on) {
+    const root = document.documentElement;
+    if (on && phone.matches && !root.classList.contains('ai-locked')) {
+      savedY = scrollY;
+      root.classList.add('ai-locked');
+      document.body.style.top = `-${savedY}px`;
+    } else if (!on && root.classList.contains('ai-locked')) {
+      root.classList.remove('ai-locked');
+      document.body.style.top = '';
+      scrollTo(0, savedY);
+    }
+  }
+  function fit() {
+    if (panel.hidden || !phone.matches) { panel.style.removeProperty('--ai-top'); panel.style.removeProperty('--ai-h'); return; }
+    const vv = window.visualViewport;
+    const offset = vv ? vv.offsetTop : 0, visible = vv ? vv.height : innerHeight;
+    // phones: the menu is a second row that can overflow the header box, so take the lowest of the two
+    const headBottom = Math.max(0, ...[...document.querySelectorAll('.site-header, .site-header .nav__links')]
+      .map(e => e.getBoundingClientRect()).filter(r => r.height && r.top < 200).map(r => r.bottom));
+    const top = Math.max(headBottom, offset);               // under the header, or the top of what is visible
+    panel.style.setProperty('--ai-top', `${Math.round(top)}px`);
+    panel.style.setProperty('--ai-h', `${Math.max(180, Math.round(offset + visible - top))}px`);
+    panel.classList.toggle('is-short', visible < 600);  // keyboard open: hide the small print under the field
+    if (document.activeElement === input) log.scrollTop = log.scrollHeight;
+  }
+  window.visualViewport?.addEventListener('resize', fit);
+  window.visualViewport?.addEventListener('scroll', fit);
+  addEventListener('resize', fit);
+  phone.addEventListener?.('change', () => { if (!panel.hidden) { lockPage(phone.matches); fit(); } });
+
   function openPanel(open) {
     if (open === !panel.hidden) return;
     write(sessionStorage, UI, { open });
@@ -402,11 +436,13 @@
       panel.hidden = false; fab.hidden = true; fab.classList.remove('has-news');
       panel.classList.remove('is-closing');
       headLogo.classList.remove('is-drawn'); void headLogo.offsetWidth; headLogo.classList.add('is-drawn');
-      setTimeout(() => input.focus(), 60);
+      lockPage(true); fit();
+      if (!phone.matches) setTimeout(() => input.focus(), 60);  // phones: no keyboard popping up on its own
     } else {
       showHistory(false);
       panel.classList.add('is-closing');
-      setTimeout(() => { panel.hidden = true; panel.classList.remove('is-closing'); fab.hidden = false; fab.focus(); }, reduce.matches ? 0 : 180);
+      lockPage(false);
+      setTimeout(() => { panel.hidden = true; panel.classList.remove('is-closing'); fab.hidden = false; fab.focus({ preventScroll: true }); fit(); }, reduce.matches ? 0 : 180);
     }
     fab.setAttribute('aria-expanded', String(open));
   }

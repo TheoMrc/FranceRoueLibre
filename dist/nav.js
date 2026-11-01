@@ -2,6 +2,11 @@
    Wide screens: each group drops its own panel under the button. Phones: the menu is the second header row and an
    open group shows its pages in a sheet under that row (the row scrolls sideways, so a panel inside it would be clipped). */
 (() => {
+  // Phones: no page zoom, except on the map (MapLibre zooms it itself). Safari ignores touch-action for pinch: block
+  // its gesture events outside the map (style.css sets touch-action for the other browsers and for double taps).
+  if (matchMedia('(max-width: 680px)').matches) {
+    document.addEventListener('gesturestart', e => { if (!e.target.closest?.('.map, .maplibregl-map')) e.preventDefault(); }, { passive: false });
+  }
   const links = document.querySelector('.nav__links');
   if (!links) return;
   const groups = [...links.querySelectorAll('.nav__group')];

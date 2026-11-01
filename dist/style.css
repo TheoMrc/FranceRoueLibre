@@ -855,7 +855,13 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 @keyframes support-beat { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.1); } }
 .footer__support svg { color: #fb7185; }
 @media (max-width: 680px) { .nav-support { width: 2.1rem; padding: 0; justify-content: center; margin-left: 0; border: 0; } .nav-support:hover { background: none; } .nav-support span { display: none; } }
-@media (max-width: 480px) { .nav-x { display: none; } } /* phones: X stays in the footer, the header keeps search, heart, GitHub, theme */
+@media (max-width: 480px) { .nav-x { display: none; } }
+/* Phones: no zooming the page (pinch or double tap). The map still zooms: it handles its own gestures in script.
+   Fields at 16 px at least, or iOS zooms in when they get the focus. nav.js blocks Safari's pinch gestures too. */
+@media (max-width: 680px) {
+  html { touch-action: pan-x pan-y; }
+  html input, html select, html textarea { font-size: max(16px, 1em) !important; }
+} /* phones: X stays in the footer, the header keeps search, heart, GitHub, theme */
 @media (max-width: 360px) { .nav-github { display: none; } }
 @media (prefers-reduced-motion: reduce) { .nav-support:hover svg { animation: none; } }
 
