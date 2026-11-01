@@ -7,7 +7,7 @@
 # 4. nginx -t, reload, live check
 # Built for rushes (thousands of visitors in a few minutes): text files are gzipped once at deploy time and served as
 # they are (gzip_static, no CPU per visit), open files are cached, HTTP/2, the search API sits behind nginx's cache,
-# nginx gets more connections per worker, and a 2 Go swap file guards the shared VPS against running out of memory.
+# nginx gets more connections per worker, and an 8 Go swap file guards the shared VPS against running out of memory.
 set -euo pipefail
 DIR=/var/www/francerouelibre
 WEB=/var/www/francerouelibre-web
@@ -308,9 +308,9 @@ if ! sudo -n grep -qE '^\s*worker_connections 4096;' "$NCONF"; then
   else sudo -n cp -f "$NCONF.bak-frl" "$NCONF"; echo "nginx.conf change refused by nginx -t: previous file restored"; fi
 fi
 sudo -n mkdir -p /var/cache/nginx/frl && sudo -n chown www-data:www-data /var/cache/nginx/frl
-# 2 Go swap file (the VPS had none): a burst of memory on any site slows down instead of being killed.
+# 8 Go swap file (the VPS had none, as much as its RAM): a burst of memory on any site slows down instead of being killed.
 if [ -z "$(swapon --show --noheadings)" ] && [ ! -e /swapfile ]; then
-  sudo -n fallocate -l 2G /swapfile && sudo -n chmod 600 /swapfile && sudo -n mkswap -q /swapfile && sudo -n swapon /swapfile
+  sudo -n fallocate -l 8G /swapfile && sudo -n chmod 600 /swapfile && sudo -n mkswap -q /swapfile && sudo -n swapon /swapfile
   grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' | sudo -n tee -a /etc/fstab > /dev/null
 fi
 printf 'vm.swappiness = 10\nnet.ipv4.tcp_max_syn_backlog = 4096\n' | sudo -n tee /etc/sysctl.d/90-francerouelibre.conf > /dev/null
