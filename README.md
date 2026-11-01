@@ -60,6 +60,10 @@ python scripts/build_all.py        # recalcule tout dist/data, dont l’index de
 
 Le menu (trois accès directs, puis Recettes, Dépenses, Contrôle) et les blocs « Pour aller plus loin » en bas de page sont définis à un seul endroit, `scripts/sync_nav.py`. Après avoir ajouté une page : ajouter sa ligne dans `NAV` et `RELATED`, puis `python scripts/sync_nav.py`.
 
+## Référencement (SEO et moteurs de réponse IA)
+
+`python scripts/sync_seo.py` réécrit, dans le `<head>` de chaque page uniquement, les données structurées schema.org (nom du site écrit FranceRoueLibre et « France Roue Libre », logo, profils X, GitHub et Tipeee, fil d’Ariane, recherche interne) et régénère `dist/sitemap.xml`. À relancer après avoir ajouté une page. `dist/robots.txt` autorise moteurs et robots des IA, `dist/llms.txt` résume le site pour les assistants IA (à tenir à jour avec les pages).
+
 ## Contribuer
 
 Une source manquante, un chiffre qui ne colle pas, un signal mal calibré : ouvrez une *issue* avec le lien vers la source. Les angles morts listés sur la page Données sont autant de demandes d’ouverture à adresser aux administrations (et à la CADA).

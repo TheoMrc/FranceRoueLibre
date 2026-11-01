@@ -1,0 +1,26 @@
+# France Roue Libre (FranceRoueLibre) : comptes publics français en données ouvertes.
+# Moteurs de recherche et moteurs de réponse IA bienvenus. Résumé pour les IA : https://francerouelibre.fr/llms.txt
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /data/search/db/
+
+# Robots des assistants et moteurs de réponse IA : explicitement autorisés
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: MistralAI-User
+User-agent: CCBot
+Allow: /
+Disallow: /api/
+Disallow: /data/search/db/
+
+Sitemap: https://francerouelibre.fr/sitemap.xml
