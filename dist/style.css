@@ -854,7 +854,7 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .nav-support:hover svg { animation: support-beat 1s ease-in-out infinite; }
 @keyframes support-beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.25); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } }
 .footer__support svg { color: #fb7185; }
-@media (max-width: 680px) { .nav-support { width: 2.1rem; padding: 0; justify-content: center; margin-left: 0; } .nav-support span { display: none; } }
+@media (max-width: 680px) { .nav-support { width: 2.1rem; padding: 0; justify-content: center; margin-left: 0; border: 0; } .nav-support:hover { background: none; } .nav-support span { display: none; } }
 @media (max-width: 480px) { .nav-x { display: none; } } /* phones: X stays in the footer, the header keeps search, heart, GitHub, theme */
 @media (max-width: 360px) { .nav-github { display: none; } }
 @media (prefers-reduced-motion: reduce) { .nav-support:hover svg { animation: none; } }
