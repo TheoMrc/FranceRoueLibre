@@ -129,11 +129,6 @@
             <button class="year-play" id="yearPlay" type="button" aria-label="Animer les années"><svg viewBox="0 0 20 20" aria-hidden="true"><path class="i-play" d="M6 4.5v11l9-5.5z"/><path class="i-pause" d="M5.5 4.5h3v11h-3zM11.5 4.5h3v11h-3z"/></svg></button>
             <label class="year-filter"><span class="sr-only">Exercice</span><select id="mapYear" aria-label="Exercice"></select></label>
           </div>
-          <div class="metric-toggle" role="group" aria-label="Unité de montant">
-            <button class="metric-btn active" type="button" data-metric="total">Total</button>
-            <button class="metric-btn" type="button" data-metric="perCapita">Par habitant</button>
-            <button class="metric-btn" type="button" data-metric="share" title="Part du total national de la vue">% national</button>
-          </div>
           <button id="reset" class="reset-btn" type="button" aria-label="Réinitialiser les filtres" title="Réinitialiser les filtres"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.5 10a6.5 6.5 0 1 0 1.9-4.6M3.5 3.5v3.2h3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
       </div>
@@ -146,11 +141,18 @@
             <div id="mapTooltip" class="map-tooltip" role="status" aria-live="polite" hidden></div>
             <div class="map-controls" aria-label="Contrôles de carte"><button id="zoomIn" type="button" aria-label="Augmenter le zoom">+</button><button id="zoomOut" type="button" aria-label="Réduire le zoom">−</button><button id="resetView" type="button" aria-label="Recentrer la carte"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
             <div class="map-legend">
-              <span id="legendTitle">Montant par territoire</span>
+              <div class="map-dom" id="mapDom" role="group" aria-label="Outre-mer"></div>
+              <div class="metric-toggle metric-toggle--map" role="group" aria-label="Unité de montant">
+                <button class="metric-btn active" type="button" data-metric="total">Total</button>
+                <button class="metric-btn" type="button" data-metric="perCapita">Par habitant</button>
+                <button class="metric-btn" type="button" data-metric="share" title="Part du total national de la vue">% national</button>
+              </div>
+              <span id="legendTitle" class="sr-only">Montant par territoire</span>
               <div class="legend-scale"></div>
               <div class="legend-labels"><span id="legendLow">Faible</span><span id="legendHigh">Élevé</span></div>
               <div class="missing-legend" id="missingLegend" hidden><span></span> Aucun compte apparié</div>
               <div class="map-badge"><span id="mapBadgeText">Chargement de la carte…</span> · <span id="detailStatus">Contours 1 km</span></div>
+              <div class="map-attrib">Contours Etalab · DGCL · OFGL</div>
             </div>
             <div class="map-loading" id="mapLoading"><span class="spinner" aria-hidden="true"></span>Chargement des contours…</div>
           </div>
@@ -218,7 +220,7 @@
     <section id="methodologie" class="section method" aria-labelledby="methodTitle">
       <div class="container method__grid">
         <div class="section__head"><span class="eyebrow">À propos des données</span><h2 id="methodTitle">Lire la carte avec le bon périmètre</h2></div>
-        <div class="method-copy"><p>« Projets aidés » reprend les subventions d’investissement accordées par l’État (DETR, DSIL, DPV et DSID) dans le fichier DGCL 2025. Les vues de budget utilisent les comptes publiés par l’Observatoire des finances et de la gestion publique locales (OFGL) : dépenses totales, avec leur montant par habitant. Les communes, départements et régions sont disponibles de 2012 à 2025. Ces deux sources mesurent des réalités différentes et restent volontairement séparées.</p><p>Les vues « Projets aidés » et « Budgets communaux » colorent le contour géographique officiel de chaque commune et le clic déclenche un zoom animé. La carte se concentre sur la France métropolitaine à l’ouverture ; les territoires ultramarins restent accessibles par la recherche, les filtres et la liste. Les contours viennent d’Etalab et les données sont sous Licence Ouverte 2.0.</p><p class="source-links"><a href="https://www.data.gouv.fr/datasets/projets-finances-par-les-dotations-de-soutien-a-linvestissement-des-collectivites-territoriales" target="_blank" rel="noopener noreferrer">DGCL · projets financés ↗</a><a href="https://data.ofgl.fr/explore/dataset/ofgl-base-communes-consolidee/" target="_blank" rel="noopener noreferrer">OFGL · comptes consolidés des communes ↗</a><a href="https://data.ofgl.fr/api/explore/v2.1/catalog/datasets" target="_blank" rel="noopener noreferrer">OFGL · API ouverte ↗</a><a href="https://etalab-datasets.geo.data.gouv.fr/contours-administratifs/2025/geojson/" target="_blank" rel="noopener noreferrer">Etalab · contours ↗</a></p></div>
+        <div class="method-copy"><p>« Projets aidés » reprend les subventions d’investissement accordées par l’État (DETR, DSIL, DPV et DSID) dans les fichiers DGCL, une année à la fois de 2018 à 2025 (sélecteur d’année au-dessus de la carte). Les vues de budget utilisent les comptes publiés par l’Observatoire des finances et de la gestion publique locales (OFGL) : dépenses totales, avec leur montant par habitant. Les communes, départements et régions sont disponibles de 2012 à 2025. Ces deux sources mesurent des réalités différentes et restent volontairement séparées.</p><p>Les vues « Projets aidés » et « Budgets communaux » colorent le contour géographique officiel de chaque commune et le clic déclenche un zoom animé. La carte se concentre sur la France métropolitaine à l’ouverture ; les territoires ultramarins restent accessibles par la recherche, les filtres et la liste. Les contours viennent d’Etalab et les données sont sous Licence Ouverte 2.0.</p><p class="source-links"><a href="https://www.data.gouv.fr/datasets/projets-finances-par-les-dotations-de-soutien-a-linvestissement-des-collectivites-territoriales" target="_blank" rel="noopener noreferrer">DGCL · projets financés ↗</a><a href="https://data.ofgl.fr/explore/dataset/ofgl-base-communes-consolidee/" target="_blank" rel="noopener noreferrer">OFGL · comptes consolidés des communes ↗</a><a href="https://data.ofgl.fr/api/explore/v2.1/catalog/datasets" target="_blank" rel="noopener noreferrer">OFGL · API ouverte ↗</a><a href="https://etalab-datasets.geo.data.gouv.fr/contours-administratifs/2025/geojson/" target="_blank" rel="noopener noreferrer">Etalab · contours ↗</a></p></div>
       </div>
     </section>
     <section class="section related" aria-labelledby="relatedTitle"><div class="container"><h2 class="related__title" id="relatedTitle">Pour aller plus loin</h2><div class="related__grid"><a class="related__card" href="impots.html"><strong>Impôts et taxes</strong><span>D’où viennent les recettes : chaque impôt, ce qu’il rapporte et coûte</span></a><a class="related__card" href="etat.html"><strong>Budget de l’État</strong><span>Le budget de l’État voté et exécuté, mission par mission</span></a><a class="related__card" href="secu.html"><strong>Sécurité sociale</strong><span>La Sécurité sociale, premier poste de dépense publique</span></a><a class="related__card" href="signaux.html"><strong>Signaux</strong><span>Les anomalies repérées dans les comptes locaux et les marchés</span></a></div></div></section>

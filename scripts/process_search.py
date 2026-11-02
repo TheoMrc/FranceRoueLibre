@@ -18,10 +18,11 @@ needs are downloaded. Tables:
 Next to the index, dist/data/search/lexicon/<2 letters>.json lists every word with its number of lines and the amount
 of those lines: small files read directly by the browser for instant suggestions and « did you mean » corrections.
 Requires: Python's sqlite3 with FTS5, duckdb. Inputs: sources/derived/*.parquet (written by process_subsidies.py and
-process_procurement.py), dist/data/web/projects-2025.json, sources/raw/plf26-budget-vert.csv.gz.
+process_procurement.py), dist/data/web/projects-YYYY.json, sources/raw/plf26-budget-vert.csv.gz.
 Run: python scripts/process_search.py
 """
 import collections
+import glob
 import json
 import os
 import re
@@ -178,11 +179,12 @@ def main():
             add(2, year, amount, 1 if framework else 0, clip(obj, 260), clip(names.get(buyer), 120), buyer, label, None)
         flush()
     # 3. DGCL projects
-    path = 'dist/data/web/projects-2025.json'
-    if os.path.exists(path):
+    # one file per year (dist/data/web/projects-YYYY.json); rows: [scheme index (0-based), dept, beneficiary, INSEE, title, amount]
+    for path in sorted(glob.glob('dist/data/web/projects-[0-9][0-9][0-9][0-9].json')):
+        year = int(path[-9:-5])
         projects = json.load(open(path, encoding='utf-8'))
-        for scheme, dept, commune, insee, title, amount in projects['rows']:
-            add(3, 2025, amount, 0, clip(title, 300), clip(commune, 120), None, projects['schemes'][scheme - 1] if isinstance(scheme, int) and scheme >= 1 else None, dept)
+        for scheme, dept, beneficiary, insee, title, amount in projects['rows']:
+            add(3, year, amount, 0, clip(title, 300), clip(beneficiary, 120), None, projects['schemes'][scheme] if isinstance(scheme, int) and 0 <= scheme < len(projects['schemes']) else None, dept)
         flush()
     # 4. Fonds vert
     path = f'{DERIVED}/fonds-vert.parquet'

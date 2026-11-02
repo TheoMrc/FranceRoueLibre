@@ -53,11 +53,33 @@ const FRL = (() => {
       wrap.appendChild(node);
       node.title = `${item.label} : ${format(item.value)}`;
       node.classList.toggle('is-highlight', Boolean(item.highlight));
-      node.querySelector('.bar__label').textContent = item.short ?? item.label;
+      { const label = node.querySelector('.bar__label'); label.textContent = label.dataset.full = String(item.short ?? item.label); }
       requestAnimationFrame(() => { node.querySelector('.bar__fill').style.height = `${Math.max(.5, 100 * Math.abs(item.value || 0) / max)}%`; });
       existing.delete(String(item.label));
     });
     existing.forEach(node => node.remove());
+    fitBarLabels(wrap);
+    if (!wrap.dataset.fit && window.ResizeObserver) { wrap.dataset.fit = '1'; new ResizeObserver(() => fitBarLabels(wrap)).observe(wrap); }
+  }
+
+  /* Labels under narrow bars (phones, long series) would run into each other: years become « ’19 », then only one
+     label in two, three… is kept, the first and the last always shown. */
+  function fitBarLabels(wrap) {
+    const nodes = [...wrap.children];
+    if (!nodes.length || !wrap.clientWidth) return;
+    const labels = nodes.map(node => node.querySelector('.bar__label'));
+    labels.forEach(label => { label.textContent = label.dataset.full ?? label.textContent; label.style.visibility = ''; });
+    const slot = wrap.clientWidth / nodes.length;
+    const widest = () => Math.max(...labels.map(label => label.getBoundingClientRect().width));
+    if (widest() + 4 <= slot) return;
+    if (labels.every(label => /^\d{4}$/.test(label.dataset.full) || !label.dataset.full)) labels.forEach(label => { if (label.dataset.full) label.textContent = `’${label.dataset.full.slice(2)}`; });
+    const step = Math.max(1, Math.ceil((widest() + 6) / slot));
+    if (step === 1) return;
+    const last = nodes.length - 1;
+    labels.forEach((label, i) => {
+      const keep = i % step === 0 && (i === last || last - i >= step);
+      if (!keep && i !== last) label.style.visibility = 'hidden';
+    });
   }
 
   /* Horizontal ranked bars. rows: [{label, value, sub, href}] */

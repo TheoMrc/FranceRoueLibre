@@ -77,6 +77,9 @@ const state = {
 
 const data = {
   projects: [],
+  projectYears: [2025],
+  projectYear: 0,
+  projectCache: new Map(),
   communes: [],
   communeMetadata: new Map(),
   communeHistory: new Map(),
@@ -373,6 +376,11 @@ function setupDerivedData() {
     const department = normalizeDepartment(row.department);
     data.populationByDepartment.set(department, (data.populationByDepartment.get(department) || 0) + (row.population || 0));
   });
+  buildProjectRows();
+}
+
+/* DGCL projects of the year shown, with their commune, department and region resolved. */
+function buildProjectRows() {
   data.projectRows = data.projects.map(row => {
     const communeData = data.communeByCode.get(row.commune) || data.communeMetadata.get(row.commune);
     const department = normalizeDepartment(row.department);
@@ -386,12 +394,38 @@ function setupDerivedData() {
   });
 }
 
+/* One file per year (projects-YYYY.json), fetched the first time the reader picks that year. */
+async function setProjectYear(year) {
+  if (data.projectYear === year && data.projectRows.length) return;
+  if (!data.projectCache.has(year)) {
+    const promise = fetchJson(`./data/web/projects-${year}.json`);
+    promise.catch(() => data.projectCache.delete(year));
+    data.projectCache.set(year, promise);
+  }
+  const projects = await data.projectCache.get(year);
+  data.projects = projects.rows.map(([scheme, department, beneficiary, commune, title, amount]) => ({ scheme: projects.schemes[scheme], department, beneficiary, commune, title, amount }));
+  data.projectYear = year;
+  if (data.features) buildProjectRows();
+  syncSchemeOptions();
+}
+
+/* The schemes (DETR, DSIL…) differ a little from one year to the next. */
+function syncSchemeOptions() {
+  if (!dom.scheme) return;
+  const schemes = [...new Set(data.projects.map(row => row.scheme).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
+  if (dom.scheme.dataset.schemes === schemes.join('|')) return;
+  dom.scheme.dataset.schemes = schemes.join('|');
+  [...dom.scheme.querySelectorAll('option')].forEach(option => { if (option.value) option.remove(); });
+  schemes.forEach(scheme => addOption(dom.scheme, scheme, scheme));
+  if (!schemes.includes(state.scheme)) state.scheme = '';
+  dom.scheme.value = state.scheme;
+}
+
 function setupFilters() {
   const projectRegionNames = data.projectRows.map(row => row.regionName).filter(Boolean);
   const regionNames = [...new Set([...data.regions.map(row => row.name), ...projectRegionNames].filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
   regionNames.forEach(name => addOption(dom.region, name, name));
-  const schemes = [...new Set(data.projects.map(row => row.scheme).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
-  schemes.forEach(scheme => addOption(dom.scheme, scheme, scheme));
+  syncSchemeOptions();
 }
 
 function inferSearchMode(query) {
@@ -425,7 +459,7 @@ function indicatorLabel() {
 }
 
 function yearsFor(mode = state.mode, indicator = state.indicator) {
-  if (mode === 'projects') return [2025];
+  if (mode === 'projects') return data.projectYears;
   if (indicator === LEGACY_INDICATOR && mode !== 'gfp') return LEGACY_YEARS;
   return data.localIndex?.levels?.[levelOf(mode)]?.years || [];
 }
@@ -452,7 +486,11 @@ function availableIndicator(mode) {
 /* Loads the rows of the current mode × indicator × year into data.communes / departments / regions / gfp. */
 async function loadModeData() {
   const mode = state.mode;
-  if (mode === 'projects') return;
+  if (mode === 'projects') {
+    if (!data.projectYears.includes(state.year)) state.year = data.projectYears[data.projectYears.length - 1];
+    await setProjectYear(state.year);
+    return;
+  }
   state.indicator = availableIndicator(mode);
   const years = yearsFor();
   if (!years.includes(state.year)) state.year = years[years.length - 1];
@@ -633,7 +671,7 @@ function modeCopy() {
   const legacy = state.indicator === LEGACY_INDICATOR;
   const localContext = `Source OFGL ${state.year} · ${label}, comptes consolidés (budgets principaux et annexes). Montants nets : une valeur négative est possible (atténuations, restitutions).`;
   const copy = {
-    projects: { filter: 'Explorer les projets', kicker: 'Projets financés par l’État', title: 'Subventions par commune', unit: 'Subventions accordées', count: 'Projets', coverage: 'Départements touchés', help: 'Cliquez sur une commune ou un département pour inspecter les projets.', context: 'Source DGCL 2025 · engagements de subventions d’investissement.' },
+    projects: { filter: 'Explorer les projets', kicker: `Projets financés par l’État · ${state.year}`, title: 'Subventions par commune', unit: 'Subventions accordées', count: 'Projets', coverage: 'Départements touchés', help: 'Cliquez sur une commune ou un département pour inspecter les projets.', context: `Source DGCL ${state.year} · engagements de subventions d’investissement (DETR, DSIL, DPV, DSID) de l’année.` },
     communes: { filter: 'Explorer les budgets communaux', kicker: `Communes · OFGL ${state.year}`, title: `${label} par commune`, unit: label, count: 'Communes', coverage: 'Départements couverts', help: 'Cliquez sur une commune pour inspecter son budget et zoomer.', context: legacy ? 'Source OFGL · dépenses totales des communes, avec montant par habitant.' : localContext },
     gfp: { filter: 'Explorer les intercommunalités', kicker: `Intercommunalités · OFGL ${state.year}`, title: `${label} par intercommunalité`, unit: label, count: 'Intercommunalités', coverage: 'Communes membres', help: 'Cliquez sur une intercommunalité pour l’inspecter.', context: `${localContext} Périmètres ${data.localIndex?.levels?.gfp?.membershipYear || ''}; les comptes antérieurs sont rattachés à l’intercommunalité de 2025 qui leur succède.` },
     departments: { filter: 'Explorer les budgets départementaux', kicker: `Départements · OFGL ${state.year}`, title: `${label} par département`, unit: label, count: 'Départements', coverage: 'Régions couvertes', help: 'Cliquez sur un département pour isoler son budget.', context: legacy ? 'Source OFGL · dépenses totales des départements, avec montant par habitant.' : localContext },
@@ -744,7 +782,9 @@ const isHover = ['boolean', ['feature-state', 'hover'], false];
 function mapPadding() {
   const width = dom.map.clientWidth;
   const base = width < 600 ? 28 : 56;
-  return { top: base + (width < 600 ? 40 : 30), bottom: base + (width < 600 ? 50 : 70), left: base, right: base };
+  // on a phone the legend card (overseas insets, units, colours) takes the bottom: keep France above it
+  const card = width < 600 ? (document.querySelector('.map-legend')?.offsetHeight || 0) + 14 : 0;
+  return { top: base + (width < 600 ? 40 : 30), bottom: Math.max(base + (width < 600 ? 50 : 70), card), left: base, right: base };
 }
 
 function buildMapStyle() {
@@ -855,8 +895,8 @@ function hideTooltip() {
   dom.tooltip.hidden = true;
 }
 
-function handleHover(point) {
-  const hit = hitTest(point);
+function handleHover(point, forcedHit) {
+  const hit = forcedHit === undefined ? hitTest(point) : forcedHit;
   const perCapita = state.metric === 'perCapita';
   const communeCode = hit?.type === 'commune' ? hit.code : '';
   const departmentCode = hit?.type === 'department' && state.mode !== 'regions' ? hit.code : '';
@@ -890,8 +930,8 @@ function departmentLabel(code, fallback) {
   return fallback;
 }
 
-function handleClick(point) {
-  const hit = hitTest(point);
+function handleClick(point, forcedHit) {
+  const hit = forcedHit === undefined ? hitTest(point) : forcedHit;
   if (!hit) {
     if (state.selectedCommune || state.selectedDepartment || state.region) clearSelection();
     return;
@@ -920,7 +960,6 @@ function initMap() {
   });
   map.touchZoomRotate.disableRotation();
   map.keyboard.disableRotation();
-  map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: 'Contours Etalab · DGCL · OFGL' }), 'bottom-right');
   mapState.map = map;
   window.__map = map;
 
@@ -1146,8 +1185,85 @@ function renderMap() {
   setText(dom.legendHigh, shownValues.length ? formatMetric(high) : 'Élevé');
   const communeMapCount = [...data.activeCommuneRowsByCode.values()].filter(row => !row.missing).length;
   setText(dom.mapBadgeText, state.mode === 'regions' ? `${data.regions.length} régions` : state.mode === 'communes' ? `${formatCount(communeMapCount)} communes` : state.mode === 'projects' ? `${formatCount(communeMapCount)} communes avec projets` : state.mode === 'gfp' ? `${formatCount(data.gfp.length)} intercommunalités` : `${data.features.length} départements`);
+  renderInsets();
   updateCamera();
   loadVisibleDetail();
+}
+
+/* ---------- Overseas insets ----------
+   The five overseas departments, each drawn in its own small tile of the legend card with the same colours as the
+   main map (their communes in the commune views). Hover gives the map's tooltip, a click selects as on the map
+   and the main map flies there. Each tile has its own scale. */
+const INSETS = [['971', 'Guadeloupe'], ['972', 'Martinique'], ['973', 'Guyane'], ['974', 'Réunion'], ['976', 'Mayotte']];
+const insetState = { built: false, tiles: [] };
+
+function ringsOf(geometry) {
+  if (!geometry) return [];
+  return geometry.type === 'Polygon' ? geometry.coordinates : geometry.type === 'MultiPolygon' ? geometry.coordinates.flat() : [];
+}
+
+function buildInsets() {
+  const host = $('mapDom');
+  if (!host || insetState.built || !data.features.length) return;
+  insetState.built = true;
+  const NS = 'http://www.w3.org/2000/svg';
+  for (const [code, name] of INSETS) {
+    const outline = data.featureByCode.get(code);
+    if (!outline) continue;
+    const communes = data.communeFeatures.features.filter(feature => String(feature.properties.departement) === code);
+    const points = ringsOf(outline.geometry).flat();
+    const lons = points.map(p => p[0]), lats = points.map(p => p[1]);
+    const [x0, x1, y0, y1] = [Math.min(...lons), Math.max(...lons), Math.min(...lats), Math.max(...lats)];
+    const k = Math.cos((y0 + y1) / 2 * Math.PI / 180);
+    const w = (x1 - x0) * k, h = y1 - y0, size = 100, pad = 6;
+    const scale = (size - 2 * pad) / Math.max(w, h);
+    const ox = (size - w * scale) / 2, oy = (size - h * scale) / 2;
+    const path = geometry => ringsOf(geometry).map(ring => 'M' + ring.map(([lon, lat]) => `${((lon - x0) * k * scale + ox).toFixed(1)},${((y1 - lat) * scale + oy).toFixed(1)}`).join('L') + 'Z').join('');
+    const tile = document.createElement('button');
+    tile.type = 'button'; tile.className = 'map-dom__tile'; tile.dataset.code = code;
+    tile.setAttribute('aria-label', `${name} : afficher sur la carte`);
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${size} ${size}`); svg.setAttribute('aria-hidden', 'true');
+    const base = document.createElementNS(NS, 'path');
+    base.setAttribute('d', path(outline.geometry)); base.setAttribute('class', 'map-dom__dept'); base.dataset.code = code;
+    svg.appendChild(base);
+    const communePaths = communes.map(feature => {
+      const node = document.createElementNS(NS, 'path');
+      node.setAttribute('d', path(feature.geometry)); node.setAttribute('class', 'map-dom__commune'); node.dataset.commune = String(feature.properties.code);
+      svg.appendChild(node);
+      return node;
+    });
+    const label = document.createElement('span'); label.className = 'map-dom__name'; label.textContent = name;
+    tile.append(svg, label);
+    host.appendChild(tile);
+    const hitFor = target => {
+      const commune = target.closest?.('[data-commune]')?.dataset.commune;
+      if (commune && ['communes', 'projects', 'gfp'].includes(state.mode) && data.activeCommuneRowsByCode.has(commune)) return { type: 'commune', code: commune };
+      return { type: 'department', code, region: String(outline.properties.region || '') };
+    };
+    const pointOf = event => { const r = dom.mapFrame.getBoundingClientRect(); return { x: event.clientX - r.left, y: event.clientY - r.top - 70 }; };
+    tile.addEventListener('pointermove', event => handleHover(pointOf(event), hitFor(event.target)));
+    tile.addEventListener('pointerleave', () => { handleHover(null, null); });
+    tile.addEventListener('click', event => { hideTooltip(); handleClick(pointOf(event), hitFor(event.target)); });
+    insetState.tiles.push({ code, tile, base, communePaths });
+  }
+}
+
+function renderInsets() {
+  buildInsets();
+  const theme = MAP_THEME[currentTheme()];
+  const communesVisible = ['communes', 'projects', 'gfp'].includes(state.mode);
+  const selected = normalizeDepartment(state.selectedDepartment || '');
+  for (const { code, tile, base, communePaths } of insetState.tiles) {
+    base.style.fill = communesVisible ? theme.empty : (mapState.departmentColors.get(code) || theme.empty);
+    base.style.stroke = theme.line;
+    for (const node of communePaths) {
+      const color = communesVisible ? mapState.communeColors.get(node.dataset.commune) : '';
+      node.style.fill = color || 'transparent';
+      node.style.stroke = color ? theme.communeLine : 'transparent';
+    }
+    tile.classList.toggle('is-selected', selected === code || (state.mode === 'regions' && state.region && regionForDepartment(code) === state.region));
+  }
 }
 
 /* ---------- Stats & inspector ---------- */
@@ -1282,13 +1398,13 @@ function renderInspector(rows, summary) {
 function renderTabs() {
   dom.modeTabs.forEach(button => { const active = button.dataset.mode === state.mode; button.classList.toggle('active', active); button.setAttribute('aria-selected', String(active)); });
   dom.metricButtons.forEach(button => button.classList.toggle('active', button.dataset.metric === state.metric));
-  dom.yearWrap.hidden = state.mode === 'projects';
+  dom.yearWrap.hidden = false;
   dom.indicatorWrap.hidden = state.mode === 'projects' || !data.localIndex;
   if (!dom.indicatorWrap.hidden) {
     dom.indicator.querySelectorAll('option').forEach(option => { option.disabled = option.value !== LEGACY_INDICATOR && !data.localIndex.aggregates[option.value]?.levels.includes(levelOf(state.mode)); });
     dom.indicator.value = state.indicator;
   }
-  if (state.mode !== 'projects') syncYearControl();
+  syncYearControl();
   dom.missingLegend.hidden = state.mode !== 'communes';
   dom.schemeFilter.hidden = state.mode !== 'projects';
   dom.scheme.disabled = state.mode !== 'projects';
@@ -1449,9 +1565,11 @@ async function init() {
   new ThemeManager();
   setupHeader();
   try {
-    const [meta, projects, boundaries, communeGeometry, localIndex] = await Promise.all([
+    const projectIndex = await fetchJson('./data/web/projects-index.json').catch(() => ({ years: [2025], latest: 2025 }));
+    data.projectYears = projectIndex.years;
+    const [meta, , boundaries, communeGeometry, localIndex] = await Promise.all([
       fetchJson('./data/web/communes-meta.json'),
-      fetchJson('./data/web/projects-2025.json'),
+      setProjectYear(projectIndex.latest),
       fetchJson('./data/departments.geojson'),
       fetchJson('./data/web/communes.json'),
       fetchJson('./data/local/index.json').catch(() => null)
@@ -1461,7 +1579,6 @@ async function init() {
       const [departmentName, regionName] = meta.departments[department] || ['', ''];
       data.communeMetadata.set(code, { code, name, department, departmentName, regionName, lon, lat });
     });
-    data.projects = projects.rows.map(([scheme, department, beneficiary, commune, title, amount]) => ({ scheme: projects.schemes[scheme], department, beneficiary, commune, title, amount }));
     data.boundaries = boundaries;
     data.communeFeatures = decodeFeatures(communeGeometry, ['code', 'nom', 'departement'], data.communeBBox);
     data.communeFeatures.features.forEach(feature => data.communeFeatureByCode.set(feature.properties.code, feature));
@@ -1470,7 +1587,8 @@ async function init() {
     setupFilters();
     setupIndicators();
     setupListeners();
-    setText(dom.dataStatus, `${formatCount(data.projects.length)} projets · ${formatCount(data.communes.length)} communes`);
+    const projectTotal = Object.values(projectIndex.counts || {}).reduce((a, b) => a + b, 0) || data.projects.length;
+    setText(dom.dataStatus, `${formatCount(projectTotal)} projets · ${formatCount(data.communes.length)} communes`);
     setText(dom.scopeText, 'DGCL · OFGL · contours Etalab · 2012–2025');
     render();
     await initMap();
