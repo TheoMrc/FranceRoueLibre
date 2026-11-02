@@ -106,7 +106,7 @@ Deux fichiers de référence sont versionnés dans `sources/` : `eurostat-cofog-
 
 ### Données
 
-- Projets : [DGCL sur data.gouv.fr](https://www.data.gouv.fr/datasets/projets-finances-par-les-dotations-de-soutien-a-linvestissement-des-collectivites-territoriales), fichier 2025 téléchargé le 15 septembre 2026, Licence Ouverte 2.0.
+- Projets : [DGCL sur data.gouv.fr](https://www.data.gouv.fr/datasets/projets-finances-par-les-dotations-de-soutien-a-linvestissement-des-collectivites-territoriales), un fichier par année de 2018 à 2025 (2025 téléchargé le 15 septembre 2026, 2018–2024 le 2 novembre 2026), Licence Ouverte 2.0. Les anciens codes de communes fusionnées sont rattachés à la commune de 2025 qui leur succède ; les quelques lignes sans département (moins de 0,1 %) sont écartées.
 - Budgets communaux : [OFGL, comptes consolidés des communes 2018–2025](https://data.ofgl.fr/explore/dataset/ofgl-base-communes-consolidee/), export filtré sur « Dépenses totales », téléchargé le 27 octobre 2026. Les budgets principaux et annexes sont consolidés au sein de chaque commune.
 - Budgets départementaux et régionaux : jeux cartographiques OFGL via [l’API ouverte](https://data.ofgl.fr/api/explore/v2.1/catalog/datasets), mêmes filtres et millésime.
 - Coordonnées communales : [API Découpage administratif](https://geo.api.gouv.fr/communes?fields=nom,code,centre&format=json), centre géographique officiel.

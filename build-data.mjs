@@ -34,23 +34,42 @@ function amount(value) {
   return Number(String(value ?? '').replace(',', '.')) || 0;
 }
 
-const dgclRows = readCsvObjects('sources/dgcl-2025.csv');
-const records = dgclRows.map((source, index) => ({
-  id: index + 1,
-  year: Number(source.exercice),
-  scheme: source.dispositif,
-  programme: source.programme,
-  beneficiaryType: source.beneficiaire_type,
-  siren: source.beneficiaire_siren,
-  department: source.beneficiaire_dep === '67A' && /^6[78]\d{3}$/.test(source.beneficiaire_code_insee)
-    ? source.beneficiaire_code_insee.slice(0, 2)
-    : source.beneficiaire_dep.replace(/^0(?=\d\d$)/, '').replace(/^20(?=[AB]$)/, '2'),
-  beneficiary: source.beneficiaire_nom,
-  commune: source.beneficiaire_code_insee,
-  title: source.intitule.trim().replace(/\s+/g, ' '),
-  cost: amount(source.cout_ht),
-  amount: amount(source.subvention)
-})).filter(record => record.amount > 0);
+// DGCL investment grants, one file per year (sources/dgcl-YYYY.csv, 2018 onwards; same columns every year).
+// Old commune codes (merged communes) are moved to the 2025 commune that succeeds them, so the map can place them;
+// a commune named only by its SIREN (21 + INSEE code + key) gets its INSEE code back from it.
+const successors = JSON.parse(fs.readFileSync('sources/communes-successeurs-2025.json', 'utf8')).map;
+const dgclYears = fs.readdirSync('sources').map(name => /^dgcl-(\d{4})\.csv$/.exec(name)?.[1]).filter(Boolean).map(Number).sort();
+function dgclDepartment(source, commune) {
+  const raw = source.beneficiaire_dep.trim().replace(/-$/, '');   // 2020 has a few « 41- »
+  if (raw === '67A' && /^6[78]\d{3}$/.test(commune)) return commune.slice(0, 2);
+  if (raw === '67A') return raw;
+  if (/^0?2?0?[AB]$/.test(raw) && /[AB]$/.test(raw)) return `2${raw.slice(-1)}`;   // 20A, 02A, 2A
+  if (/^\d{2,3}$/.test(raw)) return raw.replace(/^0(?=\d\d$)/, '');
+  if (/^\d{5}$|^2[AB]\d{3}$/.test(commune)) return /^97/.test(commune) ? commune.slice(0, 3) : commune.slice(0, 2);
+  return '';
+}
+const projectsByYear = new Map(dgclYears.map(year => {
+  const rows = readCsvObjects(`sources/dgcl-${year}.csv`).map(source => {
+    let commune = source.beneficiaire_code_insee.trim();
+    const siren = source.beneficiaire_siren.trim();
+    if (!commune && /^21(\d{5}|2[AB]\d{3})\d$/.test(siren)) commune = siren.slice(2, 7);
+    commune = successors[commune] || commune;
+    return {
+      year,
+      scheme: source.dispositif.trim(),
+      programme: source.programme,
+      beneficiaryType: source.beneficiaire_type,
+      siren,
+      department: dgclDepartment(source, commune),
+      beneficiary: source.beneficiaire_nom.trim(),
+      commune,
+      title: /^0?$/.test(source.intitule.trim()) ? 'Intitulé non publié' : source.intitule.trim().replace(/\s+/g, ' '),   // 2021: « 0 » on ~580 lines
+      cost: amount(source.cout_ht),
+      amount: amount(source.subvention)
+    };
+  }).filter(record => record.amount > 0);
+  return [year, rows];
+}));
 
 const boundaries = JSON.parse(fs.readFileSync('sources/departements-1000m.geojson', 'utf8'));
 const communeBoundaries = JSON.parse(fs.readFileSync('sources/communes-1000m.geojson', 'utf8'));
@@ -64,10 +83,12 @@ function normalizeDepartment(code) {
   return code;
 }
 
-for (const record of records) {
-  if (!deptMeta[record.department] && !deptMeta[normalizeDepartment(record.department)]) {
-    throw new Error(`Unknown department: ${record.department}`);
-  }
+for (const [year, rows] of projectsByYear) {
+  const unknown = rows.filter(record => !deptMeta[record.department] && !deptMeta[normalizeDepartment(record.department)]);
+  // a few lines name no department at all (« nan ») or a collectivity without a contour: kept out of the map, reported
+  if (unknown.length > rows.length * 0.01) throw new Error(`DGCL ${year}: ${unknown.length} lines with an unknown department (${[...new Set(unknown.map(r => r.department))].join(', ')})`);
+  if (unknown.length) console.warn(`DGCL ${year}: ${unknown.length} lines left out, unknown department ${[...new Set(unknown.map(r => r.department || '?'))].join(', ')}`);
+  projectsByYear.set(year, rows.filter(record => !unknown.includes(record)));
 }
 
 const centers = new Map(JSON.parse(fs.readFileSync('sources/communes-centres.json', 'utf8')).map(item => [item.code, item.centre?.coordinates]));
@@ -137,7 +158,7 @@ for (const feature of detailCommunes.features) {
 const [departmentDetail, regionDetail] = ['departements', 'regions'].map(name => JSON.parse(gunzipSync(fs.readFileSync(`sources/${name}-100m.geojson.gz`))));
 fs.writeFileSync('dist/data/budgets-2025.json', JSON.stringify({ communes, departments, regions }));
 // The site itself only loads the compact files in dist/data/web/.
-writeWebData({ projects: records, communes, communeBoundaries, detailGroups, departmentDetail, regionDetail });
+writeWebData({ projectsByYear, communes, communeBoundaries, detailGroups, departmentDetail, regionDetail });
 // Keep exact historical INSEE codes; never redistribute changed codes to modern communes.
 const boundaryCodes = new Set(communeBoundaries.features.map(feature => String(feature.properties.code)));
 const history = new Map();
@@ -192,4 +213,4 @@ for (let year = 2012; year <= 2025; year++) {
   fs.writeFileSync(`dist/data/local-spending-${year}.json`, JSON.stringify({ year, ...result }));
 }
 
-console.log(`${records.length} DGCL projects, ${boundaries.features.length} departmental contours, ${communes.length} commune budgets, ${departments.length} department budgets, ${regions.length} region budgets`);
+console.log(`${[...projectsByYear].map(([y, r]) => `${r.length} DGCL projects in ${y}`).join(', ')}, ${boundaries.features.length} departmental contours, ${communes.length} commune budgets, ${departments.length} department budgets, ${regions.length} region budgets`);

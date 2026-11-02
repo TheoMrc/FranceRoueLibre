@@ -77,6 +77,9 @@ const state = {
 
 const data = {
   projects: [],
+  projectYears: [2025],
+  projectYear: 0,
+  projectCache: new Map(),
   communes: [],
   communeMetadata: new Map(),
   communeHistory: new Map(),
@@ -373,6 +376,11 @@ function setupDerivedData() {
     const department = normalizeDepartment(row.department);
     data.populationByDepartment.set(department, (data.populationByDepartment.get(department) || 0) + (row.population || 0));
   });
+  buildProjectRows();
+}
+
+/* DGCL projects of the year shown, with their commune, department and region resolved. */
+function buildProjectRows() {
   data.projectRows = data.projects.map(row => {
     const communeData = data.communeByCode.get(row.commune) || data.communeMetadata.get(row.commune);
     const department = normalizeDepartment(row.department);
@@ -386,12 +394,38 @@ function setupDerivedData() {
   });
 }
 
+/* One file per year (projects-YYYY.json), fetched the first time the reader picks that year. */
+async function setProjectYear(year) {
+  if (data.projectYear === year && data.projectRows.length) return;
+  if (!data.projectCache.has(year)) {
+    const promise = fetchJson(`./data/web/projects-${year}.json`);
+    promise.catch(() => data.projectCache.delete(year));
+    data.projectCache.set(year, promise);
+  }
+  const projects = await data.projectCache.get(year);
+  data.projects = projects.rows.map(([scheme, department, beneficiary, commune, title, amount]) => ({ scheme: projects.schemes[scheme], department, beneficiary, commune, title, amount }));
+  data.projectYear = year;
+  if (data.features) buildProjectRows();
+  syncSchemeOptions();
+}
+
+/* The schemes (DETR, DSIL…) differ a little from one year to the next. */
+function syncSchemeOptions() {
+  if (!dom.scheme) return;
+  const schemes = [...new Set(data.projects.map(row => row.scheme).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
+  if (dom.scheme.dataset.schemes === schemes.join('|')) return;
+  dom.scheme.dataset.schemes = schemes.join('|');
+  [...dom.scheme.querySelectorAll('option')].forEach(option => { if (option.value) option.remove(); });
+  schemes.forEach(scheme => addOption(dom.scheme, scheme, scheme));
+  if (!schemes.includes(state.scheme)) state.scheme = '';
+  dom.scheme.value = state.scheme;
+}
+
 function setupFilters() {
   const projectRegionNames = data.projectRows.map(row => row.regionName).filter(Boolean);
   const regionNames = [...new Set([...data.regions.map(row => row.name), ...projectRegionNames].filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
   regionNames.forEach(name => addOption(dom.region, name, name));
-  const schemes = [...new Set(data.projects.map(row => row.scheme).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
-  schemes.forEach(scheme => addOption(dom.scheme, scheme, scheme));
+  syncSchemeOptions();
 }
 
 function inferSearchMode(query) {
@@ -425,7 +459,7 @@ function indicatorLabel() {
 }
 
 function yearsFor(mode = state.mode, indicator = state.indicator) {
-  if (mode === 'projects') return [2025];
+  if (mode === 'projects') return data.projectYears;
   if (indicator === LEGACY_INDICATOR && mode !== 'gfp') return LEGACY_YEARS;
   return data.localIndex?.levels?.[levelOf(mode)]?.years || [];
 }
@@ -452,7 +486,11 @@ function availableIndicator(mode) {
 /* Loads the rows of the current mode × indicator × year into data.communes / departments / regions / gfp. */
 async function loadModeData() {
   const mode = state.mode;
-  if (mode === 'projects') return;
+  if (mode === 'projects') {
+    if (!data.projectYears.includes(state.year)) state.year = data.projectYears[data.projectYears.length - 1];
+    await setProjectYear(state.year);
+    return;
+  }
   state.indicator = availableIndicator(mode);
   const years = yearsFor();
   if (!years.includes(state.year)) state.year = years[years.length - 1];
@@ -633,7 +671,7 @@ function modeCopy() {
   const legacy = state.indicator === LEGACY_INDICATOR;
   const localContext = `Source OFGL ${state.year} · ${label}, comptes consolidés (budgets principaux et annexes). Montants nets : une valeur négative est possible (atténuations, restitutions).`;
   const copy = {
-    projects: { filter: 'Explorer les projets', kicker: 'Projets financés par l’État', title: 'Subventions par commune', unit: 'Subventions accordées', count: 'Projets', coverage: 'Départements touchés', help: 'Cliquez sur une commune ou un département pour inspecter les projets.', context: 'Source DGCL 2025 · engagements de subventions d’investissement.' },
+    projects: { filter: 'Explorer les projets', kicker: `Projets financés par l’État · ${state.year}`, title: 'Subventions par commune', unit: 'Subventions accordées', count: 'Projets', coverage: 'Départements touchés', help: 'Cliquez sur une commune ou un département pour inspecter les projets.', context: `Source DGCL ${state.year} · engagements de subventions d’investissement (DETR, DSIL, DPV, DSID) de l’année.` },
     communes: { filter: 'Explorer les budgets communaux', kicker: `Communes · OFGL ${state.year}`, title: `${label} par commune`, unit: label, count: 'Communes', coverage: 'Départements couverts', help: 'Cliquez sur une commune pour inspecter son budget et zoomer.', context: legacy ? 'Source OFGL · dépenses totales des communes, avec montant par habitant.' : localContext },
     gfp: { filter: 'Explorer les intercommunalités', kicker: `Intercommunalités · OFGL ${state.year}`, title: `${label} par intercommunalité`, unit: label, count: 'Intercommunalités', coverage: 'Communes membres', help: 'Cliquez sur une intercommunalité pour l’inspecter.', context: `${localContext} Périmètres ${data.localIndex?.levels?.gfp?.membershipYear || ''}; les comptes antérieurs sont rattachés à l’intercommunalité de 2025 qui leur succède.` },
     departments: { filter: 'Explorer les budgets départementaux', kicker: `Départements · OFGL ${state.year}`, title: `${label} par département`, unit: label, count: 'Départements', coverage: 'Régions couvertes', help: 'Cliquez sur un département pour isoler son budget.', context: legacy ? 'Source OFGL · dépenses totales des départements, avec montant par habitant.' : localContext },
@@ -1282,13 +1320,13 @@ function renderInspector(rows, summary) {
 function renderTabs() {
   dom.modeTabs.forEach(button => { const active = button.dataset.mode === state.mode; button.classList.toggle('active', active); button.setAttribute('aria-selected', String(active)); });
   dom.metricButtons.forEach(button => button.classList.toggle('active', button.dataset.metric === state.metric));
-  dom.yearWrap.hidden = state.mode === 'projects';
+  dom.yearWrap.hidden = false;
   dom.indicatorWrap.hidden = state.mode === 'projects' || !data.localIndex;
   if (!dom.indicatorWrap.hidden) {
     dom.indicator.querySelectorAll('option').forEach(option => { option.disabled = option.value !== LEGACY_INDICATOR && !data.localIndex.aggregates[option.value]?.levels.includes(levelOf(state.mode)); });
     dom.indicator.value = state.indicator;
   }
-  if (state.mode !== 'projects') syncYearControl();
+  syncYearControl();
   dom.missingLegend.hidden = state.mode !== 'communes';
   dom.schemeFilter.hidden = state.mode !== 'projects';
   dom.scheme.disabled = state.mode !== 'projects';
@@ -1449,9 +1487,11 @@ async function init() {
   new ThemeManager();
   setupHeader();
   try {
-    const [meta, projects, boundaries, communeGeometry, localIndex] = await Promise.all([
+    const projectIndex = await fetchJson('./data/web/projects-index.json').catch(() => ({ years: [2025], latest: 2025 }));
+    data.projectYears = projectIndex.years;
+    const [meta, , boundaries, communeGeometry, localIndex] = await Promise.all([
       fetchJson('./data/web/communes-meta.json'),
-      fetchJson('./data/web/projects-2025.json'),
+      setProjectYear(projectIndex.latest),
       fetchJson('./data/departments.geojson'),
       fetchJson('./data/web/communes.json'),
       fetchJson('./data/local/index.json').catch(() => null)
@@ -1461,7 +1501,6 @@ async function init() {
       const [departmentName, regionName] = meta.departments[department] || ['', ''];
       data.communeMetadata.set(code, { code, name, department, departmentName, regionName, lon, lat });
     });
-    data.projects = projects.rows.map(([scheme, department, beneficiary, commune, title, amount]) => ({ scheme: projects.schemes[scheme], department, beneficiary, commune, title, amount }));
     data.boundaries = boundaries;
     data.communeFeatures = decodeFeatures(communeGeometry, ['code', 'nom', 'departement'], data.communeBBox);
     data.communeFeatures.features.forEach(feature => data.communeFeatureByCode.set(feature.properties.code, feature));
@@ -1470,7 +1509,8 @@ async function init() {
     setupFilters();
     setupIndicators();
     setupListeners();
-    setText(dom.dataStatus, `${formatCount(data.projects.length)} projets · ${formatCount(data.communes.length)} communes`);
+    const projectTotal = Object.values(projectIndex.counts || {}).reduce((a, b) => a + b, 0) || data.projects.length;
+    setText(dom.dataStatus, `${formatCount(projectTotal)} projets · ${formatCount(data.communes.length)} communes`);
     setText(dom.scopeText, 'DGCL · OFGL · contours Etalab · 2012–2025');
     render();
     await initMap();
