@@ -167,7 +167,7 @@
     const form = root.querySelector('form'), input = root.querySelector('input'), panel = root.querySelector('.omni__panel');
     const ghost = root.querySelector('.omni__ghost'), ghostText = root.querySelector('.omni__ghost-text'), ghostInner = root.querySelector('.omni__ghost-inner');
     /* a long example scrolls to the left as it is typed, so the end being typed stays in view */
-    const setGhost = text => { ghostText.textContent = text; ghostInner.style.transform = `translateX(${-Math.max(0, ghostInner.scrollWidth - ghost.clientWidth)}px)`; };
+    const setGhost = text => { ghostText.textContent = text; const over = Math.max(0, ghostInner.scrollWidth - ghost.clientWidth); ghostInner.style.transform = `translateX(${-over}px)`; ghost.classList.toggle('is-scrolled', over > 0); };
     /* examples typing themselves while the box is empty */
     let ex = 0, typing = null;
     function typeLoop() {

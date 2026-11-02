@@ -1218,6 +1218,7 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .omni__ghost[hidden] { display: none; }
 .omni__ghost-inner { display: inline-flex; align-items: center; flex: none; white-space: nowrap; will-change: transform; }
 .omni__ghost-text { white-space: pre; }
+.omni__ghost.is-scrolled { -webkit-mask-image: linear-gradient(90deg, transparent, #000 1.4rem); mask-image: linear-gradient(90deg, transparent, #000 1.4rem); }   /* short fade where the text leaves on the left */
 .omni__caret { flex: none; width: 2px; height: 1.2em; margin-left: 2px; background: var(--c-teal-600); animation: omni-blink 1s steps(2) infinite; }
 @keyframes omni-blink { 50% { opacity: 0; } }
 .omni__go { flex: none; display: inline-flex; align-items: center; gap: .45rem; height: 50px; padding: 0 1.25rem; border: 0; border-radius: var(--r-pill); background: var(--brand-gradient); color: #fff; font: 600 .98rem var(--font-display); cursor: pointer; box-shadow: 0 8px 22px rgba(37, 99, 235, .28); transition: transform .2s var(--ease); }

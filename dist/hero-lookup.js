@@ -42,7 +42,7 @@
     function countUp(el) {
       cancelAnimationFrame(raf);
       const to = +el.dataset.v, t0 = performance.now(), ms = 1800;
-      const tick = t => { const k = Math.min(1, (t - t0) / ms); el.textContent = md(to * (1 - (1 - k) ** 3)); if (k < 1) raf = requestAnimationFrame(tick); };
+      const tick = t => { const k = Math.min(1, Math.max(0, (t - t0) / ms)); el.textContent = md(to * (1 - (1 - k) ** 3)); if (k < 1) raf = requestAnimationFrame(tick); };
       raf = requestAnimationFrame(tick);
     }
     function show(i) {
