@@ -88,6 +88,7 @@
         <span class="eyebrow">Emplois publics et élus</span>
         <h1>Agents publics et élus : <span class="gradient-text">combien ils sont, ce qu’ils coûtent, et où.</span></h1>
         <p class="hero__lead" id="emLead">Enseignants, soignants, policiers, militaires, agents des mairies, élus locaux : la rémunération des personnes qui font fonctionner les services publics est le deuxième poste de dépense publique après les prestations sociales. Cette page en mesure le coût, le cartographie échelon par échelon, et pose la question que les comptes publics ne posent jamais : pour quel résultat ?</p>
+        <p class="em-scope">Cette page ne traite que des <strong>salaires publics et des élus</strong>. Le reste de la dépense a ses propres pages : <a href="etat.html">Budget de l’État</a>, <a href="operateurs.html">Opérateurs</a>, <a href="secu.html">Sécurité sociale</a>, <a href="aides.html">Aides et subventions</a>, <a href="marches.html">Marchés publics</a>, et la <a href="index.html#explorer">carte des comptes locaux</a>.</p>
         <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#effectifs">Effectifs</a><a href="#europe">Europe</a><a href="#pistes">Coût et résultats</a><a href="#fonctions">Par pôle de dépense</a><a href="#etat">État</a><a href="#collectivites">Collectivités</a><a href="#carte">Carte</a><a href="#elus">Élus</a><a href="#commune">Ma commune</a><a href="#non-publie">Ce qui manque</a><a href="#methode">Méthode</a></nav>
       </div></div>
     </section>
@@ -196,9 +197,10 @@
           <div class="panel"><h3>Conseillers municipaux pour 1 000 habitants, selon la taille de la commune</h3><div id="emSeatsStrata"></div><p class="note" id="emSeatsStrataNote"></p></div>
         </div>
         <div class="grid-2">
-          <div class="panel"><h3>Plafond légal des indemnités des maires et adjoints, par habitant</h3><div id="emCapStrata"></div><p class="note" id="emCapNote"></p></div>
+          <div class="panel"><h3 id="emCapTitle">Indemnités des maires et adjoints : versées et plafond légal</h3><div id="emCapStrata"></div><p class="note" id="emCapNote"></p></div>
           <div class="panel"><h3>Parlement et pouvoirs publics, dotations 2025</h3><div id="emPowers"></div><p class="note" id="emPowersNote"></p></div>
         </div>
+        <div class="panel panel--wide"><h3 id="emPaidTitle">Indemnités et frais des élus réellement payés, par niveau</h3><div id="emPaid" class="em-chart"></div><div id="emPaidLegend" class="tx-legend"></div><p class="note" id="emPaidNote"></p></div>
         <div class="panel panel--wide"><h3>Qui sont les élus : profession, sexe, âge</h3><div id="emProfile" class="em-stack"></div><div id="emProfileLegend" class="tx-legend"></div><p class="note" id="emProfileNote"></p></div>
         <div class="panel panel--wide"><h3>Conseillers régionaux pour 100 000 habitants</h3><div id="emRegSeats" class="em-cols2"></div><p class="note" id="emRegSeatsNote"></p></div>
         <p class="source-links" id="emElSources"></p>

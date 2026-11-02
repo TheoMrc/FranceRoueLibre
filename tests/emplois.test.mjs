@@ -84,7 +84,7 @@ test('elected officials as recorded in the Répertoire national des élus', () =
   assert.equal(by.municipaux.count - data.territory.rne.unmatchedMunicipal, t.elected);
   const regions = data.territory.regions.reduce((s, r) => s + r.seats, 0);
   assert.ok(Math.abs(regions - data.territory.departments.reduce((s, d) => s + d.elected.regionaux, 0)) < 1);
-  assert.ok(communes.rows.every(r => r.length === 7));
+  
 });
 
 test('indemnity ceiling: mayors and deputies, IB 1027', () => {
@@ -139,4 +139,16 @@ test('results: deflator, Europe, hospitals', () => {
   for (const x of h) assert.ok(x.admin / x.total > 0.08 && x.admin / x.total < 0.16, String(x.year));
   assert.ok(r.debt.series.at(-1)[1] > 100);
   assert.ok(r.pisa.series.length >= 7);
+});
+
+test('indemnities actually paid (accounts 653) against the legal base ceiling', () => {
+  const t = data.territory.totals, p = data.territory.paid;
+  assert.equal(p.year, 2025);
+  const c25 = p.levels.find(l => l.year === 2025 && l.level === 'commune');
+  assert.ok(Math.abs(c25.indemnities - t.paid) < 1e5, `${c25.indemnities} vs ${t.paid}`); // all communes matched to the 2025 codes
+  assert.ok(t.paid > 1.4e9 && t.paid < 1.7e9);
+  assert.ok(t.cap2025 > 1.5e9 && t.cap2025 < t.cap); // 2026 scale is higher than the 2020-2025 one
+  const small = data.territory.strata[0];
+  assert.ok(small.paid < small.cap2025); // small communes pay well under the ceiling
+  assert.ok(communes.rows.every(r => r.length === 11));
 });

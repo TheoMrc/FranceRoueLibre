@@ -244,6 +244,79 @@
         72.5
       ]
     ],
-    "note": "Taux maximaux en % de l’indice brut terminal. Ne sont pas comptés : majorations (chef-lieu, station de tourisme, commune sinistrée…), indemnités des conseillers municipaux délégués ou des communes de 100 000 habitants et plus, régimes propres à Paris, Lyon et Marseille, cotisations sociales et frais."
+    "note": "Taux maximaux en % de l’indice brut terminal. Ne sont pas comptés : majorations (chef-lieu, station de tourisme, commune sinistrée…), indemnités des conseillers municipaux délégués ou des communes de 100 000 habitants et plus, régimes propres à Paris, Lyon et Marseille, cotisations sociales et frais.",
+    "mayor2020": [
+      [
+        0,
+        25.5
+      ],
+      [
+        500,
+        40.3
+      ],
+      [
+        1000,
+        51.6
+      ],
+      [
+        3500,
+        55
+      ],
+      [
+        10000,
+        65
+      ],
+      [
+        20000,
+        90
+      ],
+      [
+        50000,
+        110
+      ],
+      [
+        100000,
+        145
+      ]
+    ],
+    "deputy2020": [
+      [
+        0,
+        9.9
+      ],
+      [
+        500,
+        10.7
+      ],
+      [
+        1000,
+        19.8
+      ],
+      [
+        3500,
+        22
+      ],
+      [
+        10000,
+        27.5
+      ],
+      [
+        20000,
+        33
+      ],
+      [
+        50000,
+        44
+      ],
+      [
+        100000,
+        66
+      ],
+      [
+        200001,
+        72.5
+      ]
+    ],
+    "note2020": "Barème en vigueur de 2020 à 2025 (loi n° 2019-1461 du 27 décembre 2019), qui s’applique aux indemnités payées en 2025 ; la loi du 22 décembre 2025 l’a relevé de 4 à 10 % dans les communes de moins de 20 000 habitants."
   }
 }

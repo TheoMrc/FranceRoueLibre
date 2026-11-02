@@ -2,6 +2,11 @@
 .em-chart svg, .em-map svg, .em-dom svg, .em-spark svg { display: block; width: 100%; height: auto; overflow: visible; }
 .em-chart { touch-action: pan-y; }
 
+/* Scope line under the hero lead */
+.em-scope { max-width: 640px; margin-top: var(--sp-2); color: var(--c-muted); font-size: .88rem; line-height: 1.5; }
+.em-scope a { color: var(--c-teal-600); font-weight: 600; }
+.em-scope strong { color: var(--c-ink); }
+
 /* Workforce split: one 100 % bar, then a card per versant */
 .em-split { display: flex; height: 44px; gap: 2px; border-radius: var(--r-sm); overflow: hidden; }
 .em-split span { display: flex; align-items: center; justify-content: center; min-width: 0; height: 100%; color: #fff; font-size: .8rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; transform-origin: left; animation: em-grow .8s cubic-bezier(.22, .8, .3, 1) both; }

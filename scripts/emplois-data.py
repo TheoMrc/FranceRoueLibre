@@ -445,6 +445,34 @@ def seats(code, pop):
     return SEATS['special'].get(code) or step(SEATS['strata'], pop)
 
 
+def indemnity_cap_2025(pop, n_seats):
+    """Same ceiling with the 2020-2025 scale, the one that applies to the indemnities paid in 2025."""
+    if not n_seats:
+        return 0
+    deputies = math.floor(n_seats * SEATS['maxDeputyShare'])
+    return 12 * IND['indexMonthly'] / 100 * (step(IND['mayor2020'], pop) + deputies * step(IND['deputy2020'], pop))
+
+
+def indemnities_paid():
+    """Accounts 653 actually paid (scripts/emplois-indemnites.py -> sources/indemnites/)."""
+    import csv
+    base = SRC / 'indemnites'
+    with open(base / 'totaux-par-niveau.csv', encoding='utf-8') as h:
+        levels = [{'year': int(r_['exer']), 'level': r_['niveau'], 'entities': int(r_['n_collectivites']), 'indemnities': float(r_['indemnites']),
+                   'withContributions': float(r_['indemnites_et_cotisations']), 'total': float(r_['total_653_elus'])} for r_ in csv.DictReader(h)]
+    with open(base / 'totaux-par-poste.csv', encoding='utf-8') as h:
+        posts = [{'year': int(r_['exer']), 'level': r_['niveau'], 'post': r_['poste'], 'amount': float(r_['montant_tous_budgets'])} for r_ in csv.DictReader(h)]
+    communes = {}
+    with open(sorted(base.glob('communes-2019-*.csv'))[-1], encoding='utf-8') as h:
+        for r_ in csv.DictReader(h):
+            communes.setdefault(int(r_['exer']), {})[r_['code_insee']] = (float(r_['indemnites']), float(r_['total_653_elus']))
+    others = {}
+    with open(sorted(base.glob('autres-collectivites-*.csv'))[-1], encoding='utf-8') as h:
+        for r_ in csv.DictReader(h):
+            others[r_['siren']] = {'level': r_['niveau'], 'name': r_['nom'], 'indemnities': float(r_['indemnites']), 'total': float(r_['total_653_elus'])}
+    return levels, posts, communes, others
+
+
 def indemnity_cap(pop, n_seats):
     """Maximum yearly gross indemnities of the mayor and of the largest allowed number of deputies (euros)."""
     if not n_seats:
@@ -490,6 +518,17 @@ def communes_and_departments():
 
     dep_meta = {d['code']: d for d in load(SRC / 'departements-meta.json')}
     elected, per_commune, rdep = rne(rows, dep_meta)
+    paid_levels, paid_posts, paid_communes, paid_others = indemnities_paid()
+    paid_year = max(paid_communes)
+    successors = load(SRC / 'communes-successeurs-2025.json')['map']
+    paid_by_index = {}
+    index_of = {row[0]: i for i, row in enumerate(rows)}
+    for y, table in paid_communes.items():
+        for code, (ind_, tot_) in table.items():
+            i = index_of.get(successors.get(code, code))
+            if i is not None:
+                cur = paid_by_index.setdefault(y, {}).get(i, (0, 0))
+                paid_by_index[y][i] = (cur[0] + ind_, cur[1] + tot_)
     communes = []
     for i, row in enumerate(rows):
         code, name, dep = row[0], row[1], row[2]
@@ -497,7 +536,8 @@ def communes_and_departments():
         n = seats(code, p)
         cap, deputies = indemnity_cap(p, n)
         communes.append({'i': i, 'code': code, 'name': name, 'dep': dep, 'pop': p, 'seats': n, 'deputies': deputies, 'cap': cap,
-                         'cm': per_commune[i][0], 'adj': per_commune[i][1],
+                         'cm': per_commune[i][0], 'adj': per_commune[i][1], 'cap25': indemnity_cap_2025(p, n),
+                         'paid': paid_by_index[paid_year].get(i, (None, None))[0], 'paidTotal': paid_by_index[paid_year].get(i, (None, None))[1], 'paid19': paid_by_index.get(2019, {}).get(i, (None, None))[0],
                          'fp': fp_values[yi][i], 'fp0': fp_values[y0][i], 'pop0': pop_values[pop_years.index(min(fp_years))][i], 'fn': fn_values[fn_years.index(year)][i]})
 
     # Strata
@@ -510,7 +550,9 @@ def communes_and_departments():
         fp_pop = sum(c['pop'] for c in with_fp)
         strata.append({'label': label, 'min': lo, 'max': hi, 'communes': len(group), 'population': popsum,
                        'seats': sum(c['seats'] for c in group), 'elected': sum(c['cm'] for c in group), 'deputies': sum(c['adj'] for c in group), 'mayorsAndDeputiesMax': sum(1 + c['deputies'] for c in group),
-                       'capTotal': r(sum(c['cap'] for c in group)), 'personnel': r(sum(c['fp'] for c in with_fp)),
+                       'capTotal': r(sum(c['cap'] for c in group)), 'cap2025': r(sum(c['cap25'] for c in group)),
+                       'paid': r(sum(c['paid'] or 0 for c in group)), 'paidTotal': r(sum(c['paidTotal'] or 0 for c in group)), 'paid2019': r(sum(c['paid19'] or 0 for c in group)),
+                       'paidMedianShare': r(quantile([c['paid'] / c['cap25'] for c in group if c['paid'] is not None and c['cap25']], .5), 3), 'personnel': r(sum(c['fp'] for c in with_fp)),
                        'personnelPerHab': r(sum(c['fp'] for c in with_fp) / fp_pop, 1) if fp_pop else None,
                        'operatingShare': r(sum(c['fp'] for c in with_fp) / sum(c['fn'] for c in with_fp if c['fn']), 4) if with_fp else None,
                        'q1': r(quantile(per, .25), 1), 'median': r(quantile(per, .5), 1), 'q3': r(quantile(per, .75), 1)})
@@ -524,6 +566,7 @@ def communes_and_departments():
         d['communes'] += 1; d['pop'] += c['pop']; d['pop0'] += c['pop0'] or 0; d['seats'] += c['seats']; d['cap'] += c['cap']; d['mayors'] += 1
         d['small'] += c['pop'] < 500
         d['fp']['communes'] += c['fp'] or 0; d['fp0']['communes'] += c['fp0'] or 0
+        d['paid'] = d.get('paid', 0) + (c['paid'] or 0); d['cap25'] = d.get('cap25', 0) + c['cap25']
 
     def split(level, code_to_deps, key):
         e = load(LOCAL / level / '_entities.json')
@@ -552,6 +595,12 @@ def communes_and_departments():
                 continue
             for i in idx:
                 deps[communes[i]['dep']][y]['gfp'] += v * communes[i]['pop'] / weight
+    for code, ent in paid_others.items():         # intercommunalités: indemnities split like their accounts
+        idx = members.get(code) or []
+        weight = sum(communes[i]['pop'] for i in idx)
+        if ent['level'] == 'gfp' and weight:
+            for i in idx:
+                deps[communes[i]['dep']]['paidGfp'] = deps[communes[i]['dep']].get('paidGfp', 0) + ent['indemnities'] * communes[i]['pop'] / weight
 
     def dep_targets(code, y):
         # Ville de Paris: one collectivity, published as the commune 75056, from 2019; Métropole de Lyon: already an intercommunalité
@@ -584,7 +633,8 @@ def communes_and_departments():
                          'population': d['pop'], 'communes': d['communes'], 'smallCommunes': d['small'], 'seats': d['seats'], 'cap': r(d['cap']),
                          'elected': {k: r(rdep.get(code, {}).get(k, 0), 2) for k in ('municipaux', 'adjoints', 'departementaux', 'regionaux', 'deputes', 'senateurs')},
                          'personnel': {k: r(v) for k, v in d['fp'].items()}, 'personnelTotal': r(total),
-                         'personnel0': r(total0), 'population0': d['pop0']})
+                         'personnel0': r(total0), 'population0': d['pop0'],
+                         'paid': {'communes': r(d.get('paid', 0)), 'gfp': r(d.get('paidGfp', 0)), 'cap2025': r(d.get('cap25', 0))}})
 
     # Regions: seats per inhabitant
     regions = []
@@ -594,16 +644,24 @@ def communes_and_departments():
             regions.append({'code': code, 'name': name, 'seats': r(regional_real[code]), 'population': reg_pop[code]})
 
     compact = {'year': year, 'year0': min(fp_years), 'alignedWith': 'web/communes-meta.json',
-               'columns': ['population', 'personnel (k€)', 'personnel year0 (k€)', 'population year0', 'operating spending (k€)', 'conseillers municipaux (RNE)', 'adjoints (RNE)'],
-               'rows': [[c["pop"], kilo(c["fp"]), kilo(c["fp0"]), c["pop0"], kilo(c["fn"]), c["cm"], c["adj"]] for c in communes]}
+               'paidYear': paid_year,
+               'columns': ['population', 'personnel (k€)', 'personnel year0 (k€)', 'population year0', 'operating spending (k€)', 'conseillers municipaux (RNE)', 'adjoints (RNE)',
+                           f'indemnités payées {paid_year} (€)', 'indemnités payées 2019 (€)', f'total comptes 653 élus {paid_year} (€)', f'plafond légal {paid_year} (€)'],
+               'rows': [[c["pop"], kilo(c["fp"]), kilo(c["fp0"]), c["pop0"], kilo(c["fn"]), c["cm"], c["adj"], r(c['paid']) if c['paid'] is not None else None,
+                         r(c['paid19']) if c['paid19'] is not None else None, r(c['paidTotal']) if c['paidTotal'] is not None else None, r(c['cap25'])] for c in communes]}
     totals = {'communes': len(communes), 'population': sum(c['pop'] for c in communes), 'seats': sum(c['seats'] for c in communes),
               'mayors': sum(1 for c in communes if c['seats']), 'noCouncil': [c['name'] for c in communes if not c['seats']], 'deputiesMax': sum(c['deputies'] for c in communes), 'cap': r(sum(c['cap'] for c in communes)),
               'smallCommunes': sum(1 for c in communes if c['pop'] < 500), 'communesUnder1000': sum(1 for c in communes if c['pop'] < 1000),
               'seatsUnder1000': sum(c['seats'] for c in communes if c['pop'] < 1000), 'popUnder1000': sum(c['pop'] for c in communes if c['pop'] < 1000),
               'elected': sum(c['cm'] for c in communes), 'electedDeputies': sum(c['adj'] for c in communes),
               'electedUnder1000': sum(c['cm'] for c in communes if c['pop'] < 1000),
+              'paid': r(sum(c['paid'] or 0 for c in communes)), 'paidTotal': r(sum(c['paidTotal'] or 0 for c in communes)), 'cap2025': r(sum(c['cap25'] for c in communes)),
+              'communesPaid': sum(1 for c in communes if c['paid'] is not None), 'communesAboveCap': sum(1 for c in communes if c['paid'] and c['cap25'] and c['paid'] > c['cap25'] * 1.001),
               'communesBelowLegal': sum(1 for c in communes if c['seats'] and c['cm'] < c['seats']), 'communesWithoutRne': sum(1 for c in communes if c['seats'] and not c['cm'])}
-    return {'year': year, 'year0': min(fp_years), 'strata': strata, 'departments': out_deps, 'regions': regions, 'totals': totals, 'rne': elected}, compact
+    big = sorted(((paid_others[k]['indemnities'], paid_others[k]['name'], paid_others[k]['level']) for k in paid_others), reverse=True)[:10]
+    paid = {'year': paid_year, 'levels': paid_levels, 'posts': paid_posts, 'largestOthers': big,
+            'source': 'DGFiP, balances comptables des collectivités (comptes de gestion), comptes 653', 'url': 'https://data.economie.gouv.fr/explore/?q=balances+comptables'}
+    return {'year': year, 'year0': min(fp_years), 'strata': strata, 'departments': out_deps, 'regions': regions, 'totals': totals, 'rne': elected, 'paid': paid}, compact
 
 
 def main():

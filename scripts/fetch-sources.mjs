@@ -117,6 +117,30 @@ const SOURCES = [
     { path: 'raw/drees/capact_pm_pnm.7z', url: 'https://data.drees.solidarites-sante.gouv.fr/api/explore/v2.1/catalog/datasets/708_bases-statistiques-sae/attachments/capact_pm_pnm_7z' },
   ] },
 
+  // ---- Indemnities actually paid to local elected officials (accounts 653) ----
+  { id: 'balances-653-communes-2017', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-communes-en-2017', where: 'startswith(compte,"653")', note: 'Comptes 653 (indemnités et frais des élus) des communes, 2017' },
+  { id: 'balances-653-communes-2018', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-communes-en-2018', where: 'startswith(compte,"653")', note: 'Comptes 653 (indemnités et frais des élus) des communes, 2018' },
+  { id: 'balances-653-communes-2019', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-communes-en-2019', where: 'startswith(compte,"653")', note: 'Comptes 653 (indemnités et frais des élus) des communes, 2019' },
+  { id: 'balances-653-communes-2020', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-communes-en-2020', where: 'startswith(compte,"653")', note: 'Comptes 653 (indemnités et frais des élus) des communes, 2020' },
+  { id: 'balances-653-communes-2021', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-communes-en-2021', where: 'startswith(compte,"653")', note: 'Comptes 653 (indemnités et frais des élus) des communes, 2021' },
+  { id: 'balances-653-communes-2022', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-communes-en-2022', where: 'startswith(compte,"653")', note: 'Comptes 653 (indemnités et frais des élus) des communes, 2022' },
+  { id: 'balances-653-communes-2023', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-communes-en-2023', where: 'startswith(compte,"653")', note: 'Comptes 653 (indemnités et frais des élus) des communes, 2023' },
+  { id: 'balances-653-communes-2024', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-communes-en-2024', where: 'startswith(compte,"653")', note: 'Comptes 653 (indemnités et frais des élus) des communes, 2024' },
+  { id: 'balances-653-communes-2025', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-communes-en-2025', where: 'startswith(compte,"653")', note: 'Comptes 653 (indemnités et frais des élus) des communes, 2025' },
+  { id: 'balances-653-gfp', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-groupements-a-fiscalite-propre-depuis-2010', where: 'startswith(compte,"653")', note: 'Comptes 653 (élus), toutes années de l’export' },
+  { id: 'balances-653-dept', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-departements', where: 'startswith(compte,"653")', note: 'Comptes 653 (élus), toutes années de l’export' },
+  { id: 'balances-653-reg', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-regions-', where: 'startswith(compte,"653")', note: 'Comptes 653 (élus), toutes années de l’export' },
+  { id: 'balances-653-synd', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-syndicats-depuis-2010', where: 'startswith(compte,"653")', note: 'Comptes 653 (élus), toutes années de l’export' },
+  { id: 'balances-653-pj', kind: 'files', note: 'Balances complètes 2017–2019 publiées en pièces jointes (années absentes des exports)', files: [
+    { path: 'reg_2017.csv', url: 'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/balances-comptables-des-regions-/attachments/balance_reg_2017_dec2018_csv' },
+    { path: 'reg_2018.csv', url: 'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/balances-comptables-des-regions-/attachments/balance_reg_2018_dec2019_csv' },
+    { path: 'reg_2019.csv', url: 'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/balances-comptables-des-regions-/attachments/balance_reg_2019_dec2020_csv' },
+    { path: 'dept_2017.csv', url: 'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/balances-comptables-des-departements/attachments/balance_deptctu_2017_dec2018_csv' },
+    { path: 'dept_2018.csv', url: 'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/balances-comptables-des-departements/attachments/balance_deptctu_2018_dec2019_csv' },
+    { path: 'gfp_2018.csv', url: 'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/balances-comptables-des-groupements-a-fiscalite-propre-depuis-2010/attachments/balance_gfpeptml_2018_dec2019_csv' },
+    { path: 'gfp_2017.zip', url: 'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/balances-comptables-des-groupements-a-fiscalite-propre-depuis-2010/attachments/balance_gfp_2017_zip' },
+  ] },
+
   // ---- Integrity context ----
   { id: 'atteintes-probite', kind: 'ods', host: ECO, dataset: 'atteintes-a-la-probite-dans-les-decisions-de-justice-donnees-nationales-agregees-2021-2025' },
 
