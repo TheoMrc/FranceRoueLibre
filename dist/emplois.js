@@ -15,6 +15,38 @@
   const link = (url, text) => url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(text)}</a>` : esc(text);
   const kpi = (label, value, sub) => `<div class="kpi"><span>${esc(label)}</span><strong>${value}</strong>${sub ? `<small>${sub}</small>` : ''}</div>`;
   const paidAll_ = d => (d.paid.communes || 0) + (d.paid.gfp || 0) + (d.paid.departement || 0) + (d.paid.region || 0);   // indemnities paid at every local level, per département
+  /* Pictograms drawn for this page (24×24, stroke = currentColor), shown before row titles. */
+  const ICONS = {
+    school: 'M3 21h18M5 21V10l7-5 7 5v11M9 21v-5h6v5M12 5V2h3',
+    pupil: 'M7 9a5 5 0 0 1 10 0v11H7zM9.5 6.5V5a2.5 2.5 0 0 1 5 0v1.5M9 14h6',
+    admin: 'M3 21h18M4 10h16M12 3l8 4.5H4zM6 10v8M10 10v8M14 10v8M18 10v8M4 18h16',
+    army: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM12 8.5l1.1 2.3 2.5.3-1.8 1.7.5 2.4-2.3-1.2-2.3 1.2.5-2.4-1.8-1.7 2.5-.3z',
+    police: 'M12 2.5l2.1 3 3.6.5-.5 3.6 2.5 2.4-2.5 2.4.5 3.6-3.6.5-2.1 3-2.1-3-3.6-.5.5-3.6L4.3 12l2.5-2.4-.5-3.6 3.6-.5zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z',
+    money: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM15 8.8a3.8 3.8 0 1 0 0 6.4M7.8 11h6M7.8 13h6',
+    justice: 'M12 3v17M7 20.5h10M4 7h16M6 7l-3 6.5a3 3 0 0 0 6 0zM18 7l-3 6.5a3 3 0 0 0 6 0z',
+    town: 'M3 21h18M5 21V11h14v10M3 11l9-6 9 6M12 2v3M10 21v-4h4v4M8 14h1.5M14.5 14H16',
+    health: 'M4 4h16v16H4zM12 8v8M8 12h8',
+    leaf: 'M5 19C5 11 11 5 19 5c0 8-6 14-14 14zM5 19l7-7',
+    plane: 'M21 3L3 10.5l7 3 3 7z',
+    globe: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18',
+    people: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3 2.7-5 6-5s6 2 6 5M17 11a2.5 2.5 0 1 0 0-5M16 15c2.8 0 5 1.6 5 4.5',
+    chart: 'M4 20V11M10 20V5M16 20v-8M2 20.5h20',
+    wheat: 'M12 21V9M12 9c-2.5 0-4-1.5-4-4 2.5 0 4 1.5 4 4zm0 0c0-2.5 1.5-4 4-4 0 2.5-1.5 4-4 4zM12 14c-2.5 0-4-1.5-4-4M12 14c2.5 0 4-1.5 4-4',
+    palette: 'M12 3a9 9 0 1 0 0 18c1.4 0 2-1 2-2s-1-1.4-1-2.4 1-1.6 2.4-1.6H18a3 3 0 0 0 3-3c0-5-4-9-9-9zM7.5 11.5h.01M10 7.5h.01M15 7.5h.01',
+    search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4',
+    flask: 'M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3',
+    other: 'M5 5h4v4H5zM15 5h4v4h-4zM5 15h4v4H5zM15 15h4v4h-4z',
+    island: 'M3 20c3-2 6-2 9 0s6 2 9 0M12 18V8M12 8C10 5 7 5 5 6c2 0 4 1 7 2zm0 0c2-3 5-3 7-2-2 0-4 1-7 2z',
+    sport: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7.5l3.8 2.8-1.5 4.4H9.7l-1.5-4.4zM12 3v4.5M21 10.5l-5.2-.2M3 10.5l5.2-.2M17.5 19.5l-3.2-4.8M6.5 19.5l3.2-4.8',
+    reserve: 'M7 3h10M7 21h10M8 3c0 5 8 6 8 9s-8 4-8 9M16 3c0 5-8 6-8 9s8 4 8 9',
+    paper: 'M5 4h11v16H6a2 2 0 0 1-2-2V5a1 1 0 0 1 1-1zM16 8h3v10a2 2 0 0 1-2 2M7.5 8h5M7.5 12h5M7.5 16h3',
+    gear: 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3',
+    pin: 'M12 21s-6.5-5.5-6.5-11a6.5 6.5 0 0 1 13 0c0 5.5-6.5 11-6.5 11zM12 7.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z',
+    heart: 'M12 20s-7-4.4-8.6-8.6C2.3 8.5 4.1 5.3 7.2 5.2c1.9-.1 3.4.9 4.8 2.8 1.4-1.9 2.9-2.9 4.8-2.8 3.1.1 4.9 3.3 3.8 6.2C19 15.6 12 20 12 20z',
+    flag: 'M5 21V4M5 4h12l-2.5 4L17 12H5',
+  };
+  const MISSION_ICON = { EC: 'school', DA: 'army', SB: 'police', GA: 'money', JA: 'justice', TA: 'leaf', AB: 'admin', XC: 'plane', AA: 'globe', TB: 'people', DB: 'chart', AC: 'wheat', CB: 'palette', CA: 'search', RA: 'flask', DC: 'admin', OA: 'island', SF: 'sport', PC: 'reserve', XJ: 'paper', TR: 'gear', VA: 'pin', SE: 'heart', MB: 'flag', SA: 'health' };
+  const icon = name => ICONS[name] ? `<svg class="em-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[name]}"/></svg>` : '';
   const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[-'’]/g, ' ').replace(/\s+/g, ' ').trim();
   const COLORS = ['var(--tx-1)', 'var(--tx-3)', 'var(--tx-2)', 'var(--tx-7)', 'var(--tx-4)', 'var(--tx-8)', 'var(--tx-5)', 'var(--tx-other)'];
   /* Sequential scale for the map: one hue, from the surface (low) to full strength (high), in both themes. */
@@ -58,7 +90,7 @@
   /* Horizontal bars. rows: [{label, value, sub, color, focus, tip, id}] ; with onPick the rows are buttons. */
   function rows(el, list, { format = v => nf(v), max = null, onPick = null, active = null, after = null } = {}) {
     const top = max ?? Math.max(...list.filter(r => !r.noBar).map(r => Math.abs(r.value || 0)), 1e-9);
-    const line = r => `<span class="em-line"><span>${r.prefix || ''}<span class="em-lab">${esc(r.label)}</span>${r.sub ? `<small><span>${r.sub}</span></small>` : ''}</span><strong>${format(r.value, r)}</strong></span>${r.noBar ? '' : `<span class="em-track"><span class="em-fill" style="--w:${Math.min(100, 100 * Math.abs(r.value || 0) / top).toFixed(2)}%;--c:${r.color || 'var(--tx-1)'}"></span></span>`}`;
+    const line = r => `<span class="em-line"><span>${r.prefix || ''}<span class="em-lab">${r.icon ? icon(r.icon) : ''}${esc(r.label)}</span>${r.sub ? `<small><span>${r.sub}</span></small>` : ''}</span><strong>${format(r.value, r)}</strong></span>${r.noBar ? '' : `<span class="em-track"><span class="em-fill" style="--w:${Math.min(100, 100 * Math.abs(r.value || 0) / top).toFixed(2)}%;--c:${r.color || 'var(--tx-1)'}"></span></span>`}`;
     el.innerHTML = `<ul class="em-rows">${list.map((r, i) => `<li class="${r.focus ? 'is-focus' : ''}${active != null && r.id === active ? ' is-active' : ''}"${r.tip ? ` data-tip="${esc(r.tip)}"` : ''}>${onPick ? `<button type="button" data-i="${i}">${line(r)}</button>` : `<div class="em-row">${line(r)}</div>`}${after ? after(r) : ''}</li>`).join('')}</ul>`;
     requestAnimationFrame(() => requestAnimationFrame(() => el.querySelectorAll('.em-fill').forEach(n => n.classList.add('is-in'))));
     if (onPick) el.querySelectorAll('.em-rows > li > button').forEach(b => b.addEventListener('click', () => onPick(list[+b.dataset.i], b)));
@@ -206,25 +238,25 @@
       kpi(`Agents publics, fin ${y}`, `${nf(total / 1e6, 2)} M`, `${nf(1000 * total / pop)} pour 1 000 habitants ; salaire net moyen ${eur(W.salaries.find(s => s.versant === 'Ensemble FP' && s.population === 'Ensemble').net)} par mois`),
     ].join('');
     rows($('emSynPayers'), [
-      { label: 'État : ministères et budgets annexes', value: t2, sub: `${pctS(100 * t2 / last.d1, 0)} · dépenses de personnel votées pour ${st} (titre 2), cotisations de retraite comprises`, color: 'var(--tx-1)' },
-      { label: 'Collectivités et leurs établissements', value: loc, sub: `${pctS(100 * loc / last.d1, 0)} · frais de personnel ${locYear} des communes, intercommunalités, départements, régions, syndicats, Sdis, CCAS`, color: 'var(--tx-3)' },
-      { label: 'Hôpitaux publics, sécurité sociale, universités et autres opérateurs de l’État', value: rest, sub: `${pctS(100 * rest / last.d1, 0)} · par différence avec le total de ${md(last.d1)} ; aucun compte public ne donne ce montant directement`, color: 'var(--tx-other)' },
+      { icon: 'admin', label: 'État : ministères et budgets annexes', value: t2, sub: `${pctS(100 * t2 / last.d1, 0)} · dépenses de personnel votées pour ${st} (titre 2), cotisations de retraite comprises`, color: 'var(--tx-1)' },
+      { icon: 'town', label: 'Collectivités et leurs établissements', value: loc, sub: `${pctS(100 * loc / last.d1, 0)} · frais de personnel ${locYear} des communes, intercommunalités, départements, régions, syndicats, Sdis, CCAS`, color: 'var(--tx-3)' },
+      { icon: 'health', label: 'Hôpitaux publics, sécurité sociale, universités et autres opérateurs de l’État', value: rest, sub: `${pctS(100 * rest / last.d1, 0)} · par différence avec le total de ${md(last.d1)} ; aucun compte public ne donne ce montant directement`, color: 'var(--tx-other)' },
     ], { format: v => md(v) });
     // inside the State: the largest blocks of titre 2, programme by programme (PLF), administration of the Éducation nationale apart
     const M = Object.fromEntries(D.state.missions.map(m => [m.code, m]));
     const prog = (mc, pc) => ((M[mc]?.progs || []).find(p => p.code === pc)?.t2 || 0) / 1000;
     const mis = mc => (M[mc]?.t2 || 0) / 1000;
     const blocks = [
-      { label: 'Écoles, collèges et lycées : enseignants et personnels des établissements', value: prog('EC', '140') + prog('EC', '141') + prog('EC', '139'), sub: `Éducation nationale, direction des établissements comprise : premier degré public ${md(prog('EC', '140'))}, second degré public ${md(prog('EC', '141'))}, privé sous contrat ${md(prog('EC', '139'))}`, color: 'var(--tx-1)' },
-      { label: 'Vie de l’élève', value: prog('EC', '230'), sub: 'assistants d’éducation, accompagnants d’élèves handicapés, conseillers principaux d’éducation, santé scolaire', color: 'var(--tx-1)' },
-      { label: 'Administration de l’Éducation nationale', value: prog('EC', '214'), sub: `ministère, rectorats et services académiques (programme « Soutien »), ${pctS(100 * prog('EC', '214') / mis('EC'), 1)} du personnel de la mission`, color: 'var(--tx-2)' },
-      { label: 'Armées', value: mis('DA'), sub: 'militaires et civils de la Défense, tous dans le programme « Soutien » : terrain et administration ne sont pas séparés', color: 'var(--tx-1)' },
-      { label: 'Police et gendarmerie', value: prog('SB', '176') + prog('SB', '152'), sub: `police ${md(prog('SB', '176'))}, gendarmerie ${md(prog('SB', '152'))}`, color: 'var(--tx-1)' },
-      { label: 'Finances publiques et douanes', value: mis('GA'), sub: `dont administration centrale de Bercy ${md(prog('GA', '218'), 2)}`, color: 'var(--tx-1)' },
-      { label: 'Justice', value: mis('JA'), sub: `prisons ${md(prog('JA', '107'))}, tribunaux ${md(prog('JA', '166'))}, administration ${md(prog('JA', '310'), 2)}`, color: 'var(--tx-1)' },
+      { icon: 'school', label: 'Écoles, collèges et lycées : enseignants et personnels des établissements', value: prog('EC', '140') + prog('EC', '141') + prog('EC', '139'), sub: `Éducation nationale, direction des établissements comprise : premier degré public ${md(prog('EC', '140'))}, second degré public ${md(prog('EC', '141'))}, privé sous contrat ${md(prog('EC', '139'))}`, color: 'var(--tx-1)' },
+      { icon: 'pupil', label: 'Vie de l’élève', value: prog('EC', '230'), sub: 'assistants d’éducation, accompagnants d’élèves handicapés, conseillers principaux d’éducation, santé scolaire', color: 'var(--tx-1)' },
+      { icon: 'admin', label: 'Administration de l’Éducation nationale', value: prog('EC', '214'), sub: `ministère, rectorats et services académiques (programme « Soutien »), ${pctS(100 * prog('EC', '214') / mis('EC'), 1)} du personnel de la mission`, color: 'var(--tx-2)' },
+      { icon: 'army', label: 'Armées', value: mis('DA'), sub: 'militaires et civils de la Défense, tous dans le programme « Soutien » : terrain et administration ne sont pas séparés', color: 'var(--tx-1)' },
+      { icon: 'police', label: 'Police et gendarmerie', value: prog('SB', '176') + prog('SB', '152'), sub: `police ${md(prog('SB', '176'))}, gendarmerie ${md(prog('SB', '152'))}`, color: 'var(--tx-1)' },
+      { icon: 'money', label: 'Finances publiques et douanes', value: mis('GA'), sub: `dont administration centrale de Bercy ${md(prog('GA', '218'), 2)}`, color: 'var(--tx-1)' },
+      { icon: 'justice', label: 'Justice', value: mis('JA'), sub: `prisons ${md(prog('JA', '107'))}, tribunaux ${md(prog('JA', '166'))}, administration ${md(prog('JA', '310'), 2)}`, color: 'var(--tx-1)' },
     ];
     const shown = blocks.reduce((s, b) => s + b.value, 0), stateAll = G.t2 / 1000 + G.t2Annexes / 1000;
-    blocks.push({ label: 'Tous les autres ministères', value: stateAll - shown, sub: 'écologie, intérieur hors police et gendarmerie, affaires étrangères, ministères sociaux, culture, budgets annexes…', color: 'var(--tx-other)' });
+    blocks.push({ icon: 'other', label: 'Tous les autres ministères', value: stateAll - shown, sub: 'écologie, intérieur hors police et gendarmerie, affaires étrangères, ministères sociaux, culture, budgets annexes…', color: 'var(--tx-other)' });
     $('emSynStateTitle').textContent = `Dont, à l’État (${md(stateAll)}) : les plus gros postes`;
     rows($('emSynState'), blocks.map(b => ({ ...b, sub: `${pctS(100 * b.value / stateAll, 0)} · ${b.sub}` })), { format: v => md(v), max: stateAll, onPick: () => {} });
     accordion($('emSynState'));
@@ -233,7 +265,7 @@
     const vs = { fpe: ['État', 'FPE', 'var(--tx-1)'], fpt: ['Territoriale', 'FPT', 'var(--tx-3)'], fph: ['Hospitalière', 'FPH (ensemble)', 'var(--tx-5)'] };
     rows($('emSynEmployers'), Object.entries(vs).map(([k, [label, sv, color]]) => {
       const n = W.versants[k][yk], sal = W.salaries.find(s => s.versant === sv && s.population === 'Ensemble');
-      return { label: `Fonction publique ${label === 'État' ? 'de l’État' : label.toLowerCase()}`, value: n, sub: `${pctS(100 * n / total, 0)} des agents · salaire net moyen ${eur(sal.net)} par mois`, color };
+      return { icon: { fpe: 'admin', fpt: 'town', fph: 'health' }[k], label: `Fonction publique ${label === 'État' ? 'de l’État' : label.toLowerCase()}`, value: n, sub: `${pctS(100 * n / total, 0)} des agents · salaire net moyen ${eur(sal.net)} par mois`, color };
     }), { format: v => `${nf(v / 1e6, 2)} M` });
     $('emSynEmployersNote').innerHTML = `Agents au 31 décembre ${y}, fonctionnaires, contractuels et militaires (DGAFP). Les agents des opérateurs de l’État (universités, agences) sont comptés dans la fonction publique de l’État ; ceux des caisses de sécurité sociale, de droit privé, n’y sont pas. Détail : <a href="#effectifs">effectifs</a>.`;
     // who earns what
@@ -485,7 +517,7 @@
     ].join('');
     let unit = 'md'; const open = new Set();
     function draw() {
-      const data = list.map(m => ({ id: m.code, label: m.name, value: unit === 'md' ? m.t2 : 100 * m.t2 / m.cp, sub: unit === 'md' ? `${pctS(100 * m.t2 / m.cp, 0)} des crédits de la mission (${md(m.cp / 1000)})${m.type === 'BA' ? ' · budget annexe' : ''}` : `${md(m.t2 / 1000, 2)} sur ${md(m.cp / 1000)}`, m }))
+      const data = list.map(m => ({ id: m.code, icon: MISSION_ICON[m.code] || 'other', label: m.name, value: unit === 'md' ? m.t2 : 100 * m.t2 / m.cp, sub: unit === 'md' ? `${pctS(100 * m.t2 / m.cp, 0)} des crédits de la mission (${md(m.cp / 1000)})${m.type === 'BA' ? ' · budget annexe' : ''}` : `${md(m.t2 / 1000, 2)} sur ${md(m.cp / 1000)}`, m }))
         .sort((a, b) => b.value - a.value);
       rows($('emStBars'), data, {
         format: v => unit === 'md' ? (v >= 1000 ? md(v / 1000) : `${nf(v)} M€`) : pctS(v, 0),
