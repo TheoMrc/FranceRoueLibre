@@ -34,7 +34,7 @@ SRC = {1: 'Subventions aux associations', 2: 'Marchés publics', 3: 'Projets aid
 
 DECLARATIONS: List[dict] = [
     {'name': 'rechercher_depenses',
-     'description': 'Cherche un mot ou une expression dans les 1,9 million de lignes de dépenses publiées (objet des '
+     'description': 'Cherche un mot ou une expression dans les 2,1 millions de lignes de dépenses publiées (objet des '
                     'subventions aux associations 2010-2023, des marchés publics 2014-2026, projets DGCL, Fonds vert, '
                     'aides de minimis, intitulés du budget de l’État). Renvoie le nombre de lignes, les montants par '
                     'source et par année, les principaux bénéficiaires, programmes, départements et les plus grosses '

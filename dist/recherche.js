@@ -302,7 +302,7 @@
       ...(state.family ? [`<a class="sr-chip sr-chip--family" href="?q=${encodeURIComponent(state.family.q)}">Toutes les formes : ${esc(state.family.label)}</a>`] : []),
       ...state.related.map(row => `<a class="sr-chip" href="?q=${encodeURIComponent(row.q)}">${esc(row.label)}<small>${count(row.lines)} ligne${row.lines > 1 ? 's' : ''}${row.amount ? ` · ${money(row.amount)}` : ''}</small></a>`)];
     $('srRelated').innerHTML = related.length ? `<h3>Autres formes et mots proches</h3><div class="sr-chips">${related.join('')}</div>` : '';
-    $('srMethod').textContent = 'Méthode : recherche plein texte sans accents ni majuscules dans 1,9 million de lignes publiées (subventions de l’État aux associations 2010–2023, marchés publics 2014–2026, projets DGCL 2018–2025, Fonds vert 2023–2025, aides de minimis 2026, budget vert de l’État 2026). Plusieurs mots sont cherchés comme une expression ; le dernier mot inclut ses terminaisons (pluriel, féminin).';
+    $('srMethod').textContent = 'Méthode : recherche plein texte sans accents ni majuscules dans 2,1 millions de lignes publiées (subventions de l’État aux associations 2010–2023, marchés publics 2014–2026, projets DGCL 2018–2025, Fonds vert 2023–2025, aides de minimis 2026, budget vert de l’État 2026). Plusieurs mots sont cherchés comme une expression ; le dernier mot inclut ses terminaisons (pluriel, féminin).';
     resolveNames($('srResults'));
   }
 
