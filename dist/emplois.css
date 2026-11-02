@@ -206,3 +206,10 @@ main .panel + .grid-2, main .panel + .panel { margin-top: var(--sp-3); }
   .em-sal td.num { min-width: 0; }
   .em-salbar { right: .45rem; width: calc((100% - .9rem) * var(--w) / 100); }
 }
+
+/* Folder tabs on the top edge of a table, like the main map's tabs: every tab visible, no sideways scroll */
+main .chip-select.em-tabs { display: flex; flex-wrap: nowrap; gap: .15rem; width: 100%; max-width: none; margin: 0; padding: 0; overflow: visible; border-radius: 0; background: transparent; box-shadow: inset 0 -2px 0 var(--c-line); -webkit-mask-image: none; mask-image: none; }
+main .chip-select.em-tabs button { flex: 1 1 auto; min-width: 0; padding: .55rem .3rem; border-radius: 10px 10px 0 0; background: var(--c-surface-2); font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+main .chip-select.em-tabs button.active { background: var(--brand-gradient); color: #fff; }
+.em-tabs + .table-wrap .data-table thead th { padding-top: .8rem; }
+@media (max-width: 560px) { main .chip-select.em-tabs button { font-size: .74rem; padding: .5rem .15rem; } }
