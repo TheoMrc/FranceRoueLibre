@@ -14,7 +14,7 @@
   const EXAMPLES = [
     'Combien Rennes dépense-t-elle en frais de personnel, et par habitant ?',
     'Quelles subventions publiques pour la vidéoprotection, et à qui ?',
-    'Combien coûtent les niches fiscales en 2026 ?',
+    'Combien nous a coûté Bruno Le Maire ?',   // answered from server/assistant/faq.json, no credit spent
   ];
   let status = null, busy = null, provider = 'auto', store = { v: 1, convs: [], current: null };
   const logoOK = {};

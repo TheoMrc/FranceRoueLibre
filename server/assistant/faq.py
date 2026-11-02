@@ -1,6 +1,7 @@
 """Saved answers (faq.json, built by scripts/loupe-faq.py): a question that many readers ask is answered from this file,
 at once and without calling a model, so it spends no credits. Only the first question of a conversation is matched (a
-follow-up needs the context, so it goes to the model), and every group of words of an entry must appear in it."""
+follow-up needs the context, so it goes to the model): an entry matches when, for one of its sets of word groups
+(match_any), a word of every group appears in the question."""
 import json
 import re
 import unicodedata
@@ -31,8 +32,9 @@ def find(messages: list) -> dict | None:
         return None
     q = norm(messages[-1].get('text'))
     for e in entries():
-        if all(any(norm(w).strip() in q for w in group) for group in e.get('match', [])):
-            return e
+        for groups in e.get('match_any') or [e.get('match', [])]:
+            if groups and all(any(norm(w).strip() in q for w in group) for group in groups):
+                return e
     return None
 
 

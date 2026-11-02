@@ -276,6 +276,7 @@ class SavedAnswersTest(unittest.TestCase):
         from assistant import faq
         ask = lambda t: faq.find([{'role': 'user', 'text': t}])
         self.assertIsNotNone(ask('dette publique pendant que Lemaire était à Bercy, la hausse ?'))
+        self.assertIsNotNone(ask('Combien nous a coûté Bruno Le Maire ?'), 'example question of the Loupe panel')
         self.assertIsNone(ask('Combien coûte la mairie de Lyon ?'))
         self.assertIsNone(ask('Bruno Le Maire, quel salaire ?'))
         follow = [{'role': 'user', 'text': 'Bonjour'}, {'role': 'assistant', 'text': '…'},

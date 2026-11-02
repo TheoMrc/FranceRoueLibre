@@ -67,9 +67,10 @@ def debt_le_maire(q, annual):
     return {
         'id': 'dette-le-maire',
         'question': 'De combien a augmenté la dette sous le mandat de Bruno Le Maire ?',
-        # all groups must match (after lower-case and accent removal), any word inside a group
-        'match': [['dette', 'endettement'], ['le maire', 'lemaire'], ['augment', 'hausse', 'combien', 'evolu', 'progress',
-                                                                         'sous', 'pendant', 'mandat', 'bilan', 'creus']],
+        # matches when one of these sets matches: every group of the set, any word inside a group (lower case, no accents)
+        'match_any': [[['dette', 'endettement'], ['le maire', 'lemaire'], ['augment', 'hausse', 'combien', 'evolu', 'progress',
+                                                                             'sous', 'pendant', 'mandat', 'bilan', 'creus']],
+                      [['le maire', 'lemaire'], ['coute', 'coût', 'cout']]],   # « Combien nous a coûté Bruno Le Maire ? »
         'reply': reply,
         'sources': [{'title': 'Insee, dette des administrations publiques (trimestrielle)', 'url': INSEE_PAGE},
                     {'title': 'Insee, comptes de la Nation 3.101 et 3.105', 'url': annual['source']}],
