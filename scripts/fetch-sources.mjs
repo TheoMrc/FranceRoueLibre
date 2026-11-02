@@ -95,6 +95,10 @@ const SOURCES = [
     { path: 'data-economie/etpt-par-ministere-mission-programme-pour-le-bg-et-les-ba-lfi-2023.csv', url: 'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/etpt-par-ministere-mission-programme-pour-le-bg-et-les-ba-lfi-2023/exports/csv?delimiter=%3B' },
   ] },
 
+  { id: 'dette-trimestrielle', kind: 'files', note: 'Insee, dette des administrations publiques au sens de Maastricht, données trimestrielles (réponses enregistrées de la Loupe)', files: [
+    { path: 'dette-trimestrielle/econ-gen-dette-trim-adm-pub-2.xlsx', url: 'https://www.insee.fr/fr/statistiques/fichier/2830301/econ-gen-dette-trim-adm-pub-2.xlsx' },
+  ] },
+
   { id: 'resultats', kind: 'files', note: 'Inflation (Insee), Eurostat et OCDE (comparaisons UE), commerce extérieur, PISA, personnel hospitalier (DREES)', files: [
     { path: 'raw/insee/bdm_000008965.xml', url: 'https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/000008965' },
     { path: 'raw/insee/bdm_001765177.xml', url: 'https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001765177' },

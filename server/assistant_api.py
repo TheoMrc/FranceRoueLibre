@@ -34,6 +34,7 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from assistant import faq  # noqa: E402
 from assistant import settings as S  # noqa: E402
 from assistant.agent import answer, pick_provider  # noqa: E402
 from assistant.budget import budget  # noqa: E402
@@ -174,6 +175,16 @@ def enqueue(ip: str, messages: list, provider: str | None) -> str:
     return jid
 
 
+def saved_job(ip: str, entry: dict) -> str:
+    """A finished job holding a saved answer: the page polls it like any other and gets it at once."""
+    jid = secrets.token_urlsafe(18)
+    now = time.time()
+    with JOBS_LOCK:
+        JOBS[jid] = {'t': now, 'seen': now, 'ip': ip, 'events': [], 'done': True, 'result': faq.result(entry),
+                     'cancel': False, 'state': 'done', 'messages': None, 'provider': None}
+    return jid
+
+
 def place(jid: str) -> int:
     """1 when this job is next in line, 0 when it is no longer waiting."""
     with JOBS_LOCK:
@@ -254,6 +265,9 @@ class Handler(BaseHTTPRequestHandler):
         if len(question) > S.MAX_QUESTION_CHARS:
             return self.send(400, {'error': f'question trop longue ({S.MAX_QUESTION_CHARS} caractères au plus)'})
         provider = body.get('provider') if body.get('provider') in CLIENTS else None
+        saved = faq.find(messages)
+        if saved:  # a question many readers ask: answered from faq.json, no model call, no credits
+            return self.send(202, {'job': saved_job(self.client_ip(), saved)})
         lack = credits_info()
         if lack:
             return self.send(402, lack)

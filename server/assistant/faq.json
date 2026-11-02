@@ -1,0 +1,64 @@
+{
+ "generated": "python3 scripts/loupe-faq.py",
+ "entries": [
+  {
+   "id": "dette-le-maire",
+   "question": "De combien a augmenté la dette sous le mandat de Bruno Le Maire ?",
+   "match": [
+    [
+     "dette",
+     "endettement"
+    ],
+    [
+     "le maire",
+     "lemaire"
+    ],
+    [
+     "augment",
+     "hausse",
+     "combien",
+     "evolu",
+     "progress",
+     "sous",
+     "pendant",
+     "mandat",
+     "bilan",
+     "creus"
+    ]
+   ],
+   "reply": "Entre l’arrivée de Bruno Le Maire au ministère de l’Économie (17 mai 2017) et son départ (21 septembre 2024), la dette publique au sens de Maastricht est passée de **2 256 Md€** (fin mars 2017) à **3 303 Md€** (fin septembre 2024) : **+1 047 Md€**, soit +46 %.\n\nRapportée à la richesse produite, elle passe de **100,8 %** à **113,1 % du PIB** (+12,2 points).\n\n- Les déficits publics des années 2017 à 2024 (années entières) totalisent 1 009 Md€ ; la plus lourde est 2020 (207 Md€), et 2020–2021, années du Covid, comptent pour 372 Md€.\n- Qui décide : la dette couvre toutes les administrations (État, sécurité sociale, collectivités) ; les lois de finances et de financement de la sécurité sociale sont préparées par le gouvernement (ministres de l’Économie et des Comptes publics) et votées chaque année par le Parlement.\n- Insee ne publie la dette qu’en fin de trimestre : les dates exactes du mandat ne tombent pas sur ces points.\n\nPour le détail année par année : [Comptes publics](index.html#comptes). Sources : [Insee, dette trimestrielle](https://www.insee.fr/fr/statistiques/2830301), [Insee, comptes de la Nation](https://www.insee.fr/fr/statistiques/8988843).",
+   "sources": [
+    {
+     "title": "Insee, dette des administrations publiques (trimestrielle)",
+     "url": "https://www.insee.fr/fr/statistiques/2830301"
+    },
+    {
+     "title": "Insee, comptes de la Nation 3.101 et 3.105",
+     "url": "https://www.insee.fr/fr/statistiques/8988843"
+    }
+   ],
+   "data": {
+    "start": "2017-T1",
+    "end": "2024-T3",
+    "debt": [
+     2256.0,
+     3303.0
+    ],
+    "pctGdp": [
+     100.8,
+     113.1
+    ],
+    "deficits": {
+     "2017": 77.1,
+     "2018": 54.6,
+     "2019": 58.2,
+     "2020": 207.1,
+     "2021": 165.1,
+     "2022": 125.9,
+     "2023": 151.9,
+     "2024": 169.1
+    }
+   }
+  }
+ ]
+}

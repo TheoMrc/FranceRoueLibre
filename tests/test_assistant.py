@@ -256,3 +256,28 @@ class QueueTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class SavedAnswersTest(unittest.TestCase):
+    """faq.json (scripts/loupe-faq.py): frequent questions answered without a model call."""
+
+    def test_le_maire_debt_question_is_saved(self):
+        from assistant import faq
+        hit = faq.find([{'role': 'user', 'text': 'De combien a augmenté la dette sous le mandat de Bruno Le Maire ?'}])
+        self.assertIsNotNone(hit)
+        res = faq.result(hit)
+        self.assertEqual(res['provider'], 'faq')
+        self.assertIn('Md€', res['reply'])
+        self.assertTrue(all(s['url'].startswith('https://www.insee.fr/') for s in res['sources']))
+        d = hit['data']
+        self.assertGreater(d['debt'][1], d['debt'][0])
+
+    def test_variants_and_non_matches(self):
+        from assistant import faq
+        ask = lambda t: faq.find([{'role': 'user', 'text': t}])
+        self.assertIsNotNone(ask('dette publique pendant que Lemaire était à Bercy, la hausse ?'))
+        self.assertIsNone(ask('Combien coûte la mairie de Lyon ?'))
+        self.assertIsNone(ask('Bruno Le Maire, quel salaire ?'))
+        follow = [{'role': 'user', 'text': 'Bonjour'}, {'role': 'assistant', 'text': '…'},
+                  {'role': 'user', 'text': 'Et la dette sous Bruno Le Maire, combien ?'}]
+        self.assertIsNone(faq.find(follow), 'a follow-up goes to the model, which has the context')
