@@ -214,3 +214,11 @@ main .chip-select.em-tabs button.active { background: var(--brand-gradient); col
 .em-tabs + .table-wrap .data-table thead th { padding-top: .8rem; }
 @media (max-width: 560px) { main .chip-select.em-tabs button { font-size: .74rem; padding: .5rem .15rem; } }
 .em-subhead { margin: 1.4rem 0 .5rem; font-size: .92rem; }
+
+/* Accordion rows (« Dont, à l'État »): the detail line opens for one row at a time */
+.em-acc .em-line small { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .25s ease, opacity .2s ease; }
+.em-acc .em-line small > span { overflow: hidden; }
+.em-acc.is-open .em-line small { grid-template-rows: 1fr; opacity: 1; }
+.em-acc .em-lab::after { content: ""; display: inline-block; width: .42rem; height: .42rem; margin-left: .45rem; border-right: 1.6px solid var(--c-muted); border-bottom: 1.6px solid var(--c-muted); transform: translateY(-.15rem) rotate(45deg); transition: transform .2s ease; }
+.em-acc.is-open .em-lab::after { transform: translateY(.05rem) rotate(-135deg); }
+@media (prefers-reduced-motion: reduce) { .em-acc .em-line small { transition: none; } }

@@ -58,11 +58,44 @@
   /* Horizontal bars. rows: [{label, value, sub, color, focus, tip, id}] ; with onPick the rows are buttons. */
   function rows(el, list, { format = v => nf(v), max = null, onPick = null, active = null, after = null } = {}) {
     const top = max ?? Math.max(...list.filter(r => !r.noBar).map(r => Math.abs(r.value || 0)), 1e-9);
-    const line = r => `<span class="em-line"><span>${r.prefix || ''}${esc(r.label)}${r.sub ? `<small>${r.sub}</small>` : ''}</span><strong>${format(r.value, r)}</strong></span>${r.noBar ? '' : `<span class="em-track"><span class="em-fill" style="--w:${Math.min(100, 100 * Math.abs(r.value || 0) / top).toFixed(2)}%;--c:${r.color || 'var(--tx-1)'}"></span></span>`}`;
+    const line = r => `<span class="em-line"><span>${r.prefix || ''}<span class="em-lab">${esc(r.label)}</span>${r.sub ? `<small><span>${r.sub}</span></small>` : ''}</span><strong>${format(r.value, r)}</strong></span>${r.noBar ? '' : `<span class="em-track"><span class="em-fill" style="--w:${Math.min(100, 100 * Math.abs(r.value || 0) / top).toFixed(2)}%;--c:${r.color || 'var(--tx-1)'}"></span></span>`}`;
     el.innerHTML = `<ul class="em-rows">${list.map((r, i) => `<li class="${r.focus ? 'is-focus' : ''}${active != null && r.id === active ? ' is-active' : ''}"${r.tip ? ` data-tip="${esc(r.tip)}"` : ''}>${onPick ? `<button type="button" data-i="${i}">${line(r)}</button>` : `<div class="em-row">${line(r)}</div>`}${after ? after(r) : ''}</li>`).join('')}</ul>`;
     requestAnimationFrame(() => requestAnimationFrame(() => el.querySelectorAll('.em-fill').forEach(n => n.classList.add('is-in'))));
     if (onPick) el.querySelectorAll('.em-rows > li > button').forEach(b => b.addEventListener('click', () => onPick(list[+b.dataset.i], b)));
     bindTips(el);
+  }
+
+  /* Accordion rows: details (the <small> line) stay folded; the row highest in the viewport opens as the reader scrolls past
+     the list, or the one tapped. Rows folding above the reader are compensated so the page does not jump. */
+  function accordion(el) {
+    const items = [...el.querySelectorAll('.em-rows > li')];
+    items.forEach(li => li.classList.add('em-acc'));
+    let current = null, pinned = null;
+    const open = li => {
+      if (li === current) return;
+      const before = li.getBoundingClientRect().top;
+      items.forEach(x => { x.classList.toggle('is-open', x === li); x.querySelector('button')?.setAttribute('aria-expanded', String(x === li)); });
+      current = li;
+      const shift = li.getBoundingClientRect().top - before;
+      if (Math.abs(shift) > 1) window.scrollBy(0, shift);
+    };
+    items.forEach(li => li.querySelector('button')?.addEventListener('click', () => { pinned = li; open(li); }));
+    const head = () => (document.getElementById('siteHeader')?.getBoundingClientRect().bottom || 0) + 8;
+    let queued = false;
+    const onScroll = () => {
+      queued = false;
+      if (el.closest('.is-folded')) return;   // section folded by collapse.js: rows are hidden, leave them closed
+      const top = head(), box = el.getBoundingClientRect();
+      if (box.bottom < top || box.top > innerHeight) { if (pinned) pinned = null; return; }
+      if (pinned) {
+        const r = pinned.getBoundingClientRect();
+        if (r.bottom > top && r.top < innerHeight) return;   // the tapped row stays open while it is on screen
+        pinned = null;
+      }
+      const first = items.find(li => li.getBoundingClientRect().top >= top && li.getBoundingClientRect().top < innerHeight * .7);
+      if (first) open(first);
+    };
+    addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(onScroll); } }, { passive: true });
   }
 
   /* Multi-series line chart with a shared hover. */
@@ -193,7 +226,8 @@
     const shown = blocks.reduce((s, b) => s + b.value, 0), stateAll = G.t2 / 1000 + G.t2Annexes / 1000;
     blocks.push({ label: 'Tous les autres ministères', value: stateAll - shown, sub: 'écologie, intérieur hors police et gendarmerie, affaires étrangères, ministères sociaux, culture, budgets annexes…', color: 'var(--tx-other)' });
     $('emSynStateTitle').textContent = `Dont, à l’État (${md(stateAll)}) : les plus gros postes`;
-    rows($('emSynState'), blocks.map(b => ({ ...b, sub: `${pctS(100 * b.value / stateAll, 0)} · ${b.sub}` })), { format: v => md(v), max: stateAll });
+    rows($('emSynState'), blocks.map(b => ({ ...b, sub: `${pctS(100 * b.value / stateAll, 0)} · ${b.sub}` })), { format: v => md(v), max: stateAll, onPick: () => {} });
+    accordion($('emSynState'));
     $('emSynPayersNote').innerHTML = `Trois comptes de périmètres voisins mais pas identiques : comptes nationaux ${last.year} (Insee) pour le total, loi de finances ${st} (crédits votés, pas dépensés) pour l’État, comptes ${locYear} des collectivités (OFGL). Le troisième montant est un ordre de grandeur. Les universités et les agences paient leurs agents, enseignants-chercheurs compris, avec les subventions de l’État, hors dépenses de personnel : ils tombent dans ce reste. À l’État, la loi de finances ne sépare les administrations centrales du terrain que lorsqu’un ministère a un programme « Soutien » distinct (Éducation nationale, Justice, Bercy) ; les cabinets ministériels n’ont pas de ligne propre. Sources : ${link(D.national.url, 'Insee 3.201')}, ${link(D.state.url, 'PLF ' + st)}, ${link(D.local.url, 'OFGL')}. Détail : <a href="#etat">État</a>, <a href="#collectivites">collectivités</a>.`;
     $('emSynYear').textContent = y;
     const vs = { fpe: ['État', 'FPE', 'var(--tx-1)'], fpt: ['Territoriale', 'FPT', 'var(--tx-3)'], fph: ['Hospitalière', 'FPH (ensemble)', 'var(--tx-5)'] };
