@@ -30,7 +30,6 @@ import sqlite3
 import sys
 import unicodedata
 
-import duckdb
 
 from rawfiles import csv as raw_csv
 
@@ -132,6 +131,17 @@ def split(size):
     return index
 
 
+def add_dgcl(add):
+    """DGCL projects, one file per year (dist/data/web/projects-YYYY.json, written by build-data.mjs);
+    rows: [scheme index (0-based), dept, beneficiary, INSEE code, title, amount]."""
+    for path in sorted(glob.glob('dist/data/web/projects-[0-9][0-9][0-9][0-9].json')):
+        year = int(path[-9:-5])
+        projects = json.load(open(path, encoding='utf-8'))
+        schemes = projects['schemes']
+        for scheme, dept, beneficiary, insee, title, amount in projects['rows']:
+            add(3, year, amount, 0, clip(title, 300), clip(beneficiary, 120), None, schemes[scheme] if isinstance(scheme, int) and 0 <= scheme < len(schemes) else None, dept)
+
+
 def main():
     probe = sqlite3.connect(':memory:')
     try:
@@ -144,6 +154,7 @@ def main():
     db = sqlite3.connect(DB)
     db.executescript('''PRAGMA page_size = 4096; PRAGMA journal_mode = OFF; PRAGMA synchronous = OFF;
         CREATE TABLE doc (id INTEGER PRIMARY KEY, src INTEGER, year INTEGER, amount REAL, fw INTEGER, title TEXT, who TEXT, siren TEXT, extra TEXT, dept TEXT);''')
+    import duckdb
     duck = duckdb.connect()
     rows = []
 
@@ -179,13 +190,8 @@ def main():
             add(2, year, amount, 1 if framework else 0, clip(obj, 260), clip(names.get(buyer), 120), buyer, label, None)
         flush()
     # 3. DGCL projects
-    # one file per year (dist/data/web/projects-YYYY.json); rows: [scheme index (0-based), dept, beneficiary, INSEE, title, amount]
-    for path in sorted(glob.glob('dist/data/web/projects-[0-9][0-9][0-9][0-9].json')):
-        year = int(path[-9:-5])
-        projects = json.load(open(path, encoding='utf-8'))
-        for scheme, dept, beneficiary, insee, title, amount in projects['rows']:
-            add(3, year, amount, 0, clip(title, 300), clip(beneficiary, 120), None, projects['schemes'][scheme] if isinstance(scheme, int) and 0 <= scheme < len(projects['schemes']) else None, dept)
-        flush()
+    add_dgcl(add)
+    flush()
     # 4. Fonds vert
     path = f'{DERIVED}/fonds-vert.parquet'
     if os.path.exists(path):
@@ -208,7 +214,14 @@ def main():
     total = db.execute('SELECT count(*) FROM doc').fetchone()[0]
     print(f'· {total} lignes')
 
-    db.executescript('''CREATE VIRTUAL TABLE fts USING fts5(title, who, extra, content='doc', content_rowid='id', tokenize='unicode61 remove_diacritics 2');
+    finish(db, total)
+
+
+
+def finish(db, total):
+    """Full-text index, compact tables, vocabulary, lexicon, precomputed frequent words, then the 45 MiB split."""
+    db.executescript('''DROP TABLE IF EXISTS fts; DROP TABLE IF EXISTS term; DROP TABLE IF EXISTS stat; DROP TABLE IF EXISTS top;
+        CREATE VIRTUAL TABLE fts USING fts5(title, who, extra, content='doc', content_rowid='id', tokenize='unicode61 remove_diacritics 2');
         INSERT INTO fts (rowid, title, who, extra) SELECT id, title, who, extra FROM doc;
         INSERT INTO fts (fts) VALUES ('optimize');''')
 
@@ -255,7 +268,24 @@ def main():
 
 
 if __name__ == '__main__':
-    if '--lexicon-only' in sys.argv:
+    if '--dgcl-only' in sys.argv:
+        # Replace only the DGCL projects (src 3) of an existing index, from dist/data/web/projects-YYYY.json, without
+        # the raw files of the other sources; then everything derived from the lines is rebuilt (index, lexicon…).
+        # The index is first put back together from its 45 MiB files, so it is the one that is online.
+        with open(DB, 'wb') as out:
+            for part in sorted(glob.glob(f'{OUT_DIR}/db/frl-search.sqlite3.[0-9][0-9][0-9]')):
+                with open(part, 'rb') as handle:
+                    out.write(handle.read())
+        connection = sqlite3.connect(DB)
+        connection.executescript('PRAGMA journal_mode = OFF; PRAGMA synchronous = OFF;')
+        before = connection.execute('SELECT count(*) FROM doc WHERE src = 3').fetchone()[0]
+        connection.execute('DELETE FROM doc WHERE src = 3')
+        batch = []
+        add_dgcl(lambda *row: batch.append(row))
+        connection.executemany('INSERT INTO doc (src, year, amount, fw, title, who, siren, extra, dept) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', batch)
+        print(f'· DGCL : {before} lignes remplacées par {len(batch)}')
+        finish(connection, connection.execute('SELECT count(*) FROM doc').fetchone()[0])
+    elif '--lexicon-only' in sys.argv:
         # Rebuild only the word lists next to the index (the index itself is left untouched).
         build_lexicon(sqlite3.connect(DB))
     elif '--compact-only' in sys.argv:

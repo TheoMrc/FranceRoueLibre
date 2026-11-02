@@ -287,7 +287,7 @@
     if (years.length) {
       const full = []; for (let y = years[0]; y <= years[years.length - 1]; y++) full.push({ label: y, value: t.byYear[y] || 0 });
       bars($('srYears'), full, { height: 200 });
-      $('srYearsNote').textContent = 'Hors plafonds d’accords-cadres et lignes du budget de l’État. Les années couvertes diffèrent selon les sources (associations 2010–2023 avec des trous, marchés 2014–2026, Fonds vert 2023–2025).';
+      $('srYearsNote').textContent = 'Hors plafonds d’accords-cadres et lignes du budget de l’État. Les années couvertes diffèrent selon les sources (associations 2010–2023 avec des trous, marchés 2014–2026, projets DGCL 2018–2025, Fonds vert 2023–2025).';
     } else { $('srYears').innerHTML = '<p class="note">Aucun montant daté.</p>'; $('srYearsNote').textContent = ''; }
     ranking($('srWho'), whoTop.map(item => ({ label: item.label, html: sirenLink(item.siren, /^\d{9}$/.test(item.label) ? null : esc(item.label)), value: item.value, sub: `${S.SOURCES[item.src].short} · ${count(item.n)} ligne${item.n > 1 ? 's' : ''}` })), { limit: 10 });
     if (!whoTop.length) $('srWho').innerHTML = '<p class="note">–</p>';
@@ -302,7 +302,7 @@
       ...(state.family ? [`<a class="sr-chip sr-chip--family" href="?q=${encodeURIComponent(state.family.q)}">Toutes les formes : ${esc(state.family.label)}</a>`] : []),
       ...state.related.map(row => `<a class="sr-chip" href="?q=${encodeURIComponent(row.q)}">${esc(row.label)}<small>${count(row.lines)} ligne${row.lines > 1 ? 's' : ''}${row.amount ? ` · ${money(row.amount)}` : ''}</small></a>`)];
     $('srRelated').innerHTML = related.length ? `<h3>Autres formes et mots proches</h3><div class="sr-chips">${related.join('')}</div>` : '';
-    $('srMethod').textContent = 'Méthode : recherche plein texte sans accents ni majuscules dans 1,9 million de lignes publiées (subventions de l’État aux associations 2010–2023, marchés publics 2014–2026, projets DGCL 2025, Fonds vert 2023–2025, aides de minimis 2026, budget vert de l’État 2026). Plusieurs mots sont cherchés comme une expression ; le dernier mot inclut ses terminaisons (pluriel, féminin).';
+    $('srMethod').textContent = 'Méthode : recherche plein texte sans accents ni majuscules dans 1,9 million de lignes publiées (subventions de l’État aux associations 2010–2023, marchés publics 2014–2026, projets DGCL 2018–2025, Fonds vert 2023–2025, aides de minimis 2026, budget vert de l’État 2026). Plusieurs mots sont cherchés comme une expression ; le dernier mot inclut ses terminaisons (pluriel, féminin).';
     resolveNames($('srResults'));
   }
 
