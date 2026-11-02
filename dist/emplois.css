@@ -224,4 +224,7 @@ main .chip-select.em-tabs button.active { background: var(--brand-gradient); col
 @media (prefers-reduced-motion: reduce) { .em-acc .em-line small { transition: none; } }
 
 /* Pictograms before row titles */
-.em-ico { display: inline-block; width: 1.15em; height: 1.15em; margin-right: .45em; vertical-align: -.2em; fill: none; stroke: var(--c-teal-600); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.em-ico { display: inline-block; width: 1.25em; height: 1.25em; margin-right: .45em; vertical-align: -.25em; fill: url(#emIcoGrad); }
+.em-ico__red { fill: none; stroke: #e11d48; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.em-ico__soft { opacity: .18; }
+.em-ico__line { fill: none; stroke: url(#emIcoGrad); stroke-width: 1.6; stroke-linejoin: round; }
