@@ -509,6 +509,9 @@
     syncModel(false);
     renderLog();
     if (status.credits === false) noCredits({ error: status.credits_message, donate: status.donate });
+    /* other parts of the page (the site search box) can open the Loupe with a question already asked */
+    window.FRLLoupe = { ready: true, ask(text) { openPanel(true); const t = String(text || '').trim(); if (t && !busy) { store.current = null; showHistory(false); renderLog(); ask(t); } } };   // a new conversation, so a saved answer can match
+    (window.FRLLoupeQueue || []).splice(0).forEach(t => window.FRLLoupe.ask(t));
     if (read(sessionStorage, UI, {}).open) openPanel(true);
     else { fab.hidden = false; fab.classList.add('is-intro'); setTimeout(() => fab.classList.remove('is-intro'), 4000); }
   }

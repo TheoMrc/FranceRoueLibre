@@ -19,7 +19,7 @@ SKIP = {'recherche.html', 'mentions.html'}
 # Words readers type that the page itself does not use. Key: page, or page#section.
 SYNONYMS = {
     'index.html': 'accueil carte communes départements régions intercommunalités budget local dépenses par commune',
-    'index.html#comptes': 'dette déficit PIB prélèvements obligatoires comptes nationaux Insee dette publique Maastricht',
+    'index.html#comptes': 'dette de la France hausse augmente augmentation déficit PIB prélèvements obligatoires comptes nationaux Insee dette publique Maastricht',
     'index.html#circuit': 'circuit argent public fonctions enseignement santé défense protection sociale',
     'emplois.html': 'fonctionnaires agents publics fonction publique salaires masse salariale emplois publics élus maires '
                     'indemnités profs enseignants policiers militaires infirmiers hôpital',
