@@ -148,6 +148,129 @@ def local():
             'note': 'Départements sans la Ville de Paris (comptée avec les communes depuis 2019) ni la Métropole de Lyon (comptée avec les intercommunalités).'}
 
 
+# ---------- 4b. Elected officials as they are: Répertoire national des élus (RNE) ----------
+RAW = SRC / 'raw'
+RNE_PAGE = 'https://www.data.gouv.fr/datasets/repertoire-national-des-elus-1/'
+RNE_FILES = {  # resource title (data.gouv.fr) -> id used on the page
+    'elus-conseillers-municipaux-cm.csv': 'municipaux', 'elus-maires-mai.csv': 'maires',
+    'elus-conseillers-communautaires-epci.csv': 'communautaires', 'elus-conseillers-darrondissements-ca.csv': 'arrondissements',
+    'elus-conseillers-departementaux-cd.csv': 'departementaux', 'elus-conseillers-regionaux-cr.csv': 'regionaux',
+    'elus-membres-assemblee-ma.csv': 'assemblees', 'elus-deputes-dep.csv': 'deputes', 'elus-senateurs-sen.csv': 'senateurs',
+    'elus-representants-Parlement-européen-rpe.csv': 'europeens',
+    'elus-conseillers-des-francais-de-letranger-consfde.csv': 'consulaires', 'elus-assemblee-des-francais-de-letranger-afe.csv': 'afe',
+}
+RNE_LABELS = {
+    'municipaux': 'Conseillers municipaux (dont maires et adjoints)', 'maires': 'Maires', 'communautaires': 'Conseillers communautaires (aussi conseillers municipaux)',
+    'arrondissements': 'Conseillers d’arrondissement (Paris, Lyon, Marseille)', 'departementaux': 'Conseillers départementaux',
+    'regionaux': 'Conseillers régionaux', 'assemblees': 'Membres des assemblées de Corse, Guyane, Martinique, Métropole de Lyon et collectivités d’outre-mer',
+    'deputes': 'Députés', 'senateurs': 'Sénateurs', 'europeens': 'Députés européens élus en France',
+    'consulaires': 'Conseillers des Français de l’étranger', 'afe': 'Membres de l’Assemblée des Français de l’étranger',
+}
+# Professional categories (PCS) grouped for reading; teachers of private schools are in 34 and 42 too.
+CSP_GROUPS = [
+    ('public', 'Agents publics en activité', {'33', '34', '42', '45', '52', '53'}),
+    ('cadres', 'Cadres et ingénieurs du privé, professions de l’information et des arts', {'35', '37', '38'}),
+    ('independants', 'Chefs d’entreprise, artisans, commerçants, professions libérales', {'21', '22', '23', '31'}),
+    ('agriculteurs', 'Agriculteurs exploitants', {'11', '12', '13'}),
+    ('intermediaires', 'Professions intermédiaires du privé (santé, technique, commerce)', {'43', '44', '46', '47', '48'}),
+    ('employes', 'Employés du privé', {'54', '55', '56'}),
+    ('ouvriers', 'Ouvriers', {'62', '63', '64', '65', '67', '68', '69'}),
+    ('retraites', 'Retraités', {'71', '72', '74', '75', '77', '78'}),
+    ('autres', 'Étudiants, sans activité, non renseigné', None),
+]
+
+
+def rne_files():
+    manifest = json.loads((RAW / 'manifest.json').read_text(encoding='utf8'))
+    entry = manifest.get('datagouv-rne')
+    if not entry:
+        raise SystemExit('Répertoire national des élus absent : node scripts/fetch-sources.mjs --only=datagouv-rne')
+    return entry, {RNE_FILES[f['title']]: f for f in entry['files'] if f['title'] in RNE_FILES}
+
+
+def rne_rows(file):
+    import csv
+    import gzip
+    import io
+    with gzip.open(RAW / file['file'], 'rt', encoding='utf-8-sig', newline='') as handle:
+        yield from csv.DictReader(handle, delimiter=';')
+
+
+def csp_group(code):
+    for gid, _, codes in CSP_GROUPS:
+        if codes and code in codes:
+            return gid
+    return 'autres'
+
+
+def rne(meta_rows, dep_meta):
+    """Counts, profile (sex, age, profession) per mandate, and per commune / département counts."""
+    import datetime
+    entry, files = rne_files()
+    ref_date = datetime.date.fromisoformat(max(f['modified'] for f in files.values())[:10])
+    successors = load(SRC / 'communes-successeurs-2025.json')['map']
+    index = {row[0]: i for i, row in enumerate(meta_rows)}
+    per_commune = [[0, 0, 0] for _ in meta_rows]        # conseillers, adjoints, maires délégués
+    dep = {}
+    def bump(code, key, n=1):
+        if code:
+            d = dep.setdefault(code, {})
+            d[key] = d.get(key, 0) + n
+    mandates, profiles, unmatched = [], {}, 0
+    for mid, f in files.items():
+        count, sex, ages, csp = 0, {'F': 0, 'M': 0}, [], {g[0]: 0 for g in CSP_GROUPS}
+        functions = {}
+        for row in rne_rows(f):
+            count += 1
+            sex[row.get('Code sexe', '')] = sex.get(row.get('Code sexe', ''), 0) + 1
+            born = row.get('Date de naissance', '')
+            if len(born) == 10:
+                b = datetime.date.fromisoformat(born)
+                ages.append(ref_date.year - b.year - ((ref_date.month, ref_date.day) < (b.month, b.day)))
+            csp[csp_group(row.get('Code de la catégorie socio-professionnelle', ''))] += 1
+            fn = (row.get('Libellé de la fonction') or '').strip()
+            if mid == 'municipaux':
+                kind = 'adjoint' if 'adjoint' in fn.lower() else 'delegue' if fn.lower().startswith('maire délégué') else 'maire' if fn == 'Maire' else ''
+                if kind:
+                    functions[kind] = functions.get(kind, 0) + 1
+                code = row['Code de la commune']
+                i = index.get(successors.get(code, code))
+                if i is None:
+                    unmatched += 1
+                    continue
+                per_commune[i][0] += 1
+                per_commune[i][1] += kind == 'adjoint'
+                per_commune[i][2] += kind == 'delegue'
+                bump(meta_rows[i][2], 'municipaux')
+                bump(meta_rows[i][2], 'adjoints', kind == 'adjoint')
+            elif mid == 'departementaux':
+                code = row['Code du département']
+                if code == '6AE':     # Collectivité européenne d'Alsace: the canton code starts with 67 or 68
+                    code = row['Code du canton'][:2]
+                bump(code, 'departementaux')
+            elif mid == 'regionaux':
+                bump('R' + row['Code de la région'], 'regionaux')     # section codes are not all départements: counted by region
+            elif mid == 'assemblees':
+                c = row['Code de la collectivité à statut particulier']
+                section = row.get('Code de la section - collectivité à statut particulier', '')
+                if c in ('94', '972', '973'):   # Assemblée de Corse, assemblées de Martinique et de Guyane: regional level
+                    bump('R' + {'94': '94', '972': '02', '973': '03'}[c], 'regionaux')
+                elif c == '69M':       # Conseil de la Métropole de Lyon: département-level body inside the Rhône
+                    bump('69', 'departementaux')
+            elif mid in ('deputes', 'senateurs'):
+                code = row['Code du département'] or row['Code de la collectivité à statut particulier']
+                bump({'94': None}.get(code, code), mid)
+        ages.sort()
+        mandates.append({'id': mid, 'label': RNE_LABELS[mid], 'count': count, 'women': r(sex.get('F', 0) / count, 4) if count else None,
+                         'medianAge': ages[len(ages) // 2] if ages else None, 'over60': r(sum(a >= 60 for a in ages) / len(ages), 4) if ages else None,
+                         'csp': {k: v for k, v in csp.items()}, 'functions': functions or None, 'file': f['url']})
+    order = [m for m in ('municipaux', 'maires', 'communautaires', 'arrondissements', 'departementaux', 'regionaux', 'assemblees', 'deputes', 'senateurs', 'europeens', 'consulaires', 'afe')]
+    mandates.sort(key=lambda m: order.index(m['id']))
+    return {'source': 'Répertoire national des élus, ministère de l’Intérieur', 'url': RNE_PAGE, 'date': ref_date.isoformat(),
+            'downloadedAt': entry.get('downloadedAt'), 'mandates': mandates, 'cspGroups': [[g, l] for g, l, _ in CSP_GROUPS],
+            'unmatchedMunicipal': unmatched}, per_commune, dep
+
+
 # ---------- 5. Elected officials: legal seats and maximum indemnities ----------
 def step(table, pop):
     value = table[0][1]
@@ -211,6 +334,8 @@ def communes_and_departments():
                 return pop_values[k][i]
         return 0
 
+    dep_meta = {d['code']: d for d in load(SRC / 'departements-meta.json')}
+    elected, per_commune, rdep = rne(rows, dep_meta)
     communes = []
     for i, row in enumerate(rows):
         code, name, dep = row[0], row[1], row[2]
@@ -218,6 +343,7 @@ def communes_and_departments():
         n = seats(code, p)
         cap, deputies = indemnity_cap(p, n)
         communes.append({'i': i, 'code': code, 'name': name, 'dep': dep, 'pop': p, 'seats': n, 'deputies': deputies, 'cap': cap,
+                         'cm': per_commune[i][0], 'adj': per_commune[i][1],
                          'fp': fp_values[yi][i], 'fp0': fp_values[y0][i], 'pop0': pop_values[pop_years.index(min(fp_years))][i], 'fn': fn_values[fn_years.index(year)][i]})
 
     # Strata
@@ -229,14 +355,13 @@ def communes_and_departments():
         popsum = sum(c['pop'] for c in group)
         fp_pop = sum(c['pop'] for c in with_fp)
         strata.append({'label': label, 'min': lo, 'max': hi, 'communes': len(group), 'population': popsum,
-                       'seats': sum(c['seats'] for c in group), 'mayorsAndDeputiesMax': sum(1 + c['deputies'] for c in group),
+                       'seats': sum(c['seats'] for c in group), 'elected': sum(c['cm'] for c in group), 'deputies': sum(c['adj'] for c in group), 'mayorsAndDeputiesMax': sum(1 + c['deputies'] for c in group),
                        'capTotal': r(sum(c['cap'] for c in group)), 'personnel': r(sum(c['fp'] for c in with_fp)),
                        'personnelPerHab': r(sum(c['fp'] for c in with_fp) / fp_pop, 1) if fp_pop else None,
                        'operatingShare': r(sum(c['fp'] for c in with_fp) / sum(c['fn'] for c in with_fp if c['fn']), 4) if with_fp else None,
                        'q1': r(quantile(per, .25), 1), 'median': r(quantile(per, .5), 1), 'q3': r(quantile(per, .75), 1)})
 
     # Départements: communes + intercommunalités (split by member population) + département + région (split by population)
-    dep_meta = {d['code']: d for d in load(SRC / 'departements-meta.json')}
     dep_names = {code: v[0] for code, v in meta['departments'].items()}
     deps = {}
     for c in communes:
@@ -287,18 +412,23 @@ def communes_and_departments():
 
     split('departements', dep_targets, 'departement')
     split('regions', region_targets, 'region')
-    regional_seats = REF['regionalSeats']['byRegionCode']
     reg_pop = {}
     for code, d in deps.items():
         rc = dep_meta.get(code, {}).get('codeRegion')
         reg_pop[rc] = reg_pop.get(rc, 0) + d['pop']
+    # regional level as elected (regional councils, assemblies of Corse, Guyane, Martinique), shared between départements by population
+    regional_real = {k[1:]: v['regionaux'] for k, v in rdep.items() if k.startswith('R')}
+    for code, d in deps.items():
+        rc = dep_meta.get(code, {}).get('codeRegion')
+        if regional_real.get(rc) and reg_pop.get(rc):
+            rdep.setdefault(code, {})['regionaux'] = regional_real[rc] * d['pop'] / reg_pop[rc]
     out_deps = []
     for code, d in sorted(deps.items()):
         rc = dep_meta.get(code, {}).get('codeRegion')
         total, total0 = sum(d['fp'].values()), sum(d['fp0'].values())
         out_deps.append({'code': code, 'name': dep_meta.get(code, {}).get('nom') or dep_names.get(code) or code, 'region': rc,
                          'population': d['pop'], 'communes': d['communes'], 'smallCommunes': d['small'], 'seats': d['seats'], 'cap': r(d['cap']),
-                         'regionalSeats': r(regional_seats.get(rc, 0) * d['pop'] / reg_pop[rc], 2) if rc in regional_seats and reg_pop.get(rc) else 0,
+                         'elected': {k: r(rdep.get(code, {}).get(k, 0), 2) for k in ('municipaux', 'adjoints', 'departementaux', 'regionaux', 'deputes', 'senateurs')},
                          'personnel': {k: r(v) for k, v in d['fp'].items()}, 'personnelTotal': r(total),
                          'personnel0': r(total0), 'population0': d['pop0']})
 
@@ -306,17 +436,20 @@ def communes_and_departments():
     regions = []
     reg_e = load(LOCAL / 'regions' / '_entities.json')
     for code, name in zip(reg_e['codes'], reg_e['names']):
-        if code in regional_seats and reg_pop.get(code):
-            regions.append({'code': code, 'name': name, 'seats': regional_seats[code], 'population': reg_pop[code]})
+        if regional_real.get(code) and reg_pop.get(code):
+            regions.append({'code': code, 'name': name, 'seats': r(regional_real[code]), 'population': reg_pop[code]})
 
     compact = {'year': year, 'year0': min(fp_years), 'alignedWith': 'web/communes-meta.json',
-               'columns': ['population', 'personnel (k€)', 'personnel year0 (k€)', 'population year0', 'operating spending (k€)'],
-               'rows': [[c["pop"], kilo(c["fp"]), kilo(c["fp0"]), c["pop0"], kilo(c["fn"])] for c in communes]}
+               'columns': ['population', 'personnel (k€)', 'personnel year0 (k€)', 'population year0', 'operating spending (k€)', 'conseillers municipaux (RNE)', 'adjoints (RNE)'],
+               'rows': [[c["pop"], kilo(c["fp"]), kilo(c["fp0"]), c["pop0"], kilo(c["fn"]), c["cm"], c["adj"]] for c in communes]}
     totals = {'communes': len(communes), 'population': sum(c['pop'] for c in communes), 'seats': sum(c['seats'] for c in communes),
               'mayors': sum(1 for c in communes if c['seats']), 'noCouncil': [c['name'] for c in communes if not c['seats']], 'deputiesMax': sum(c['deputies'] for c in communes), 'cap': r(sum(c['cap'] for c in communes)),
               'smallCommunes': sum(1 for c in communes if c['pop'] < 500), 'communesUnder1000': sum(1 for c in communes if c['pop'] < 1000),
-              'seatsUnder1000': sum(c['seats'] for c in communes if c['pop'] < 1000), 'popUnder1000': sum(c['pop'] for c in communes if c['pop'] < 1000)}
-    return {'year': year, 'year0': min(fp_years), 'strata': strata, 'departments': out_deps, 'regions': regions, 'totals': totals}, compact
+              'seatsUnder1000': sum(c['seats'] for c in communes if c['pop'] < 1000), 'popUnder1000': sum(c['pop'] for c in communes if c['pop'] < 1000),
+              'elected': sum(c['cm'] for c in communes), 'electedDeputies': sum(c['adj'] for c in communes),
+              'electedUnder1000': sum(c['cm'] for c in communes if c['pop'] < 1000),
+              'communesBelowLegal': sum(1 for c in communes if c['seats'] and c['cm'] < c['seats']), 'communesWithoutRne': sum(1 for c in communes if c['seats'] and not c['cm'])}
+    return {'year': year, 'year0': min(fp_years), 'strata': strata, 'departments': out_deps, 'regions': regions, 'totals': totals, 'rne': elected}, compact
 
 
 def main():
@@ -325,14 +458,10 @@ def main():
     st = state()
     loc = local()
     geo, compact = communes_and_departments()
-    mandates = []
-    for m in REF['mandates']['items']:
-        m = dict(m)
-        if m['id'] == 'municipaux':
-            m['count'] = geo['totals']['seats']
-        if m['id'] == 'regionaux':
-            m['count'] = sum(REF['regionalSeats']['byRegionCode'].values())
-        mandates.append(m)
+    legal = {m['id']: m for m in REF['mandates']['items']}
+    legal['municipaux'] = {**legal['municipaux'], 'count': geo['totals']['seats']}
+    legal['regionaux'] = {**legal['regionaux'], 'count': sum(REF['regionalSeats']['byRegionCode'].values())}
+    mandates = [{**m, 'legal': legal[m['id']]['count'] if m['id'] in legal else None, 'legalSource': legal[m['id']]['source'] if m['id'] in legal else None} for m in geo['rne']['mandates']]
     out = {
         'generated': 'python3 scripts/emplois-data.py',
         'national': nat, 'functions': fun, 'state': st, 'local': loc, 'territory': geo,
@@ -343,7 +472,7 @@ def main():
     last = nat['years'][-1]
     t = geo['totals']
     print(f'{OUT.relative_to(ROOT)}: D1 {last["year"]} = {last["d1"]} Md€ ; {len(st["missions"])} missions ; {len(geo["departments"])} départements ; '
-          f'{t["seats"]} conseillers municipaux (légal) ; plafond indemnités maires+adjoints {t["cap"] / 1e9:.2f} Md€')
+          f'{t["elected"]} conseillers municipaux en fonction (RNE) pour {t["seats"]} sièges légaux ; plafond indemnités maires+adjoints {t["cap"] / 1e9:.2f} Md€')
     print(f'{OUT_COMMUNES.relative_to(ROOT)}: {len(compact["rows"])} communes')
 
 

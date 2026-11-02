@@ -64,8 +64,27 @@ test('legal municipal seats: the CGCT scale, Paris, Marseille, Lyon', () => {
   assert.deepEqual(ref.special, { 75056: 163, 13055: 111, 69123: 73 });
   assert.equal(ref.strata[0][1], 7);
   assert.equal(ref.strata.at(-1)[1], 69);
-  // regional seats: 1 757 in the 13 + 2 regions of art. L. 337, plus Corse 63, Guyane 51, Martinique 51
-  assert.equal(data.mandates.find(m => m.id === 'regionaux').count, 1757 + 63 + 51 + 51);
+  // legal regional seats, kept for comparison: 1 757 in the regions of art. L. 337, plus Corse 63, Guyane 51, Martinique 51
+  assert.equal(data.mandates.find(m => m.id === 'regionaux').legal, 1757 + 63 + 51 + 51);
+});
+
+test('elected officials as recorded in the Répertoire national des élus', () => {
+  const by = Object.fromEntries(data.mandates.map(m => [m.id, m]));
+  assert.equal(by.deputes.count, 577);
+  assert.ok(by.senateurs.count >= 340 && by.senateurs.count <= 348);
+  assert.ok(Math.abs(by.municipaux.count - by.municipaux.legal) / by.municipaux.legal < 0.02);
+  assert.ok(by.maires.count > 34000 && by.maires.count <= 34875);
+  for (const m of data.mandates) {
+    assert.equal(Object.values(m.csp).reduce((s, v) => s + v, 0), m.count, m.id);
+    assert.ok(m.women > 0.15 && m.women < 0.6, m.id);
+  }
+  const t = data.territory.totals;
+  assert.ok(data.territory.rne.unmatchedMunicipal < 3000); // communes of Polynésie, Nouvelle-Calédonie, Saint-Pierre-et-Miquelon
+  assert.equal(data.territory.departments.reduce((s, d) => s + d.elected.municipaux, 0), t.elected);
+  assert.equal(by.municipaux.count - data.territory.rne.unmatchedMunicipal, t.elected);
+  const regions = data.territory.regions.reduce((s, r) => s + r.seats, 0);
+  assert.ok(Math.abs(regions - data.territory.departments.reduce((s, d) => s + d.elected.regionaux, 0)) < 1);
+  assert.ok(communes.rows.every(r => r.length === 7));
 });
 
 test('indemnity ceiling: mayors and deputies, IB 1027', () => {

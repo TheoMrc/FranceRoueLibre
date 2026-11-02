@@ -2,10 +2,6 @@
 .em-chart svg, .em-map svg, .em-dom svg, .em-spark svg { display: block; width: 100%; height: auto; overflow: visible; }
 .em-chart { touch-action: pan-y; }
 
-/* Reading note under the first chart */
-.em-read { margin-top: var(--sp-3); padding: var(--sp-2) var(--sp-3); border-left: 3px solid var(--c-teal-600); border-radius: 0 var(--r-md) var(--r-md) 0; background: var(--c-surface); color: var(--c-body); font-size: .9rem; line-height: 1.55; }
-.em-read strong { color: var(--c-ink); }
-
 /* Workforce split: one 100 % bar, then a card per versant */
 .em-split { display: flex; height: 44px; gap: 2px; border-radius: var(--r-sm); overflow: hidden; }
 .em-split span { display: flex; align-items: center; justify-content: center; min-width: 0; height: 100%; color: #fff; font-size: .8rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; transform-origin: left; animation: em-grow .8s cubic-bezier(.22, .8, .3, 1) both; }
@@ -72,6 +68,15 @@
 .em-key--iqr { width: 1.2rem; height: .55rem; border-radius: var(--r-pill); background: color-mix(in srgb, var(--tx-1) 38%, var(--c-surface-2)); }
 .em-key--med { width: .7rem; height: .7rem; border-radius: 50%; background: var(--tx-1); }
 .em-key--mean { width: 2px; height: .8rem; background: var(--tx-2); }
+
+/* 100 % stacked rows (profession of elected officials) */
+.em-stack { display: grid; gap: .85rem; }
+.em-stack__row { display: grid; gap: .3rem; }
+.em-stack__label { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .2rem .8rem; font-size: .86rem; color: var(--c-ink); }
+.em-stack__label small { color: var(--c-muted); font-size: .74rem; }
+.em-stack__bar { display: flex; height: 18px; gap: 2px; border-radius: 4px; overflow: hidden; }
+.em-stack__bar span { display: block; height: 100%; min-width: 1px; }
+.em-stack__bar span:hover { filter: brightness(1.1); }
 
 /* Map */
 .em-chips-scroll { max-width: 100%; }

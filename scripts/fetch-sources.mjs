@@ -85,6 +85,9 @@ const SOURCES = [
   { id: 'datagouv-cnam-cliniques', kind: 'datagouv', slug: 'donnees-par-cpam-sur-les-depenses-dassurance-maladie-relatives-aux-etablissements-de-sante-prives' },
   { id: 'datagouv-secu-comptes', kind: 'datagouv', slug: 'comptes-simplifies-des-regimes-de-base-de-securite-sociale-30378403' },
 
+  // ---- Public employment and elected officials ----
+  { id: 'datagouv-rne', kind: 'datagouv', slug: 'repertoire-national-des-elus-1', note: 'Répertoire national des élus (ministère de l’Intérieur), tous les mandats' },
+
   // ---- Integrity context ----
   { id: 'atteintes-probite', kind: 'ods', host: ECO, dataset: 'atteintes-a-la-probite-dans-les-decisions-de-justice-donnees-nationales-agregees-2021-2025' },
 

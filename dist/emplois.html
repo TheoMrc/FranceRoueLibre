@@ -87,7 +87,7 @@
       <div class="container"><div class="hero__inner">
         <span class="eyebrow">Emplois publics et élus</span>
         <h1>Agents publics et élus : <span class="gradient-text">combien ils sont, ce qu’ils coûtent, et où.</span></h1>
-        <p class="hero__lead" id="emLead">Enseignants, soignants, policiers, militaires, agents des mairies, élus locaux : la rémunération des personnes qui font fonctionner les services publics est le deuxième poste de dépense publique après les prestations sociales. Cette page en mesure le coût et le cartographie, échelon par échelon, sans juger de l’utilité de chaque emploi.</p>
+        <p class="hero__lead" id="emLead">Enseignants, soignants, policiers, militaires, agents des mairies, élus locaux : la rémunération des personnes qui font fonctionner les services publics est le deuxième poste de dépense publique après les prestations sociales. Cette page en mesure le coût, le cartographie échelon par échelon, et pose la question que les comptes publics ne posent jamais : pour quel résultat ?</p>
         <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#effectifs">Effectifs</a><a href="#fonctions">Par pôle de dépense</a><a href="#etat">État</a><a href="#collectivites">Collectivités</a><a href="#carte">Carte</a><a href="#elus">Élus</a><a href="#commune">Ma commune</a><a href="#non-publie">Ce qui manque</a><a href="#methode">Méthode</a></nav>
       </div></div>
     </section>
@@ -98,7 +98,6 @@
           <div class="chip-select" id="emNatUnit" role="group" aria-label="Unité"><button type="button" data-unit="md" class="active">Md€</button><button type="button" data-unit="gdp">% du PIB</button><button type="button" data-unit="share">% des dépenses</button><button type="button" data-unit="hab">€ par habitant</button></div></div>
         <div class="kpis" id="emKpis"></div>
         <div class="panel"><h3 id="emNatTitle">Rémunération des agents publics</h3><div id="emNatChart" class="tx-line em-chart"></div><div id="emNatLegend" class="tx-legend"></div><p class="note" id="emNatNote"></p></div>
-        <div class="em-read" role="note"><strong>Lire cette page.</strong> Un coût n’est ni un gaspillage ni une économie possible en soi : une école, un hôpital ou une caserne fonctionnent d’abord avec des personnes. Les comparaisons entre territoires ou entre années montrent où va l’argent ; les écarts s’expliquent souvent par les compétences exercées, l’âge de la population, le tourisme ou l’outre-mer. Ils sont des questions à poser, pas des conclusions.</div>
       </div>
     </section>
 
@@ -165,16 +164,17 @@
 
     <section class="section" id="elus" aria-labelledby="emElTitle">
       <div class="container">
-        <div class="section__head"><span class="eyebrow">Mandats fixés par la loi</span><h2 id="emElTitle">Les élus : nombre, répartition et plafond des indemnités</h2><p class="lead" id="emElLead"></p></div>
+        <div class="section__head"><span class="eyebrow">Répertoire national des élus · 2026</span><h2 id="emElTitle">Les élus : combien, qui, et ce qu’ils peuvent toucher</h2><p class="lead" id="emElLead"></p></div>
         <div class="kpis" id="emElKpis"></div>
         <div class="grid-2">
-          <div class="panel"><h3>Sièges par mandat</h3><div id="emMandates"></div><p class="note" id="emMandatesNote"></p></div>
+          <div class="panel"><h3>Élus en fonction, par mandat</h3><div id="emMandates"></div><p class="note" id="emMandatesNote"></p></div>
           <div class="panel"><h3>Conseillers municipaux pour 1 000 habitants, selon la taille de la commune</h3><div id="emSeatsStrata"></div><p class="note" id="emSeatsStrataNote"></p></div>
         </div>
         <div class="grid-2">
           <div class="panel"><h3>Plafond légal des indemnités des maires et adjoints, par habitant</h3><div id="emCapStrata"></div><p class="note" id="emCapNote"></p></div>
           <div class="panel"><h3>Parlement et pouvoirs publics, dotations 2025</h3><div id="emPowers"></div><p class="note" id="emPowersNote"></p></div>
         </div>
+        <div class="panel panel--wide"><h3>Qui sont les élus : profession, sexe, âge</h3><div id="emProfile" class="em-stack"></div><div id="emProfileLegend" class="tx-legend"></div><p class="note" id="emProfileNote"></p></div>
         <div class="panel panel--wide"><h3>Conseillers régionaux pour 100 000 habitants</h3><div id="emRegSeats" class="em-cols2"></div><p class="note" id="emRegSeatsNote"></p></div>
         <p class="source-links" id="emElSources"></p>
       </div>
