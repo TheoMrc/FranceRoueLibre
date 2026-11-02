@@ -72,6 +72,219 @@
      "2024": 169.1
     }
    }
+  },
+  {
+   "id": "inflation-dette",
+   "question": "Quand les prix montent, qui paie la dette ?",
+   "match_any": [
+    [
+     [
+      "prix",
+      "inflation"
+     ],
+     [
+      "dette"
+     ]
+    ],
+    [
+     [
+      "inflation"
+     ],
+     [
+      "qui paie",
+      "qui paye",
+      "pauvre",
+      "modeste",
+      "menage"
+     ]
+    ]
+   ],
+   "reply": "Quand les prix montent, la dette pèse **moins** par rapport à la richesse produite, mais elle **coûte plus** en intérêts, et chacun ne vit pas la hausse des prix de la même façon.\n\n- **La dette fond en proportion** : avec 4,6 % d’inflation en 2022 et 4,5 % en 2023, le PIB en euros a grossi vite. La dette est passée de 2 829 à 3 103 Md€ (+274 Md€) entre fin 2021 et fin 2023, mais de 112,8 % à 109,5 % du PIB : elle a baissé en proportion.\n- **Les intérêts augmentent** : ils sont passés de 38 Md€ en 2021 à 53 Md€ en 2022, puis 59 Md€ en 2024. Une partie de la dette de l’État est indexée sur l’inflation (OAT indexées) : quand les prix montent, ce que l’État doit rembourser monte avec eux. Les nouveaux emprunts se font aussi à des taux plus élevés. Ces intérêts sont payés avec les impôts de tous.\n- **Qui perd, qui gagne** : ceux qui ont prêté à taux fixe (épargnants par l’assurance vie, banques, investisseurs étrangers) sont remboursés en euros qui valent moins ; les ménages, eux, subissent la hausse des prix. L’Insee a mesuré que l’inflation a été un peu plus forte pour les ménages modestes et les plus âgés, surtout à cause de l’alimentation, qui pèse plus dans leur budget.\n\nLes données publiées ne disent pas qui, au final, « paie » la dette ménage par ménage : cela dépend des impôts que chacun paie et de l’épargne qu’il détient. Pour les montants année par année : [Comptes publics](index.html#comptes). Sources : [Insee, prix à la consommation](https://www.insee.fr/fr/statistiques/serie/011814653), [Insee, dette trimestrielle](https://www.insee.fr/fr/statistiques/2830301), [Eurostat, dépenses par fonction](https://ec.europa.eu/eurostat/databrowser/view/gov_10a_exp/default/table?lang=fr), [Insee, inflation par catégorie de ménages](https://www.insee.fr/fr/statistiques/fichier/7634629/ndc-juin-2023-ipc-categorie-menages.pdf), [Fipeco, les obligations indexées sur l’inflation](https://fipeco.fr/pdf/Obligations%20index%C3%A9es.pdf).",
+   "sources": [
+    {
+     "title": "Insee, indice des prix à la consommation",
+     "url": "https://www.insee.fr/fr/statistiques/serie/011814653"
+    },
+    {
+     "title": "Insee, dette des administrations publiques (trimestrielle)",
+     "url": "https://www.insee.fr/fr/statistiques/2830301"
+    },
+    {
+     "title": "Eurostat, dépenses des administrations par fonction",
+     "url": "https://ec.europa.eu/eurostat/databrowser/view/gov_10a_exp/default/table?lang=fr"
+    },
+    {
+     "title": "Insee, inflation selon la catégorie de ménages (2023)",
+     "url": "https://www.insee.fr/fr/statistiques/fichier/7634629/ndc-juin-2023-ipc-categorie-menages.pdf"
+    },
+    {
+     "title": "Fipeco, les obligations indexées sur l’inflation (2023)",
+     "url": "https://fipeco.fr/pdf/Obligations%20index%C3%A9es.pdf"
+    }
+   ],
+   "data": {
+    "inflation": {
+     "2021": 1.52,
+     "2022": 4.57,
+     "2023": 4.51,
+     "2024": 2.05
+    },
+    "debt": [
+     2828.8,
+     3103.2
+    ],
+    "pctGdp": [
+     112.8,
+     109.5
+    ],
+    "interest": {
+     "2019": 40.0,
+     "2020": 32.9,
+     "2021": 37.7,
+     "2022": 53.0,
+     "2023": 51.7,
+     "2024": 58.9
+    }
+   }
+  },
+  {
+   "id": "cent-euros",
+   "question": "Quand je paie 100 € d’impôts, comment sont-ils dépensés ?",
+   "match_any": [
+    [
+     [
+      "100",
+      "cent",
+      "1000",
+      "mille"
+     ],
+     [
+      "impot",
+      "taxe",
+      "prelev",
+      "cotisation"
+     ]
+    ],
+    [
+     [
+      "mes impot",
+      "nos impot",
+      "mes taxe",
+      "nos taxe"
+     ],
+     [
+      "ou va",
+      "ou vont",
+      "depens",
+      "utilis",
+      "sert",
+      "servent",
+      "finance"
+     ]
+    ]
+   ],
+   "reply": "Sur **100 €** de dépenses publiques en 2024 (État, Sécurité sociale et collectivités ensemble), voici où ils vont :\n\n- **41 €** : protection sociale (retraites, famille, chômage)\n- **16 €** : santé\n- **10 €** : affaires économiques (transports, énergie, aides aux entreprises, emploi)\n- **8,9 €** : enseignement\n- **7,3 €** : administration générale (ministères, impôts, recherche fondamentale)\n- **3,5 €** : intérêts de la dette\n- **3,2 €** : défense\n- **3,1 €** : police, justice, pompiers\n- **2,6 €** : culture et sport\n- **2,5 €** : logement et équipements\n- **1,8 €** : environnement\n\nDeux précisions. Vos impôts ne vont pas tous au même endroit : la CSG finance surtout la Sécurité sociale, la taxe foncière votre commune, la TVA et l’impôt sur le revenu l’État. Et les administrations dépensent plus qu’elles ne prélèvent : en 2024, pour 100 € d’impôts et de cotisations, elles ont dépensé environ **111 €**, les 11 € de plus étant empruntés (le déficit, 169 Md€).\n\nDétail et évolution depuis 1995 : [le circuit de l’argent public](index.html#circuit). Sources : [Eurostat et Insee, dépenses par fonction](https://ec.europa.eu/eurostat/databrowser/view/gov_10a_exp/default/table?lang=fr), [Insee, déficit et dette](https://www.insee.fr/fr/statistiques/8988843).",
+   "sources": [
+    {
+     "title": "Eurostat et Insee, dépenses des administrations par fonction",
+     "url": "https://ec.europa.eu/eurostat/databrowser/view/gov_10a_exp/default/table?lang=fr"
+    },
+    {
+     "title": "Insee, comptes de la Nation (déficit)",
+     "url": "https://www.insee.fr/fr/statistiques/8988843"
+    }
+   ],
+   "data": {
+    "year": 2024,
+    "per100": {
+     "protection sociale (retraites, famille, chômage)": 41.45,
+     "santé": 15.62,
+     "affaires économiques (transports, énergie, aides aux entreprises, emploi)": 9.93,
+     "enseignement": 8.89,
+     "administration générale (ministères, impôts, recherche fondamentale)": 7.31,
+     "intérêts de la dette": 3.52,
+     "défense": 3.24,
+     "police, justice, pompiers": 3.12,
+     "culture et sport": 2.58,
+     "logement et équipements": 2.52,
+     "environnement": 1.81
+    },
+    "spentPer100Collected": 111.3
+   }
+  },
+  {
+   "id": "associations",
+   "question": "Quelles associations reçoivent le plus de subventions de l’État ?",
+   "match_any": [
+    [
+     [
+      "association"
+     ],
+     [
+      "subvention",
+      "aide",
+      "argent",
+      "recoi",
+      "touch",
+      "financ",
+      "percoi"
+     ]
+    ]
+   ],
+   "reply": "En 2023, l’État a versé **11,8 Md€** de subventions à 55 673 organismes classés comme associations. Les dix qui ont reçu le plus :\n\n1. **Association internationale de développement (fonds de la Banque mondiale)** : 1,00 Md€\n2. **Union nationale des Carpa (aide juridictionnelle versée aux avocats)** : 597 M€\n3. **Coallia** : 234 M€\n4. **Croix-Rouge française** : 188 M€\n5. **Fongecfa Transport (formation dans les transports)** : 150 M€\n6. **Association Aurore** : 115 M€\n7. **Groupe SOS Solidarités** : 105 M€\n8. **Fondation de l’Armée du salut** : 90 M€\n9. **Emmaüs Solidarité** : 78 M€\n10. **Fondation nationale des sciences politiques (Sciences Po)** : 77 M€\n\nCes dix-là touchent 22 % du total. Le mot « association » recouvre ici des organismes très différents : un fonds de la Banque mondiale, des caisses qui reversent l’aide juridictionnelle aux avocats, des opérateurs de l’hébergement d’urgence et de l’accueil des demandeurs d’asile, des fondations de recherche. Une subvention paie souvent un service public confié à l’association (héberger, former, soigner), pas son fonctionnement.\n\nLes montants sont publiés avec deux ans de retard, dans une annexe au projet de loi de finances. Pour chercher une association ou voir les années précédentes : [Aides et subventions](aides.html#associations). Source : [annexe « Effort financier de l’État en faveur des associations », projet de loi de finances 2025](https://data.economie.gouv.fr/explore/dataset/plf25-donnees-de-l-annexe-jaune-effort-financier-de-l-etat-en-faveur-des-associations/).",
+   "sources": [
+    {
+     "title": "Annexe « jaune » : effort financier de l’État en faveur des associations",
+     "url": "https://data.economie.gouv.fr/explore/dataset/plf25-donnees-de-l-annexe-jaune-effort-financier-de-l-etat-en-faveur-des-associations/"
+    }
+   ],
+   "data": {
+    "year": 2023,
+    "total": 11765696375.650015,
+    "beneficiaries": 55673,
+    "top": [
+     [
+      "ASS INTERNATIONALE DE DEVELOPPEMEN",
+      1004021933
+     ],
+     [
+      "UNION NATIONALE DES CARPA",
+      596973638
+     ],
+     [
+      "COALLIA",
+      233737123
+     ],
+     [
+      "CROIX ROUGE FRANCAISE",
+      188225618
+     ],
+     [
+      "FONGECFA TRANSPORT",
+      149663836
+     ],
+     [
+      "ASSOCIATION AURORE",
+      115086001
+     ],
+     [
+      "GROUPE SOS SOLIDARITES",
+      105160324
+     ],
+     [
+      "FONDATION DE L ARMEE DU SALUT",
+      89673809
+     ],
+     [
+      "EMMAUS SOLIDARITE",
+      78425857
+     ],
+     [
+      "FONDATION NATIONALE SCIENCES POLITIQUES",
+      77229271
+     ]
+    ]
+   }
   }
  ]
 }

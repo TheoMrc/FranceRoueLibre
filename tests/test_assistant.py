@@ -328,3 +328,16 @@ class JournalTest(unittest.TestCase):
         r = mod.review(self.dir / 'journal')
         self.assertEqual(len(r['top'][0]), 2, 'same words in another order: one group')
         self.assertIn('fonctionnaires', mod.report(r))
+
+
+class ExamplesAreSavedTest(unittest.TestCase):
+    """Every example question shown in the Loupe panel is answered from faq.json, without spending credits."""
+
+    def test_examples_match_a_saved_answer(self):
+        import re
+        from assistant import faq
+        js = (ROOT / 'dist' / 'assistant.js').read_text(encoding='utf-8')
+        examples = re.findall(r"^    '([^']+)',", re.search(r'const EXAMPLES = \[(.*?)\];', js, re.S).group(1), re.M)
+        self.assertGreaterEqual(len(examples), 3)
+        for q in examples:
+            self.assertIsNotNone(faq.find([{'role': 'user', 'text': q}]), q)

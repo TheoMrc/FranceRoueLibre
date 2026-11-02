@@ -11,10 +11,12 @@
   const MAX_CONVS = 30, MAX_MSGS = 40;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const PROVIDERS = { gemini: { label: 'Gemini', img: './img/ai/gemini.svg' }, claude: { label: 'Claude', img: './img/ai/claude.svg' } };
+  /* each one is answered from server/assistant/faq.json (scripts/loupe-faq.py): no credit spent */
   const EXAMPLES = [
-    'Combien Rennes dépense-t-elle en frais de personnel, et par habitant ?',
-    'Quelles subventions publiques pour la vidéoprotection, et à qui ?',
-    'Combien nous a coûté Bruno Le Maire ?',   // answered from server/assistant/faq.json, no credit spent
+    'Combien nous a coûté Bruno Le Maire ?',
+    'Quand les prix montent, qui paie la dette ?',
+    'Quand je paie 100 € d’impôts, comment sont-ils dépensés ?',
+    'Quelles associations reçoivent le plus de subventions de l’État ?',
   ];
   let status = null, busy = null, provider = 'auto', store = { v: 1, convs: [], current: null };
   const logoOK = {};

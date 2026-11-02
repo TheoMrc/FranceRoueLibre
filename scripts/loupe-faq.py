@@ -1,6 +1,7 @@
 """Saved answers of la Loupe (server/assistant/faq.json): questions many readers ask, answered once from data downloaded
-by fetch-sources.mjs, then served without calling a model (no credits spent). Every figure is read from a file; the
-wording around it is fixed here. Re-run after a new download:
+by fetch-sources.mjs, then served without calling a model (no credits spent). Every figure is read from a file downloaded by
+script; the wording around it is fixed here. Questions: the debt under Bruno Le Maire, inflation and the debt, where
+100 € of taxes go, the associations that receive most from the State. Re-run after a new download:
 
   node scripts/fetch-sources.mjs --only=dette-trimestrielle
   python3 scripts/loupe-faq.py
@@ -79,6 +80,134 @@ def debt_le_maire(q, annual):
     }
 
 
+COFOG = ROOT / 'dist' / 'data' / 'national-functions.json'   # Eurostat gov_10a_exp, built by scripts (national accounts)
+CPI = ROOT / 'sources' / 'resultats' / 'insee_ipc_annuel_1960_2025.csv'
+ASSOS = ROOT / 'dist' / 'data' / 'aides' / 'associations.json'
+INSEE_CPI_CATEGORIES = 'https://www.insee.fr/fr/statistiques/fichier/7634629/ndc-juin-2023-ipc-categorie-menages.pdf'
+AFT = 'https://fipeco.fr/pdf/Obligations%20index%C3%A9es.pdf'   # Fipeco, « Les obligations indexées sur l’inflation » (février 2023)
+# the dataset downloaded by fetch-sources.mjs (jaune-associations-2025)
+ASSO_PAGE = 'https://data.economie.gouv.fr/explore/dataset/plf25-donnees-de-l-annexe-jaune-effort-financier-de-l-etat-en-faveur-des-associations/'
+
+
+def cofog():
+    d = json.loads(COFOG.read_text(encoding='utf-8'))
+    return d, {code: dict(zip(d['years'], vals)) for code, vals in d['data']['TE'].items()}
+
+
+def inflation_debt(q, annual):
+    """« Quand les prix montent, qui paie la dette ? »: the 2022-2023 inflation, the debt in euros and in % of GDP, the
+    interest paid; who bears what is stated without figures that the downloaded data do not give."""
+    cpi = {int(r['annee']): float(r['inflation_pct']) for r in csv.DictReader(open(CPI, encoding='utf-8')) if r['inflation_pct']}
+    d, te = cofog()
+    i21, i22, last = te['GF0107'][2021], te['GF0107'][2022], max(d['years'])
+    (d21, p21), (d23, p23) = q['2021-T4'], q['2023-T4']
+    reply = (
+        f'Quand les prix montent, la dette pèse **moins** par rapport à la richesse produite, mais elle **coûte plus** '
+        f'en intérêts, et chacun ne vit pas la hausse des prix de la même façon.\n\n'
+        f'- **La dette fond en proportion** : avec {fr(cpi[2022], 1)} % d’inflation en 2022 et {fr(cpi[2023], 1)} % en 2023, '
+        f'le PIB en euros a grossi vite. La dette est passée de {fr(d21)} à {fr(d23)} Md€ (+{fr(d23 - d21)} Md€) entre fin '
+        f'2021 et fin 2023, mais de {fr(p21, 1)} % à {fr(p23, 1)} % du PIB : elle a baissé en proportion.\n'
+        f'- **Les intérêts augmentent** : ils sont passés de {fr(i21)} Md€ en 2021 à {fr(i22)} Md€ en 2022, puis '
+        f'{fr(te["GF0107"][last])} Md€ en {last}. Une partie de la dette de l’État est indexée sur l’inflation (OAT '
+        f'indexées) : quand les prix montent, ce que l’État doit rembourser monte avec eux. Les nouveaux emprunts se font '
+        f'aussi à des taux plus élevés. Ces intérêts sont payés avec les impôts de tous.\n'
+        f'- **Qui perd, qui gagne** : ceux qui ont prêté à taux fixe (épargnants par l’assurance vie, banques, '
+        f'investisseurs étrangers) sont remboursés en euros qui valent moins ; les ménages, eux, subissent la hausse des '
+        f'prix. L’Insee a mesuré que l’inflation a été un peu plus forte pour les ménages modestes et les plus âgés, '
+        f'surtout à cause de l’alimentation, qui pèse plus dans leur budget.\n\n'
+        f'Les données publiées ne disent pas qui, au final, « paie » la dette ménage par ménage : cela dépend des impôts '
+        f'que chacun paie et de l’épargne qu’il détient. Pour les montants année par année : '
+        f'[Comptes publics](index.html#comptes). Sources : [Insee, prix à la consommation]'
+        f'(https://www.insee.fr/fr/statistiques/serie/011814653), [Insee, dette trimestrielle]({INSEE_PAGE}), '
+        f'[Eurostat, dépenses par fonction]({d["url"]}), [Insee, inflation par catégorie de ménages]({INSEE_CPI_CATEGORIES}), '
+        f'[Fipeco, les obligations indexées sur l’inflation]({AFT}).')
+    return {
+        'id': 'inflation-dette', 'question': 'Quand les prix montent, qui paie la dette ?',
+        'match_any': [[['prix', 'inflation'], ['dette']], [['inflation'], ['qui paie', 'qui paye', 'pauvre', 'modeste', 'menage']]],
+        'reply': reply,
+        'sources': [{'title': 'Insee, indice des prix à la consommation', 'url': 'https://www.insee.fr/fr/statistiques/serie/011814653'},
+                    {'title': 'Insee, dette des administrations publiques (trimestrielle)', 'url': INSEE_PAGE},
+                    {'title': 'Eurostat, dépenses des administrations par fonction', 'url': d['url']},
+                    {'title': 'Insee, inflation selon la catégorie de ménages (2023)', 'url': INSEE_CPI_CATEGORIES},
+                    {'title': 'Fipeco, les obligations indexées sur l’inflation (2023)', 'url': AFT}],
+        'data': {'inflation': {y: cpi[y] for y in (2021, 2022, 2023, 2024)}, 'debt': [round(d21, 1), round(d23, 1)],
+                 'pctGdp': [round(p21, 1), round(p23, 1)], 'interest': {y: round(te['GF0107'][y], 1) for y in range(2019, last + 1)}},
+    }
+
+
+def hundred_euros(annual):
+    """« Quand je paie 100 € d’impôts, comment sont-ils dépensés ? »: 100 € of public spending by function, and how
+    much is spent for 100 € collected (the rest is borrowed)."""
+    d, te = cofog()
+    y = max(d['years'])
+    total = te['TOTAL'][y]
+    posts = [('GF10', 'protection sociale (retraites, famille, chômage)'), ('GF07', 'santé'), ('GF04', 'affaires économiques (transports, énergie, aides aux entreprises, emploi)'),
+             ('GF09', 'enseignement'), ('GF01-GF0107', 'administration générale (ministères, impôts, recherche fondamentale)'), ('GF0107', 'intérêts de la dette'),
+             ('GF02', 'défense'), ('GF03', 'police, justice, pompiers'), ('GF08', 'culture et sport'), ('GF06', 'logement et équipements'), ('GF05', 'environnement')]
+    val = lambda code: sum((-1 if i else 1) * te[c][y] for i, c in enumerate(code.split('-')))
+    rows = sorted(((100 * val(c) / total, label) for c, label in posts), reverse=True)
+    assert abs(sum(v for v, _ in rows) - 100) < .5, 'les fonctions ne font pas 100 %'
+    deficit = next(r['deficit'] for r in annual['years'] if r['year'] == y)
+    spent = 100 * total / (total - deficit)
+    lines_ = '\n'.join(f'- **{fr(v, 0) if v >= 9.5 else fr(v, 1)} €** : {label}' for v, label in rows)
+    reply = (
+        f'Sur **100 €** de dépenses publiques en {y} (État, Sécurité sociale et collectivités ensemble), voici où ils vont :\n\n'
+        f'{lines_}\n\n'
+        f'Deux précisions. Vos impôts ne vont pas tous au même endroit : la CSG finance surtout la Sécurité sociale, la '
+        f'taxe foncière votre commune, la TVA et l’impôt sur le revenu l’État. Et les administrations dépensent plus '
+        f'qu’elles ne prélèvent : en {y}, pour 100 € d’impôts et de cotisations, elles ont dépensé environ **{fr(spent, 0)} €**, '
+        f'les {fr(spent - 100, 0)} € de plus étant empruntés (le déficit, {fr(deficit)} Md€).\n\n'
+        f'Détail et évolution depuis 1995 : [le circuit de l’argent public](index.html#circuit). Sources : '
+        f'[Eurostat et Insee, dépenses par fonction]({d["url"]}), [Insee, déficit et dette]({annual["source"]}).')
+    return {
+        'id': 'cent-euros', 'question': 'Quand je paie 100 € d’impôts, comment sont-ils dépensés ?',
+        'match_any': [[['100', 'cent', '1000', 'mille'], ['impot', 'taxe', 'prelev', 'cotisation']],
+                      [['mes impot', 'nos impot', 'mes taxe', 'nos taxe'], ['ou va', 'ou vont', 'depens', 'utilis', 'sert', 'servent', 'finance']]],
+        'reply': reply,
+        'sources': [{'title': 'Eurostat et Insee, dépenses des administrations par fonction', 'url': d['url']},
+                    {'title': 'Insee, comptes de la Nation (déficit)', 'url': annual['source']}],
+        'data': {'year': y, 'per100': {label: round(v, 2) for v, label in rows}, 'spentPer100Collected': round(spent, 1)},
+    }
+
+
+# Readable names for the largest recipients (the annex gives them in capitals, without accents, sometimes cut)
+ASSO_NAMES = {'ASS INTERNATIONALE DE DEVELOPPEMEN': 'Association internationale de développement (fonds de la Banque mondiale)',
+              'UNION NATIONALE DES CARPA': 'Union nationale des Carpa (aide juridictionnelle versée aux avocats)',
+              'COALLIA': 'Coallia', 'CROIX ROUGE FRANCAISE': 'Croix-Rouge française', 'FONGECFA TRANSPORT': 'Fongecfa Transport (formation dans les transports)',
+              'ASSOCIATION AURORE': 'Association Aurore', 'GROUPE SOS SOLIDARITES': 'Groupe SOS Solidarités',
+              'FONDATION DE L ARMEE DU SALUT': 'Fondation de l’Armée du salut', 'EMMAUS SOLIDARITE': 'Emmaüs Solidarité',
+              'FONDATION NATIONALE SCIENCES POLITIQUES': 'Fondation nationale des sciences politiques (Sciences Po)'}
+
+
+def associations():
+    """« Quelles associations reçoivent le plus de subventions de l’État ? »: the ten largest of the latest year published."""
+    d = json.loads(ASSOS.read_text(encoding='utf-8'))
+    y = max(d['top'], key=int)
+    year = next(p for p in d['perYear'] if str(p['year']) == y)
+    top = d['top'][y][:10]
+    eur = lambda v: f'{fr(v / 1e6)} M€' if v < 1e9 else f'{fr(v / 1e9, 2)} Md€'
+    lines_ = '\n'.join(f'{i}. **{ASSO_NAMES.get(name, name.title())}** : {eur(amount)}' for i, (_, name, amount, *_rest) in enumerate(top, 1))
+    share = 100 * sum(r[2] for r in top) / year['amount']
+    reply = (
+        f'En {y}, l’État a versé **{fr(year["amount"] / 1e9, 1)} Md€** de subventions à {fr(year["beneficiaries"])} '
+        f'organismes classés comme associations. Les dix qui ont reçu le plus :\n\n{lines_}\n\n'
+        f'Ces dix-là touchent {fr(share)} % du total. Le mot « association » recouvre ici des organismes très différents : '
+        f'un fonds de la Banque mondiale, des caisses qui reversent l’aide juridictionnelle aux avocats, des opérateurs '
+        f'de l’hébergement d’urgence et de l’accueil des demandeurs d’asile, des fondations de recherche. Une subvention '
+        f'paie souvent un service public confié à l’association (héberger, former, soigner), pas son fonctionnement.\n\n'
+        f'Les montants sont publiés avec deux ans de retard, dans une annexe au projet de loi de finances. Pour chercher '
+        f'une association ou voir les années précédentes : [Aides et subventions](aides.html#associations). Source : '
+        f'[annexe « Effort financier de l’État en faveur des associations », projet de loi de finances {int(y) + 2}]({ASSO_PAGE}).')
+    return {
+        'id': 'associations', 'question': 'Quelles associations reçoivent le plus de subventions de l’État ?',
+        'match_any': [[['association'], ['subvention', 'aide', 'argent', 'recoi', 'touch', 'financ', 'percoi']],],
+        'reply': reply,
+        'sources': [{'title': 'Annexe « jaune » : effort financier de l’État en faveur des associations',
+                     'url': ASSO_PAGE}],
+        'data': {'year': int(y), 'total': year['amount'], 'beneficiaries': year['beneficiaries'], 'top': [[r[1], r[2]] for r in top]},
+    }
+
+
 def main():
     q = quarterly()
     TIDY.parent.mkdir(parents=True, exist_ok=True)
@@ -92,7 +221,7 @@ def main():
     for y in (2017, 2020, 2024):
         a = next(r['debt'] for r in annual['years'] if r['year'] == y)
         assert abs(q[f'{y}-T4'][0] - a) < 1, f'dette fin {y} : trimestrielle {q[f"{y}-T4"][0]} vs annuelle {a}'
-    entries = [debt_le_maire(q, annual)]
+    entries = [debt_le_maire(q, annual), inflation_debt(q, annual), hundred_euros(annual), associations()]
     OUT.write_text(json.dumps({'generated': 'python3 scripts/loupe-faq.py', 'entries': entries}, ensure_ascii=False, indent=1) + '\n',
                    encoding='utf-8')
     print(f'{TIDY.relative_to(ROOT)}: {len(q)} trimestres ; {OUT.relative_to(ROOT)}: {len(entries)} réponse(s)')
