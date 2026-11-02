@@ -37,6 +37,7 @@
   <link rel="stylesheet" href="./vendor/maplibre-gl.css">
   <link rel="stylesheet" href="./style.css">
   <script defer src="./vendor/maplibre-gl.js"></script>
+  <script defer src="./pretty-select.js"></script>
   <script defer src="./icons.js"></script>
   <script defer src="./app.js"></script>
   <script defer src="./national.js"></script>
@@ -138,7 +139,7 @@
             <div class="map-controls" aria-label="Contrôles de carte"><button id="zoomIn" type="button" aria-label="Augmenter le zoom">+</button><button id="zoomOut" type="button" aria-label="Réduire le zoom">−</button><button id="reset" type="button" aria-label="Tout réinitialiser : filtres, sélection et vue de la carte" title="Tout réinitialiser (filtres, sélection, vue)"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.5 10a6.5 6.5 0 1 0 1.9-4.6M3.5 3.5v3.2h3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
             <div class="year-control map-year" id="yearWrap" hidden>
               <button class="year-play" id="yearPlay" type="button" aria-label="Animer les années"><svg viewBox="0 0 20 20" aria-hidden="true"><path class="i-play" d="M6 4.5v11l9-5.5z"/><path class="i-pause" d="M5.5 4.5h3v11h-3zM11.5 4.5h3v11h-3z"/></svg></button>
-              <label class="year-filter"><span class="sr-only">Exercice</span><select id="mapYear" aria-label="Exercice"></select></label>
+              <label class="year-filter"><span class="sr-only">Exercice</span><select id="mapYear" aria-label="Exercice" data-pretty></select></label>
             </div>
             <div class="map-pick" id="mapPick" hidden></div>
             <div class="map-legend">
