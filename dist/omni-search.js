@@ -160,12 +160,14 @@
         <span class="omni__icon">${ICON_SEARCH}</span>
         <label class="sr-only" for="${uid}">Rechercher sur le site, dans les dépenses ou demander à la Loupe</label>
         <input id="${uid}" name="q" type="search" autocomplete="off" spellcheck="false">
-        <span class="omni__ghost" aria-hidden="true"><span class="omni__ghost-text"></span><i class="omni__caret"></i></span>
+        <span class="omni__ghost" aria-hidden="true"><span class="omni__ghost-inner"><span class="omni__ghost-text"></span><i class="omni__caret"></i></span></span>
         <button class="omni__go" type="submit" aria-label="Rechercher"><span>Rechercher</span>${ICON_SPARK}</button>
       </form>
       <div class="omni__panel" id="${uid}-list" hidden></div>`;
     const form = root.querySelector('form'), input = root.querySelector('input'), panel = root.querySelector('.omni__panel');
-    const ghost = root.querySelector('.omni__ghost'), ghostText = root.querySelector('.omni__ghost-text');
+    const ghost = root.querySelector('.omni__ghost'), ghostText = root.querySelector('.omni__ghost-text'), ghostInner = root.querySelector('.omni__ghost-inner');
+    /* a long example scrolls to the left as it is typed, so the end being typed stays in view */
+    const setGhost = text => { ghostText.textContent = text; ghostInner.style.transform = `translateX(${-Math.max(0, ghostInner.scrollWidth - ghost.clientWidth)}px)`; };
     /* examples typing themselves while the box is empty */
     let ex = 0, typing = null;
     function typeLoop() {
@@ -173,12 +175,12 @@
       if (input.value) { ghost.hidden = true; return; }
       ghost.hidden = false;
       const text = examples[ex % examples.length];
-      if (reduce.matches) { ghostText.textContent = text; typing = setTimeout(() => { ex++; typeLoop(); }, 3200); return; }
+      if (reduce.matches) { setGhost(text); typing = setTimeout(() => { ex++; typeLoop(); }, 3200); return; }
       let n = 0, dir = 1;
       const step = () => {
         if (input.value) { ghost.hidden = true; return; }
         n += dir;
-        ghostText.textContent = text.slice(0, n);
+        setGhost(text.slice(0, n));
         if (dir > 0 && n >= text.length) { dir = -1; typing = setTimeout(step, 1700); return; }
         if (dir < 0 && n <= 0) { ex++; typing = setTimeout(typeLoop, 350); return; }
         typing = setTimeout(step, dir > 0 ? 42 + Math.random() * 40 : 18);

@@ -1216,7 +1216,8 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .omni input::-webkit-search-cancel-button { display: none; }
 .omni__ghost { position: absolute; left: calc(1.25rem + 26px + .6rem); right: 9rem; top: 50%; transform: translateY(-50%); display: flex; align-items: center; overflow: hidden; color: var(--c-muted); font-size: 1.12rem; white-space: nowrap; pointer-events: none; }
 .omni__ghost[hidden] { display: none; }
-.omni__ghost-text { overflow: hidden; text-overflow: ellipsis; }
+.omni__ghost-inner { display: inline-flex; align-items: center; flex: none; white-space: nowrap; will-change: transform; }
+.omni__ghost-text { white-space: pre; }
 .omni__caret { flex: none; width: 2px; height: 1.2em; margin-left: 2px; background: var(--c-teal-600); animation: omni-blink 1s steps(2) infinite; }
 @keyframes omni-blink { 50% { opacity: 0; } }
 .omni__go { flex: none; display: inline-flex; align-items: center; gap: .45rem; height: 50px; padding: 0 1.25rem; border: 0; border-radius: var(--r-pill); background: var(--brand-gradient); color: #fff; font: 600 .98rem var(--font-display); cursor: pointer; box-shadow: 0 8px 22px rgba(37, 99, 235, .28); transition: transform .2s var(--ease); }
@@ -1282,10 +1283,10 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .lookup__line > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lookup__line strong { font-weight: 700; font-variant-numeric: tabular-nums; }
 .lookup__line small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-body); font-weight: 400; font-size: .88rem; color: var(--c-muted); }
-.lookup__card.is-active { animation: lk-icon-in .7s cubic-bezier(.34, 1.56, .64, 1) both; }
-.lookup__card.is-leaving { animation: lk-icon-out .45s var(--ease) both; }
-.lookup__line.is-active { animation: lk-text-in .55s var(--ease) .08s both; }
-.lookup__line.is-leaving { animation: lk-text-out .4s var(--ease) both; }
+.lookup__card.is-active { animation: lk-icon-in 1.1s cubic-bezier(.34, 1.4, .64, 1) both; }
+.lookup__card.is-leaving { animation: lk-icon-out .9s var(--ease) both; }
+.lookup__line.is-active { animation: lk-text-in 1s cubic-bezier(.22, .8, .2, 1) .15s both; }
+.lookup__line.is-leaving { animation: lk-text-out .8s var(--ease) both; }
 @keyframes lk-icon-in { from { opacity: 0; transform: translateY(70%) scale(.6) rotate(-12deg); } to { opacity: 1; transform: none; } }
 @keyframes lk-icon-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-70%) scale(.7) rotate(10deg); } }
 @keyframes lk-text-in { from { opacity: 0; transform: translateY(60%); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
