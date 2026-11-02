@@ -244,6 +244,64 @@ def workforce():
             'salaries': sal, 'ceilings': ceilings, 'used2025': used, 'checks': {'count': len(checks), 'ok': all(c['ok'] for c in checks)}}
 
 
+# ---------- 4c. Results to put in front of the cost: inflation, Europe, trade, debt, hospitals, PISA ----------
+RES = SRC / 'resultats'
+
+
+def res_rows(name):
+    import csv
+    with open(RES / name, encoding='utf-8', newline='') as handle:
+        return list(csv.DictReader(handle))
+
+
+def fnum(v):
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def results():
+    cpi = {int(r_['annee']): fnum(r_['ipc_chaine_base2025_100']) for r_ in res_rows('insee_ipc_annuel_1960_2025.csv') if fnum(r_['ipc_chaine_base2025_100'])}
+    # hospitals, SAE, salaried full-time equivalents by filière
+    hosp = {}
+    for r_ in res_rows('drees_sae_etp_hopitaux_2001_2024.csv'):
+        h = hosp.setdefault(r_['secteur'], [])
+        h.append({'year': int(r_['annee']), 'doctors': fnum(r_['medecins_salaries_etp']), 'admin': fnum(r_['administratifs_etp']), 'care': fnum(r_['soignants_etp']),
+                  'careManagers': fnum(r_['dont_cadres_soins_etp']), 'nurses': fnum(r_['dont_infirmiers_etp']), 'aides': fnum(r_['dont_aides_soignants_etp']),
+                  'technical': fnum(r_['techniques_ouvriers_etp']), 'medtech': fnum(r_['medico_techniques_etp']), 'social': fnum(r_['educatifs_sociaux_etp']),
+                  'total': fnum(r_['total_salaries_etp'])})
+    for h in hosp.values():
+        h.sort(key=lambda x: x['year'])
+    # Europe: remuneration of government employees, % of GDP and % of spending
+    eu = {}
+    for r_ in res_rows('eurostat_gov_remuneration_salaries_ue.csv'):
+        eu.setdefault(r_['geo'], {'label': r_['geo_label'], 'years': {}})['years'][int(r_['annee'])] = [fnum(r_['D1PAY_PC_GDP']), fnum(r_['D1PAY_pct_TE'])]
+    eu_year = max(y for y in eu['FR']['years'] if sum(1 for c in eu.values() if (c['years'].get(y) or [None])[0] is not None) >= 27)
+    europe = [{'geo': g, 'label': c['label'], 'gdp': c['years'][eu_year][0], 'spending': c['years'][eu_year][1]} for g, c in eu.items() if g not in ('EA19', 'EA21') and c['years'].get(eu_year) and c['years'][eu_year][0] is not None]
+    oecd = {}
+    for r_ in res_rows('ocde_emploi_apu_pct_emploi_total.csv'):
+        v = fnum(r_['emploi_apu_pct_emploi_total'])
+        if v is not None and int(r_['annee']) >= oecd.get(r_['pays_iso3'], {}).get('year', 0):
+            oecd[r_['pays_iso3']] = {'iso3': r_['pays_iso3'], 'label': r_['pays'], 'year': int(r_['annee']), 'value': v}
+    oecd_fr = sorted(([int(r_['annee']), fnum(r_['emploi_apu_pct_emploi_total'])] for r_ in res_rows('ocde_emploi_apu_pct_emploi_total.csv') if r_['pays_iso3'] == 'FRA'), key=lambda x: x[0])
+    trade = [{'year': int(r_['annee']), 'goods': fnum(r_['solde_biens_Md_eur']), 'goodsGdp': fnum(r_['solde_biens_pct_pib']), 'goodsServices': fnum(r_['solde_biens_services_insee_Md_eur'])}
+             for r_ in res_rows('france_solde_commercial_1949_2025.csv')]
+    gdp_volume = {int(r_['annee']): fnum(r_['pib_volume_Md_eur_chaines_2020_011779991']) for r_ in res_rows('insee_deflateur_pib_1949_2025.csv')}
+    ratios = load(SRC / 'national-ratios-insee.json')
+    debt = [[y['year'], y['debt']] for y in ratios['years'] if y.get('debt') is not None]
+    pisa = [{'year': int(r_['annee']), 'reading': fnum(r_['comprehension_ecrit']), 'math': fnum(r_['mathematiques']), 'science': fnum(r_['sciences'])} for r_ in res_rows('pisa_france_scores_moyens_2000_2018.csv')]
+    return {'cpi': {'base': 2025, 'values': {y: round(v, 3) for y, v in sorted(cpi.items())}, 'url': 'https://www.insee.fr/fr/statistiques/serie/011814653', 'source': 'Insee, indice des prix à la consommation (séries chaînées base 2025, 2015, 1980)'},
+            'hospitals': {'series': hosp, 'source': 'DREES, statistique annuelle des établissements de santé (SAE), ETP moyens annuels rémunérés', 'url': 'https://data.drees.solidarites-sante.gouv.fr/explore/dataset/708_bases-statistiques-sae/'},
+            'europe': {'year': eu_year, 'countries': sorted(europe, key=lambda c: -c['gdp']), 'france': [[y, v[0], v[1]] for y, v in sorted(eu['FR']['years'].items())], 'eu27': [[y, v[0], v[1]] for y, v in sorted(eu['EU27_2020']['years'].items())], 'germany': [[y, v[0], v[1]] for y, v in sorted(eu['DE']['years'].items())],
+                       'source': 'Eurostat, gov_10a_main (rémunération des salariés des administrations publiques, D.1)', 'url': 'https://ec.europa.eu/eurostat/databrowser/view/gov_10a_main/default/table?lang=fr'},
+            'oecd': {'countries': sorted(oecd.values(), key=lambda c: -c['value']), 'france': oecd_fr, 'source': 'OCDE, Government at a Glance (emploi des administrations publiques en % de l’emploi total)', 'url': 'https://www.oecd.org/fr/topics/sub-issues/public-employment.html'},
+            'trade': {'series': trade, 'source': 'Eurostat nama_10_gdp (biens, 1975–2025) ; Insee, équilibre ressources-emplois (biens et services)', 'url': 'https://ec.europa.eu/eurostat/databrowser/view/nama_10_gdp/default/table?lang=fr'},
+            'gdpVolume': {'values': {y: v for y, v in sorted(gdp_volume.items()) if v}, 'source': 'Insee, PIB en volume (prix chaînés 2020)', 'url': 'https://www.insee.fr/fr/statistiques/serie/011779991'},
+            'debt': {'series': debt, 'source': 'Insee, dette publique au sens de Maastricht, % du PIB', 'url': ratios['source']},
+            'pisa': {'series': pisa, 'source': 'OCDE, PISA (repris par la Banque mondiale, EdStats)', 'url': 'https://databank.worldbank.org/source/education-statistics-%5E-all-indicators'}}
+
+
 # ---------- 4b. Elected officials as they are: Répertoire national des élus (RNE) ----------
 RAW = SRC / 'raw'
 RNE_PAGE = 'https://www.data.gouv.fr/datasets/repertoire-national-des-elus-1/'
@@ -561,7 +619,7 @@ def main():
     wf = workforce()
     out = {
         'generated': 'python3 scripts/emplois-data.py',
-        'workforce': wf,
+        'workforce': wf, 'results': results(),
         'national': nat, 'functions': fun, 'state': st, 'local': loc, 'territory': geo,
         'mandates': mandates, 'reference': {k: REF[k] for k in ('regionalSeats', 'municipalSeats', 'indemnities')},
     }

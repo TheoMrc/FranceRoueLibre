@@ -157,6 +157,7 @@
   /* ---------- 1. National series ---------- */
   function initNational(D) {
     const nat = D.national, rows = nat.years, last = rows.at(-1), W = D.workforce, wf = { total: W.total[W.year] / 1000, year: W.year };
+    const CPI = { base: D.results.cpi.base, v: D.results.cpi.values };
     const habOf = r => r.population ? r.d1 * 1e9 / r.population : null;
     const agentsPer1000 = 1000 * wf.total * 1000 / (rows.find(r => r.year === wf.year + 1) || last).population;
     const peak = rows.filter(r => r.gdp).reduce((b, r) => r.d1 / r.gdp > b.d1 / b.gdp ? r : b);
@@ -172,6 +173,8 @@
       gdp: { title: 'Rémunération des agents publics, en % du PIB', val: (r, k) => r.gdp ? 100 * r[k] / r.gdp : null, format: v => pctS(v), tick: v => `${nf(v)} %` },
       share: { title: 'Rémunération des agents publics, en % des dépenses publiques', val: (r, k) => 100 * r[k] / r.spending, format: v => pctS(v), tick: v => `${nf(v)} %` },
       hab: { title: 'Rémunération des agents publics par habitant, en euros courants', val: (r, k) => r.population ? r[k] * 1e9 / r.population : null, format: v => eur(v), tick: v => nf(v) },
+      real: { title: `Rémunération des agents publics, en milliards d’euros de ${CPI.base} (inflation déduite)`, val: (r, k) => CPI.v[r.year] ? r[k] * 100 / CPI.v[r.year] : null, format: v => md(v), tick: v => nf(v) },
+      realHab: { title: `Rémunération des agents publics par habitant, en euros de ${CPI.base}`, val: (r, k) => r.population && CPI.v[r.year] ? r[k] * 1e9 / r.population * 100 / CPI.v[r.year] : null, format: v => eur(v), tick: v => nf(v) },
     };
     const draw = () => {
       const c = cfg[unit];
@@ -183,7 +186,7 @@
       lines($('emNatChart'), series, { format: c.format, tick: c.tick, label: c.title });
       $('emNatLegend').innerHTML = series.map(s => `<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join('');
       const y2000 = rows.find(r => r.year === 2000);
-      $('emNatNote').innerHTML = `Ensemble des administrations publiques (État, organismes d’administration centrale, collectivités, hôpitaux publics, sécurité sociale). Les cotisations imputées (${md(last.imputed)} en ${last.year}) représentent les retraites que l’État verse directement à ses anciens fonctionnaires, enregistrées comme une charge de l’employeur. ${unit === 'md' ? `Euros courants, sans correction de l’inflation : de ${md(y2000.d1)} en 2000 à ${md(last.d1)} en ${last.year}. ` : ''}${unit === 'hab' ? 'Population au 1er janvier (Insee), disponible depuis 1982. ' : ''}${unit === 'gdp' ? 'PIB déduit du ratio des dépenses publiques en % du PIB publié par l’Insee. ' : ''}Source : ${link(nat.url, 'Insee, comptes de la Nation, tableau 3.201')}.`;
+      $('emNatNote').innerHTML = `Ensemble des administrations publiques (État, organismes d’administration centrale, collectivités, hôpitaux publics, sécurité sociale). Les cotisations imputées (${md(last.imputed)} en ${last.year}) représentent les retraites que l’État verse directement à ses anciens fonctionnaires, enregistrées comme une charge de l’employeur. ${unit === 'md' ? `Euros courants, sans correction de l’inflation : de ${md(y2000.d1)} en 2000 à ${md(last.d1)} en ${last.year}. ` : ''}${unit === 'hab' ? 'Population au 1er janvier (Insee), disponible depuis 1982. ' : ''}${unit === 'gdp' ? 'PIB déduit du ratio des dépenses publiques en % du PIB publié par l’Insee. ' : ''}${/^real/.test(unit) ? `Euros de ${CPI.base} : montants divisés par l’indice des prix à la consommation de l’Insee (séries base 2025, 2015 et 1980 raccordées). ` : ''}Source : ${link(nat.url, 'Insee, comptes de la Nation, tableau 3.201')}${/^real/.test(unit) ? `, ${link(D.results.cpi.url, 'Insee, indice des prix')}` : ''}.`;
     };
     unitChips($('emNatUnit'), u => { unit = u; draw(); });
     draw();
@@ -255,6 +258,78 @@
     rows($('emPerAgent'), per, { format: v => `${nf(v / 1000, 1)} k€ / an` });
     $('emPerAgentNote').innerHTML = `Salaires nets moyens en équivalent temps plein ${y}, hors militaires (DGAFP). Le coût complet rapporte les rémunérations publiques (Insee, OFGL) aux agents au 31 décembre : cotisations patronales, retraites de l’État et temps partiels compris, c’est un ordre de grandeur, pas un salaire. Sources : ${link(W.url, 'DGAFP')}, ${link(D.national.url, 'Insee 3.201')}, ${link(D.local.url, 'OFGL')}.`;
     $('emWfSources').innerHTML = [link(W.url, 'DGAFP, rapport annuel 2026 (données)'), link('https://www.insee.fr/fr/statistiques/2493501', 'Insee, effectifs par versant et ministère')].join('');
+  }
+
+  /* ---------- 2b. Europe ---------- */
+  const COUNTRY = { AT: 'Autriche', BE: 'Belgique', BG: 'Bulgarie', CY: 'Chypre', CZ: 'Tchéquie', DE: 'Allemagne', DK: 'Danemark', EE: 'Estonie', EL: 'Grèce', ES: 'Espagne', FI: 'Finlande', FR: 'France', HR: 'Croatie', HU: 'Hongrie', IE: 'Irlande', IT: 'Italie', LT: 'Lituanie', LU: 'Luxembourg', LV: 'Lettonie', MT: 'Malte', NL: 'Pays-Bas', PL: 'Pologne', PT: 'Portugal', RO: 'Roumanie', SE: 'Suède', SI: 'Slovénie', SK: 'Slovaquie', IS: 'Islande', NO: 'Norvège', CH: 'Suisse', EU27_2020: 'Union européenne (27)', EA20: 'Zone euro (20)',
+    AUS: 'Australie', AUT: 'Autriche', BEL: 'Belgique', CAN: 'Canada', CHE: 'Suisse', CHL: 'Chili', COL: 'Colombie', CRI: 'Costa Rica', CZE: 'Tchéquie', DEU: 'Allemagne', DNK: 'Danemark', ESP: 'Espagne', EST: 'Estonie', FIN: 'Finlande', FRA: 'France', GBR: 'Royaume-Uni', GRC: 'Grèce', HUN: 'Hongrie', IRL: 'Irlande', ISL: 'Islande', ISR: 'Israël', ITA: 'Italie', JPN: 'Japon', KOR: 'Corée du Sud', LTU: 'Lituanie', LUX: 'Luxembourg', LVA: 'Lettonie', MEX: 'Mexique', NLD: 'Pays-Bas', NOR: 'Norvège', NZL: 'Nouvelle-Zélande', POL: 'Pologne', PRT: 'Portugal', SVK: 'Slovaquie', SVN: 'Slovénie', SWE: 'Suède', TUR: 'Turquie', USA: 'États-Unis', HRV: 'Croatie' };
+  function initEurope(D) {
+    const E = D.results.europe, O = D.results.oecd;
+    const fr = E.countries.find(c => c.geo === 'FR'), eu = E.countries.find(c => c.geo === 'EU27_2020'), de = E.countries.find(c => c.geo === 'DE');
+    const nat = E.countries.filter(c => !/^(EU|EA)/.test(c.geo)), rank = nat.findIndex(c => c.geo === 'FR') + 1;
+    const gdp = D.national.years.find(r => r.year === E.year)?.gdp;
+    $('emEuLead').innerHTML = `En ${E.year}, la France consacre ${pctS(fr.gdp)} de son PIB à rémunérer ses agents publics, contre ${pctS(eu.gdp)} en moyenne dans l’Union et ${pctS(de.gdp)} en Allemagne : ${rank}e sur ${nat.length} pays européens. ${gdp ? `L’écart avec la moyenne européenne représente ${md((fr.gdp - eu.gdp) / 100 * gdp, 0)} par an.` : ''} Les pays nordiques, qui assurent beaucoup de services en régie publique, sont plus haut ; l’Allemagne, où cliniques, écoles confessionnelles et caisses sont souvent privées ou associatives, plus bas : la comparaison dépend aussi de ce que chaque pays confie au secteur public.`;
+    rows($('emEuBars'), E.countries.map(c => ({ label: COUNTRY[c.geo] || c.label, value: c.gdp, focus: c.geo === 'FR' || /^(EU|EA)/.test(c.geo), color: c.geo === 'FR' ? 'var(--tx-2)' : /^(EU|EA)/.test(c.geo) ? 'var(--tx-other)' : 'var(--tx-1)', sub: c.spending ? `${pctS(c.spending, 0)} des dépenses publiques` : '' })), { format: v => pctS(v) });
+    $('emEuBarsTitle').textContent = `Rémunération des agents publics, en % du PIB, ${E.year}`;
+    $('emEuBarsNote').innerHTML = `Rémunération des salariés des administrations publiques (salaires et cotisations, D.1). Source : ${link(E.url, E.source)}.`;
+    const fo = O.countries.find(c => c.iso3 === 'FRA');
+    rows($('emOecd'), O.countries.map(c => ({ label: COUNTRY[c.iso3] || c.label, value: c.value, focus: c.iso3 === 'FRA', color: c.iso3 === 'FRA' ? 'var(--tx-2)' : 'var(--tx-1)', sub: c.year !== fo.year ? `donnée ${c.year}` : '' })), { format: v => pctS(v) });
+    $('emOecdTitle').textContent = `Emploi des administrations publiques, en % de l’emploi total`;
+    $('emOecdNote').innerHTML = `Dernière année disponible (${fo.year} pour la France : ${pctS(fo.value)}, contre ${pctS(O.france[0][1])} en ${O.france[0][0]}). Pays de l’OCDE seulement : Bulgarie, Croatie, Chypre, Malte et Roumanie manquent. Source : ${link(O.url, O.source)}.`;
+    const series = [['France', E.france, 'var(--tx-2)'], ['Union européenne (27)', E.eu27, 'var(--tx-other)'], ['Allemagne', E.germany, 'var(--tx-1)']];
+    lines($('emEuLines'), series.map(([name, s, color]) => ({ name, color, points: s.map(([y, v]) => ({ x: y, value: v })) })), { format: v => pctS(v), tick: v => `${nf(v)} %`, label: 'Rémunération des agents publics en % du PIB', height: 240, zero: false });
+    $('emEuLegend').innerHTML = series.map(([n, , c]) => `<span><i style="background:${c}"></i>${n}</span>`).join('');
+    $('emEuLinesNote').innerHTML = `Source : ${link(E.url, 'Eurostat, gov_10a_main')}.`;
+    $('emEuSources').innerHTML = [link(E.url, 'Eurostat, comptes des administrations publiques'), link(O.url, 'OCDE, Government at a Glance')].join('');
+  }
+
+  /* ---------- 2c. Cost and results ---------- */
+  function initPistes(D) {
+    const R = D.results, CPI = R.cpi.values, base = R.cpi.base, nat = D.national.years, F = D.functions;
+    const real = (v, y) => CPI[y] ? v * 100 / CPI[y] : null;
+    const at = (arr, y) => arr.find(p => p[0] === y);
+    const last = nat.at(-1), y80 = nat.find(r => r.year === 1980), y82 = nat.find(r => r.year === 1982), y00 = nat.find(r => r.year === 2000), GV = R.gdpVolume.values;
+    const fy = F.years, fi = y => fy.indexOf(y), fn = code => F.items.find(i => i.code === code);
+    const W = D.workforce, bercy = W.ministries.find(m => /économiques et financiers/.test(m.label));
+    const b0 = bercy.series[0], b1 = bercy.series.at(-1);
+    const debt = R.debt.series, d0 = at(debt, b0[0]) || debt[0], d1 = debt.at(-1);
+    const trade = R.trade.series.filter(t => t.goodsGdp != null);
+    const t0 = trade.find(t => t.year === b0[0]) || trade[0], t1 = trade.at(-1);
+    const deficitSince = (() => { let y = t1.year; for (let i = trade.length - 1; i >= 0 && trade[i].goodsGdp < 0; i--) y = trade[i].year; return y; })();
+    const gfp = D.state.missions.find(m => m.code === 'GA'), eco = D.state.missions.find(m => m.code === 'DB');
+    const H = R.hospitals.series.public, h0 = H[0], h1 = H.at(-1);
+    const growth = (a, b) => signedPct(100 * (b / a - 1), 0);
+    const pisa = R.pisa.series, p0 = pisa[0], p1 = pisa.at(-1);
+    const edu = fn('GF09'), health = fn('GF07');
+    const k = (label, value, sub) => kpi(label, value, sub);
+    const cards = [
+      { id: 'inflation', tag: 'Inflation', title: 'Corrigé de l’inflation, la masse salariale publique a quand même fortement augmenté',
+        facts: [k(`Rémunérations publiques ${last.year}`, md(last.d1), `en euros de ${base}`), k(`Depuis 1980, inflation déduite`, growth(real(y80.d1, 1980), real(last.d1, last.year)), `${md(real(y80.d1, 1980), 0)} en euros de ${base} en 1980`), k('Par habitant, inflation déduite', growth(real(y82.d1, 1982) / y82.population, real(last.d1, last.year) / last.population), `depuis 1982 ; population : ${growth(y82.population, last.population)}`), k('Depuis 2000, inflation déduite', growth(real(y00.d1, 2000), real(last.d1, last.year)), `richesse produite (PIB en volume) : ${growth(GV[2000], GV[last.year])}`)],
+        charts: [{ id: 'piReal', title: `Rémunérations publiques, Md€ de ${base}`, series: [{ name: `Md€ de ${base}`, color: 'var(--tx-1)', area: true, points: nat.filter(r => CPI[r.year]).map(r => ({ x: r.year, value: real(r.d1, r.year) })) }], format: v => md(v, 0), zero: true }],
+        q: `<strong>À demander :</strong> la hausse vient-elle de plus d’agents, de meilleurs salaires, ou du coût des retraites de l’État (cotisations imputées) ? Le nombre d’agents (+${nf(100 * (W.total[W.year] / W.total[String(Math.min(...Object.keys(W.total).map(Number)))] - 1), 0)} % depuis 2011) et le salaire net moyen (${eur(W.salaries.find(s => s.versant === 'Ensemble FP' && s.population === 'Ensemble').net)} par mois en ${W.year}) sont publiés ; le service rendu en face ne l’est pas.` },
+      { id: 'bercy', tag: 'Bercy', title: `Bercy : ${nf(b1[1] * 1000)} agents, la dette et le commerce extérieur`,
+        facts: [k(`Agents des ministères économiques et financiers, ${b1[0]}`, nf(b1[1] * 1000), `${nf(b0[1] * 1000)} en ${b0[0]} (${growth(b0[1], b1[1])}), établissements publics compris`), k(`Dépenses de personnel ${D.state.year}`, md((gfp.t2 + (eco?.t2 || 0)) / 1000), `missions « ${gfp.name} » et « Économie »`), k('Dette publique', `${nf(d1[1], 1)} % du PIB`, `${nf(d0[1], 1)} % en ${d0[0]}`), k('Solde des échanges de biens', `${nf(t1.goodsGdp, 1)} % du PIB`, `${t1.year} ; ${nf(t0.goodsGdp, 1)} % en ${t0.year}`)],
+        charts: [
+          { id: 'piBercy', title: 'Agents des ministères économiques et financiers', series: [{ name: 'Agents', color: 'var(--tx-1)', points: bercy.series.map(([y, v]) => ({ x: y, value: v * 1000 })) }], format: v => nf(v), tick: v => `${nf(v / 1000)} k`, zero: true },
+          { id: 'piDebt', title: 'Dette publique, % du PIB', series: [{ name: 'Dette publique', color: 'var(--tx-2)', points: debt.filter(([y]) => y >= b0[0]).map(([y, v]) => ({ x: y, value: v })) }], format: v => pctS(v), tick: v => `${nf(v)} %`, zero: true },
+          { id: 'piTrade', title: 'Solde des échanges de biens, % du PIB', series: [{ name: 'Solde des biens', color: 'var(--tx-8)', points: trade.filter(t => t.year >= b0[0]).map(t => ({ x: t.year, value: t.goodsGdp })) }], format: v => pctS(v), tick: v => `${nf(v)} %`, zero: false },
+        ],
+        q: `<strong>À demander :</strong> Bercy compte ${nf(b0[1] * 1000 - b1[1] * 1000)} agents de moins qu’en ${b0[0]}, pendant que l’impôt se dématérialisait (les à-coups de 2008 à 2011 tiennent aux changements de périmètre du ministère). Dans le même temps, la dette est passée de ${nf(d0[1], 0)} % à ${nf(d1[1], 0)} % du PIB et les échanges de biens sont déficitaires chaque année depuis ${deficitSince}. Les indicateurs de performance publiés pour ces missions mesurent des délais de traitement et des taux de recouvrement, jamais la trajectoire de la dette ni la compétitivité.<ul><li>Qui répond de la dette ? Les lois de finances sont préparées par le gouvernement (ministres de l’Économie et du Budget, administrations de Bercy) et votées par le Parlement.</li><li>Quel indicateur relie le coût des administrations économiques à un résultat pour le public : recettes, dette, emplois, commerce extérieur ?</li></ul>` },
+      { id: 'sante', tag: 'Santé', title: 'Hôpital public : plus de médecins et de soignants, un tiers de cadres de santé en moins… et plus d’administratifs',
+        facts: [k(`Rémunérations de la fonction santé, ${fy.at(-1)}`, md(health.d1.at(-1)), `${growth(real(health.d1[0], fy[0]), real(health.d1.at(-1), fy.at(-1)))} depuis ${fy[0]}, inflation déduite`), k(`Administratifs des hôpitaux publics, ${h1.year}`, nf(h1.admin), `ETP ; ${growth(h0.admin, h1.admin)} depuis ${h0.year} (${pctS(100 * h0.admin / h0.total)} puis ${pctS(100 * h1.admin / h1.total)} des emplois)`), k('Cadres de santé', nf(h1.careManagers), `ETP ; ${growth(h0.careManagers, h1.careManagers)} depuis ${h0.year}`), k('Médecins salariés, infirmiers', `${growth(h0.doctors, h1.doctors)} · ${growth(h0.nurses, h1.nurses)}`, `depuis ${h0.year} (ETP) ; aides-soignants ${growth(h0.aides, h1.aides)}`)],
+        charts: [{ id: 'piHosp', title: `Hôpitaux publics, emplois en ETP (indice 100 en ${h0.year})`, series: [['Administratifs', 'admin', 'var(--tx-2)'], ['Médecins salariés', 'doctors', 'var(--tx-1)'], ['Infirmiers', 'nurses', 'var(--tx-3)'], ['Aides-soignants', 'aides', 'var(--tx-5)'], ['Cadres de santé', 'careManagers', 'var(--tx-7)']].map(([name, key, color]) => ({ name, color, points: H.map(h => ({ x: h.year, value: 100 * h[key] / h0[key] })) })), format: v => nf(v, 0), tick: v => nf(v), zero: false, legend: true }],
+        q: `<strong>À demander :</strong> en 2000, l’Organisation mondiale de la santé classait le système de santé français au premier rang mondial (${link('https://www.who.int/publications/i/item/924156198X', 'Rapport sur la santé dans le monde 2000')}). Dans les hôpitaux publics, la part des administratifs a peu bougé (${pctS(100 * h0.admin / h0.total)} des ETP en ${h0.year}, ${pctS(100 * h1.admin / h1.total)} en ${h1.year}, secrétaires médicales comprises) : le poids de la gestion se mesure-t-il ailleurs (temps des soignants passé à coder et à remplir, agences régionales de santé, tarification à l’activité) ?<ul><li>Le vieillissement de la population était annoncé dès les années 1990 : qui a fixé, année après année, le nombre de médecins et d’infirmiers formés ?</li><li>Pourquoi le nombre de cadres de santé a-t-il baissé de ${nf(Math.abs(100 * (h1.careManagers / h0.careManagers - 1)), 0)} % quand celui des administratifs augmentait ?</li></ul>` },
+      { id: 'ecole', tag: 'École', title: 'Enseignement : premier poste de rémunérations publiques, des résultats PISA en baisse',
+        facts: [k(`Rémunérations de l’enseignement, ${fy.at(-1)}`, md(edu.d1.at(-1)), `${growth(real(edu.d1[0], fy[0]), real(edu.d1.at(-1), fy.at(-1)))} depuis ${fy[0]}, inflation déduite`), k('PISA mathématiques', `${nf(p1.math)} points`, `${p1.year} ; ${nf(p0.math)} en ${p0.year}`), k('PISA compréhension de l’écrit', `${nf(p1.reading)} points`, `${p1.year} ; ${nf(p0.reading)} en ${p0.year}`)],
+        charts: [
+          { id: 'piEdu', title: `Rémunérations de l’enseignement, Md€ de ${base}`, series: [{ name: 'Enseignement', color: 'var(--tx-1)', area: true, points: fy.map((y, i) => ({ x: y, value: real(edu.d1[i], y) })).filter(p => p.value) }], format: v => md(v, 0), zero: true },
+          { id: 'piPisa', title: 'Scores PISA de la France', series: [['Mathématiques', 'math', 'var(--tx-1)'], ['Compréhension de l’écrit', 'reading', 'var(--tx-2)'], ['Sciences', 'science', 'var(--tx-3)']].map(([name, key, color]) => ({ name, color, points: pisa.map(p => ({ x: p.year, value: p[key] })) })), format: v => nf(v), tick: v => nf(v), zero: false, legend: true },
+        ],
+        q: `<strong>À demander :</strong> inflation déduite, la dépense de rémunération de l’enseignement augmente pendant que les scores moyens baissent de ${p0.year} à ${p1.year} (l’enquête 2022 n’est pas encore dans cette source ouverte). Combien d’agents de l’Éducation nationale enseignent devant une classe, combien travaillent en administration ? Ces chiffres ne sont pas publiés en données ouvertes, établissement par établissement.` },
+    ];
+    $('emPistes').innerHTML = cards.map(c => `<article class="em-piste" id="piste-${c.id}"><span class="em-piste__tag">${esc(c.tag)}</span><h3>${esc(c.title)}</h3><div class="em-piste__facts">${c.facts.join('')}</div><div class="em-piste__charts">${c.charts.map(ch => `<div><h4>${esc(ch.title)}</h4><div id="${ch.id}" class="em-chart"></div>${ch.legend ? `<div class="tx-legend">${ch.series.map(s => `<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join('')}</div>` : ''}</div>`).join('')}</div><div class="em-piste__q">${c.q}</div></article>`).join('');
+    cards.forEach(c => c.charts.forEach(ch => lines($(ch.id), ch.series, { format: ch.format, tick: ch.tick || ch.format, label: ch.title, height: 200, zero: ch.zero })));
+    $('emPistes').insertAdjacentHTML('beforeend', `<p class="note">Sources : ${link(D.national.url, 'Insee 3.201')}, ${link(R.cpi.url, 'Insee, prix à la consommation')}, ${link(F.url, 'Eurostat, dépenses par fonction')}, ${link(D.workforce.url, 'DGAFP')}, ${link(D.state.url, 'PLF 2025')}, ${link(R.debt.url, 'Insee, dette publique')}, ${link(R.trade.url, R.trade.source)}, ${link(R.hospitals.url, R.hospitals.source)}, ${link(R.pisa.url, R.pisa.source)}. Les montants en euros de ${base} sont divisés par l’indice des prix à la consommation.</p>`);
   }
 
   /* ---------- 3. By function ---------- */
@@ -603,10 +678,10 @@
 
   /* ---------- 9. Not published ---------- */
   const GAPS = [
-    { state: 'partial', title: 'Effectifs par collectivité', text: 'L’Insee et la DGAFP publient les effectifs par versant, par type de collectivité et par zone d’emploi, mais pas le nombre d’agents de chaque commune, intercommunalité ou département. Les « rapports sociaux uniques » que chaque collectivité établit chaque année ne sont pas ouverts.', who: 'Collectivités, DGCL, CNFPT, centres de gestion' },
-    { state: 'none', title: 'Indemnités versées à chaque élu', text: 'Depuis 2020, chaque commune doit présenter avant le vote du budget l’état des indemnités de ses élus. Cet état n’est pas publié en données ouvertes ni centralisé : on ne connaît que des totaux par compte comptable.', who: 'Communes, intercommunalités, départements, régions, DGCL' },
+    { state: 'partial', title: 'Effectifs par collectivité', text: 'La DGAFP publie les effectifs par versant, par type d’employeur et par département, mais pas le nombre d’agents de chaque commune, intercommunalité ou département employeur. Les « rapports sociaux uniques » que chaque collectivité établit chaque année ne sont pas ouverts.', who: 'Collectivités, DGCL, CNFPT, centres de gestion' },
+    { state: 'partial', title: 'Indemnités versées à chaque élu', text: 'Depuis 2020, chaque commune doit présenter avant le vote du budget l’état des indemnités de chacun de ses élus. Cet état n’est ni publié en données ouvertes ni centralisé : les comptes ne donnent que le total par collectivité.', who: 'Communes, intercommunalités, départements, régions, DGCL' },
     { state: 'partial', title: 'Effectifs de l’État par programme', text: 'Les plafonds d’emplois (ETPT) votés par ministère et par opérateur figurent dans les documents budgétaires en PDF et tableurs annexes, mais pas dans une série ouverte et stable qui permettrait de suivre emplois votés et emplois réalisés, programme par programme.', who: 'Direction du budget' },
-    { state: 'partial', title: 'Effectifs par ministère en série', text: 'La répartition des agents de l’État par ministère paraît chaque année dans le rapport annuel de la DGAFP, en tableaux de publication : aucun fichier ouvert ne donne la série longue, ministère par ministère, avec les contractuels et les militaires.', who: 'DGAFP, Insee' },
+    { state: 'none', title: 'Service rendu par administration', text: 'Les rapports annuels de performances mesurent des délais, des taux et des volumes d’activité, rarement un résultat pour le public (santé, niveau scolaire, sécurité) rapporté au coût de l’administration qui en a la charge, et jamais en série ouverte comparable d’une année et d’un territoire à l’autre.', who: 'Direction du budget, ministères, Cour des comptes' },
     { state: 'none', title: 'Temps de travail et absences', text: 'La durée effective du travail dans chaque collectivité (1 607 heures légales) et les taux d’absence ne sont connus que par des enquêtes et des rapports des chambres régionales des comptes, collectivité par collectivité, sans base ouverte.', who: 'Collectivités, chambres régionales des comptes, DGAFP' },
     { state: 'none', title: 'Collaborateurs et cabinets', text: 'Le nombre et le coût des collaborateurs de cabinet des exécutifs locaux, et des collaborateurs des parlementaires, ne sont pas publiés en données ouvertes, ni de façon homogène.', who: 'Collectivités, Assemblée nationale, Sénat' },
   ];
@@ -618,6 +693,8 @@
     REF = D.reference;
     initNational(D);
     initWorkforce(D);
+    initEurope(D);
+    initPistes(D);
     initFunctions(D);
     initState(D);
     initLocal(D);

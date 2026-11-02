@@ -111,3 +111,32 @@ test('page wiring', () => {
   }
   assert.ok(html.includes('emplois.js') && html.includes('emplois.css'));
 });
+
+test('headcounts: DGAFP 2026, published totals and checks', () => {
+  const w = data.workforce;
+  assert.equal(w.year, 2024);
+  assert.equal(w.total['2024'], 5848291);
+  assert.equal(w.versants.fpe['2024'] + w.versants.fpt['2024'] + w.versants.fph['2024'], w.total['2024']);
+  assert.ok(w.checks.ok && w.checks.count >= 30);
+  assert.equal(Object.keys(w.departments).length, 100);
+  const sum = Object.values(w.departments).reduce((s, d) => s + d.total_civils, 0);
+  assert.ok(sum > 5.4e6 && sum < w.total['2024']); // militaries and non-located jobs are not in the départements
+  const min = w.ministries.reduce((s, m) => s + m.total, 0);
+  assert.ok(Math.abs(min * 1000 - w.versants.fpe['2024']) < 5);
+  assert.ok(w.ceilings.Total['2026'] > 2e6);
+});
+
+test('results: deflator, Europe, hospitals', () => {
+  const r = data.results;
+  assert.equal(r.cpi.values['2025'], 100);
+  assert.ok(r.cpi.values['1960'] < 10);
+  const fr = r.europe.countries.find(c => c.geo === 'FR');
+  assert.ok(Math.abs(fr.gdp - 12.4) < 0.3);
+  assert.ok(r.europe.countries.filter(c => !/^(EU|EA)/.test(c.geo)).length >= 27);
+  const h = r.hospitals.series.public;
+  assert.equal(h[0].year, 2001);
+  assert.ok(!h.some(x => x.year === 2020));
+  for (const x of h) assert.ok(x.admin / x.total > 0.08 && x.admin / x.total < 0.16, String(x.year));
+  assert.ok(r.debt.series.at(-1)[1] > 100);
+  assert.ok(r.pisa.series.length >= 7);
+});

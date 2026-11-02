@@ -78,6 +78,20 @@
 .em-stack__bar span { display: block; height: 100%; min-width: 1px; }
 .em-stack__bar span:hover { filter: brightness(1.1); }
 
+/* Cost and results */
+.em-pistes { display: grid; gap: var(--sp-3); }
+.em-piste { padding: var(--sp-3); border-radius: var(--r-md); background: var(--c-bg); }
+.em-piste h3 { margin: .2rem 0 .6rem; font-size: 1.2rem; }
+.em-piste__tag { color: var(--c-teal-600); font-size: .74rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.em-piste__facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .5rem; margin: .8rem 0 1rem; }
+.em-piste__facts .kpi { background: var(--c-surface); }
+.em-piste__charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--sp-2); }
+.em-piste__charts h4 { margin: 0 0 .3rem; font-size: .86rem; color: var(--c-ink); }
+.em-piste__q { margin-top: 1rem; padding: .9rem 1rem; border-left: 3px solid var(--c-amber); border-radius: 0 var(--r-sm) var(--r-sm) 0; background: var(--c-surface); color: var(--c-body); font-size: .9rem; line-height: 1.55; }
+.em-piste__q strong { color: var(--c-ink); }
+.em-piste__q ul { margin: .4rem 0 0; padding-left: 1.1rem; }
+.em-piste__q li + li { margin-top: .3rem; }
+
 /* Map */
 #emMapInd { display: grid; gap: .5rem; width: 100%; }
 .em-chipgroup { display: flex; align-items: center; gap: .6rem; min-width: 0; }

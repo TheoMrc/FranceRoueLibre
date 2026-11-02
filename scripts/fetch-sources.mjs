@@ -95,6 +95,28 @@ const SOURCES = [
     { path: 'data-economie/etpt-par-ministere-mission-programme-pour-le-bg-et-les-ba-lfi-2023.csv', url: 'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/etpt-par-ministere-mission-programme-pour-le-bg-et-les-ba-lfi-2023/exports/csv?delimiter=%3B' },
   ] },
 
+  { id: 'resultats', kind: 'files', note: 'Inflation (Insee), Eurostat et OCDE (comparaisons UE), commerce extérieur, PISA, personnel hospitalier (DREES)', files: [
+    { path: 'raw/insee/bdm_000008965.xml', url: 'https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/000008965' },
+    { path: 'raw/insee/bdm_001765177.xml', url: 'https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001765177' },
+    { path: 'raw/insee/bdm_011814653.xml', url: 'https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/011814653' },
+    { path: 'raw/insee/bdm_011779990.xml', url: 'https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/011779990' },
+    { path: 'raw/insee/bdm_011779991.xml', url: 'https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/011779991' },
+    { path: 'raw/insee/bdm_011779992.xml', url: 'https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/011779992' },
+    { path: 'raw/insee/bdm_011791813.xml', url: 'https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/011791813' },
+    { path: 'raw/insee/bdm_011792506.xml', url: 'https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/011792506' },
+    { path: 'raw/eurostat/gov_10a_main_S13_D1PAY_D11PAY_TE.json', url: 'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10a_main?sector=S13&na_item=D1PAY&na_item=D11PAY&na_item=TE&unit=MIO_EUR&unit=PC_GDP&sinceTimePeriod=1995' },
+    { path: 'raw/eurostat/gov_10a_exp_S13_D1_cofog.json', url: 'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10a_exp?sector=S13&na_item=D1&unit=MIO_EUR&unit=PC_GDP&unit=PC_TOT&cofog99=TOTAL&cofog99=GF01&cofog99=GF02&cofog99=GF03&cofog99=GF04&cofog99=GF05&cofog99=GF06&cofog99=GF07&cofog99=GF08&cofog99=GF09&cofog99=GF10&sinceTimePeriod=2015' },
+    { path: 'raw/eurostat/nama_10_a10_e_EMP_DC_O-Q.json', url: 'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10_a10_e?na_item=EMP_DC&unit=THS_PER&unit=PC_TOT_PER&nace_r2=TOTAL&nace_r2=O-Q' },
+    { path: 'raw/eurostat/nama_10_gdp_FR_trade.json', url: 'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10_gdp?geo=FR&unit=CP_MEUR&na_item=P61&na_item=P71&na_item=P62&na_item=P72&na_item=B1GQ' },
+    { path: 'raw/oecd/oecd_gov_glance_DF_GOV_EMPPS_REP_YU.csv', url: 'https://sdmx.oecd.org/public/rest/data/OECD.GOV.GIP,DSD_GOV@DF_GOV_EMPPS_REP_YU,1.0/all?dimensionAtObservation=AllDimensions&format=csvfilewithlabels' },
+    { path: 'raw/worldbank/wb_edstats_FRA_LO.PISA.MAT.json', url: 'https://api.worldbank.org/v2/country/FRA/indicator/LO.PISA.MAT?format=json&source=12&per_page=200' },
+    { path: 'raw/worldbank/wb_edstats_FRA_LO.PISA.REA.json', url: 'https://api.worldbank.org/v2/country/FRA/indicator/LO.PISA.REA?format=json&source=12&per_page=200' },
+    { path: 'raw/worldbank/wb_edstats_FRA_LO.PISA.SCI.json', url: 'https://api.worldbank.org/v2/country/FRA/indicator/LO.PISA.SCI?format=json&source=12&per_page=200' },
+    { path: 'raw/drees/Effectifs_salaries_hospitaliers_Prod2026_DSN.xlsx', url: 'https://data.drees.solidarites-sante.gouv.fr/api/explore/v2.1/catalog/datasets/effectifs-salaries-hospitaliers-series-longues/attachments/effectifs_salaries_hospitaliers_prod2026_dsn_xlsx' },
+    { path: 'raw/drees/drees_effectifs_salaries_hospitaliers_series_longues.csv', url: 'https://data.drees.solidarites-sante.gouv.fr/api/explore/v2.1/catalog/datasets/effectifs-salaries-hospitaliers-series-longues/exports/csv?delimiter=%3B' },
+    { path: 'raw/drees/capact_pm_pnm.7z', url: 'https://data.drees.solidarites-sante.gouv.fr/api/explore/v2.1/catalog/datasets/708_bases-statistiques-sae/attachments/capact_pm_pnm_7z' },
+  ] },
+
   // ---- Integrity context ----
   { id: 'atteintes-probite', kind: 'ods', host: ECO, dataset: 'atteintes-a-la-probite-dans-les-decisions-de-justice-donnees-nationales-agregees-2021-2025' },
 

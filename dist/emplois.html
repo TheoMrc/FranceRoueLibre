@@ -88,14 +88,14 @@
         <span class="eyebrow">Emplois publics et élus</span>
         <h1>Agents publics et élus : <span class="gradient-text">combien ils sont, ce qu’ils coûtent, et où.</span></h1>
         <p class="hero__lead" id="emLead">Enseignants, soignants, policiers, militaires, agents des mairies, élus locaux : la rémunération des personnes qui font fonctionner les services publics est le deuxième poste de dépense publique après les prestations sociales. Cette page en mesure le coût, le cartographie échelon par échelon, et pose la question que les comptes publics ne posent jamais : pour quel résultat ?</p>
-        <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#effectifs">Effectifs</a><a href="#fonctions">Par pôle de dépense</a><a href="#etat">État</a><a href="#collectivites">Collectivités</a><a href="#carte">Carte</a><a href="#elus">Élus</a><a href="#commune">Ma commune</a><a href="#non-publie">Ce qui manque</a><a href="#methode">Méthode</a></nav>
+        <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#effectifs">Effectifs</a><a href="#europe">Europe</a><a href="#pistes">Coût et résultats</a><a href="#fonctions">Par pôle de dépense</a><a href="#etat">État</a><a href="#collectivites">Collectivités</a><a href="#carte">Carte</a><a href="#elus">Élus</a><a href="#commune">Ma commune</a><a href="#non-publie">Ce qui manque</a><a href="#methode">Méthode</a></nav>
       </div></div>
     </section>
 
     <section class="section" id="ensemble" aria-labelledby="emAllTitle">
       <div class="container">
         <div class="section__head-row"><div class="section__head"><span class="eyebrow">Comptes nationaux Insee · 1960–2025</span><h2 id="emAllTitle">Ce que coûtent les agents publics</h2><p class="lead">La « rémunération des salariés » des administrations publiques au sens de la comptabilité nationale : salaires et primes bruts, cotisations sociales payées par l’employeur public, et cotisations « imputées » qui représentent les retraites des fonctionnaires de l’État versées directement par le budget. État, collectivités, hôpitaux publics et organismes de sécurité sociale compris.</p></div>
-          <div class="chip-select" id="emNatUnit" role="group" aria-label="Unité"><button type="button" data-unit="md" class="active">Md€</button><button type="button" data-unit="gdp">% du PIB</button><button type="button" data-unit="share">% des dépenses</button><button type="button" data-unit="hab">€ par habitant</button></div></div>
+          <div class="chip-select" id="emNatUnit" role="group" aria-label="Unité"><button type="button" data-unit="md" class="active">Md€</button><button type="button" data-unit="gdp">% du PIB</button><button type="button" data-unit="share">% des dépenses</button><button type="button" data-unit="hab">€ par habitant</button><button type="button" data-unit="real">Md€ hors inflation</button><button type="button" data-unit="realHab">€ / hab. hors inflation</button></div></div>
         <div class="kpis" id="emKpis"></div>
         <div class="panel"><h3 id="emNatTitle">Rémunération des agents publics</h3><div id="emNatChart" class="tx-line em-chart"></div><div id="emNatLegend" class="tx-legend"></div><p class="note" id="emNatNote"></p></div>
       </div>
@@ -116,6 +116,25 @@
           <div class="panel"><h3>Salaire et coût moyen par agent</h3><div id="emPerAgent"></div><p class="note" id="emPerAgentNote"></p></div>
         </div>
         <p class="source-links" id="emWfSources"></p>
+      </div>
+    </section>
+
+    <section class="section" id="europe" aria-labelledby="emEuTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Eurostat et OCDE</span><h2 id="emEuTitle">La France face à ses voisins</h2><p class="lead" id="emEuLead"></p></div>
+        <div class="grid-2">
+          <div class="panel"><h3 id="emEuBarsTitle">Rémunération des agents publics, en % du PIB</h3><div id="emEuBars"></div><p class="note" id="emEuBarsNote"></p></div>
+          <div class="panel"><h3 id="emOecdTitle">Emploi public, en % de l’emploi total</h3><div id="emOecd"></div><p class="note" id="emOecdNote"></p></div>
+        </div>
+        <div class="panel"><h3>Rémunération des agents publics en % du PIB depuis 1995</h3><div id="emEuLines" class="em-chart"></div><div id="emEuLegend" class="tx-legend"></div><p class="note" id="emEuLinesNote"></p></div>
+        <p class="source-links" id="emEuSources"></p>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="pistes" aria-labelledby="emPiTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Coût et résultats</span><h2 id="emPiTitle">Ce que l’on paie, ce que l’on obtient : les questions à poser</h2><p class="lead">Les comptes publics disent combien coûte chaque administration, jamais ce qu’elle rapporte au public. Dans un monde idéal, chaque poste de dépense serait mis en face du service rendu. Voici quelques rapprochements possibles avec les données publiées : ils ne prouvent pas de causalité, ils montrent où il faudrait demander des comptes.</p></div>
+        <div class="em-pistes" id="emPistes"></div>
       </div>
     </section>
 
@@ -208,11 +227,12 @@
       <div class="container">
         <div class="section__head"><span class="eyebrow">Méthode</span><h2 id="emMethodTitle">Lire ces chiffres sans se tromper</h2></div>
         <div class="gap-grid">
-          <article class="gap"><h3>Quatre sources, quatre périmètres</h3><p>Les comptes nationaux (Insee, 2025) couvrent toutes les administrations. La répartition par fonction (Eurostat) s’arrête en 2024. Le titre 2 du budget de l’État est une prévision votée pour 2025. Les frais de personnel des collectivités viennent de leurs comptes (OFGL, 2025). Ces montants ne s’additionnent pas entre eux.</p></article>
+          <article class="gap"><h3>Des sources, des périmètres</h3><p>Comptes nationaux (Insee, 2025) pour le coût de toutes les administrations ; Eurostat pour la répartition par fonction (jusqu’en 2024) et les comparaisons européennes ; budget de l’État voté pour 2025 ; comptes des collectivités (OFGL, 2025) ; effectifs et salaires de la DGAFP (31 décembre 2024) ; élus du répertoire national des élus (2026). Ces montants et ces effectifs ne s’additionnent pas entre eux.</p></article>
           <article class="gap"><h3>Ce que contient la « rémunération »</h3><p>Salaires bruts, primes, cotisations sociales de l’employeur et cotisations imputées (les retraites des fonctionnaires de l’État, que l’État paie lui-même). Ce n’est pas le salaire net perçu par les agents, ni le coût des retraites déjà versées aux anciens agents des collectivités et des hôpitaux, payées par leur caisse.</p></article>
           <article class="gap"><h3>Rien n’est compté deux fois</h3><p id="emMethodLocal">La Ville de Paris est publiée à la fois comme commune et comme département depuis 2019, la Métropole de Lyon comme intercommunalité et comme département : leurs lignes « département » sont retirées. Les comptes d’une intercommunalité sont répartis entre départements selon la population de ses communes membres, ceux d’une région selon la population de ses départements.</p></article>
-          <article class="gap"><h3>Sièges prévus, pas élus en poste</h3><p>Le nombre de conseillers municipaux est celui que fixe la loi selon la population (article L. 2121-2 du CGCT). Depuis 2026, une liste peut compter jusqu’à deux candidats de moins dans les communes de moins de 1 000 habitants, et des sièges peuvent être vacants : l’effectif réel peut être un peu plus bas. La population utilisée est celle des comptes OFGL 2025.</p></article>
+          <article class="gap"><h3>Élus en fonction et sièges prévus</h3><p>Les élus sont ceux du répertoire national des élus, tenu par le ministère de l’Intérieur à partir des déclarations des préfectures. Le nombre de sièges prévu par la loi (article L. 2121-2 du CGCT, Code électoral) est recalculé à côté pour comparaison : l’écart vient des sièges vacants, des listes incomplètes et des communes nouvelles. Profession, sexe et âge sont ceux que déclarent les élus.</p></article>
           <article class="gap"><h3>Plafond, pas indemnités versées</h3><p id="emMethodCap"></p></article>
+          <article class="gap"><h3>Euros courants et euros constants</h3><p>Sauf mention « hors inflation », les montants sont en euros de chaque année. Hors inflation, ils sont divisés par l’indice des prix à la consommation de l’Insee, ramené à 100 en 2025 (séries base 2025, 2015 et 1980 raccordées).</p></article>
           <article class="gap"><h3>Agents et coût moyen</h3><p>Le coût moyen par agent rapporte des rémunérations comptées en euros à des effectifs comptés en personnes au 31 décembre, temps partiels compris, et à un périmètre un peu différent (salariés de droit privé des caisses de sécurité sociale, par exemple). C’est un ordre de grandeur, pas un salaire.</p></article>
         </div>
         <p class="source-links" id="emSources"></p>
