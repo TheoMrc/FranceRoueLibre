@@ -213,3 +213,4 @@ main .chip-select.em-tabs button { flex: 1 1 auto; min-width: 0; padding: .55rem
 main .chip-select.em-tabs button.active { background: var(--brand-gradient); color: #fff; }
 .em-tabs + .table-wrap .data-table thead th { padding-top: .8rem; }
 @media (max-width: 560px) { main .chip-select.em-tabs button { font-size: .74rem; padding: .5rem .15rem; } }
+.em-subhead { margin: 1.4rem 0 .5rem; font-size: .92rem; }

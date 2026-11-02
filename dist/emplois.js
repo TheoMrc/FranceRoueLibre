@@ -175,9 +175,26 @@
     rows($('emSynPayers'), [
       { label: 'État : ministères et budgets annexes', value: t2, sub: `${pctS(100 * t2 / last.d1, 0)} · dépenses de personnel votées pour ${st} (titre 2), cotisations de retraite comprises`, color: 'var(--tx-1)' },
       { label: 'Collectivités et leurs établissements', value: loc, sub: `${pctS(100 * loc / last.d1, 0)} · frais de personnel ${locYear} des communes, intercommunalités, départements, régions, syndicats, Sdis, CCAS`, color: 'var(--tx-3)' },
-      { label: 'Hôpitaux publics, sécurité sociale, opérateurs de l’État et autres', value: rest, sub: `${pctS(100 * rest / last.d1, 0)} · par différence avec le total de ${md(last.d1)} ; aucun compte public ne donne ce montant directement`, color: 'var(--tx-other)' },
+      { label: 'Hôpitaux publics, sécurité sociale, universités et autres opérateurs de l’État', value: rest, sub: `${pctS(100 * rest / last.d1, 0)} · par différence avec le total de ${md(last.d1)} ; aucun compte public ne donne ce montant directement`, color: 'var(--tx-other)' },
     ], { format: v => md(v) });
-    $('emSynPayersNote').innerHTML = `Trois comptes de périmètres voisins mais pas identiques : comptes nationaux ${last.year} (Insee) pour le total, loi de finances ${st} (crédits votés, pas dépensés) pour l’État, comptes ${locYear} des collectivités (OFGL). Le troisième montant est un ordre de grandeur. Les opérateurs (universités, agences) paient leurs agents avec les subventions de l’État, hors titre 2 : ils tombent dans ce reste. Sources : ${link(D.national.url, 'Insee 3.201')}, ${link(D.state.url, 'PLF ' + st)}, ${link(D.local.url, 'OFGL')}. Détail : <a href="#etat">État</a>, <a href="#collectivites">collectivités</a>.`;
+    // inside the State: the largest blocks of titre 2, programme by programme (PLF), administration of the Éducation nationale apart
+    const M = Object.fromEntries(D.state.missions.map(m => [m.code, m]));
+    const prog = (mc, pc) => ((M[mc]?.progs || []).find(p => p.code === pc)?.t2 || 0) / 1000;
+    const mis = mc => (M[mc]?.t2 || 0) / 1000;
+    const blocks = [
+      { label: 'Écoles, collèges et lycées : enseignants et personnels des établissements', value: prog('EC', '140') + prog('EC', '141') + prog('EC', '139'), sub: `Éducation nationale, direction des établissements comprise : premier degré public ${md(prog('EC', '140'))}, second degré public ${md(prog('EC', '141'))}, privé sous contrat ${md(prog('EC', '139'))}`, color: 'var(--tx-1)' },
+      { label: 'Vie de l’élève', value: prog('EC', '230'), sub: 'assistants d’éducation, accompagnants d’élèves handicapés, conseillers principaux d’éducation, santé scolaire', color: 'var(--tx-1)' },
+      { label: 'Administration de l’Éducation nationale', value: prog('EC', '214'), sub: `ministère, rectorats et services académiques (programme « Soutien »), ${pctS(100 * prog('EC', '214') / mis('EC'), 1)} du personnel de la mission`, color: 'var(--tx-2)' },
+      { label: 'Armées', value: mis('DA'), sub: 'militaires et civils de la Défense, tous dans le programme « Soutien » : terrain et administration ne sont pas séparés', color: 'var(--tx-1)' },
+      { label: 'Police et gendarmerie', value: prog('SB', '176') + prog('SB', '152'), sub: `police ${md(prog('SB', '176'))}, gendarmerie ${md(prog('SB', '152'))}`, color: 'var(--tx-1)' },
+      { label: 'Finances publiques et douanes', value: mis('GA'), sub: `dont administration centrale de Bercy ${md(prog('GA', '218'), 2)}`, color: 'var(--tx-1)' },
+      { label: 'Justice', value: mis('JA'), sub: `prisons ${md(prog('JA', '107'))}, tribunaux ${md(prog('JA', '166'))}, administration ${md(prog('JA', '310'), 2)}`, color: 'var(--tx-1)' },
+    ];
+    const shown = blocks.reduce((s, b) => s + b.value, 0), stateAll = G.t2 / 1000 + G.t2Annexes / 1000;
+    blocks.push({ label: 'Tous les autres ministères', value: stateAll - shown, sub: 'écologie, intérieur hors police et gendarmerie, affaires étrangères, ministères sociaux, culture, budgets annexes…', color: 'var(--tx-other)' });
+    $('emSynStateTitle').textContent = `Dont, à l’État (${md(stateAll)}) : les plus gros postes`;
+    rows($('emSynState'), blocks.map(b => ({ ...b, sub: `${pctS(100 * b.value / stateAll, 0)} · ${b.sub}` })), { format: v => md(v), max: stateAll });
+    $('emSynPayersNote').innerHTML = `Trois comptes de périmètres voisins mais pas identiques : comptes nationaux ${last.year} (Insee) pour le total, loi de finances ${st} (crédits votés, pas dépensés) pour l’État, comptes ${locYear} des collectivités (OFGL). Le troisième montant est un ordre de grandeur. Les universités et les agences paient leurs agents, enseignants-chercheurs compris, avec les subventions de l’État, hors dépenses de personnel : ils tombent dans ce reste. À l’État, la loi de finances ne sépare les administrations centrales du terrain que lorsqu’un ministère a un programme « Soutien » distinct (Éducation nationale, Justice, Bercy) ; les cabinets ministériels n’ont pas de ligne propre. Sources : ${link(D.national.url, 'Insee 3.201')}, ${link(D.state.url, 'PLF ' + st)}, ${link(D.local.url, 'OFGL')}. Détail : <a href="#etat">État</a>, <a href="#collectivites">collectivités</a>.`;
     $('emSynYear').textContent = y;
     const vs = { fpe: ['État', 'FPE', 'var(--tx-1)'], fpt: ['Territoriale', 'FPT', 'var(--tx-3)'], fph: ['Hospitalière', 'FPH (ensemble)', 'var(--tx-5)'] };
     rows($('emSynEmployers'), Object.entries(vs).map(([k, [label, sv, color]]) => {
