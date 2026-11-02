@@ -312,7 +312,7 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .map-controls button { display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 0; border-radius: 10px; color: var(--c-ink); font-size: 1.25rem; line-height: 1; transition: color .2s var(--ease), transform .2s var(--ease); }
 .map-controls button svg { width: 18px; height: 18px; }
 .map-controls button:hover { color: var(--c-teal-600); transform: translateY(-1px); }
-.map-legend { position: absolute; left: 1rem; bottom: 1rem; z-index: 3; width: min(300px, calc(100% - 2rem)); padding: .65rem .85rem; border-radius: var(--r-md); color: var(--c-muted); font-size: .74rem; }
+.map-legend { position: absolute; left: 1rem; bottom: 1rem; z-index: 3; width: min(330px, calc(100% - 2rem)); padding: .65rem .85rem; border-radius: var(--r-md); color: var(--c-muted); font-size: .74rem; }
 .legend-scale { height: 7px; margin-top: .4rem; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--ramp-0), var(--ramp-1), var(--ramp-2), var(--ramp-3), var(--ramp-4), var(--ramp-5)); }
 .legend-labels { display: flex; justify-content: space-between; gap: 1rem; margin-top: .25rem; color: var(--c-ink); font-weight: 600; font-size: .72rem; }
 .missing-legend { display: flex; align-items: center; gap: .4rem; margin-top: .35rem; }
@@ -326,9 +326,19 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .map-loading.is-done { opacity: 0; pointer-events: none; }
 .spinner { width: 16px; height: 16px; border: 2px solid var(--c-line); border-top-color: var(--c-teal-600); border-radius: 50%; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.maplibregl-ctrl-attrib.maplibregl-compact { background: var(--c-chip-bg); color: var(--c-muted); }
-.maplibregl-ctrl-attrib a { color: var(--c-muted); }
-.maplibregl-ctrl-bottom-right { z-index: 3; }
+/* Legend card: overseas insets, unit buttons, colour ramp, sources */
+.map-dom { display: grid; grid-template-columns: repeat(5, 1fr); gap: .3rem; margin-bottom: .55rem; padding-bottom: .55rem; border-bottom: 1px solid var(--c-line); }
+.map-dom:empty { display: none; }
+.map-dom__tile { display: flex; flex-direction: column; align-items: center; gap: .15rem; min-width: 0; padding: .25rem .1rem .2rem; border: 0; border-radius: 8px; background: transparent; color: var(--c-muted); cursor: pointer; transition: background .2s var(--ease), color .2s var(--ease); }
+.map-dom__tile svg { width: 100%; max-width: 46px; aspect-ratio: 1; overflow: visible; }
+.map-dom__dept { stroke-width: .9; vector-effect: non-scaling-stroke; transition: fill .3s var(--ease); }
+.map-dom__commune { stroke-width: .4; vector-effect: non-scaling-stroke; transition: fill .3s var(--ease); }
+.map-dom__name { max-width: 100%; overflow: hidden; font-size: .58rem; letter-spacing: -.02em; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
+.map-dom__tile:hover, .map-dom__tile:focus-visible { background: var(--c-surface-2); color: var(--c-ink); }
+.map-dom__tile.is-selected { background: var(--c-surface-2); color: var(--c-ink); box-shadow: inset 0 0 0 1.5px var(--c-amber, #f59e0b); }
+.metric-toggle--map { display: flex; width: 100%; margin-bottom: .5rem; padding: .2rem; }
+.metric-toggle--map .metric-btn { flex: 1 1 0; min-width: 0; padding: .32rem .3rem; font-size: .72rem; text-align: center; }
+.map-attrib { margin-top: .3rem; font-size: .62rem; color: var(--c-muted); opacity: .85; }
 
 /* ---------- Inspector ---------- */
 .inspector {
@@ -666,7 +676,15 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
   .map-title { top: .6rem; left: .6rem; padding: .45rem .7rem; }
   .map-title strong { font-size: .86rem; }
   .map-controls { top: .6rem; right: .6rem; }
-  .map-legend { left: .6rem; bottom: .6rem; width: min(250px, calc(100% - 1.2rem)); padding: .5rem .7rem; }
+  .map-legend { left: .6rem; bottom: .6rem; width: min(300px, calc(100% - 1.2rem)); padding: .45rem .55rem; }
+  .map-dom { gap: .1rem; margin-bottom: .35rem; padding-bottom: .35rem; }
+  .map-dom__tile { gap: .05rem; padding: .1rem 0; }
+  .map-dom__tile svg { max-width: 28px; }
+  .map-dom__name { font-size: .52rem; letter-spacing: -.02em; }
+  .legend-scale { margin-top: .2rem; }
+  .map-attrib { margin-top: .15rem; font-size: .58rem; }
+  .metric-toggle--map { margin-bottom: .35rem; }
+  .metric-toggle--map .metric-btn { padding: .3rem .2rem; font-size: .68rem; }
   .map-badge { display: none; }
   .inspector-stats { grid-template-columns: 1fr 1fr; }
   .inspector-stat:last-child { grid-column: 1 / -1; }

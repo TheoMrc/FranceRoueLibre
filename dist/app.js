@@ -782,7 +782,9 @@ const isHover = ['boolean', ['feature-state', 'hover'], false];
 function mapPadding() {
   const width = dom.map.clientWidth;
   const base = width < 600 ? 28 : 56;
-  return { top: base + (width < 600 ? 40 : 30), bottom: base + (width < 600 ? 50 : 70), left: base, right: base };
+  // on a phone the legend card (overseas insets, units, colours) takes the bottom: keep France above it
+  const card = width < 600 ? (document.querySelector('.map-legend')?.offsetHeight || 0) + 14 : 0;
+  return { top: base + (width < 600 ? 40 : 30), bottom: Math.max(base + (width < 600 ? 50 : 70), card), left: base, right: base };
 }
 
 function buildMapStyle() {
@@ -893,8 +895,8 @@ function hideTooltip() {
   dom.tooltip.hidden = true;
 }
 
-function handleHover(point) {
-  const hit = hitTest(point);
+function handleHover(point, forcedHit) {
+  const hit = forcedHit === undefined ? hitTest(point) : forcedHit;
   const perCapita = state.metric === 'perCapita';
   const communeCode = hit?.type === 'commune' ? hit.code : '';
   const departmentCode = hit?.type === 'department' && state.mode !== 'regions' ? hit.code : '';
@@ -928,8 +930,8 @@ function departmentLabel(code, fallback) {
   return fallback;
 }
 
-function handleClick(point) {
-  const hit = hitTest(point);
+function handleClick(point, forcedHit) {
+  const hit = forcedHit === undefined ? hitTest(point) : forcedHit;
   if (!hit) {
     if (state.selectedCommune || state.selectedDepartment || state.region) clearSelection();
     return;
@@ -958,7 +960,6 @@ function initMap() {
   });
   map.touchZoomRotate.disableRotation();
   map.keyboard.disableRotation();
-  map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: 'Contours Etalab · DGCL · OFGL' }), 'bottom-right');
   mapState.map = map;
   window.__map = map;
 
@@ -1184,8 +1185,85 @@ function renderMap() {
   setText(dom.legendHigh, shownValues.length ? formatMetric(high) : 'Élevé');
   const communeMapCount = [...data.activeCommuneRowsByCode.values()].filter(row => !row.missing).length;
   setText(dom.mapBadgeText, state.mode === 'regions' ? `${data.regions.length} régions` : state.mode === 'communes' ? `${formatCount(communeMapCount)} communes` : state.mode === 'projects' ? `${formatCount(communeMapCount)} communes avec projets` : state.mode === 'gfp' ? `${formatCount(data.gfp.length)} intercommunalités` : `${data.features.length} départements`);
+  renderInsets();
   updateCamera();
   loadVisibleDetail();
+}
+
+/* ---------- Overseas insets ----------
+   The five overseas departments, each drawn in its own small tile of the legend card with the same colours as the
+   main map (their communes in the commune views). Hover gives the map's tooltip, a click selects as on the map
+   and the main map flies there. Each tile has its own scale. */
+const INSETS = [['971', 'Guadeloupe'], ['972', 'Martinique'], ['973', 'Guyane'], ['974', 'Réunion'], ['976', 'Mayotte']];
+const insetState = { built: false, tiles: [] };
+
+function ringsOf(geometry) {
+  if (!geometry) return [];
+  return geometry.type === 'Polygon' ? geometry.coordinates : geometry.type === 'MultiPolygon' ? geometry.coordinates.flat() : [];
+}
+
+function buildInsets() {
+  const host = $('mapDom');
+  if (!host || insetState.built || !data.features.length) return;
+  insetState.built = true;
+  const NS = 'http://www.w3.org/2000/svg';
+  for (const [code, name] of INSETS) {
+    const outline = data.featureByCode.get(code);
+    if (!outline) continue;
+    const communes = data.communeFeatures.features.filter(feature => String(feature.properties.departement) === code);
+    const points = ringsOf(outline.geometry).flat();
+    const lons = points.map(p => p[0]), lats = points.map(p => p[1]);
+    const [x0, x1, y0, y1] = [Math.min(...lons), Math.max(...lons), Math.min(...lats), Math.max(...lats)];
+    const k = Math.cos((y0 + y1) / 2 * Math.PI / 180);
+    const w = (x1 - x0) * k, h = y1 - y0, size = 100, pad = 6;
+    const scale = (size - 2 * pad) / Math.max(w, h);
+    const ox = (size - w * scale) / 2, oy = (size - h * scale) / 2;
+    const path = geometry => ringsOf(geometry).map(ring => 'M' + ring.map(([lon, lat]) => `${((lon - x0) * k * scale + ox).toFixed(1)},${((y1 - lat) * scale + oy).toFixed(1)}`).join('L') + 'Z').join('');
+    const tile = document.createElement('button');
+    tile.type = 'button'; tile.className = 'map-dom__tile'; tile.dataset.code = code;
+    tile.setAttribute('aria-label', `${name} : afficher sur la carte`);
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${size} ${size}`); svg.setAttribute('aria-hidden', 'true');
+    const base = document.createElementNS(NS, 'path');
+    base.setAttribute('d', path(outline.geometry)); base.setAttribute('class', 'map-dom__dept'); base.dataset.code = code;
+    svg.appendChild(base);
+    const communePaths = communes.map(feature => {
+      const node = document.createElementNS(NS, 'path');
+      node.setAttribute('d', path(feature.geometry)); node.setAttribute('class', 'map-dom__commune'); node.dataset.commune = String(feature.properties.code);
+      svg.appendChild(node);
+      return node;
+    });
+    const label = document.createElement('span'); label.className = 'map-dom__name'; label.textContent = name;
+    tile.append(svg, label);
+    host.appendChild(tile);
+    const hitFor = target => {
+      const commune = target.closest?.('[data-commune]')?.dataset.commune;
+      if (commune && ['communes', 'projects', 'gfp'].includes(state.mode) && data.activeCommuneRowsByCode.has(commune)) return { type: 'commune', code: commune };
+      return { type: 'department', code, region: String(outline.properties.region || '') };
+    };
+    const pointOf = event => { const r = dom.mapFrame.getBoundingClientRect(); return { x: event.clientX - r.left, y: event.clientY - r.top - 70 }; };
+    tile.addEventListener('pointermove', event => handleHover(pointOf(event), hitFor(event.target)));
+    tile.addEventListener('pointerleave', () => { handleHover(null, null); });
+    tile.addEventListener('click', event => { hideTooltip(); handleClick(pointOf(event), hitFor(event.target)); });
+    insetState.tiles.push({ code, tile, base, communePaths });
+  }
+}
+
+function renderInsets() {
+  buildInsets();
+  const theme = MAP_THEME[currentTheme()];
+  const communesVisible = ['communes', 'projects', 'gfp'].includes(state.mode);
+  const selected = normalizeDepartment(state.selectedDepartment || '');
+  for (const { code, tile, base, communePaths } of insetState.tiles) {
+    base.style.fill = communesVisible ? theme.empty : (mapState.departmentColors.get(code) || theme.empty);
+    base.style.stroke = theme.line;
+    for (const node of communePaths) {
+      const color = communesVisible ? mapState.communeColors.get(node.dataset.commune) : '';
+      node.style.fill = color || 'transparent';
+      node.style.stroke = color ? theme.communeLine : 'transparent';
+    }
+    tile.classList.toggle('is-selected', selected === code || (state.mode === 'regions' && state.region && regionForDepartment(code) === state.region));
+  }
 }
 
 /* ---------- Stats & inspector ---------- */
