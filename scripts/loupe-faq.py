@@ -86,6 +86,7 @@ ASSOS = ROOT / 'dist' / 'data' / 'aides' / 'associations.json'
 INSEE_CPI_CATEGORIES = 'https://www.insee.fr/fr/statistiques/fichier/7634629/ndc-juin-2023-ipc-categorie-menages.pdf'
 AFT = 'https://fipeco.fr/pdf/Obligations%20index%C3%A9es.pdf'   # Fipeco, « Les obligations indexées sur l’inflation » (février 2023)
 # the dataset downloaded by fetch-sources.mjs (jaune-associations-2025)
+TRESOR = 'https://www.tresor.economie.gouv.fr/Articles/2022/07/05/finances-publiques-une-inflation-qui-rapporte'
 ASSO_PAGE = 'https://data.economie.gouv.fr/explore/dataset/plf25-donnees-de-l-annexe-jaune-effort-financier-de-l-etat-en-faveur-des-associations/'
 
 
@@ -95,37 +96,46 @@ def cofog():
 
 
 def inflation_debt(q, annual):
-    """« Quand les prix montent, qui paie la dette ? »: the 2022-2023 inflation, the debt in euros and in % of GDP, the
-    interest paid; who bears what is stated without figures that the downloaded data do not give."""
+    """« Quand les prix montent, qui paie la dette ? »: mostly the lenders, in real terms; the State gains in part (debt
+    ratio, revenue), less on its indexed debt and as rates rise; savers pay a quiet inflation tax. Figures come from the
+    downloaded data (inflation, debt, interest); the rest is stated without figures, with its sources."""
     cpi = {int(r['annee']): float(r['inflation_pct']) for r in csv.DictReader(open(CPI, encoding='utf-8')) if r['inflation_pct']}
     d, te = cofog()
     i21, i22, last = te['GF0107'][2021], te['GF0107'][2022], max(d['years'])
     (d21, p21), (d23, p23) = q['2021-T4'], q['2023-T4']
     reply = (
-        f'Quand les prix montent, la dette pèse **moins** par rapport à la richesse produite, mais elle **coûte plus** '
-        f'en intérêts, et chacun ne vit pas la hausse des prix de la même façon.\n\n'
-        f'- **La dette fond en proportion** : avec {fr(cpi[2022], 1)} % d’inflation en 2022 et {fr(cpi[2023], 1)} % en 2023, '
-        f'le PIB en euros a grossi vite. La dette est passée de {fr(d21)} à {fr(d23)} Md€ (+{fr(d23 - d21)} Md€) entre fin '
-        f'2021 et fin 2023, mais de {fr(p21, 1)} % à {fr(p23, 1)} % du PIB : elle a baissé en proportion.\n'
-        f'- **Les intérêts augmentent** : ils sont passés de {fr(i21)} Md€ en 2021 à {fr(i22)} Md€ en 2022, puis '
-        f'{fr(te["GF0107"][last])} Md€ en {last}. Une partie de la dette de l’État est indexée sur l’inflation (OAT '
-        f'indexées) : quand les prix montent, ce que l’État doit rembourser monte avec eux. Les nouveaux emprunts se font '
-        f'aussi à des taux plus élevés. Ces intérêts sont payés avec les impôts de tous.\n'
-        f'- **Qui perd, qui gagne** : ceux qui ont prêté à taux fixe (épargnants par l’assurance vie, banques, '
-        f'investisseurs étrangers) sont remboursés en euros qui valent moins ; les ménages, eux, subissent la hausse des '
-        f'prix. L’Insee a mesuré que l’inflation a été un peu plus forte pour les ménages modestes et les plus âgés, '
-        f'surtout à cause de l’alimentation, qui pèse plus dans leur budget.\n\n'
-        f'Les données publiées ne disent pas qui, au final, « paie » la dette ménage par ménage : cela dépend des impôts '
-        f'que chacun paie et de l’épargne qu’il détient. Pour les montants année par année : '
-        f'[Comptes publics](index.html#comptes). Sources : [Insee, prix à la consommation]'
-        f'(https://www.insee.fr/fr/statistiques/serie/011814653), [Insee, dette trimestrielle]({INSEE_PAGE}), '
-        f'[Eurostat, dépenses par fonction]({d["url"]}), [Insee, inflation par catégorie de ménages]({INSEE_CPI_CATEGORIES}), '
-        f'[Fipeco, les obligations indexées sur l’inflation]({AFT}).')
+        f'**Surtout ceux qui ont prêté.** Une dette à taux fixe est fixée en euros : quand les prix montent, l’emprunteur '
+        f'rembourse le même nombre d’euros, mais ces euros achètent moins. C’est un transfert de richesse des prêteurs vers '
+        f'les emprunteurs. Exemple : 1 000 € empruntés à taux fixe, puis 10 % d’inflation ; ces 1 000 € ne valent plus '
+        f'qu’environ {fr(1000 / 1.1)} € d’avant. L’emprunteur rembourse moins « vraiment », le prêteur perd la différence.\n\n'
+        f'**L’État, grand emprunteur, y gagne en partie.**\n'
+        f'- La dette pèse moins par rapport à la richesse produite : avec {fr(cpi[2022], 1)} % d’inflation en 2022 et '
+        f'{fr(cpi[2023], 1)} % en 2023, elle est passée de {fr(d21)} à {fr(d23)} Md€ entre fin 2021 et fin 2023, mais de '
+        f'{fr(p21, 1)} % à {fr(p23, 1)} % du PIB.\n'
+        f'- Les recettes (TVA, impôt sur le revenu…) augmentent avec les prix.\n\n'
+        f'**Mais l’allègement est partiel.**\n'
+        f'- Environ un dixième de la dette de l’État est indexé sur l’inflation : là, ce qu’il doit rembourser suit les prix.\n'
+        f'- Les taux montent avec l’inflation, ce qui renchérit les emprunts qui remplacent la dette arrivée à échéance. '
+        f'Les intérêts payés par l’ensemble des administrations sont passés de {fr(i21)} Md€ en 2021 à {fr(i22)} Md€ en '
+        f'2022, puis {fr(te["GF0107"][last])} Md€ en {last}, payés par l’impôt.\n'
+        f'- Une inflation importée (énergie) appauvrit le pays et peut dégrader les comptes publics malgré tout.\n\n'
+        f'**Les épargnants paient une « taxe d’inflation » discrète** : assurance vie, livrets ou fonds placés à un taux '
+        f'inférieur à l’inflation perdent du pouvoir d’achat, comme les banques, assureurs et investisseurs (dont beaucoup '
+        f'd’étrangers) qui détiennent la dette. Les ménages modestes, eux, ont peu d’épargne mais ont subi une inflation un '
+        f'peu plus forte que la moyenne, surtout à cause de l’alimentation.\n\n'
+        f'Le transfert joue surtout quand l’inflation est inattendue : prévue, les prêteurs exigent d’emblée des taux plus '
+        f'élevés. **En résumé** : l’inflation n’efface pas la dette, elle en fait porter le coût réel aux prêteurs et aux '
+        f'épargnants ; pour l’État, l’allègement est partiel et temporaire. Montants année par année : '
+        f'[Comptes publics](index.html#comptes). Sources : [Direction générale du Trésor, « Finances publiques : une '
+        f'inflation qui rapporte ? »]({TRESOR}), [Insee, prix à la consommation](https://www.insee.fr/fr/statistiques/serie/011814653), '
+        f'[Insee, dette trimestrielle]({INSEE_PAGE}), [Eurostat, dépenses par fonction]({d["url"]}), '
+        f'[Insee, inflation par catégorie de ménages]({INSEE_CPI_CATEGORIES}), [Fipeco, les obligations indexées]({AFT}).')
     return {
         'id': 'inflation-dette', 'question': 'Quand les prix montent, qui paie la dette ?',
         'match_any': [[['prix', 'inflation'], ['dette']], [['inflation'], ['qui paie', 'qui paye', 'pauvre', 'modeste', 'menage']]],
         'reply': reply,
-        'sources': [{'title': 'Insee, indice des prix à la consommation', 'url': 'https://www.insee.fr/fr/statistiques/serie/011814653'},
+        'sources': [{'title': 'Direction générale du Trésor, « Finances publiques : une inflation qui rapporte ? » (2022)', 'url': TRESOR},
+                    {'title': 'Insee, indice des prix à la consommation', 'url': 'https://www.insee.fr/fr/statistiques/serie/011814653'},
                     {'title': 'Insee, dette des administrations publiques (trimestrielle)', 'url': INSEE_PAGE},
                     {'title': 'Eurostat, dépenses des administrations par fonction', 'url': d['url']},
                     {'title': 'Insee, inflation selon la catégorie de ménages (2023)', 'url': INSEE_CPI_CATEGORIES},
