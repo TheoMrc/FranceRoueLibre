@@ -1429,7 +1429,7 @@ function shortLabels() {
     const first = (select, long, short) => { const option = select?.querySelector('option[value=""]'); if (option) option.textContent = small.matches ? short : long; };
     first(dom.region, 'Toutes les régions', 'Région');
     first(dom.scheme, 'Tous les dispositifs', 'Dispositif');
-    const shortTab = { departments: 'Départ.', projects: 'Projets' };  // the five tabs fit the phone's width
+    const shortTab = { projects: 'Projets' };  // the five tabs fit the phone's width
     dom.modeTabs.forEach(tab => { tab.dataset.label ??= tab.textContent; tab.textContent = small.matches && shortTab[tab.dataset.mode] || tab.dataset.label; });
   };
   small.addEventListener?.('change', apply);
