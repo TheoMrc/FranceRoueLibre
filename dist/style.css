@@ -1272,44 +1272,32 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .omni__spark-icon { fill: currentColor !important; stroke: none !important; }
 .omni__go:hover .omni__spark-icon { transform: rotate(18deg) scale(1.08); }
 
-/* Home: « Où va l’argent public ? » answered post by post (hero-lookup.js), in the style of the BioDevs mission panel */
-.lookup { position: relative; overflow: hidden; max-width: 720px; margin: 0 0 var(--sp-4); padding: var(--sp-4) var(--sp-4) var(--sp-3); border: 1px solid var(--c-line); border-radius: var(--r-lg, 20px); background: linear-gradient(135deg, color-mix(in srgb, #0e7490 8%, var(--c-bg)), color-mix(in srgb, #2563eb 8%, var(--c-bg))); min-height: 17rem; }
-.lookup__prefix { margin: 0; text-align: center; font-family: var(--font-display); font-weight: 600; font-size: clamp(1rem, 1.8vw, 1.2rem); color: var(--c-ink); }
-.lookup__slides { display: grid; margin-top: .3rem; }
-.lookup__slide { grid-area: 1 / 1; display: flex; flex-direction: column; align-items: center; text-align: center; opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity .5s var(--ease), transform .5s var(--ease), visibility 0s linear .5s; }
-.lookup__slide.is-active { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
-.lookup__word { display: block; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.35rem, 2.8vw, 1.9rem); line-height: 1.2; letter-spacing: -.015em; font-variant-numeric: tabular-nums; }
-.lookup__desc { max-width: 520px; margin: .45rem 0 0; color: var(--c-body); font-size: .97rem; line-height: 1.5; }
-.lookup__desc strong { color: var(--c-ink); }
-.lookup__icons { --cols: 6; --gx: .6rem; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2) var(--gx); margin: var(--sp-3) auto 0; }
-.lookup__icons > .lookup__icon { flex: 0 0 calc((100% - (var(--cols) - 1) * var(--gx)) / var(--cols)); }
-.lookup__icon { display: flex; flex-direction: column; align-items: center; gap: .4rem; min-width: 0; padding: .25rem 0; border: 0; background: none; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.lookup__box { display: grid; place-items: center; width: 50px; height: 50px; border-radius: var(--r-md); background: var(--c-bg); border: 1px solid var(--c-line); transition: background .35s var(--ease), box-shadow .35s var(--ease), transform .35s var(--ease), border-color .35s var(--ease); }
-.lookup__box .frl-ico { width: 26px; height: 26px; margin: 0; vertical-align: 0; transition: fill .35s var(--ease); }
-.lookup__label { font-family: var(--font-display); font-weight: 600; font-size: .76rem; line-height: 1.2; color: var(--c-muted); text-align: center; transition: color .35s var(--ease); }
-.lookup__icon:hover .lookup__box { border-color: var(--c-teal-600); transform: translateY(-2px); }
-.lookup__icon:focus-visible { outline: none; }
-.lookup__icon:focus-visible .lookup__box { box-shadow: 0 0 0 3px rgba(37, 99, 235, .35); }
-.lookup__icon.is-active .lookup__box { background: var(--brand-gradient); border-color: transparent; box-shadow: var(--sh-md); transform: translateY(-4px) scale(1.08); }
-.lookup__icon.is-active .frl-ico { fill: #fff; }
-.lookup__icon.is-active .frl-ico__line { stroke: #fff; }
-.lookup__icon.is-active .frl-ico__halo { stroke: #1d6fd1; }
-.lookup__icon.is-active .lookup__label { color: var(--c-ink); }
-.lookup__source { margin: var(--sp-3) 0 0; text-align: center; color: var(--c-muted); font-size: .76rem; }
-.lookup__source a { color: var(--c-teal-600); font-weight: 600; }
-.lookup__progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--brand-gradient); transform: scaleX(0); transform-origin: left; opacity: 0; }
-.lookup.is-playing .lookup__progress { opacity: .8; animation: lk-progress var(--lk-dur, 4s) linear forwards; }
-@keyframes lk-progress { to { transform: scaleX(1); } }
-/* arrival: the pictograms rise one after the other */
-.lookup .lookup__icon { opacity: 0; transform: translateY(16px); transition: opacity .6s var(--ease), transform .6s var(--ease); transition-delay: calc(.08s + var(--i) * .07s); }
-.lookup.is-visible .lookup__icon { opacity: 1; transform: none; }
+/* Home: one line rolling from post to post under the title (hero-lookup.js): a pictogram, and the amount facing it */
+.lookup { position: relative; display: flex; align-items: center; gap: 1rem; max-width: 720px; height: 76px; margin: 0 0 var(--sp-4); overflow: hidden; cursor: pointer; }
+.lookup__icon { position: relative; flex: none; width: 60px; height: 100%; }
+.lookup__card { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transform: translateY(70%) scale(.6) rotate(-12deg); }
+.lookup__card .frl-ico { width: 52px; height: 52px; margin: 0; vertical-align: 0; filter: drop-shadow(0 6px 14px rgba(37, 99, 235, .25)); }
+.lookup__text { position: relative; flex: 1; min-width: 0; height: 100%; }
+.lookup__line { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: .25rem; opacity: 0; transform: translateY(60%); font-family: var(--font-display); font-weight: 600; font-size: clamp(1.1rem, 2.3vw, 1.45rem); line-height: 1.2; color: var(--c-ink); }
+.lookup__line > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lookup__line strong { font-weight: 700; font-variant-numeric: tabular-nums; }
+.lookup__line small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-body); font-weight: 400; font-size: .88rem; color: var(--c-muted); }
+.lookup__card.is-active { animation: lk-icon-in .7s cubic-bezier(.34, 1.56, .64, 1) both; }
+.lookup__card.is-leaving { animation: lk-icon-out .45s var(--ease) both; }
+.lookup__line.is-active { animation: lk-text-in .55s var(--ease) .08s both; }
+.lookup__line.is-leaving { animation: lk-text-out .4s var(--ease) both; }
+@keyframes lk-icon-in { from { opacity: 0; transform: translateY(70%) scale(.6) rotate(-12deg); } to { opacity: 1; transform: none; } }
+@keyframes lk-icon-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-70%) scale(.7) rotate(10deg); } }
+@keyframes lk-text-in { from { opacity: 0; transform: translateY(60%); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes lk-text-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-60%); filter: blur(4px); } }
+.lookup__progress { display: none; }
 @media (max-width: 600px) {
-  .lookup { padding: var(--sp-3) .75rem var(--sp-2); min-height: 0; }
-  .lookup__icons { --cols: 4; --gx: .25rem; row-gap: var(--sp-2); }
-  .lookup__box { width: 44px; height: 44px; }
-  .lookup__box .frl-ico { width: 22px; height: 22px; }
-  .lookup__label { font-size: .68rem; }
-  .lookup__desc { font-size: .92rem; }
+  .lookup { height: 92px; gap: .8rem; }
+  .lookup__icon { width: 48px; }
+  .lookup__card .frl-ico { width: 44px; height: 44px; }
+  .lookup__line { font-size: 1.02rem; }
+  .lookup__line > span { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .lookup__line small { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: .8rem; }
 }
-@media (prefers-reduced-motion: reduce) { .lookup__slide, .lookup .lookup__icon { transition: none; } .lookup .lookup__icon { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .lookup__card.is-active, .lookup__line.is-active { animation: none; opacity: 1; transform: none; } .lookup__card.is-leaving, .lookup__line.is-leaving { animation: none; opacity: 0; } }
 .hero__about { margin: var(--sp-3) 0 0; color: var(--c-muted); font: 600 .72rem var(--font-display); letter-spacing: .14em; text-transform: uppercase; }
