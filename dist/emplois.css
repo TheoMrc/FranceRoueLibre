@@ -223,12 +223,5 @@ main .chip-select.em-tabs button.active { background: var(--brand-gradient); col
 .em-acc.is-open .em-lab::after { transform: translateY(.05rem) rotate(-135deg); }
 @media (prefers-reduced-motion: reduce) { .em-acc .em-line small { transition: none; } }
 
-/* Pictograms before row titles */
-.em-ico { display: inline-block; width: 1.25em; height: 1.25em; margin-right: .45em; vertical-align: -.25em; fill: url(#emIcoGrad); }
-.em-ico__red { fill: none; stroke: #e11d48; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.em-ico__halo { fill: none; stroke: var(--c-surface); stroke-width: 4.6; stroke-linecap: round; stroke-linejoin: round; }
-.em-ico__soft { opacity: .18; }
-.em-ico__line { fill: none; stroke: url(#emIcoGrad); stroke-width: 1.6; stroke-linejoin: round; }
-.section--alt .panel .em-ico__halo { stroke: var(--c-bg); }
-.em-rows button:hover .em-ico__halo, .em-rows button:focus-visible .em-ico__halo { stroke: var(--c-surface-2); }
-.section--alt .em-rows button:hover .em-ico__halo, .section--alt .em-rows button:focus-visible .em-ico__halo { stroke: var(--c-surface); }
+.em-rows button:hover .frl-ico__halo, .em-rows button:focus-visible .frl-ico__halo { stroke: var(--c-surface-2); }
+.section--alt .em-rows button:hover .frl-ico__halo, .section--alt .em-rows button:focus-visible .frl-ico__halo { stroke: var(--c-surface); }
