@@ -148,6 +148,102 @@ def local():
             'note': 'Départements sans la Ville de Paris (comptée avec les communes depuis 2019) ni la Métropole de Lyon (comptée avec les intercommunalités).'}
 
 
+# ---------- 4a. Headcounts: DGAFP annual report 2026 (data at 31/12/2024), extracted by extract-effectifs-fp.py ----------
+FP = SRC / 'fonction-publique'
+DGAFP_PAGE = 'https://www.fonction-publique.gouv.fr/toutes-les-publications/rapport-annuel-sur-letat-de-la-fonction-publique-edition-2026'
+
+
+def csv_rows(name):
+    import csv
+    with open(FP / name, encoding='utf-8', newline='') as handle:
+        return list(csv.DictReader(handle))
+
+
+def year_of(label):
+    """« 2023 millésime 2024 », « 2016(3) » -> 2023, 2016."""
+    return int(str(label)[:4])
+
+
+def series(rows, key='effectif_milliers'):
+    """One value per year: when a year is published twice (change of method), the later vintage is kept;
+    the years with a break are returned too."""
+    out, breaks = {}, set()
+    for row in rows:
+        y = year_of(row['annee_millesime'])
+        if y in out and str(row['annee_millesime']) != str(y):
+            breaks.add(y)
+        if row.get(key) not in (None, ''):
+            out[y] = float(row[key])
+    return {k: out[k] for k in sorted(out)}, sorted(breaks)
+
+
+def clean_label(label):
+    import re
+    return re.sub(r'\(\d\)', '', re.sub(r'\s+', ' ', label)).replace(', dont :', '').strip()
+
+
+def workforce():
+    vs = csv_rows('effectifs-versants-serie.csv')
+    pick = lambda versant, ligne: series([r for r in vs if r['versant'] == versant and r['ligne'] == ligne])
+    total, breaks = pick('FP', 'Total hors bénéficiaire de contrats aidés')
+    with_aided, _ = pick('FP', 'Total y compris bénéficiaires de contrats aidés')
+    versants = {'fpe': pick('FPE', 'Total ministères + EPA')[0], 'fpt': pick('FPT', 'Total emplois principaux')[0], 'fph': pick('FPH', 'Total FPH')[0]}
+    last = max(total)
+    # ministries (FPE): ministries + national public bodies (EPA)
+    mins = csv_rows('effectifs-fpe-ministeres-serie.csv')
+    names = [n for n in dict.fromkeys(r['ministere'] for r in mins) if not n.startswith('Total')]
+    ministries = []
+    for n in names:
+        tot, _ = series([r for r in mins if r['ministere'] == n and r['perimetre'] == 'Total'])
+        part = {p: series([r for r in mins if r['ministere'] == n and r['perimetre'] == p])[0].get(last) for p in ('Ministères', 'EPA')}
+        ministries.append({'label': clean_label(n), 'total': tot.get(last), 'ministry': part['Ministères'], 'bodies': part['EPA'],
+                           'series': [[y, v] for y, v in tot.items()]})
+    ministries.sort(key=lambda m: -(m['total'] or 0))
+    # FPT employers and FPH establishments
+    fpt = csv_rows('effectifs-fpt-employeurs-serie.csv')
+    employers = [{'label': clean_label(t), 'value': series([r for r in fpt if r['type_employeur'] == t])[0].get(last),
+                  'series': [[y, v] for y, v in series([r for r in fpt if r['type_employeur'] == t])[0].items()]}
+                 for t in dict.fromkeys(r['type_employeur'] for r in fpt)]
+    fph = csv_rows('effectifs-fph-etablissements-serie.csv')
+    hospitals = [{'label': clean_label(t), 'value': series([r for r in fph if r['type_etablissement'] == t])[0].get(last),
+                  'series': [[y, v] for y, v in series([r for r in fph if r['type_etablissement'] == t])[0].items()]}
+                 for t in dict.fromkeys(r['type_etablissement'] for r in fph)]
+    # départements: agents (civils) and administration rate (ETP per 1 000 inhabitants)
+    deps = {}
+    for r_ in csv_rows('effectifs-departements.csv'):
+        deps[r_['code_departement']] = {k: float(r_[k]) for k in ('fpe_civils', 'fpt', 'fph', 'total_civils', 'fonctionnaires', 'contractuels', 'autres_statuts',
+                                                                  'taux_admin_fpe_etp_1000hab', 'taux_admin_fpt_etp_1000hab', 'taux_admin_fph_etp_1000hab', 'taux_admin_total_etp_1000hab')}
+    long = csv_rows('effectifs-departements-serie.csv')
+    rate_first = {}
+    for r_ in long:
+        if r_['niveau'] == 'departement' and r_['versant'] == 'FP' and r_['indicateur'].startswith('taux') and year_of(r_['annee_millesime']) == 2011:
+            rate_first[r_['code_departement']] = float(r_['valeur'])
+    national_rate = {}
+    for r_ in long:
+        if r_['zone'].startswith('Total France') and r_['versant'] in ('FP', 'FPE', 'FPT', 'FPH') and r_['indicateur'].startswith('taux'):
+            national_rate.setdefault(r_['versant'], []).append(r_)
+    rates = {v: [[y, x] for y, x in series(rows_, 'valeur')[0].items()] for v, rows_ in national_rate.items()}
+    # salaries 2024
+    sal = [{'versant': r_['versant'], 'population': clean_label(r_['population']), 'gross': float(r_['salaire_brut_mensuel_moyen_eqtp_eur']),
+            'net': float(r_['salaire_net_mensuel_moyen_eqtp_eur']),
+            'realChange': float(r_['evol_net_2023_2024_euros_constants_pct']) if r_['evol_net_2023_2024_euros_constants_pct'] else None}
+           for r_ in csv_rows('salaires-versants-2024.csv')]
+    # State jobs: ceilings voted in the budget acts (LFI) and jobs actually used in 2025
+    ceil = csv_rows('plafonds-emplois-lfi-2019-2026.csv')
+    ceilings = {}
+    for r_ in ceil:
+        if not r_['mission']:
+            ceilings.setdefault(r_['ministere_2026'], {})[int(r_['annee_lfi'])] = round(float(r_['plafond_milliers_etpt']) * 1000)
+    used = [{'label': r_['ministere_2025'], 'used': round(float(r_['consommation_etpt'])), 'gap': round(float(r_['ecart_vs_plafond_lfr_etpt']))}
+            for r_ in csv_rows('consommation-emplois-ministeres-2025.csv')]
+    checks = load(FP / 'checks.json')['checks']
+    return {'source': 'DGAFP, rapport annuel sur l’état de la fonction publique, édition 2026 (Siasp, Insee)', 'url': DGAFP_PAGE, 'year': last,
+            'total': {y: round(v * 1000) for y, v in total.items()}, 'withAided': round(with_aided[last] * 1000), 'breaks': breaks,
+            'versants': {k: {y: round(v * 1000) for y, v in s_.items()} for k, s_ in versants.items()},
+            'ministries': ministries, 'employers': employers, 'hospitals': hospitals, 'departments': deps, 'rateFirst': rate_first, 'rates': rates,
+            'salaries': sal, 'ceilings': ceilings, 'used2025': used, 'checks': {'count': len(checks), 'ok': all(c['ok'] for c in checks)}}
+
+
 # ---------- 4b. Elected officials as they are: Répertoire national des élus (RNE) ----------
 RAW = SRC / 'raw'
 RNE_PAGE = 'https://www.data.gouv.fr/datasets/repertoire-national-des-elus-1/'
@@ -462,10 +558,12 @@ def main():
     legal['municipaux'] = {**legal['municipaux'], 'count': geo['totals']['seats']}
     legal['regionaux'] = {**legal['regionaux'], 'count': sum(REF['regionalSeats']['byRegionCode'].values())}
     mandates = [{**m, 'legal': legal[m['id']]['count'] if m['id'] in legal else None, 'legalSource': legal[m['id']]['source'] if m['id'] in legal else None} for m in geo['rne']['mandates']]
+    wf = workforce()
     out = {
         'generated': 'python3 scripts/emplois-data.py',
+        'workforce': wf,
         'national': nat, 'functions': fun, 'state': st, 'local': loc, 'territory': geo,
-        'mandates': mandates, 'reference': {k: REF[k] for k in ('workforce', 'stateMinistries', 'education2024', 'regionalSeats', 'municipalSeats', 'indemnities')},
+        'mandates': mandates, 'reference': {k: REF[k] for k in ('regionalSeats', 'municipalSeats', 'indemnities')},
     }
     OUT.write_text(json.dumps(out, ensure_ascii=False, separators=(',', ':')), encoding='utf8')
     OUT_COMMUNES.write_text(json.dumps(compact, ensure_ascii=False, separators=(',', ':')), encoding='utf8')

@@ -1,62 +1,168 @@
 {
-  "about": "Chiffres relevés à la main dans des publications officielles qui ne sont pas des jeux de données téléchargeables par fetch-sources.mjs (PDF, textes de loi). Chaque bloc donne la source et la date de relevé. Lu par scripts/emplois-data.py.",
+  "about": "Règles fixées par la loi (sièges par mandat, barème des indemnités), gardées pour comparer le prévu et le réel. Les chiffres réels viennent des sources téléchargées (Répertoire national des élus, DGAFP, comptes des collectivités). Lu par scripts/emplois-data.py.",
   "retrieved": "2026-11-02",
-  "workforce": {
-    "label": "Agents de la fonction publique au 31 décembre 2024, hors bénéficiaires de contrats aidés, en milliers",
-    "year": 2024,
-    "source": "DGAFP, Stats rapides « Évolution des effectifs de la fonction publique en 2024 » (mai 2026), d’après Insee, Siasp",
-    "url": "https://www.fonction-publique.gouv.fr/toutes-les-publications/evolution-des-effectifs-de-la-fonction-publique-en-2024",
-    "versants": [
-      { "id": "fpe", "label": "Fonction publique de l’État", "thousands": 2581.9, "what": "Ministères (enseignants, militaires, policiers, agents des finances…), établissements publics nationaux, lycées et collèges" },
-      { "id": "fpt", "label": "Fonction publique territoriale", "thousands": 2017.8, "what": "Communes, intercommunalités, départements, régions, et leurs établissements (CCAS, SDIS, syndicats…)" },
-      { "id": "fph", "label": "Fonction publique hospitalière", "thousands": 1248.6, "what": "Hôpitaux publics, Ehpad publics, établissements médico-sociaux publics" }
-    ],
-    "total": 5848.3,
-    "changeOnYear": 37,
-    "intercommunal": { "thousands": 401.4, "label": "dont organismes intercommunaux (intercommunalités et syndicats), 20 % de la territoriale" }
-  },
-  "stateMinistries": {
-    "label": "Fonction publique de l’État par ministère, fin 2022, en milliers d’agents",
-    "year": 2022,
-    "source": "DGAFP, « Fonction publique : chiffres clés 2024 »",
-    "url": "https://www.fonction-publique.gouv.fr/files/files/publications/rapport-annuel/cc-2024-web.pdf",
-    "items": [
-      { "label": "Éducation nationale, enseignement supérieur et recherche", "thousands": 1054.7 },
-      { "label": "Intérieur et outre-mer", "thousands": 299.0 },
-      { "label": "Armées", "thousands": 282.6 },
-      { "label": "Économie et finances", "thousands": 129.8 }
-    ],
-    "ministriesTotal": 1973.5,
-    "nationalBodies": { "label": "Établissements publics administratifs nationaux", "thousands": 568.6 },
-    "note": "Les « autres ministères » sont la différence entre le total des ministères et les quatre lignes publiées : Justice, Agriculture, Culture, Travail, Transition écologique, services du Premier ministre…"
-  },
-  "education2024": {
-    "label": "Ministères de l’Éducation, de l’enseignement supérieur et de la recherche, fin 2024",
-    "thousands": 1144,
-    "source": "Insee Première n° 2094, « L’emploi dans la fonction publique en 2024 »",
-    "url": "https://www.insee.fr/fr/statistiques/8732435"
-  },
   "mandates": {
-    "source": "Code électoral et CGCT ; résultats des élections",
+    "source": "Sièges prévus par la loi (Code électoral, CGCT), à comparer aux élus en fonction du Répertoire national des élus",
     "items": [
-      { "id": "deputes", "label": "Députés", "count": 577, "level": "national", "source": "Code électoral, art. L.O. 119", "url": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070239" },
-      { "id": "senateurs", "label": "Sénateurs", "count": 348, "level": "national", "source": "Code électoral, art. L.O. 274", "url": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070239" },
-      { "id": "europeens", "label": "Députés européens élus en France", "count": 81, "level": "national", "source": "Décision (UE) 2023/2061 du Conseil européen (législature 2024-2029)", "url": "https://eur-lex.europa.eu/eli/dec/2023/2061/oj" },
-      { "id": "regionaux", "label": "Conseillers régionaux et membres des assemblées de Corse, Guyane et Martinique", "count": null, "level": "region", "source": "Code électoral, art. L. 337 (tableau 7), L. 364 (Corse), L. 558-2 (Guyane, Martinique)", "url": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070239" },
-      { "id": "departementaux", "label": "Conseillers départementaux", "count": 4056, "level": "departement", "source": "Élections départementales de juin 2021 (deux élus par canton)", "url": "https://www.info.gouv.fr/actualite/tout-ce-qu-il-faut-savoir-sur-les-elections-regionales-et-departementales" },
-      { "id": "municipaux", "label": "Conseillers municipaux (dont maires et adjoints)", "count": null, "level": "commune", "source": "CGCT, art. L. 2121-2 ; Paris (L. 2512-3), Marseille et Lyon (loi n° 2025-795 du 11 août 2025, tableau n° 2 annexé au code électoral)", "url": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070633" }
+      {
+        "id": "deputes",
+        "label": "Députés",
+        "count": 577,
+        "level": "national",
+        "source": "Code électoral, art. L.O. 119",
+        "url": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070239"
+      },
+      {
+        "id": "senateurs",
+        "label": "Sénateurs",
+        "count": 348,
+        "level": "national",
+        "source": "Code électoral, art. L.O. 274",
+        "url": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070239"
+      },
+      {
+        "id": "europeens",
+        "label": "Députés européens élus en France",
+        "count": 81,
+        "level": "national",
+        "source": "Décision (UE) 2023/2061 du Conseil européen (législature 2024-2029)",
+        "url": "https://eur-lex.europa.eu/eli/dec/2023/2061/oj"
+      },
+      {
+        "id": "regionaux",
+        "label": "Conseillers régionaux et membres des assemblées de Corse, Guyane et Martinique",
+        "count": null,
+        "level": "region",
+        "source": "Code électoral, art. L. 337 (tableau 7), L. 364 (Corse), L. 558-2 (Guyane, Martinique)",
+        "url": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070239"
+      },
+      {
+        "id": "departementaux",
+        "label": "Conseillers départementaux",
+        "count": 4056,
+        "level": "departement",
+        "source": "Élections départementales de juin 2021 (deux élus par canton)",
+        "url": "https://www.info.gouv.fr/actualite/tout-ce-qu-il-faut-savoir-sur-les-elections-regionales-et-departementales"
+      },
+      {
+        "id": "municipaux",
+        "label": "Conseillers municipaux (dont maires et adjoints)",
+        "count": null,
+        "level": "commune",
+        "source": "CGCT, art. L. 2121-2 ; Paris (L. 2512-3), Marseille et Lyon (loi n° 2025-795 du 11 août 2025, tableau n° 2 annexé au code électoral)",
+        "url": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070633"
+      }
     ]
   },
   "regionalSeats": {
     "source": "Code électoral, art. L. 337 (tableau 7), L. 364, L. 558-2 et L. 558-3",
-    "byRegionCode": { "84": 204, "27": 100, "53": 83, "24": 77, "44": 169, "32": 170, "11": 209, "28": 102, "75": 183, "76": 158, "52": 93, "93": 123, "01": 41, "04": 45, "94": 63, "03": 51, "02": 51 },
+    "byRegionCode": {
+      "84": 204,
+      "27": 100,
+      "53": 83,
+      "24": 77,
+      "44": 169,
+      "32": 170,
+      "11": 209,
+      "28": 102,
+      "75": 183,
+      "76": 158,
+      "52": 93,
+      "93": 123,
+      "01": 41,
+      "04": 45,
+      "94": 63,
+      "03": 51,
+      "02": 51
+    },
     "note": "Mayotte n’a pas de conseil régional distinct : son conseil départemental exerce les compétences de la région."
   },
   "municipalSeats": {
     "source": "CGCT, art. L. 2121-2 (effectif du conseil municipal selon la population municipale)",
     "url": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006070633",
-    "strata": [[0, 7], [100, 11], [500, 15], [1500, 19], [2500, 23], [3500, 27], [5000, 29], [10000, 33], [20000, 35], [30000, 39], [40000, 43], [50000, 45], [60000, 49], [80000, 53], [100000, 55], [150000, 59], [200000, 61], [250000, 65], [300000, 69]],
-    "special": { "75056": 163, "13055": 111, "69123": 73 },
+    "strata": [
+      [
+        0,
+        7
+      ],
+      [
+        100,
+        11
+      ],
+      [
+        500,
+        15
+      ],
+      [
+        1500,
+        19
+      ],
+      [
+        2500,
+        23
+      ],
+      [
+        3500,
+        27
+      ],
+      [
+        5000,
+        29
+      ],
+      [
+        10000,
+        33
+      ],
+      [
+        20000,
+        35
+      ],
+      [
+        30000,
+        39
+      ],
+      [
+        40000,
+        43
+      ],
+      [
+        50000,
+        45
+      ],
+      [
+        60000,
+        49
+      ],
+      [
+        80000,
+        53
+      ],
+      [
+        100000,
+        55
+      ],
+      [
+        150000,
+        59
+      ],
+      [
+        200000,
+        61
+      ],
+      [
+        250000,
+        65
+      ],
+      [
+        300000,
+        69
+      ]
+    ],
+    "special": {
+      "75056": 163,
+      "13055": 111,
+      "69123": 73
+    },
     "maxDeputyShare": 0.3,
     "note": "Depuis 2026, les listes des communes de moins de 1 000 habitants peuvent compter jusqu’à deux candidats de moins que l’effectif légal (loi n° 2025-444 du 21 mai 2025) : l’effectif légal est un plafond."
   },
@@ -66,8 +172,78 @@
     "indexLabel": "Indice brut terminal de la fonction publique (IB 1027, indice majoré 835)",
     "indexMonthly": 4110.52,
     "indexNote": "Valeur mensuelle brute depuis le 1er janvier 2024 : 835 points × 4,92278 €.",
-    "mayor": [[0, 28.1], [500, 44.3], [1000, 55.7], [3500, 58.3], [10000, 67.6], [20000, 90], [50000, 110], [100000, 145]],
-    "deputy": [[0, 10.89], [500, 11.77], [1000, 21.38], [3500, 23.32], [10000, 28.6], [20000, 33], [50000, 44], [100000, 66], [200001, 72.5]],
+    "mayor": [
+      [
+        0,
+        28.1
+      ],
+      [
+        500,
+        44.3
+      ],
+      [
+        1000,
+        55.7
+      ],
+      [
+        3500,
+        58.3
+      ],
+      [
+        10000,
+        67.6
+      ],
+      [
+        20000,
+        90
+      ],
+      [
+        50000,
+        110
+      ],
+      [
+        100000,
+        145
+      ]
+    ],
+    "deputy": [
+      [
+        0,
+        10.89
+      ],
+      [
+        500,
+        11.77
+      ],
+      [
+        1000,
+        21.38
+      ],
+      [
+        3500,
+        23.32
+      ],
+      [
+        10000,
+        28.6
+      ],
+      [
+        20000,
+        33
+      ],
+      [
+        50000,
+        44
+      ],
+      [
+        100000,
+        66
+      ],
+      [
+        200001,
+        72.5
+      ]
+    ],
     "note": "Taux maximaux en % de l’indice brut terminal. Ne sont pas comptés : majorations (chef-lieu, station de tourisme, commune sinistrée…), indemnités des conseillers municipaux délégués ou des communes de 100 000 habitants et plus, régimes propres à Paris, Lyon et Marseille, cotisations sociales et frais."
   }
 }

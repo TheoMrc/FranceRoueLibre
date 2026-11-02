@@ -87,6 +87,13 @@ const SOURCES = [
 
   // ---- Public employment and elected officials ----
   { id: 'datagouv-rne', kind: 'datagouv', slug: 'repertoire-national-des-elus-1', note: 'Répertoire national des élus (ministère de l’Intérieur), tous les mandats' },
+  { id: 'fonction-publique', kind: 'files', note: 'DGAFP, rapport annuel 2026 (données au 31/12/2024) ; Insee, effectifs par versant et ministère ; ETPT LFI 2023', files: [
+    { path: 'dgafp-ra2026/ra_2026_postes.zip', url: 'https://www.fonction-publique.gouv.fr/files/files/publications/vue-rapport-annuel/2026/ra_2026_postes.zip' },
+    { path: 'dgafp-ra2026/ra_2026_effectifs.zip', url: 'https://www.fonction-publique.gouv.fr/files/files/publications/vue-rapport-annuel/2026/ra_2026_effectifs.zip' },
+    { path: 'dgafp-ra2026/ra_2026_remu_niveaux.zip', url: 'https://www.fonction-publique.gouv.fr/files/files/publications/vue-rapport-annuel/2026/ra_2026_remu_niveaux.zip' },
+    { path: 'insee/marc-empl-eff-fonc-pub.xlsx', url: 'https://www.insee.fr/fr/statistiques/fichier/2493501/marc-empl-eff-fonc-pub.xlsx' },
+    { path: 'data-economie/etpt-par-ministere-mission-programme-pour-le-bg-et-les-ba-lfi-2023.csv', url: 'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/etpt-par-ministere-mission-programme-pour-le-bg-et-les-ba-lfi-2023/exports/csv?delimiter=%3B' },
+  ] },
 
   // ---- Integrity context ----
   { id: 'atteintes-probite', kind: 'ods', host: ECO, dataset: 'atteintes-a-la-probite-dans-les-decisions-de-justice-donnees-nationales-agregees-2021-2025' },
@@ -202,6 +209,18 @@ async function fetchDatagouv(source) {
   return files;
 }
 
+// kind "files": plain files (zip, xlsx, csv) kept as published, under sources/raw/<id>/<path>.
+async function fetchFiles(source) {
+  const files = [];
+  for (const item of source.files) {
+    const file = path.join(OUT, source.id, item.path);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    console.log(`    ${item.path}`);
+    files.push({ file: path.join(source.id, item.path), url: item.url, ...(await download(item.url, file, { gzip: false })) });
+  }
+  return files;
+}
+
 async function fetchInsee(source) {
   const url = `https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/${source.idbank}`;
   const file = path.join(OUT, `${source.id}.xml.gz`);
@@ -220,7 +239,7 @@ for (const [index, source] of selected.entries()) {
   console.log(`${label} · ${source.note || source.dataset || source.slug || source.idbank}`);
   const started = Date.now();
   try {
-    const files = source.kind === 'ods' ? await fetchOds(source) : source.kind === 'datagouv' ? await fetchDatagouv(source) : await fetchInsee(source);
+    const files = source.kind === 'ods' ? await fetchOds(source) : source.kind === 'datagouv' ? await fetchDatagouv(source) : source.kind === 'files' ? await fetchFiles(source) : await fetchInsee(source);
     manifest[source.id] = { ...source, downloadedAt: new Date().toISOString(), files };
     saveManifest();
     console.log(`    ✓ ${mb(files.reduce((total, item) => total + item.bytes, 0))} en ${Math.round((Date.now() - started) / 1000)} s`);

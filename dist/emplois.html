@@ -103,11 +103,17 @@
 
     <section class="section section--alt" id="effectifs" aria-labelledby="emWfTitle">
       <div class="container">
-        <div class="section__head"><span class="eyebrow">DGAFP et Insee · fin 2024</span><h2 id="emWfTitle">5,85 millions d’agents, trois fonctions publiques</h2><p class="lead" id="emWfLead"></p></div>
+        <div class="section__head"><span class="eyebrow">DGAFP, rapport annuel 2026 · au 31 décembre 2024</span><h2 id="emWfTitle">Combien d’agents, où, et pour quel salaire</h2><p class="lead" id="emWfLead"></p></div>
+        <div class="kpis" id="emWfKpis"></div>
         <div class="panel"><h3>Répartition des agents par versant, fin 2024</h3><div id="emWfBar" class="em-split"></div><div id="emWfCards" class="em-cards"></div><p class="note" id="emWfNote"></p></div>
+        <div class="panel"><h3>Agents publics depuis 2011, par versant</h3><div id="emWfLines" class="em-chart"></div><div id="emWfLinesLegend" class="tx-legend"></div><p class="note" id="emWfLinesNote"></p></div>
         <div class="grid-2">
-          <div class="panel"><h3>Fonction publique de l’État, par ministère (fin 2022)</h3><div id="emMin"></div><p class="note" id="emMinNote"></p></div>
-          <div class="panel"><h3>Coût moyen par agent, ordre de grandeur</h3><div id="emPerAgent"></div><p class="note" id="emPerAgentNote"></p></div>
+          <div class="panel"><div class="panel__head"><h3 id="emMinTitle">Fonction publique de l’État, par ministère, fin 2024</h3></div><div class="chip-select" id="emMinUnit" role="group" aria-label="Mesure" style="margin-bottom:1rem"><button type="button" data-unit="n" class="active">Agents</button><button type="button" data-unit="evo">Évolution depuis 1998</button></div><div id="emMin"></div><p class="note" id="emMinNote"></p></div>
+          <div class="panel"><h3>Collectivités : qui emploie, fin 2024</h3><div id="emFpt"></div><p class="note" id="emFptNote"></p></div>
+        </div>
+        <div class="grid-2">
+          <div class="panel"><h3>Emplois de l’État : votés et réellement occupés</h3><div id="emCeil" class="em-chart"></div><div id="emCeilLegend" class="tx-legend"></div><div id="emUsed"></div><p class="note" id="emCeilNote"></p></div>
+          <div class="panel"><h3>Salaire et coût moyen par agent</h3><div id="emPerAgent"></div><p class="note" id="emPerAgentNote"></p></div>
         </div>
         <p class="source-links" id="emWfSources"></p>
       </div>
@@ -151,8 +157,8 @@
 
     <section class="section section--alt" id="carte" aria-labelledby="emMapTitle">
       <div class="container">
-        <div class="section__head"><span class="eyebrow">Département par département</span><h2 id="emMapTitle">La carte</h2><p class="lead">Chaque département avec ses communes, ses intercommunalités, son conseil départemental et sa part du conseil régional. Choisissez l’indicateur ; touchez un département pour le détail.</p></div>
-        <div class="tx-controls"><div class="chip-select em-chips-scroll" id="emMapInd" role="group" aria-label="Indicateur" data-scroll-x></div></div>
+        <div class="section__head"><span class="eyebrow">Département par département</span><h2 id="emMapTitle">La carte</h2><p class="lead">Agents publics pour 1 000 habitants (DGAFP), élus en fonction (répertoire national des élus) et frais de personnel des communes, intercommunalités, du département et de sa part de la région (OFGL). Choisissez l’indicateur ; touchez un département pour le détail.</p></div>
+        <div class="tx-controls"><div id="emMapInd" role="group" aria-label="Indicateur"></div></div>
         <div class="em-map-layout">
           <div class="panel"><h3 id="emMapHead">Carte</h3><div id="emMap" class="em-map"></div><div id="emDom" class="em-dom"></div><div id="emMapLegend" class="em-scale"></div><p class="note" id="emMapNote"></p></div>
           <div class="panel"><h3 id="emRankTitle">Classement</h3><div id="emRank"></div><button type="button" class="em-more" id="emRankMore">Voir les 101 départements</button></div>

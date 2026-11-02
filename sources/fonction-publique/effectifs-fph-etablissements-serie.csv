@@ -1,0 +1,103 @@
+versant,type_etablissement,annee_millesime,effectif_milliers
+FPH,Médecins(2),2011,106.6
+FPH,Médecins(2),2012,110
+FPH,Médecins(2),2013,112.8
+FPH,Médecins(2),2014,115
+FPH,Médecins(2),2015,116.8
+FPH,Médecins(2),2016(3),115.1
+FPH,Médecins(2),2017,117.1
+FPH,Médecins(2),2018,118.4
+FPH,Médecins(2),2019,120.7
+FPH,Médecins(2),2020(4),124.218
+FPH,Médecins(2),2021 Classique,127.419
+FPH,Médecins(2),2021 Moderne(5),132.968
+FPH,Médecins(2),2022 millésime 2022,136.163
+FPH,Médecins(2),2022 millésime 2023,136.726
+FPH,Médecins(2),2023 millésime 2023,141.349
+FPH,Médecins(2),2023 millésime 2024,141.451
+FPH,Médecins(2),2024,144.604
+FPH,Personnels non médical,2011,914
+FPH,Personnels non médical,2012,916.5
+FPH,Personnels non médical,2013,907.6
+FPH,Personnels non médical,2014,910.9
+FPH,Personnels non médical,2015,909.7
+FPH,Personnels non médical,2016(3),910.1
+FPH,Personnels non médical,2017,912.1
+FPH,Personnels non médical,2018,913.4
+FPH,Personnels non médical,2019,913.8
+FPH,Personnels non médical,2020(4),949.777
+FPH,Personnels non médical,2021 Classique,952.993
+FPH,Personnels non médical,2021 Moderne(5),946.435
+FPH,Personnels non médical,2022 millésime 2022,946.498
+FPH,Personnels non médical,2022 millésime 2023,949.5
+FPH,Personnels non médical,2023 millésime 2023,968.882
+FPH,Personnels non médical,2023 millésime 2024,971.523
+FPH,Personnels non médical,2024,973.956
+FPH,Total hôpitaux,2011,1020.6
+FPH,Total hôpitaux,2012,1026.5
+FPH,Total hôpitaux,2013,1020.4
+FPH,Total hôpitaux,2014,1025.9
+FPH,Total hôpitaux,2015,1026.5
+FPH,Total hôpitaux,2016(3),1025.2
+FPH,Total hôpitaux,2017,1029.1
+FPH,Total hôpitaux,2018,1031.8
+FPH,Total hôpitaux,2019,1034.5
+FPH,Total hôpitaux,2020(4),1073.995
+FPH,Total hôpitaux,2021 Classique,1080.412
+FPH,Total hôpitaux,2021 Moderne(5),1079.403
+FPH,Total hôpitaux,2022 millésime 2022,1082.661
+FPH,Total hôpitaux,2022 millésime 2023,1086.226
+FPH,Total hôpitaux,2023 millésime 2023,1110.231
+FPH,Total hôpitaux,2023 millésime 2024,1112.974
+FPH,Total hôpitaux,2024,1118.56
+FPH,Établissements d'hébergement pour personnes âgées,2011,76.3
+FPH,Établissements d'hébergement pour personnes âgées,2012,77.2
+FPH,Établissements d'hébergement pour personnes âgées,2013,93.7
+FPH,Établissements d'hébergement pour personnes âgées,2014,96.1
+FPH,Établissements d'hébergement pour personnes âgées,2015,97.4
+FPH,Établissements d'hébergement pour personnes âgées,2016(3),99.6
+FPH,Établissements d'hébergement pour personnes âgées,2017,102.7
+FPH,Établissements d'hébergement pour personnes âgées,2018,105.7
+FPH,Établissements d'hébergement pour personnes âgées,2019,107.3
+FPH,Établissements d'hébergement pour personnes âgées,2020(4),89.804
+FPH,Établissements d'hébergement pour personnes âgées,2021 Classique,88.883
+FPH,Établissements d'hébergement pour personnes âgées,2021 Moderne(5),85.81
+FPH,Établissements d'hébergement pour personnes âgées,2022 millésime 2022,90.429
+FPH,Établissements d'hébergement pour personnes âgées,2022 millésime 2023,90.974
+FPH,Établissements d'hébergement pour personnes âgées,2023 millésime 2023,91.532
+FPH,Établissements d'hébergement pour personnes âgées,2023 millésime 2024,91.922
+FPH,Établissements d'hébergement pour personnes âgées,2024,92.51
+FPH,Autres établissements médico-sociaux,2011,32.6
+FPH,Autres établissements médico-sociaux,2012,33.3
+FPH,Autres établissements médico-sociaux,2013,38.6
+FPH,Autres établissements médico-sociaux,2014,39.1
+FPH,Autres établissements médico-sociaux,2015,39.4
+FPH,Autres établissements médico-sociaux,2016(3),40.6
+FPH,Autres établissements médico-sociaux,2017,41.5
+FPH,Autres établissements médico-sociaux,2018,41.5
+FPH,Autres établissements médico-sociaux,2019,42.4
+FPH,Autres établissements médico-sociaux,2020(4),43.202
+FPH,Autres établissements médico-sociaux,2021 Classique,43.615
+FPH,Autres établissements médico-sociaux,2021 Moderne(5),45.88
+FPH,Autres établissements médico-sociaux,2022 millésime 2022,40.768
+FPH,Autres établissements médico-sociaux,2022 millésime 2023,38.381
+FPH,Autres établissements médico-sociaux,2023 millésime 2023,37.672
+FPH,Autres établissements médico-sociaux,2023 millésime 2024,37.771
+FPH,Autres établissements médico-sociaux,2024,37.521
+FPH,Total FPH,2011,1129.4
+FPH,Total FPH,2012,1137
+FPH,Total FPH,2013,1152.7
+FPH,Total FPH,2014,1161.1
+FPH,Total FPH,2015,1163.3
+FPH,Total FPH,2016(3),1165.4
+FPH,Total FPH,2017,1173.4
+FPH,Total FPH,2018,1179.1
+FPH,Total FPH,2019,1184.2
+FPH,Total FPH,2020(4),1207.001
+FPH,Total FPH,2021 Classique,1212.91
+FPH,Total FPH,2021 Moderne(5),1211.093
+FPH,Total FPH,2022 millésime 2022,1213.858
+FPH,Total FPH,2022 millésime 2023,1215.581
+FPH,Total FPH,2023 millésime 2023,1239.435
+FPH,Total FPH,2023 millésime 2024,1242.667
+FPH,Total FPH,2024,1248.591

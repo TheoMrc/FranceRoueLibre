@@ -65,13 +65,13 @@
   }
 
   /* Multi-series line chart with a shared hover. */
-  function lines(el, series, { height = 290, format = v => nf(v), tick = format, label = '' } = {}) {
+  function lines(el, series, { height = 290, format = v => nf(v), tick = format, label = '', zero = true } = {}) {
     return responsive(el, W => {
       const H = W < 520 ? 240 : height, L = W < 520 ? 46 : 58, R = 12, T = 14, B = 26;
       const all = series.flatMap(s => s.points.filter(p => Number.isFinite(p.value)));
       if (!all.length) { el.innerHTML = '<p class="tx-empty">Série indisponible.</p>'; return; }
       const xs = all.map(p => p.x), x0 = Math.min(...xs), x1 = Math.max(...xs);
-      let lo = Math.min(0, ...all.map(p => p.value)), hi = Math.max(...all.map(p => p.value));
+      let lo = zero ? Math.min(0, ...all.map(p => p.value)) : Math.min(...all.map(p => p.value)), hi = Math.max(...all.map(p => p.value));
       const step = niceStep(hi - lo || 1); lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
       const x = v => L + (W - L - R) * (v - x0) / ((x1 - x0) || 1), y = v => T + (H - T - B) * (1 - (v - lo) / ((hi - lo) || 1));
       let svg = '';
@@ -156,7 +156,7 @@
 
   /* ---------- 1. National series ---------- */
   function initNational(D) {
-    const nat = D.national, rows = nat.years, last = rows.at(-1), wf = D.reference.workforce;
+    const nat = D.national, rows = nat.years, last = rows.at(-1), W = D.workforce, wf = { total: W.total[W.year] / 1000, year: W.year };
     const habOf = r => r.population ? r.d1 * 1e9 / r.population : null;
     const agentsPer1000 = 1000 * wf.total * 1000 / (rows.find(r => r.year === wf.year + 1) || last).population;
     const peak = rows.filter(r => r.gdp).reduce((b, r) => r.d1 / r.gdp > b.d1 / b.gdp ? r : b);
@@ -189,33 +189,72 @@
     draw();
   }
 
-  /* ---------- 2. Workforce ---------- */
+  /* ---------- 2. Workforce (DGAFP) ---------- */
   function initWorkforce(D) {
-    const wf = D.reference.workforce, sm = D.reference.stateMinistries, nat = D.national.years;
+    const W = D.workforce, nat = D.national.years, y = W.year, yk = String(y);
     const vColors = { fpe: 'var(--tx-1)', fpt: 'var(--tx-3)', fph: 'var(--tx-5)' };
-    const pop = (nat.find(r => r.year === wf.year + 1) || nat.at(-1)).population;
-    $('emWfLead').innerHTML = `Au 31 décembre ${wf.year}, ${nf(wf.total * 1000)} personnes travaillaient dans la fonction publique, soit ${nf(1000 * wf.total * 1000 / pop)} pour 1 000 habitants, ${nf(wf.changeOnYear * 1000)} de plus en un an. Fonctionnaires, contractuels et militaires sont comptés ensemble ; les bénéficiaires de contrats aidés ne le sont pas.`;
-    $('emWfBar').innerHTML = wf.versants.map(v => `<span style="flex:${v.thousands};background:${vColors[v.id]}" data-tip="${esc(`<strong>${esc(v.label)}</strong><span class="tx-tip__value">${nf(v.thousands * 1000)} agents</span><br>${pctS(100 * v.thousands / wf.total)} des agents publics`)}">${pctS(100 * v.thousands / wf.total, 0)}</span>`).join('');
-    $('emWfCards').innerHTML = wf.versants.map(v => `<article class="em-card"><h4><i style="background:${vColors[v.id]}"></i>${esc(v.label)}</h4><strong>${nf(v.thousands / 1000, 2)} million${v.thousands >= 2000 ? 's' : ''}</strong><small>${nf(1000 * v.thousands * 1000 / pop, 1)} agents pour 1 000 habitants</small><p>${esc(v.what)}</p></article>`).join('');
+    const vLabels = { fpe: 'Fonction publique de l’État', fpt: 'Fonction publique territoriale', fph: 'Fonction publique hospitalière' };
+    const vWhat = { fpe: 'Ministères (enseignants, militaires, policiers, agents des finances…), universités et établissements publics nationaux', fpt: 'Communes, intercommunalités, départements, régions et leurs établissements (CCAS, SDIS, syndicats…)', fph: 'Hôpitaux publics, Ehpad publics, établissements médico-sociaux publics' };
+    const pop = (nat.find(r => r.year === y + 1) || nat.at(-1)).population;
+    const total = W.total[yk], first = Math.min(...Object.keys(W.total).map(Number));
+    const salary = (v, who = 'Ensemble') => W.salaries.find(s => s.versant === v && s.population === who);
+    const rate = W.rates.FP.at(-1)[1];
+    $('emWfLead').innerHTML = `Au 31 décembre ${y}, ${nf(total)} personnes occupaient un emploi principal dans la fonction publique (hors contrats aidés), soit ${nf(1000 * total / pop)} pour 1 000 habitants : ${signedPct(100 * (total / W.total[String(first)] - 1))} depuis ${first}, quand la population a augmenté de ${signedPct(100 * (pop / (nat.find(r => r.year === first + 1) || nat[0]).population - 1))}. Fonctionnaires, contractuels et militaires sont comptés ensemble ; avec les contrats aidés : ${nf(W.withAided)}.`;
+    $('emWfKpis').innerHTML = [
+      kpi(`Agents publics, fin ${y}`, `${nf(total / 1e6, 2)} M`, `${nf(1000 * total / pop)} pour 1 000 habitants`),
+      kpi('Taux d’administration', nf(rate, 1), `emplois en équivalent temps plein pour 1 000 habitants, agents civils (${nf(W.rates.FP[0][1], 1)} en ${W.rates.FP[0][0]})`),
+      kpi('Salaire net moyen', eur(salary('Ensemble FP').net), `par mois, en équivalent temps plein, ${y} (brut : ${eur(salary('Ensemble FP').gross)})`),
+      kpi(`Depuis ${first}`, signedPct(100 * (total / W.total[String(first)] - 1)), `${nf(total - W.total[String(first)])} agents de plus`),
+    ].join('');
+    const vs = ['fpe', 'fpt', 'fph'];
+    $('emWfBar').innerHTML = vs.map(v => `<span style="flex:${W.versants[v][yk]};background:${vColors[v]}" data-tip="${esc(`<strong>${vLabels[v]}</strong><span class="tx-tip__value">${nf(W.versants[v][yk])} agents</span><br>${pctS(100 * W.versants[v][yk] / total)} des agents publics`)}">${pctS(100 * W.versants[v][yk] / total, 0)}</span>`).join('');
+    const salV = { fpe: 'FPE', fpt: 'FPT', fph: 'FPH (ensemble)' };
+    $('emWfCards').innerHTML = vs.map(v => { const n = W.versants[v][yk], f = W.versants[v][String(first)], sa = salary(salV[v]); return `<article class="em-card"><h4><i style="background:${vColors[v]}"></i>${vLabels[v]}</h4><strong>${nf(n / 1e6, 2)} million${n >= 2e6 ? 's' : ''}</strong><small>${nf(1000 * n / pop, 1)} pour 1 000 habitants · ${signedPct(100 * (n / f - 1))} depuis ${first}</small><small>Salaire net moyen : ${eur(sa.net)} par mois (${sa.realChange >= 0 ? '+' : ''}${nf(sa.realChange, 1)} % en un an, inflation déduite)</small><p>${vWhat[v]}</p></article>`; }).join('');
     bindTips($('emWfBar'));
-    $('emWfNote').innerHTML = `${esc(wf.intercommunal.label)} : ${nf(wf.intercommunal.thousands * 1000)} agents. Effectifs physiques : un agent à temps partiel compte pour un. Source : ${link(wf.url, wf.source)}.`;
-    const named = sm.items.reduce((s, it) => s + it.thousands, 0);
-    const minRows = [...sm.items.map(it => ({ label: it.label, value: it.thousands })), { label: 'Autres ministères', value: sm.ministriesTotal - named, sub: 'Justice, Agriculture, Culture, Travail, Écologie, services du Premier ministre…' }, { label: sm.nationalBodies.label, value: sm.nationalBodies.thousands, sub: 'universités, agences, musées et autres établissements publics administratifs', color: 'var(--tx-other)' }];
-    rows($('emMin'), minRows, { format: v => `${nf(v * 1000)}` });
-    const edu = D.reference.education2024;
-    $('emMinNote').innerHTML = `Agents en fin d’année ${sm.year}. Le détail par ministère n’est pas publié en données ouvertes ; ces chiffres sont relevés dans ${link(sm.url, sm.source)}. Fin 2024, ${esc(edu.label.toLowerCase())} : ${nf(edu.thousands * 1000)} agents (${link(edu.url, edu.source)}).`;
-    // Average cost per agent: D1 over headcount (all), local personnel costs over FPT headcount.
-    const y = wf.year, n = nat.find(r => r.year === y);
+    const inter = W.employers.find(e => e.label === 'Organismes intercommunaux');
+    $('emWfNote').innerHTML = `Effectifs physiques au 31 décembre : un agent à temps partiel compte pour un. Mayotte n’est pas couverte. Les ${nf(inter.value * 1000)} agents des organismes intercommunaux (intercommunalités et syndicats) représentent ${pctS(100 * inter.value * 1000 / W.versants.fpt[yk], 0)} de la territoriale. Source : ${link(W.url, W.source)}.`;
+    const years = Object.keys(W.total).map(Number);
+    lines($('emWfLines'), vs.map(v => ({ name: vLabels[v], color: vColors[v], points: years.map(yy => ({ x: yy, value: W.versants[v][String(yy)] })) })), { format: v => nf(v), tick: v => `${nf(v / 1e6, 1)} M`, label: 'Agents publics par versant depuis 2011', height: 250 });
+    $('emWfLinesLegend').innerHTML = vs.map(v => `<span><i style="background:${vColors[v]}"></i>${vLabels[v]}</span>`).join('');
+    $('emWfLinesNote').innerHTML = `Agents au 31 décembre, hors contrats aidés. La série change de méthode en ${W.breaks.join(', ')} (nouvelles sources de paie, déclaration sociale nominative) : pour ces années, la DGAFP publie deux valeurs, et la plus récente est retenue ici. Avant 2020, valeurs arrondies à la centaine. Source : ${link(W.url, 'DGAFP')}.`;
+
+    // ministries
+    let mUnit = 'n';
+    const drawMin = () => {
+      const list = W.ministries.map(m => { const s0 = m.series[0], v0 = s0[1] * 1000, n = m.total * 1000; return { label: m.label, value: mUnit === 'n' ? n : 100 * (n / v0 - 1), sub: mUnit === 'n' ? `${nf(m.ministry * 1000)} dans les services, ${nf(m.bodies * 1000)} dans les établissements publics` : `${nf(v0)} en ${s0[0]}, ${nf(n)} en ${y}`, color: mUnit === 'evo' && n < v0 ? 'var(--tx-2)' : 'var(--tx-1)' }; }).sort((a, b) => b.value - a.value);
+      rows($('emMin'), list, { format: v => mUnit === 'n' ? nf(v) : signedPct(v, 0), max: mUnit === 'evo' ? Math.max(...list.map(r => Math.abs(r.value))) : null });
+      $('emMinTitle').textContent = mUnit === 'n' ? `Fonction publique de l’État, par ministère, fin ${y}` : `Évolution des effectifs par ministère, 1998–${y}`;
+    };
+    unitChips($('emMinUnit'), u => { mUnit = u; drawMin(); });
+    drawMin();
+    $('emMinNote').innerHTML = `Agents des ministères et de leurs établissements publics nationaux (universités, agences…), militaires compris. Les périmètres ministériels changent d’un gouvernement à l’autre : une évolution longue mélange réorganisations (transferts aux collectivités, aux opérateurs, fusions de directions) et créations ou suppressions de postes. Source : ${link(W.url, 'DGAFP, rapport annuel 2026')}.`;
+    // FPT employers
+    const pickE = l => W.employers.find(e => e.label === l);
+    const fptRows = [['Communes', 'Communes'], ['Établissements communaux (CCAS, CDE)', 'Centres communaux d’action sociale, caisses des écoles'], ['EPCI à fiscalité propre', 'Intercommunalités à fiscalité propre'], ['Autres structures intercommunales (Sivom, Sivu, syndicats mixtes)', 'Syndicats intercommunaux'], ['Départements', 'Départements'], ['SDIS', 'Services d’incendie et de secours'], ['Régions', 'Régions'], ['Autres établissements départementaux', 'Autres établissements départementaux'], ['Autres EPA locaux (CCM, régies)', 'Autres établissements locaux']]
+      .map(([l, label], i) => { const e = pickE(l); const s0 = e.series[0]; return e && { label, value: e.value * 1000, sub: `${signedPct(100 * (e.value / s0[1] - 1), 0)} depuis ${s0[0]}`, color: COLORS[i % COLORS.length] }; }).filter(Boolean);
+    rows($('emFpt'), fptRows, { format: v => nf(v) });
+    const sizes = W.employers.filter(e => /^Communes (de|du)/.test(e.label));
+    $('emFptNote').innerHTML = `Agents au 31 décembre ${y}. Les communes emploient ${pctS(100 * pickE('Communes').value * 1000 / W.versants.fpt[yk], 0)} des agents territoriaux. Dans les communes de 100 000 habitants et plus : ${nf(pickE('Communes de 100 000 habitants et plus').value * 1000)} agents ; dans celles de moins de 1 000 habitants : ${nf(pickE('Communes de moins de 1 000 habitants').value * 1000)}. Source : ${link(W.url, 'DGAFP')}.`;
+    // ceilings voted vs used
+    const tot = W.ceilings.Total, cy = Object.keys(tot).map(Number);
+    lines($('emCeil'), [{ name: 'Plafond d’emplois voté (loi de finances initiale)', color: 'var(--tx-7)', points: cy.map(yy => ({ x: yy, value: tot[yy] })) }], { format: v => `${nf(v)} ETPT`, tick: v => `${nf(v / 1e6, 2)} M`, label: 'Plafond d’emplois de l’État', height: 200, zero: false });
+    $('emCeilLegend').innerHTML = '<span><i style="background:var(--tx-7)"></i>Plafond d’emplois voté, budget de l’État et budgets annexes</span>';
+    const used = W.used2025.filter(u => !/^Total/.test(u.label)).sort((a, b) => a.gap - b.gap).slice(0, 6);
+    const usedTotal = W.used2025.find(u => /^Total/.test(u.label));
+    $('emUsed').innerHTML = `<h4 style="margin:1rem 0 .5rem;font-size:.9rem">En 2025, emplois réellement occupés sous le plafond voté</h4><div id="emUsedRows"></div>`;
+    rows($('emUsedRows'), used.map(u => ({ label: u.label, value: -u.gap, sub: `${nf(u.used)} emplois occupés`, color: 'var(--tx-2)' })), { format: v => `−${nf(v)}` });
+    $('emCeilNote').innerHTML = `Plafond en équivalents temps plein travaillé (ETPT) voté chaque année en loi de finances, nomenclature des ministères de 2026. En 2025, le budget général a consommé ${nf(usedTotal.used)} ETPT, ${nf(-usedTotal.gap)} de moins que son plafond rectifié : le plafond autorise des recrutements, il ne les impose pas, et l’écart mesure surtout les postes non pourvus. Source : ${link(W.url, 'DGAFP, rapport annuel 2026')} (lois de finances, rapports annuels de performances).`;
+    // salary and cost per agent
+    const n = nat.find(r => r.year === y);
     const loc = D.local.levels.reduce((s, l) => { const i = l.years.indexOf(y); return s + (i >= 0 ? l.personnel[i] : 0); }, 0);
-    const fpt = wf.versants.find(v => v.id === 'fpt').thousands * 1000;
     const per = [
-      { label: 'Toutes administrations publiques', value: n.d1 * 1e9 / (wf.total * 1000), sub: `${md(n.d1)} de rémunérations ${y} pour ${nf(wf.total / 1000, 2)} M d’agents` },
-      { label: 'Toutes administrations, hors retraites de l’État', value: (n.d1 - n.imputed) * 1e9 / (wf.total * 1000), sub: `sans les ${md(n.imputed)} de cotisations imputées` },
-      { label: 'Collectivités et leurs établissements', value: loc / fpt, sub: `${md(loc / 1e9)} de frais de personnel ${y} pour ${nf(fpt / 1e6, 2)} M d’agents territoriaux`, color: 'var(--tx-3)' },
+      ...[['Ensemble FP', 'Toutes fonctions publiques'], ['FPE', 'État'], ['FPT', 'Territoriale'], ['FPH (hôpitaux publics)', 'Hôpitaux publics'], ['FPH (établissements médico-sociaux)', 'Établissements médico-sociaux']].map(([v, l]) => ({ label: `Salaire net moyen, ${l}`, value: 12 * salary(v).net, sub: `${eur(salary(v).net)} par mois · brut ${eur(salary(v).gross)}`, color: 'var(--tx-3)' })),
+      { label: 'Coût complet moyen pour l’employeur, toutes administrations', value: n.d1 * 1e9 / total, sub: `${md(n.d1)} de rémunérations ${y} (cotisations et retraites de l’État comprises) pour ${nf(total / 1e6, 2)} M d’agents` },
+      { label: 'Coût complet moyen, collectivités', value: loc / W.versants.fpt[yk], sub: `${md(loc / 1e9)} de frais de personnel ${y} pour ${nf(W.versants.fpt[yk] / 1e6, 2)} M d’agents territoriaux` },
     ];
-    rows($('emPerAgent'), per, { format: v => `${nf(v / 1000)} k€ / an` });
-    $('emPerAgentNote').innerHTML = `Coût complet pour l’employeur (salaire brut, primes, cotisations), divisé par le nombre d’agents au 31 décembre ${y}, temps partiels compris. Ce n’est pas un salaire moyen : c’est l’ordre de grandeur de ce que coûte un emploi public par an. Sources : ${link(D.national.url, 'Insee 3.201')}, ${link(D.local.url, 'OFGL')}, ${link(wf.url, 'DGAFP')}.`;
-    $('emWfSources').innerHTML = [link(wf.url, 'DGAFP, effectifs 2024'), link(sm.url, 'DGAFP, chiffres clés 2024'), link(edu.url, 'Insee Première n° 2094')].join('');
+    rows($('emPerAgent'), per, { format: v => `${nf(v / 1000, 1)} k€ / an` });
+    $('emPerAgentNote').innerHTML = `Salaires nets moyens en équivalent temps plein ${y}, hors militaires (DGAFP). Le coût complet rapporte les rémunérations publiques (Insee, OFGL) aux agents au 31 décembre : cotisations patronales, retraites de l’État et temps partiels compris, c’est un ordre de grandeur, pas un salaire. Sources : ${link(W.url, 'DGAFP')}, ${link(D.national.url, 'Insee 3.201')}, ${link(D.local.url, 'OFGL')}.`;
+    $('emWfSources').innerHTML = [link(W.url, 'DGAFP, rapport annuel 2026 (données)'), link('https://www.insee.fr/fr/statistiques/2493501', 'Insee, effectifs par versant et ministère')].join('');
   }
 
   /* ---------- 3. By function ---------- */
@@ -332,7 +371,13 @@
   function initMap(D, geo) {
     const T = D.territory, deps = T.departments, by = Object.fromEntries(deps.map(d => [d.code, d]));
     const per = (d, k) => d.population ? d[k] / d.population : null;
+    const WD = D.workforce.departments, wv = (d, k) => WD[d.code]?.[k] ?? null;
     const IND = [
+      { id: 'admin', label: 'Agents publics', unit: 'ETP pour 1 000 habitants', val: d => wv(d, 'taux_admin_total_etp_1000hab'), fmt: v => nf(v, 1), desc: `Taux d’administration ${D.workforce.year} : emplois publics civils en équivalent temps plein, État, collectivités et hôpitaux, pour 1 000 habitants (DGAFP ; Mayotte non couverte)` },
+      { id: 'adminFpe', label: 'Agents de l’État', unit: 'ETP pour 1 000 habitants', val: d => wv(d, 'taux_admin_fpe_etp_1000hab'), fmt: v => nf(v, 1), desc: 'Agents civils de l’État (enseignants, préfectures, finances publiques, police…) en ETP pour 1 000 habitants, militaires exclus' },
+      { id: 'adminFpt', label: 'Agents territoriaux', unit: 'ETP pour 1 000 habitants', val: d => wv(d, 'taux_admin_fpt_etp_1000hab'), fmt: v => nf(v, 1), desc: 'Agents des communes, intercommunalités, départements, régions et de leurs établissements, en ETP pour 1 000 habitants' },
+      { id: 'adminFph', label: 'Agents hospitaliers', unit: 'ETP pour 1 000 habitants', val: d => wv(d, 'taux_admin_fph_etp_1000hab'), fmt: v => nf(v, 1), desc: 'Agents des hôpitaux publics et établissements médico-sociaux publics, en ETP pour 1 000 habitants' },
+      { id: 'adminEvo', label: 'Agents publics, évolution 2011–2024', unit: 'points pour 1 000 habitants', val: d => WD[d.code] && D.workforce.rateFirst[d.code] != null ? WD[d.code].taux_admin_total_etp_1000hab - D.workforce.rateFirst[d.code] : null, fmt: v => `${v > 0 ? '+' : v < 0 ? '−' : ''}${nf(Math.abs(v), 1)}`, desc: `Évolution du taux d’administration (ETP pour 1 000 habitants) entre 2011 et ${D.workforce.year}, ruptures de méthode comprises` },
       { id: 'perHab', label: 'Frais de personnel locaux', unit: '€ par habitant', val: d => per(d, 'personnelTotal'), fmt: v => eur(v), desc: `Frais de personnel ${T.year} des communes, intercommunalités, du département et de sa part de la région, par habitant` },
       { id: 'block', label: 'Bloc communal', unit: '€ par habitant', val: d => (d.personnel.communes + d.personnel.gfp) / d.population, fmt: v => eur(v), desc: `Frais de personnel ${T.year} des communes et intercommunalités, par habitant` },
       { id: 'growth', label: `Évolution ${T.year0}–${T.year}`, unit: '% par habitant', val: d => 100 * ((d.personnelTotal / d.population) / (d.personnel0 / d.population0) - 1), fmt: v => signedPct(v), desc: `Évolution des frais de personnel locaux par habitant entre ${T.year0} et ${T.year}, en euros courants` },
@@ -343,7 +388,9 @@
     ];
     let ind = IND[0], selected = null, showAll = false;
     const chipsEl = $('emMapInd');
-    chipsEl.innerHTML = IND.map((x, i) => `<button type="button" data-v="${x.id}"${i ? '' : ' class="active"'}>${esc(x.label)}</button>`).join('');
+    const GROUP = { admin: 'Agents', adminFpe: 'Agents', adminFpt: 'Agents', adminFph: 'Agents', adminEvo: 'Agents', perHab: 'Coût local', block: 'Coût local', growth: 'Coût local', seats: 'Élus', allElected: 'Élus', cap: 'Élus', small: 'Élus' };
+    const SHORT = { admin: 'Tous', adminFpe: 'État', adminFpt: 'Territoriaux', adminFph: 'Hospitaliers', adminEvo: 'Évolution 2011–2024', perHab: 'Frais de personnel', block: 'Bloc communal', growth: `Évolution ${T.year0}–${T.year}`, seats: 'Municipaux', allElected: 'Tous les élus locaux', cap: 'Plafond indemnités', small: 'Petites communes' };
+    chipsEl.innerHTML = [...new Set(IND.map(x => GROUP[x.id]))].map(g => `<div class="em-chipgroup"><span class="em-chipgroup__label">${esc(g)}</span><div class="chip-select em-chips-scroll" data-scroll-x>${IND.filter(x => GROUP[x.id] === g).map(x => `<button type="button" data-v="${x.id}"${x === IND[0] ? ' class="active"' : ''}>${esc(SHORT[x.id] || x.label)}</button>`).join('')}</div></div>`).join('');
     chipsEl.addEventListener('click', event => {
       const b = event.target.closest('button'); if (!b) return;
       chipsEl.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
@@ -382,7 +429,7 @@
       return [1, 2, 3, 4, 5].map(k => v[Math.floor(k * v.length / 6)]);
     }
     let breaks = [];
-    const colorOf = v => RAMP[breaks.filter(b => v >= b).length];
+    const colorOf = v => Number.isFinite(v) ? RAMP[breaks.filter(b => v >= b).length] : 'var(--tx-none)';
     function paint() {
       const values = deps.map(d => ind.val(d));
       breaks = classes(values);
@@ -391,7 +438,7 @@
       const edges = [lo, ...breaks, hi];
       $('emMapLegend').innerHTML = RAMP.map((c, i) => `<span><i style="background:${c}"></i>${i === 0 ? `&lt; ${ind.fmt(edges[1])}` : i === 5 ? `≥ ${ind.fmt(edges[5])}` : ind.fmt(edges[i])}</span>`).join('');
       $('emMapHead').textContent = `${ind.label}, ${ind.unit}`;
-      $('emMapNote').innerHTML = `${esc(ind.desc)}. Six classes de 16 ou 17 départements chacune. Touchez un département pour son détail. ${ind.id === 'seats' || ind.id === 'small' ? 'Plus un département compte de petites communes, plus il a d’élus par habitant : une commune de 100 habitants a 11 conseillers, une ville de 30 000 en a 39.' : 'Les départements d’outre-mer et la Corse ont une collectivité unique ou un régime propre, et des surcoûts (indexation des traitements outre-mer) : comparez-les entre eux.'} Sources : ${link(D.local.url, 'OFGL')}, ${link(REF.municipalSeats.url, 'CGCT')}.`;
+      $('emMapNote').innerHTML = `${esc(ind.desc)}. Six classes de 16 ou 17 départements chacune ; touchez un département pour son détail. ${/^admin/.test(ind.id) ? 'Paris accueille les administrations centrales des ministères, les chefs-lieux de région les services régionaux de l’État et les CHU : leurs agents servent bien au-delà du département. ' : ind.id === 'seats' || ind.id === 'small' || ind.id === 'allElected' ? 'Plus un département compte de petites communes, plus il a d’élus par habitant. ' : 'Outre-mer et Corse : collectivités uniques et traitements indexés, à comparer entre eux. '}Sources : ${/^admin/.test(ind.id) ? link(D.workforce.url, 'DGAFP, rapport annuel 2026') : ind.id === 'seats' || ind.id === 'allElected' ? link(D.territory.rne.url, 'Répertoire national des élus') : ind.id === 'cap' ? link(REF.indemnities.url, 'CGCT') : link(D.local.url, 'OFGL')}.`;
       rank();
       table();
     }
@@ -400,10 +447,10 @@
       const shown = showAll ? list : [...list.slice(0, 8), ...list.slice(-4)];
       const sel = selected && by[selected];
       $('emRankTitle').textContent = showAll ? `Les ${list.length} départements` : 'Les plus hauts et les plus bas';
-      const pick = sel ? `<div class="em-pick"><h4>${esc(sel.name)} (${esc(sel.code)})</h4><div class="em-big">${ind.fmt(ind.val(sel))} <small style="font-size:.8rem;font-weight:500;color:var(--c-muted)">${esc(ind.unit)}</small></div><small style="color:var(--c-muted)">${list.findIndex(x => x.d === sel) + 1}e sur ${list.length}</small><dl><dt>Population</dt><dd>${nf(sel.population)}</dd><dt>Personnel des communes</dt><dd>${money(sel.personnel.communes)}</dd><dt>des intercommunalités</dt><dd>${money(sel.personnel.gfp)}</dd><dt>du département</dt><dd>${sel.personnel.departement ? money(sel.personnel.departement) : sel.code === '75' ? 'avec la commune' : 'collectivité unique'}</dd><dt>part de la région</dt><dd>${money(sel.personnel.region)}</dd><dt>Total par habitant</dt><dd>${eur(sel.personnelTotal / sel.population)}</dd><dt>Conseillers municipaux</dt><dd>${nf(sel.elected.municipaux)} · ${nf(1000 * sel.elected.municipaux / sel.population, 1)} ‰</dd><dt>dont adjoints</dt><dd>${nf(sel.elected.adjoints)}</dd><dt>Conseillers départementaux</dt><dd>${nf(sel.elected.departementaux)}</dd><dt>Députés, sénateurs</dt><dd>${nf(sel.elected.deputes)}, ${nf(sel.elected.senateurs)}</dd><dt>Plafond indemnités maires et adjoints</dt><dd>${money(sel.cap)} / an</dd></dl></div>` : '';
+      const pick = sel ? `<div class="em-pick"><h4>${esc(sel.name)} (${esc(sel.code)})</h4><div class="em-big">${ind.fmt(ind.val(sel))} <small style="font-size:.8rem;font-weight:500;color:var(--c-muted)">${esc(ind.unit)}</small></div><small style="color:var(--c-muted)">${list.findIndex(x => x.d === sel) + 1}e sur ${list.length}</small><dl><dt>Population</dt><dd>${nf(sel.population)}</dd>${WD[sel.code] ? `<dt>Agents publics civils (${D.workforce.year})</dt><dd>${nf(WD[sel.code].total_civils)}</dd><dt>dont État, territoriale, hospitalière</dt><dd>${nf(WD[sel.code].fpe_civils)} · ${nf(WD[sel.code].fpt)} · ${nf(WD[sel.code].fph)}</dd><dt>ETP pour 1 000 habitants</dt><dd>${nf(WD[sel.code].taux_admin_total_etp_1000hab, 1)}</dd>` : ''}<dt>Personnel des communes</dt><dd>${money(sel.personnel.communes)}</dd><dt>des intercommunalités</dt><dd>${money(sel.personnel.gfp)}</dd><dt>du département</dt><dd>${sel.personnel.departement ? money(sel.personnel.departement) : sel.code === '75' ? 'avec la commune' : 'collectivité unique'}</dd><dt>part de la région</dt><dd>${money(sel.personnel.region)}</dd><dt>Total par habitant</dt><dd>${eur(sel.personnelTotal / sel.population)}</dd><dt>Conseillers municipaux</dt><dd>${nf(sel.elected.municipaux)} · ${nf(1000 * sel.elected.municipaux / sel.population, 1)} ‰</dd><dt>dont adjoints</dt><dd>${nf(sel.elected.adjoints)}</dd><dt>Conseillers départementaux</dt><dd>${nf(sel.elected.departementaux)}</dd><dt>Députés, sénateurs</dt><dd>${nf(sel.elected.deputes)}, ${nf(sel.elected.senateurs)}</dd><dt>Plafond indemnités maires et adjoints</dt><dd>${money(sel.cap)} / an</dd></dl></div>` : '';
       const max = Math.max(...list.map(x => Math.abs(x.v)));
       $('emRank').innerHTML = pick + '<div id="emRankRows"></div>';
-      rows($('emRankRows'), shown.map((x, i) => ({ id: x.d.code, label: `${list.indexOf(x) + 1}. ${x.d.name}`, value: x.v, focus: x.d.code === selected, color: colorOf(x.v) === RAMP[0] ? 'var(--ramp-1)' : colorOf(x.v) })), { format: v => ind.fmt(v), max, onPick: r => select(r.id) });
+      rows($('emRankRows'), shown.map((x, i) => ({ id: x.d.code, label: `${list.indexOf(x) + 1}. ${x.d.name}`, value: x.v, focus: x.d.code === selected, color: colorOf(x.v) === RAMP[0] ? RAMP[1] : colorOf(x.v) })), { format: v => ind.fmt(v), max, onPick: r => select(r.id) });
       if (!showAll) $('emRankRows').querySelector('.em-rows')?.children[7]?.insertAdjacentHTML('afterend', '<li aria-hidden="true" style="text-align:center;color:var(--c-muted)">…</li>');
       $('emRankMore').textContent = showAll ? 'Réduire le classement' : `Voir les ${list.length} départements`;
     }
@@ -418,6 +465,8 @@
     const cols = [
       { k: 'name', label: 'Département', val: d => d.name, fmt: (v, d) => `${esc(d.code)} · ${esc(v)}`, text: true },
       { k: 'pop', label: 'Population', val: d => d.population, fmt: v => nf(v), foot: P_ },
+      { k: 'ag', label: 'Agents publics civils', val: d => wv(d, 'total_civils') ?? NaN, fmt: v => nf(v), foot: () => S_(d => wv(d, 'total_civils') || 0) },
+      { k: 'agr', label: 'ETP / 1 000 hab.', val: d => wv(d, 'taux_admin_total_etp_1000hab') ?? NaN, fmt: v => nf(v, 1) },
       { k: 'fp', label: 'Frais de personnel locaux', val: d => d.personnelTotal, fmt: v => money(v), foot: () => S_(d => d.personnelTotal) },
       { k: 'fph', label: '€ / hab.', val: d => d.personnelTotal / d.population, fmt: v => nf(v), foot: () => S_(d => d.personnelTotal) / P_() },
       { k: 'blk', label: 'dont bloc communal, € / hab.', val: d => (d.personnel.communes + d.personnel.gfp) / d.population, fmt: v => nf(v), foot: () => S_(d => d.personnel.communes + d.personnel.gfp) / P_() },
@@ -429,18 +478,18 @@
       { k: 'leg', label: 'Sièges légaux mun.', val: d => d.seats, fmt: v => nf(v), foot: () => S_(d => d.seats) },
       { k: 'cap', label: 'Plafond indemnités, € / hab.', val: d => d.cap / d.population, fmt: v => nf(v, 1), foot: () => S_(d => d.cap) / P_() },
     ];
-    let sortK = 'fph', asc = false;
+    let sortK = 'agr', asc = false;
     function table() {
       const c = cols.find(x => x.k === sortK);
-      const list = [...deps].sort((a, b) => c.text ? a.name.localeCompare(b.name, 'fr') * (asc ? 1 : -1) : (c.val(a) - c.val(b)) * (asc ? 1 : -1));
+      const list = [...deps].sort((a, b) => { if (c.text) return a.name.localeCompare(b.name, 'fr') * (asc ? 1 : -1); const va = c.val(a), vb = c.val(b); if (!Number.isFinite(va)) return 1; if (!Number.isFinite(vb)) return -1; return (va - vb) * (asc ? 1 : -1); });
       $('emDepTable').innerHTML = `<table class="data-table em-sort"><thead><tr>${cols.map(x => `<th class="${x.text ? '' : 'num'}" data-k="${x.k}"${x.k === sortK ? ` aria-sort="${asc ? 'ascending' : 'descending'}"` : ''} scope="col" tabindex="0">${esc(x.label)}</th>`).join('')}</tr></thead><tbody>${list.map(d => `<tr class="${d.code === selected ? 'is-selected' : ''}">${cols.map(x => `<td class="${x.text ? '' : 'num'}">${x.fmt(x.val(d), d)}</td>`).join('')}</tr>`).join('')}</tbody><tfoot><tr>${cols.map(x => `<td class="${x.text ? '' : 'num'}">${x.text ? `France (${nf(deps.length)} départements)` : x.foot ? x.fmt(x.foot()) : ''}</td>`).join('')}</tr></tfoot></table>`;
       $('emDepTable').querySelectorAll('th').forEach(th => {
         const go = () => { if (sortK === th.dataset.k) asc = !asc; else { sortK = th.dataset.k; asc = cols.find(x => x.k === sortK).text; } table(); };
         th.addEventListener('click', go); th.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
       });
     }
-    $('emDepTableNote').innerHTML = `Frais de personnel ${T.year} des communes, intercommunalités (réparties selon la population de leurs communes membres), du département et de la région (répartie selon la population de ses départements), sans les syndicats, services d’incendie, CCAS et autres établissements, dont les comptes ne sont publiés ici qu’en total national. La Corse, la Martinique et la Guyane ont une collectivité unique, comptée dans la colonne « région ». Population : comptes OFGL ${T.year}. Sources : ${link(D.local.url, 'OFGL')}, ${link(REF.municipalSeats.url, 'CGCT, art. L. 2121-2')}, ${link(REF.indemnities.url, 'CGCT, art. L. 2123-23 et L. 2123-24')}.`;
-    $('emMapSources').innerHTML = [link(D.local.url, 'OFGL, comptes des collectivités'), link(REF.municipalSeats.url, 'Code général des collectivités territoriales'), '<a href="index.html#explorer">La carte de chaque commune</a>'].join('');
+    $('emDepTableNote').innerHTML = `Agents publics civils au 31 décembre ${D.workforce.year} localisés dans le département (DGAFP : hors militaires et emplois non localisés, hors Mayotte) ; taux d’administration en équivalent temps plein pour 1 000 habitants. Frais de personnel ${T.year} des communes, intercommunalités (réparties selon la population de leurs communes membres), du département et de la région (répartie selon la population de ses départements), sans les syndicats, services d’incendie, CCAS et autres établissements, dont les comptes ne sont publiés ici qu’en total national. La Corse, la Martinique et la Guyane ont une collectivité unique, comptée dans la colonne « région ». Population : comptes OFGL ${T.year}. Sources : ${link(D.local.url, 'OFGL')}, ${link(REF.municipalSeats.url, 'CGCT, art. L. 2121-2')}, ${link(REF.indemnities.url, 'CGCT, art. L. 2123-23 et L. 2123-24')}.`;
+    $('emMapSources').innerHTML = [link(D.workforce.url, 'DGAFP, agents par département'), link(D.territory.rne.url, 'Répertoire national des élus'), link(D.local.url, 'OFGL, comptes des collectivités'), link(REF.municipalSeats.url, 'Code général des collectivités territoriales'), '<a href="index.html#explorer">La carte de chaque commune</a>'].join('');
     const redraw = responsive($('emMap'), W => {
       if (!metro.length) { $('emMap').innerHTML = '<p class="tx-empty">Fond de carte indisponible : le classement donne les mêmes valeurs.</p>'; return; }
       const { H, path } = project(metro, W);
@@ -578,7 +627,7 @@
     initGaps();
     $('emSources').innerHTML = [
       link(D.national.url, 'Insee, comptes de la Nation'), link(D.functions.url, 'Eurostat, dépenses par fonction'), link(D.state.url, 'PLF 2025'),
-      link(D.local.url, 'OFGL, comptes des collectivités'), link(REF.workforce.url, 'DGAFP, effectifs'), link(REF.municipalSeats.url, 'Légifrance, CGCT'),
+      link(D.local.url, 'OFGL, comptes des collectivités'), link(D.workforce.url, 'DGAFP, rapport annuel 2026'), link(D.territory.rne.url, 'Répertoire national des élus'), link(REF.municipalSeats.url, 'Légifrance, CGCT'),
     ].join('');
     window.addEventListener('frl-theme', () => window.dispatchEvent(new Event('resize')));
     FRL.keepHash();

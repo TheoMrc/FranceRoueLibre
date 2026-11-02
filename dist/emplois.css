@@ -79,6 +79,10 @@
 .em-stack__bar span:hover { filter: brightness(1.1); }
 
 /* Map */
+#emMapInd { display: grid; gap: .5rem; width: 100%; }
+.em-chipgroup { display: flex; align-items: center; gap: .6rem; min-width: 0; }
+.em-chipgroup__label { flex: none; width: 5.6rem; color: var(--c-muted); font-size: .76rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.em-chipgroup .chip-select { min-width: 0; }
 .em-chips-scroll { max-width: 100%; }
 .em-map-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--sp-3); align-items: start; margin-bottom: var(--sp-3); }
 .em-map { max-width: 640px; margin-inline: auto; touch-action: pan-y; }
@@ -149,6 +153,8 @@ main .panel + .grid-2, main .panel + .panel { margin-top: var(--sp-3); }
   .em-split { height: 36px; }
   .em-range__row, .em-range__axis { grid-template-columns: 5.6rem minmax(0, 1fr) 3.6rem; gap: .45rem; font-size: .76rem; }
   .em-dom { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .2rem; }
+  .em-chipgroup { flex-direction: column; align-items: stretch; gap: .25rem; }
+  .em-chipgroup__label { width: auto; }
   /* indicator chips: one row that scrolls sideways rather than five wrapped rows */
   .em-chips-scroll { display: flex; flex-wrap: nowrap; overflow-x: auto; border-radius: var(--r-md); scrollbar-width: none; }
   .em-chips-scroll::-webkit-scrollbar { display: none; }

@@ -1,0 +1,154 @@
+{
+ "checks": [
+  {
+   "name": "FP fig2: fpe+fpt+fph == total (each of 114 dept+region rows, tol 1 agent)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "FP fig3: fonctionnaires+contractuels+autres == total, and total == fig2 total",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "sum of départements == published region row (13 metro regions + DOM, 4 columns)",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "name": "96 metro + 4 DOM départements present (Mayotte absent from source)",
+   "ok": true,
+   "detail": "100"
+  },
+  {
+   "name": "FPE 2024 sum of 11 ministries (Ministères) == Total row",
+   "ok": true,
+   "detail": "2058.555 vs 2058.555"
+  },
+  {
+   "name": "FPE 2024 sum of 11 ministries (EPA) == Total row",
+   "ok": true,
+   "detail": "523.315 vs 523.315"
+  },
+  {
+   "name": "FPE 2024 sum of 11 ministries (Total) == Total row",
+   "ok": true,
+   "detail": "2581.870 vs 2581.870"
+  },
+  {
+   "name": "FPE 2024 Ministères+EPA == Total for each ministry",
+   "ok": true,
+   "detail": "cum diff 0.000"
+  },
+  {
+   "name": "2024 FPE+FPT+FPH == Ensemble FP (vue Figure 2)",
+   "ok": true,
+   "detail": "5848.2910 vs 5848.2910 milliers"
+  },
+  {
+   "name": "2024 FPE(fig1 FPE)+FPT(fig1 FPT)+FPH(fig3) == FP total hors contrats aidés (fig3 FP)",
+   "ok": true,
+   "detail": "5848.291 vs 5848.291 milliers"
+  },
+  {
+   "name": "2024 FP hors CA + contrats aidés == FP y c. CA",
+   "ok": true,
+   "detail": "5848.291+25.797 vs 5874.088"
+  },
+  {
+   "name": "FPT 2024 communes + établissements communaux == organismes communaux",
+   "ok": true,
+   "detail": "1146.464 vs 1146.464"
+  },
+  {
+   "name": "FPT 2024 départements + SDIS + autres étab. départementaux == organismes départementaux",
+   "ok": true,
+   "detail": "358.826 vs 358.826"
+  },
+  {
+   "name": "FPT 2024 communaux+intercommunaux+départementaux+régions+autres EPA == Total",
+   "ok": true,
+   "detail": "2017.830 vs 2017.830"
+  },
+  {
+   "name": "FPT 2024 sum of commune size classes == Communes",
+   "ok": true,
+   "detail": "1041.290 vs 1041.290"
+  },
+  {
+   "name": "FPH 2024 hôpitaux + EHPA + autres médico-sociaux == Total FPH",
+   "ok": true,
+   "detail": "1248.591 vs 1248.591"
+  },
+  {
+   "name": "2024 net salary: EQTP-weighted mean of 3 versants == Ensemble FP",
+   "ok": true,
+   "detail": "2741.9 vs 2741.9 EUR"
+  },
+  {
+   "name": "LFI 2019: missions sum to ministries, ministries to budget général, BG+BA == Total",
+   "ok": true,
+   "detail": "BG 1942.308 + BA 11.208 = 1953.516 milliers ETPT; bad=[]"
+  },
+  {
+   "name": "LFI 2020: missions sum to ministries, ministries to budget général, BG+BA == Total",
+   "ok": true,
+   "detail": "BG 1931.959 + BA 11.149 = 1943.108 milliers ETPT; bad=[]"
+  },
+  {
+   "name": "LFI 2021: missions sum to ministries, ministries to budget général, BG+BA == Total",
+   "ok": true,
+   "detail": "BG 1934.021 + BA 11.108 = 1945.129 milliers ETPT; bad=[]"
+  },
+  {
+   "name": "LFI 2022: missions sum to ministries, ministries to budget général, BG+BA == Total",
+   "ok": true,
+   "detail": "BG 1930.485 + BA 10.985 = 1941.470 milliers ETPT; bad=[]"
+  },
+  {
+   "name": "LFI 2023: missions sum to ministries, ministries to budget général, BG+BA == Total",
+   "ok": true,
+   "detail": "BG 1950.169 + BA 10.924 = 1961.094 milliers ETPT; bad=[]"
+  },
+  {
+   "name": "LFI 2024: missions sum to ministries, ministries to budget général, BG+BA == Total",
+   "ok": true,
+   "detail": "BG 1974.384 + BA 10.923 = 1985.307 milliers ETPT; bad=[]"
+  },
+  {
+   "name": "LFI 2025: missions sum to ministries, ministries to budget général, BG+BA == Total",
+   "ok": true,
+   "detail": "BG 1997.194 + BA 11.006 = 2008.200 milliers ETPT; bad=[]"
+  },
+  {
+   "name": "LFI 2026: missions sum to ministries, ministries to budget général, BG+BA == Total",
+   "ok": true,
+   "detail": "BG 2005.538 + BA 11.048 = 2016.586 milliers ETPT; bad=[]"
+  },
+  {
+   "name": "RAP 2025 consommation: sum of ministries == Total budget général",
+   "ok": true,
+   "detail": "1974567.6 vs 1974567.6 ETPT"
+  },
+  {
+   "name": "Insee 2024 Fonction publique de l'État (FPE): sum of 4 statuts == Ensemble",
+   "ok": true,
+   "detail": "2589.0 vs 2588.962"
+  },
+  {
+   "name": "Insee 2024 Fonction publique territoriale (FPT): sum of 4 statuts == Ensemble",
+   "ok": true,
+   "detail": "2039.4 vs 2039.367"
+  },
+  {
+   "name": "Insee 2024 Fonction publique hospitalière (FPH): sum of 4 statuts == Ensemble",
+   "ok": true,
+   "detail": "1249.9 vs 1249.917"
+  },
+  {
+   "name": "Insee 2024 Ensemble: sum of 4 statuts == Ensemble",
+   "ok": true,
+   "detail": "5878.2 vs 5878.246"
+  }
+ ]
+}
