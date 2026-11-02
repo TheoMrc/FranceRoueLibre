@@ -74,6 +74,51 @@
    }
   },
   {
+   "id": "dette-par-habitant",
+   "question": "À combien s’élève la dette publique par Français ?",
+   "match_any": [
+    [
+     [
+      "dette"
+     ],
+     [
+      "par francais",
+      "par habitant",
+      "par personne",
+      "par tete",
+      "chaque francais",
+      "par citoyen",
+      "par menage",
+      "par foyer"
+     ]
+    ]
+   ],
+   "reply": "**Environ 52 000 € par habitant.** La dette publique s’élevait à **3 596 Md€** fin juin 2026 (État, Sécurité sociale et collectivités, au sens de Maastricht), pour 69,1 millions d’habitants.\n\n- Fin 2017 : 33 800 € par habitant ; fin 2019 : 35 400 €.\n- Rapportée à la richesse produite en un an, elle représente 119,0 % du PIB.\n- Les seuls intérêts ont coûté environ **860 € par habitant** en 2024 (59 Md€).\n\nC’est une moyenne : personne ne doit cette somme personnellement. La dette n’est pas remboursée d’un coup, elle est renouvelée en empruntant à nouveau, et ce sont les intérêts qui pèsent chaque année sur le budget. Il s’agit de la dette brute : les administrations détiennent aussi des actifs (participations, trésorerie), non déduits ici.\n\nLe détail année par année : [Comptes publics](index.html#comptes). Sources : [Insee, dette trimestrielle](https://www.insee.fr/fr/statistiques/2830301), [Insee, population au 1er janvier](https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001641586), [Eurostat et Insee, dépenses par fonction](https://ec.europa.eu/eurostat/databrowser/view/gov_10a_exp/default/table?lang=fr).",
+   "sources": [
+    {
+     "title": "Insee, dette des administrations publiques (trimestrielle)",
+     "url": "https://www.insee.fr/fr/statistiques/2830301"
+    },
+    {
+     "title": "Insee, population au 1er janvier",
+     "url": "https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001641586"
+    },
+    {
+     "title": "Eurostat et Insee, dépenses par fonction (intérêts)",
+     "url": "https://ec.europa.eu/eurostat/databrowser/view/gov_10a_exp/default/table?lang=fr"
+    }
+   ],
+   "data": {
+    "quarter": "2026-T2",
+    "debt": 3595.5,
+    "population": 69081996,
+    "perPerson": 52047,
+    "perPerson2017": 33784,
+    "perPerson2019": 35399,
+    "interestPerPerson": 858
+   }
+  },
+  {
    "id": "inflation-dette",
    "question": "Quand les prix montent, qui paie la dette ?",
    "match_any": [

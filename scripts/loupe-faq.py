@@ -218,6 +218,51 @@ def associations():
     }
 
 
+POP = ROOT / 'sources' / 'insee-population.json'
+QUARTER_END = {'T1': 'fin mars', 'T2': 'fin juin', 'T3': 'fin septembre', 'T4': 'fin décembre'}
+
+
+def debt_per_person(q):
+    """« À combien s’élève la dette publique par Français ? »: the latest quarter divided by the population, and the
+    same at the end of 2017 and 2019; the yearly interest per inhabitant."""
+    popd = json.loads(POP.read_text(encoding='utf-8'))
+    pop = {r['year']: r['population'] for r in popd['january1']}
+    last = max(q)
+    year, quarter = int(last[:4]), last[5:]
+    debt, ratio = q[last]
+    # population on 1 January of the year after the quarter when published, else the closest year before
+    p_now = pop.get(year + 1) or pop[max(y for y in pop if y <= year + 1)]
+    per = lambda d, y: d * 1e9 / (pop.get(y + 1) or pop[max(k for k in pop if k <= y + 1)])
+    d17, d19 = q['2017-T4'][0], q['2019-T4'][0]
+    d, te = cofog()
+    ylast = max(d['years'])
+    interest = te['GF0107'][ylast] * 1e9 / pop[ylast]
+    reply = (
+        f'**Environ {fr(round(debt * 1e9 / p_now, -2))} € par habitant.** La dette publique s’élevait à **{fr(debt)} Md€** '
+        f'{QUARTER_END[quarter]} {year} (État, Sécurité sociale et collectivités, au sens de Maastricht), pour '
+        f'{fr(p_now / 1e6, 1)} millions d’habitants.\n\n'
+        f'- Fin 2017 : {fr(round(per(d17, 2017), -2))} € par habitant ; fin 2019 : {fr(round(per(d19, 2019), -2))} €.\n'
+        f'- Rapportée à la richesse produite en un an, elle représente {fr(ratio, 1)} % du PIB.\n'
+        f'- Les seuls intérêts ont coûté environ **{fr(round(interest, -1))} € par habitant** en {ylast} '
+        f'({fr(te["GF0107"][ylast])} Md€).\n\n'
+        f'C’est une moyenne : personne ne doit cette somme personnellement. La dette n’est pas remboursée d’un coup, elle '
+        f'est renouvelée en empruntant à nouveau, et ce sont les intérêts qui pèsent chaque année sur le budget. Il '
+        f's’agit de la dette brute : les administrations détiennent aussi des actifs (participations, trésorerie), non '
+        f'déduits ici.\n\n'
+        f'Le détail année par année : [Comptes publics](index.html#comptes). Sources : [Insee, dette trimestrielle]({INSEE_PAGE}), '
+        f'[Insee, population au 1er janvier]({popd["url"]}), [Eurostat et Insee, dépenses par fonction]({d["url"]}).')
+    return {
+        'id': 'dette-par-habitant', 'question': 'À combien s’élève la dette publique par Français ?',
+        'match_any': [[['dette'], ['par francais', 'par habitant', 'par personne', 'par tete', 'chaque francais', 'par citoyen', 'par menage', 'par foyer']]],
+        'reply': reply,
+        'sources': [{'title': 'Insee, dette des administrations publiques (trimestrielle)', 'url': INSEE_PAGE},
+                    {'title': 'Insee, population au 1er janvier', 'url': popd['url']},
+                    {'title': 'Eurostat et Insee, dépenses par fonction (intérêts)', 'url': d['url']}],
+        'data': {'quarter': last, 'debt': round(debt, 1), 'population': p_now, 'perPerson': round(debt * 1e9 / p_now),
+                 'perPerson2017': round(per(d17, 2017)), 'perPerson2019': round(per(d19, 2019)), 'interestPerPerson': round(interest)},
+    }
+
+
 def main():
     q = quarterly()
     TIDY.parent.mkdir(parents=True, exist_ok=True)
@@ -231,7 +276,7 @@ def main():
     for y in (2017, 2020, 2024):
         a = next(r['debt'] for r in annual['years'] if r['year'] == y)
         assert abs(q[f'{y}-T4'][0] - a) < 1, f'dette fin {y} : trimestrielle {q[f"{y}-T4"][0]} vs annuelle {a}'
-    entries = [debt_le_maire(q, annual), inflation_debt(q, annual), hundred_euros(annual), associations()]
+    entries = [debt_le_maire(q, annual), debt_per_person(q), inflation_debt(q, annual), hundred_euros(annual), associations()]
     OUT.write_text(json.dumps({'generated': 'python3 scripts/loupe-faq.py', 'entries': entries}, ensure_ascii=False, indent=1) + '\n',
                    encoding='utf-8')
     print(f'{TIDY.relative_to(ROOT)}: {len(q)} trimestres ; {OUT.relative_to(ROOT)}: {len(entries)} réponse(s)')

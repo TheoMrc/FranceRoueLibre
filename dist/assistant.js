@@ -14,7 +14,7 @@
   /* each one is answered from server/assistant/faq.json (scripts/loupe-faq.py): no credit spent */
   const EXAMPLES = [
     'Combien nous a coûté Bruno Le Maire ?',
-    'Quand les prix montent, qui paie la dette ?',
+    'À combien s’élève la dette publique par Français ?',
     'Quand je paie 100 € d’impôts, comment sont-ils dépensés ?',
     'Quelles associations reçoivent le plus de subventions de l’État ?',
   ];
