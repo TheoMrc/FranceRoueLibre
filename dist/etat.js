@@ -126,11 +126,14 @@
     return responsive(el, draw);
   }
 
+  /* Pictogram of a budget mission (icons.js), empty if the module is not loaded */
+  const ico = (code, name) => typeof FRL_ICONS === 'undefined' ? '' : FRL_ICONS.forMission(code, name);
+
   /* ---------- Horizontal bars ---------- */
   function hbars(el, rows, { format = meur, max = null, color = null } = {}) {
     if (!rows.length) { el.innerHTML = '<p class="tx-empty">Aucune donnée publiée.</p>'; return; }
     const top = max ?? Math.max(...rows.map(r => Math.abs(r.value || 0)), 1e-9);
-    el.innerHTML = `<ul class="tx-bars">${rows.map(r => `<li class="${r.focus ? 'is-focus' : ''}"><div class="tx-bars__line"><span>${esc(r.label)}${r.sub ? `<small>${r.sub}</small>` : ''}</span><strong>${format(r.value)}</strong></div><span class="tx-bars__track" aria-hidden="true"><span class="tx-bars__fill" style="--w:${(100 * Math.abs(r.value || 0) / top).toFixed(2)}%${r.color || color ? `;background:${r.color || color}` : ''}"></span></span></li>`).join('')}</ul>`;
+    el.innerHTML = `<ul class="tx-bars">${rows.map(r => `<li class="${r.focus ? 'is-focus' : ''}"><div class="tx-bars__line"><span>${r.icon || ''}${esc(r.label)}${r.sub ? `<small>${r.sub}</small>` : ''}</span><strong>${format(r.value)}</strong></div><span class="tx-bars__track" aria-hidden="true"><span class="tx-bars__fill" style="--w:${(100 * Math.abs(r.value || 0) / top).toFixed(2)}%${r.color || color ? `;background:${r.color || color}` : ''}"></span></span></li>`).join('')}</ul>`;
     requestAnimationFrame(() => el.querySelectorAll('.tx-bars__fill').forEach(n => { n.style.width = n.style.getPropertyValue('--w'); }));
   }
 
@@ -138,7 +141,7 @@
   function stacks(el, rows, { format = meur, totalFormat = format, legend = null, legendEl = null, onRow = null } = {}) {
     el.innerHTML = `<ul class="et-stack__rows">${rows.map((r, ri) => {
       const total = sum(r.parts, p => Math.max(0, p.value));
-      return `<li${onRow ? ` class="is-link" data-row="${ri}" tabindex="0" role="button"` : ''}><div class="et-stack__label"><span>${esc(r.label)}${r.sub ? `<small>${r.sub}</small>` : ''}</span><strong>${totalFormat(r.total ?? total)}</strong></div><div class="et-stack__bar">${r.parts.filter(p => p.value > 0).map(p => `<span style="flex-grow:${(p.value / (total || 1)).toFixed(5)};background:${p.color}" data-tip="${esc(`<strong>${esc(r.label)}</strong>${esc(p.label)} : <span class="tx-tip__value">${format(p.value)}</span> · ${pct(100 * p.value / (total || 1), 0)}`)}"></span>`).join('')}</div></li>`;
+      return `<li${onRow ? ` class="is-link" data-row="${ri}" tabindex="0" role="button"` : ''}><div class="et-stack__label"><span>${r.icon || ''}${esc(r.label)}${r.sub ? `<small>${r.sub}</small>` : ''}</span><strong>${totalFormat(r.total ?? total)}</strong></div><div class="et-stack__bar">${r.parts.filter(p => p.value > 0).map(p => `<span style="flex-grow:${(p.value / (total || 1)).toFixed(5)};background:${p.color}" data-tip="${esc(`<strong>${esc(r.label)}</strong>${esc(p.label)} : <span class="tx-tip__value">${format(p.value)}</span> · ${pct(100 * p.value / (total || 1), 0)}`)}"></span>`).join('')}</div></li>`;
     }).join('')}</ul>`;
     tipsOn(el);
     if (onRow) {
@@ -267,7 +270,7 @@
     }
     function detailMission(m) {
       const list = m.type === 'BG' && m !== rd ? bgNet : m.type === 'BG' ? bg : others, tot = sum(list, x => x.cp);
-      detail.innerHTML = `<span class="tx-pill">${esc(data.budgets[m.type])}</span><h3>${esc(m.name)}</h3>
+      detail.innerHTML = `<span class="tx-pill">${esc(data.budgets[m.type])}</span><h3>${ico(m.code, m.name)}${esc(m.name)}</h3>
         <div class="tx-amount">${md(m.cp, 2)}</div><p class="note">crédits de paiement 2025 · ${pct(100 * m.cp / tot, 1)} du périmètre</p>
         <dl><dt>Autorisations d’engagement</dt><dd>${meur(m.ae)}</dd><dt>Écart AE − CP</dt><dd>${meur(m.ae - m.cp)}${Math.abs(m.ae - m.cp) > 0.05 * m.cp ? ' <span class="muted">(engagements pluriannuels)</span>' : ''}</dd><dt>Programmes</dt><dd>${m.progs.length}</dd><dt>Ministères</dt><dd>${esc([...new Set(m.progs.map(p => p.min))].join(', '))}</dd></dl>
         <h4 class="et-h4">Par nature</h4>${titreBars(m.titres)}
@@ -302,7 +305,7 @@
         rows.push(`<tr class="et-group"><td colspan="5">${esc(data.budgets[type])} · ${md(tot, 1)} de CP${type === 'BG' ? `, dont ${md(rd.cp, 1)} de remboursements et dégrèvements` : ''}</td></tr>`);
         hits.forEach(({ m, progs, self }) => {
           const expanded = open.has(m.type + m.code) || (q && !self) || (q && progs.length && progs.length < m.progs.length);
-          rows.push(`<tr><td class="tx-name"><button type="button" class="tx-rowlink" data-m="${esc(m.type + m.code)}" aria-expanded="${expanded}">${expanded ? '▾' : '▸'} ${esc(m.name)}</button></td><td class="num">${m.progs.length}</td><td class="num">${meur(m.ae)}</td><td class="num">${meur(m.cp)}</td><td class="tx-bar-cell"><span class="tx-minibar" style="width:${(100 * m.cp / Math.max(...missions.map(x => x.cp))).toFixed(1)}%;background:${titreColor(dominant(m.titres))}"></span></td></tr>`);
+          rows.push(`<tr><td class="tx-name"><button type="button" class="tx-rowlink" data-m="${esc(m.type + m.code)}" aria-expanded="${expanded}">${expanded ? '▾' : '▸'} ${ico(m.code, m.name)}${esc(m.name)}</button></td><td class="num">${m.progs.length}</td><td class="num">${meur(m.ae)}</td><td class="num">${meur(m.cp)}</td><td class="tx-bar-cell"><span class="tx-minibar" style="width:${(100 * m.cp / Math.max(...missions.map(x => x.cp))).toFixed(1)}%;background:${titreColor(dominant(m.titres))}"></span></td></tr>`);
           if (expanded) (q && !self ? progs : m.progs).forEach(p => rows.push(`<tr class="is-sub"><td>${esc(p.code)} · ${esc(p.name)} <span class="muted">(${esc(p.min)})</span></td><td class="num">${p.actions.length} act.</td><td class="num">${meur(p.ae)}</td><td class="num">${meur(p.cp)}</td><td></td></tr>`));
         });
       });
@@ -329,7 +332,7 @@
     const fdc = sum(nat.titres.filter(r => r.budget === 'BG'), r => r.fdcCp);
     const rdCats = nat.categories.filter(c => c.rd).sort((a, b) => b.cp - a.cp);
     $('etNatCatsNote').innerHTML = `${cats.length} catégories ; les plus petites ne sont pas affichées. Les remboursements et dégrèvements (${md(rd.cp, 1)}, exclus ici) sont classés en transferts : ${rdCats.map(c => `${esc(c.label.toLowerCase())} ${md(c.cp, 1)}`).join(', ')}. S’y ajoutent ${md(fdc, 2)} de fonds de concours prévus (dons et participations affectés à une dépense). Source : ${src('plf25-depenses-nature', 'PLF 2025, nomenclatures destination et nature')}.`;
-    const natRows = bgNet.slice().sort((a, b) => b.cp - a.cp).map(m => ({ label: m.name, total: m.cp, parts: TITRE_ORDER.map(t => ({ key: t, value: m.titres[t] || 0, color: titreColor(t), label: TITRES[t] })) }));
+    const natRows = bgNet.slice().sort((a, b) => b.cp - a.cp).map(m => ({ label: m.name, icon: ico(m.code, m.name), total: m.cp, parts: TITRE_ORDER.map(t => ({ key: t, value: m.titres[t] || 0, color: titreColor(t), label: TITRES[t] })) }));
     stacks($('etNatStack'), natRows, { format: v => meur(v), legend: TITRE_ORDER.map(t => ({ color: titreColor(t), label: TITRES[t], value: md(plfTitre(t), 1) })), legendEl: $('etNatStackLegend') });
     $('etNatStackNote').textContent = 'Chaque barre fait 100 % des crédits de paiement de la mission, classées de la plus grosse à la plus petite (montant à droite). Survolez un segment pour son montant. La charge de la dette est presque entièrement dans « Engagements financiers de l’État » ; les salaires des enseignants font l’essentiel de « Enseignement scolaire ».';
 
@@ -443,7 +446,7 @@
     const perfAll = [...byMission.entries()].map(([mi, list]) => ({ mi, label: missionName(mi), sub: '', c: count(list), n: list.length }));
     const perfSmall = perfAll.filter(r => r.n < 10);
     const perfRows = perfAll.filter(r => r.n >= 10).sort((a, b) => (b.c.ok || 0) / b.n - (a.c.ok || 0) / a.n);
-    stacks($('etPerfStack'), perfRows.map(r => ({ label: r.label, mi: r.mi, total: r.n, parts: ST_ORDER.map(s => ({ key: s, value: r.c[s] || 0, color: ST[s].color, label: ST[s].label })) })),
+    stacks($('etPerfStack'), perfRows.map(r => ({ label: r.label, icon: ico(P.missions[r.mi][1], r.label), mi: r.mi, total: r.n, parts: ST_ORDER.map(s => ({ key: s, value: r.c[s] || 0, color: ST[s].color, label: ST[s].label })) })),
       { format: v => `${nf(v, 0)} indicateur${v > 1 ? 's' : ''}`, totalFormat: v => nf(v, 0), legend: ST_ORDER.filter(s => allC[s]).map(s => ({ color: ST[s].color, label: ST[s].label, value: nf(allC[s], 0) })), legendEl: $('etPerfLegend'), onRow: r => openPerf(P.missions[r.mi][1]) });
     $('etPerfStackNote').innerHTML = `Missions classées par part d’indicateurs dont la cible est atteinte ; nombre d’indicateurs et sous-indicateurs à droite. ${perfSmall.length} missions ou comptes de moins de 10 indicateurs ne sont pas représentés (leurs parts ne seraient pas comparables) : ${perfSmall.map(r => esc(r.label)).join(', ')}. Cliquez sur une mission pour la liste de ses indicateurs. Classement publié par l’administration dans le fichier des ${src('rap-2025-performance', 'rapports annuels de performance 2025')}.`;
     const seen = new Set();
@@ -451,8 +454,8 @@
     const progName = i => i >= 0 ? `${P.progs[i][0]} · ${P.progs[i][1]}` : 'Indicateur de mission';
     $('etPerfGaps').innerHTML = `<table class="data-table et-perf-table"><thead><tr><th>Indicateur</th><th class="num">Cible 2025</th><th class="num">Réalisé</th><th class="num">Écart</th></tr></thead><tbody>${gaps.slice(0, 15).map(r => `<tr><td><strong>${esc(r[3] || r[2])}</strong>${r[3] ? `<br><span class="muted">${esc(r[2])}</span>` : ''}<br><span class="muted">${esc(missionName(r[0]))} · ${esc(progName(r[1]))}</span></td><td class="et-val" data-l="Cible 2025">${esc(r[6])}</td><td class="et-val" data-l="Réalisé">${esc(r[7])}</td><td class="et-val" data-l="Écart">${r[9] > 0 ? '+' : ''}${nf(r[9], 1)} pt</td></tr>`).join('')}</tbody></table>`;
     $('etPerfGapsNote').textContent = `Parmi les ${gaps.length} indicateurs en pourcentage classés « sans amélioration » par l’administration, les quinze plus éloignés de leur cible, en points. Un taux de consommation de crédits faible peut refléter un calendrier de projets, une cible de satisfaction peut être fixée haut : l’écart signale une question à poser, pas un dysfonctionnement établi.`;
-    const missRows = [...byMission.entries()].map(([mi, list]) => ({ label: missionName(mi), value: list.filter(r => r[8] === 'nd').length, n: list.length })).filter(r => r.value).sort((a, b) => b.value - a.value);
-    hbars($('etPerfMissing'), missRows.slice(0, 14).map(r => ({ label: r.label, sub: `sur ${r.n} indicateurs · ${pct(100 * r.value / r.n, 0)}`, value: r.value, color: 'var(--c-muted)' })), { format: v => nf(v, 0) });
+    const missRows = [...byMission.entries()].map(([mi, list]) => ({ label: missionName(mi), icon: ico(P.missions[mi][1], missionName(mi)), value: list.filter(r => r[8] === 'nd').length, n: list.length })).filter(r => r.value).sort((a, b) => b.value - a.value);
+    hbars($('etPerfMissing'), missRows.slice(0, 14).map(r => ({ label: r.label, icon: r.icon, sub: `sur ${r.n} indicateurs · ${pct(100 * r.value / r.n, 0)}`, value: r.value, color: 'var(--c-muted)' })), { format: v => nf(v, 0) });
     $('etPerfMissingNote').textContent = `Nombre d’indicateurs dont la réalisation 2025 est « non renseignée » dans le fichier (${nf(allC.nd || 0, 0)} au total, sur ${missRows.length} missions). Souvent la donnée n’est connue qu’après la publication du rapport (enquêtes annuelles, comptes d’organismes) ; elle devrait alors être publiée l’année suivante.`;
     // full table
     const mSel = $('etPerfMission'), sSel = $('etPerfStatus');

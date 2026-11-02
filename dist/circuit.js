@@ -413,6 +413,7 @@
       el.className = `dr-row${row.level ? ' is-sub' : ''}${row.open ? ' is-open' : ''}${row.button ? ' is-button' : ''}`;
       if (row.button) el.setAttribute('aria-expanded', row.open ? 'true' : 'false');
       el.querySelector('.dr-label').textContent = row.label;
+      if (!row.level && /^GF\d{2}$/.test(String(row.key)) && typeof FRL_ICONS !== 'undefined') el.querySelector('.dr-label').insertAdjacentHTML('afterbegin', FRL_ICONS.forText(row.label));   // pictogram of the spending function (icons.js)
       el.querySelector('.dr-value').innerHTML = row.value;
       const track = el.querySelector('.dr-track');
       const segments = row.segments || [[row.amount, row.color]];

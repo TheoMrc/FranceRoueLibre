@@ -42,10 +42,13 @@
     run();
   }
 
+  /* Pictogram for a mission, ministry or function name (icons.js), empty if the module is not loaded */
+  const icoText = name => typeof FRL_ICONS === 'undefined' ? '' : FRL_ICONS.forText(name);
+
   function hbars(el, rows, { format = meur, max = null } = {}) {
     if (!rows.length) { el.innerHTML = '<p class="tx-empty">Aucune donnée.</p>'; return; }
     const top = max ?? Math.max(...rows.map(r => r.value || 0), 1e-9);
-    el.innerHTML = `<ul class="tx-bars">${rows.map(r => `<li class="${r.focus ? 'is-focus' : ''}"><div class="tx-bars__line"><span>${esc(r.label)}${r.sub ? `<small>${r.sub}</small>` : ''}</span><strong>${format(r.value)}</strong></div><span class="tx-bars__track" aria-hidden="true"><span class="tx-bars__fill" style="--w:${(100 * (r.value || 0) / top).toFixed(2)}%"></span></span></li>`).join('')}</ul>`;
+    el.innerHTML = `<ul class="tx-bars">${rows.map(r => `<li class="${r.focus ? 'is-focus' : ''}"><div class="tx-bars__line"><span>${r.icon || ''}${esc(r.label)}${r.sub ? `<small>${r.sub}</small>` : ''}</span><strong>${format(r.value)}</strong></div><span class="tx-bars__track" aria-hidden="true"><span class="tx-bars__fill" style="--w:${(100 * (r.value || 0) / top).toFixed(2)}%"></span></span></li>`).join('')}</ul>`;
     requestAnimationFrame(() => el.querySelectorAll('.tx-bars__fill').forEach(n => { n.style.width = n.style.getPropertyValue('--w'); }));
   }
 
@@ -71,7 +74,7 @@
     ]);
     hbars($('nfByTax'), data.byTax.map(g => ({ label: g.name, sub: `${g.n} mesures${g.n - g.known ? `, dont ${g.n - g.known} sans montant 2026` : ''}`, value: g.v26 })));
     const missions = data.byMission.filter(g => g.v26 > 0);
-    hbars($('nfByMission'), missions.slice(0, 12).map(g => ({ label: g.name, sub: `${g.n} mesures${g.n - g.known ? `, dont ${g.n - g.known} sans montant 2026` : ''}`, value: g.v26 })));
+    hbars($('nfByMission'), missions.slice(0, 12).map(g => ({ label: g.name, icon: icoText(g.name), sub: `${g.n} mesures${g.n - g.known ? `, dont ${g.n - g.known} sans montant 2026` : ''}`, value: g.v26 })));
     const rest = missions.slice(12), restZero = data.byMission.filter(g => !(g.v26 > 0));
     $('nfByMissionNote').textContent = `Mission du budget de l’État à laquelle chaque mesure est rattachée. ${rest.length ? `${rest.length} autres missions : ${meur(rest.reduce((s, g) => s + g.v26, 0))} au total. ` : ''}${restZero.length ? `${restZero.map(g => g.name).join(', ')} : aucune mesure chiffrée.` : ''}`;
     $('nfByTaxNote').innerHTML = `Coût prévu en 2026, par impôt réduit. « Impôt sur le revenu et impôt sur les sociétés » : mesures qui jouent sur les deux (crédit d’impôt recherche, par exemple). Source : ${srcPlf26}.`;

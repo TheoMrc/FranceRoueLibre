@@ -71,6 +71,9 @@
     return out;
   }
 
+  /* Pictogram for a mission, ministry or function name (icons.js), empty if the module is not loaded */
+  const icoText = name => typeof FRL_ICONS === 'undefined' ? '' : FRL_ICONS.forText(name);
+
   /* Horizontal bars. rows: [{label, sub, value, display}] */
   function hbars(el, rows, { format = eur, max = null } = {}) {
     if (!rows.length) { el.innerHTML = '<p class="tx-empty">Aucune donnée publiée.</p>'; return; }
@@ -119,7 +122,7 @@
         <dl>
           <dt>Statut</dt><dd>${esc(STATUTS[o.statut] || o.statut)}</dd>
           ${o.category ? `<dt>Réseau</dt><dd>${esc(o.category)}, ${plural(siblings, 'établissement')} dans la liste</dd>` : ''}
-          <dt>Mission</dt><dd>${esc(o.mission)}</dd>
+          <dt>Mission</dt><dd>${icoText(o.mission)}${esc(o.mission)}</dd>
           <dt>Programme chef de file</dt><dd>${esc(o.programme)} – ${esc(o.programmeLabel)}</dd>
           <dt>Ministère</dt><dd>${o.ministere ? `${esc(o.ministere)} <span class="muted">(porteur du programme au PLF 2025)</span>` : '<span class="muted">programme absent du PLF 2025</span>'}</dd>
           <dt>SCSP du programme</dt><dd>${p?.scspCp != null ? `${eur(p.scspCp)} <span class="muted">en 2025 (PLF), pour l’ensemble du programme, qui pilote ${plural(p.operators, 'opérateur')} ; la part de celui-ci n’est pas publiée en données ouvertes</span>` : '<span class="muted">non disponible</span>'}</dd>
@@ -246,9 +249,9 @@
       });
       rows.sort((a, b) => b.n - a.n || a.k.localeCompare(b.k, 'fr'));
       const cap = list => tutAll ? list : list.slice(0, 12);
-      hbars($('opTutCount'), cap(rows).map(r => ({ label: r.k, sub: `${plural(r.codes.length, 'programme')} chef${r.codes.length > 1 ? 's' : ''} de file`, value: r.n })), { format: v => nf(v, 0) });
+      hbars($('opTutCount'), cap(rows).map(r => ({ label: r.k, html: icoText(r.k) + esc(r.k), sub: `${plural(r.codes.length, 'programme')} chef${r.codes.length > 1 ? 's' : ''} de file`, value: r.n })), { format: v => nf(v, 0) });
       const bySc = rows.filter(r => r.scsp != null || r.missing).sort((a, b) => (b.scsp ?? -1) - (a.scsp ?? -1));
-      hbars($('opTutScsp'), cap(bySc).map(r => ({ label: r.k, sub: `${plural(r.n, 'opérateur')}${r.missing ? ` · ${r.missing} programme absent du PLF 2025` : ''}`, value: r.scsp || 0, display: r.scsp == null ? 'non disponible' : eur(r.scsp) })));
+      hbars($('opTutScsp'), cap(bySc).map(r => ({ label: r.k, html: icoText(r.k) + esc(r.k), sub: `${plural(r.n, 'opérateur')}${r.missing ? ` · ${r.missing} programme absent du PLF 2025` : ''}`, value: r.scsp || 0, display: r.scsp == null ? 'non disponible' : eur(r.scsp) })));
       ['opTutCount', 'opTutScsp'].forEach(id => { const n = id === 'opTutCount' ? rows.length : bySc.length; if (!tutAll && n > 12) $(id).insertAdjacentHTML('beforeend', `<div class="tx-more"><button type="button" data-tut-all>Afficher les ${n} lignes</button></div>`); });
       $('opTutCountTitle').textContent = tutBy === 'mission' ? 'Nombre d’opérateurs par mission' : 'Nombre d’opérateurs par ministère';
       $('opTutCountNote').textContent = tutBy === 'mission'

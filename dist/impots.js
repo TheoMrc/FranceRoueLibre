@@ -124,11 +124,14 @@
     return responsive(el, draw);
   }
 
+  /* Pictogram for a beneficiary (État, sécurité sociale, collectivités…) from icons.js; only when grouped by beneficiary */
+  const icoText = name => typeof FRL_ICONS === 'undefined' ? '' : FRL_ICONS.forText(name);
+
   /* ---------- Horizontal bars ---------- */
   function hbars(el, rows, { format = v => nf(v), max = null } = {}) {
     if (!rows.length) { el.innerHTML = '<p class="tx-empty">Aucune donnée publiée trouvée.</p>'; return; }
     const top = max ?? Math.max(...rows.map(r => r.value || 0), 1e-9);
-    el.innerHTML = `<ul class="tx-bars">${rows.map(r => `<li class="${r.focus ? 'is-focus' : ''}"><div class="tx-bars__line"><span>${esc(r.label)}${r.sub ? `<small>${r.sub}</small>` : ''}</span><strong>${format(r.value)}</strong></div><span class="tx-bars__track" aria-hidden="true"><span class="tx-bars__fill" style="--w:${(100 * (r.value || 0) / top).toFixed(2)}%"></span></span></li>`).join('')}</ul>`;
+    el.innerHTML = `<ul class="tx-bars">${rows.map(r => `<li class="${r.focus ? 'is-focus' : ''}"><div class="tx-bars__line"><span>${r.icon || ''}${esc(r.label)}${r.sub ? `<small>${r.sub}</small>` : ''}</span><strong>${format(r.value)}</strong></div><span class="tx-bars__track" aria-hidden="true"><span class="tx-bars__fill" style="--w:${(100 * (r.value || 0) / top).toFixed(2)}%"></span></span></li>`).join('')}</ul>`;
     requestAnimationFrame(() => el.querySelectorAll('.tx-bars__fill').forEach(n => { n.style.width = n.style.getPropertyValue('--w'); }));
   }
 
@@ -299,7 +302,7 @@
         const n = active.filter(t => gval(t) === v).length, sum = counted.filter(t => gval(t) === v).reduce((s, t) => s + t.amount, 0);
         return { v, n, sum, pn: 100 * n / active.length, ps: 100 * sum / totalListed };
       });
-      shareEl.innerHTML = `<div class="tx-share__legend"><span><i class="is-count"></i>Part du nombre de prélèvements</span><span><i></i>Part de l’argent</span></div><ul class="tx-share">${rows.map(r => `<li><div class="tx-bars__line"><span>${esc(r.v)}</span><strong>${r.n} · ${meur(r.sum)}</strong></div>
+      shareEl.innerHTML = `<div class="tx-share__legend"><span><i class="is-count"></i>Part du nombre de prélèvements</span><span><i></i>Part de l’argent</span></div><ul class="tx-share">${rows.map(r => `<li><div class="tx-bars__line"><span>${group === 'beneficiary' ? icoText(r.v) : ''}${esc(r.v)}</span><strong>${r.n} · ${meur(r.sum)}</strong></div>
         <span class="tx-share__bar is-count" style="--c:${color(group, r.v)};--w:${r.pn.toFixed(2)}%"><b>${pct(r.pn, 0)}</b></span><span class="tx-share__bar" style="--c:${color(group, r.v)};--w:${r.ps.toFixed(2)}%"><b>${pct(r.ps, r.ps < 1 ? 1 : 0)}</b></span></li>`).join('')}</ul>`;
     };
     drawShare(); redraws.push(drawShare);
@@ -488,7 +491,7 @@
         ['Lignes plafonnées en 2024', String(y24.capped), `pour un plafond total de ${meur(y24.cap)} et un produit prévu de ${meur(y24.cappedYield)}`],
         ['Repris par l’État au-delà du plafond', meur(y24.back), `prévu en 2024 sur ${y24.over} lignes ; ${meur(y22.back)} en 2022 (exécution, ${y22.over} lignes)`]
       ].map(([a, b, c]) => `<div class="kpi"><span>${esc(a)}</span><strong>${esc(b)}</strong><small>${esc(c)}</small></div>`).join('');
-      hbars($('txAffSectors'), A.sectors.map(s => ({ label: s.name, sub: `${s.rows} lignes${s.capped ? `, dont ${s.capped} plafonnées` : ', aucune plafonnée'}${s.back ? ` · ${meur(s.back)} repris par l’État` : ''}`, value: s.yield })), { format: meur });
+      hbars($('txAffSectors'), A.sectors.map(s => ({ label: s.name, icon: icoText(s.name), sub: `${s.rows} lignes${s.capped ? `, dont ${s.capped} plafonnées` : ', aucune plafonnée'}${s.back ? ` · ${meur(s.back)} repris par l’État` : ''}`, value: s.yield })), { format: meur });
       const over = A.rows.filter(r => r.back[2] > 0).sort((a, b) => b.back[2] - a.back[2]);
       hbars($('txAffBack'), over.slice(0, 12).map(r => ({ label: r.tax.length > 70 ? `${r.tax.slice(0, 68).replace(/\s+\S*$/, '')}…` : r.tax, sub: `${esc(r.beneficiary)} · produit ${meur(r.y[2])}, plafond ${meur(r.cap[2])}`, value: r.back[2] })), { format: meur });
       $('txAffBackNote').textContent = `${over.length} lignes dépassent leur plafond en 2024 (prévision) ; les douze plus grosses reprises sont affichées. Montants prévus par le projet de loi de finances pour 2024.`;
