@@ -281,3 +281,49 @@ class SavedAnswersTest(unittest.TestCase):
         follow = [{'role': 'user', 'text': 'Bonjour'}, {'role': 'assistant', 'text': '…'},
                   {'role': 'user', 'text': 'Et la dette sous Bruno Le Maire, combien ?'}]
         self.assertIsNone(faq.find(follow), 'a follow-up goes to the model, which has the context')
+
+
+class JournalTest(unittest.TestCase):
+    """Journal of the answers (server/assistant/journal.py) and its review (scripts/loupe-review.py)."""
+
+    def setUp(self):
+        import tempfile
+        self.dir = Path(tempfile.mkdtemp())
+
+    def test_answer_and_vote_lines_without_ip(self):
+        from assistant import journal
+        who = journal.reader('203.0.113.9')
+        self.assertEqual(who, journal.reader('203.0.113.9'), 'same reader, same day, same value')
+        self.assertNotIn('203.0.113', who)
+        events = [{'type': 'tool_start', 'name': 'rechercher_depenses', 'label': 'Recherche « piscine »'},
+                  {'type': 'tool_done', 'name': 'rechercher_depenses', 'label': 'Recherche « piscine »', 'ok': True, 'summary': '12 ligne(s)', 's': .4}]
+        entry = journal.answer_entry('JOBID123456789', who, [{'role': 'user', 'text': 'Combien coûtent les piscines ?'}], events,
+                                     {'reply': 'Environ…', 'provider': 'gemini', 'model': 'm', 'cost_eur': .002}, 3.2)
+        journal.write(self.dir, entry)
+        journal.write(self.dir, journal.vote_entry('JOBID123456789', who, -1))
+        rows = [json.loads(l) for l in (self.dir / 'journal').glob('*.jsonl').__next__().read_text().splitlines()]
+        self.assertEqual([r['type'] for r in rows], ['answer', 'vote'])
+        self.assertEqual(rows[0]['tools'][0]['summary'], '12 ligne(s)')
+        self.assertNotIn('203.0.113.9', json.dumps(rows))
+
+    def test_sweep_gzips_and_deletes(self):
+        import datetime as dt, gzip
+        from assistant import journal
+        d = self.dir / 'journal'; d.mkdir()
+        today = dt.date.today()
+        (d / f'{today - dt.timedelta(days=1)}.jsonl').write_text('{"type":"answer"}\n')
+        (d / f'{today - dt.timedelta(days=journal.RETENTION_DAYS + 2)}.jsonl.gz').write_bytes(gzip.compress(b'{}\n'))
+        journal.sweep(self.dir, today)
+        names = sorted(p.name for p in d.iterdir())
+        self.assertEqual(names, [f'{today - dt.timedelta(days=1)}.jsonl.gz'])
+
+    def test_review_groups_questions(self):
+        import importlib.util
+        from assistant import journal
+        for i, q in enumerate(['Combien coûtent les fonctionnaires ?', 'les fonctionnaires coûtent combien', 'Prix des piscines']):
+            journal.write(self.dir, journal.answer_entry(f'J{i:011d}', 'r', [{'role': 'user', 'text': q}], [], {'reply': 'x', 'cost_eur': .01}, 1))
+        spec = importlib.util.spec_from_file_location('review', ROOT / 'scripts' / 'loupe-review.py')
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        r = mod.review(self.dir / 'journal')
+        self.assertEqual(len(r['top'][0]), 2, 'same words in another order: one group')
+        self.assertIn('fonctionnaires', mod.report(r))

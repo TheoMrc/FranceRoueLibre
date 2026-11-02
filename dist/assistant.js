@@ -258,12 +258,29 @@
         if (m.sources?.length) parts.push(`<div class="ai-chips"><span>Sources web</span>${m.sources.map((s, i) => `<a style="--i:${i}" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>`).join('')}</div>`);
         if (m.searches?.length) parts.push(`<div class="ai-chips ai-chips--search"><span>Recherches Google</span>${m.searches.map((s, i) => `<a style="--i:${i + 2}" href="https://www.google.com/search?q=${encodeURIComponent(s)}" target="_blank" rel="noopener noreferrer">${esc(s)}</a>`).join('')}</div>`);
         q('.ai-extra').innerHTML = parts.join('');
-        q('.ai-foot').innerHTML = m.provider ? `${provBadge(m.provider, m.label || label(m.provider))}${m.s ? `<span>${Math.round(m.s)} s</span>` : ''}` : '';
+        q('.ai-foot').innerHTML = m.provider ? `${provBadge(m.provider, m.label || label(m.provider))}${m.s ? `<span>${Math.round(m.s)} s</span>` : ''}${voteHtml(m)}` : '';
+        const vote = q('.ai-vote');
+        if (vote) vote.addEventListener('click', e => { const b = e.target.closest('button[data-vote]'); if (b) sendVote(m, +b.dataset.vote, vote); });
         if (m.error) q('.ai-text').innerHTML = `<p class="ai-error">${esc(m.error)}</p>${m.donate ? donateLink(m.donate) : ''}`;
       },
     };
     if (m.provider) v.provider(m.provider);
     return v;
+  }
+  /* 👍 / 👎 under an answer: sent once to the server journal (server/assistant/journal.py), within the hour */
+  const VOTE_UP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10v11H3V10zM7 10l4-8a3 3 0 0 1 3 3v4h6a2 2 0 0 1 2 2.3l-1.4 8A2 2 0 0 1 18.6 21H7"/></svg>';
+  const VOTE_DOWN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 14V3h4v11zM17 14l-4 8a3 3 0 0 1-3-3v-4H4a2 2 0 0 1-2-2.3l1.4-8A2 2 0 0 1 5.4 3H17"/></svg>';
+  function voteHtml(m) {
+    if (!m.job || m.error || !m.text) return '';
+    if (m.vote) return `<span class="ai-vote is-done">${m.vote > 0 ? 'Merci !' : 'Merci, la réponse sera relue.'}</span>`;
+    if (Date.now() - (m.at || 0) > 55 * 60 * 1000) return '';
+    return `<span class="ai-vote"><span>Utile ?</span><button type="button" data-vote="1" aria-label="Réponse utile">${VOTE_UP}</button><button type="button" data-vote="-1" aria-label="Réponse fausse ou inutile">${VOTE_DOWN}</button></span>`;
+  }
+  function sendVote(m, vote, el) {
+    m.vote = vote; saveStore();
+    el.classList.add('is-done');
+    el.innerHTML = vote > 0 ? 'Merci !' : 'Merci, la réponse sera relue.';
+    fetch(API + 'feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ job: m.job, vote }) }).catch(() => {});
   }
   function staticBot(m) {
     const v = botView(m);
@@ -331,7 +348,7 @@
       if (data.credits === false) { m.donate = data.donate; noCredits(data); }
       if (!r.ok || !data.job) throw new Error(data.error || (r.status === 503 || r.status === 502 || r.status === 504
         ? 'La Loupe est très demandée en ce moment : réessayez dans quelques minutes.' : `Erreur ${r.status}`));
-      busy.job = data.job;
+      busy.job = data.job; m.job = data.job; m.at = Date.now();
       let after = 0, fails = 0, queued = '';
       for (;;) {
         await sleep(650);

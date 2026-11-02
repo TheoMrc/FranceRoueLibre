@@ -35,6 +35,7 @@ from urllib.parse import parse_qs, urlparse
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from assistant import faq  # noqa: E402
+from assistant import journal  # noqa: E402
 from assistant import settings as S  # noqa: E402
 from assistant.agent import answer, pick_provider  # noqa: E402
 from assistant.budget import budget  # noqa: E402
@@ -42,7 +43,7 @@ from assistant.providers import CLIENTS  # noqa: E402
 
 MAX_BODY = 48_000
 DEMO = {'on': False}
-JOB_TTL = 15 * 60
+JOB_TTL = 60 * 60   # a reader may still vote on an answer during this hour
 
 JOBS: dict = {}
 JOBS_LOCK = threading.Lock()
@@ -124,6 +125,7 @@ def status() -> dict:
 def run_job(job: dict, messages: list, provider: str | None) -> None:
     def emit(event: dict) -> None:
         job['events'].append(event)
+    started = time.time()
     try:
         job['result'] = answer(messages, provider, on_event=emit, cancelled=lambda: job['cancel'])
     except Exception as exc:  # noqa: BLE001 - never a stack trace to the reader
@@ -134,6 +136,9 @@ def run_job(job: dict, messages: list, provider: str | None) -> None:
         if lack:
             job['result'] = dict(job['result'], **lack)
     job['done'] = True
+    if not job['cancel']:
+        journal.write(S.STATE_DIR, journal.answer_entry(job['id'], journal.reader(job['ip']), messages, job['events'],
+                                                        job['result'], time.time() - started))
 
 
 def worker() -> None:
@@ -166,7 +171,7 @@ def enqueue(ip: str, messages: list, provider: str | None) -> str:
     start_workers()
     jid = secrets.token_urlsafe(18)
     now = time.time()
-    job = {'t': now, 'seen': now, 'ip': ip, 'events': [], 'done': False, 'result': None, 'cancel': False,
+    job = {'id': jid, 't': now, 'seen': now, 'ip': ip, 'events': [], 'done': False, 'result': None, 'cancel': False,
            'state': 'queued', 'messages': messages, 'provider': provider}
     with WORK:
         JOBS[jid] = job
@@ -175,13 +180,14 @@ def enqueue(ip: str, messages: list, provider: str | None) -> str:
     return jid
 
 
-def saved_job(ip: str, entry: dict) -> str:
+def saved_job(ip: str, entry: dict, messages: list) -> str:
     """A finished job holding a saved answer: the page polls it like any other and gets it at once."""
     jid = secrets.token_urlsafe(18)
     now = time.time()
     with JOBS_LOCK:
-        JOBS[jid] = {'t': now, 'seen': now, 'ip': ip, 'events': [], 'done': True, 'result': faq.result(entry),
+        JOBS[jid] = {'id': jid, 't': now, 'seen': now, 'ip': ip, 'events': [], 'done': True, 'result': faq.result(entry),
                      'cancel': False, 'state': 'done', 'messages': None, 'provider': None}
+    journal.write(S.STATE_DIR, journal.answer_entry(jid, journal.reader(ip), messages, [], JOBS[jid]['result'], 0))
     return jid
 
 
@@ -246,6 +252,20 @@ class Handler(BaseHTTPRequestHandler):
                 if job['state'] == 'queued' and not job['done']:  # never reaches a worker: answered now
                     job.update(result={'error': 'Question annulée.'}, done=True)
             return self.send(200, {'ok': bool(job)})
+        if url.path == '/api/assistant/feedback':  # 👍 / 👎 under an answer, once per answer
+            try:
+                size = int(self.headers.get('Content-Length') or 0)
+                body = json.loads(self.rfile.read(size)) if 0 < size <= 2000 else {}
+            except (ValueError, AttributeError):
+                body = {}
+            job = JOBS.get(str(body.get('job') or ''))
+            vote = body.get('vote')
+            if not job or not job['done'] or job['ip'] != self.client_ip() or vote not in (1, -1):
+                return self.send(400, {'error': 'avis refusé'})
+            if job.get('voted') is None:
+                job['voted'] = vote
+                journal.write(S.STATE_DIR, journal.vote_entry(job['id'], journal.reader(job['ip']), vote, body.get('note')))
+            return self.send(200, {'ok': True})
         if url.path != '/api/assistant/ask':
             return self.send(404, {'error': 'not found'})
         try:
@@ -267,7 +287,7 @@ class Handler(BaseHTTPRequestHandler):
         provider = body.get('provider') if body.get('provider') in CLIENTS else None
         saved = faq.find(messages)
         if saved:  # a question many readers ask: answered from faq.json, no model call, no credits
-            return self.send(202, {'job': saved_job(self.client_ip(), saved)})
+            return self.send(202, {'job': saved_job(self.client_ip(), saved, messages)})
         lack = credits_info()
         if lack:
             return self.send(402, lack)

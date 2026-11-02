@@ -240,7 +240,7 @@ WantedBy=multi-user.target
 UNIT
   sudo -n systemctl daemon-reload
   sudo -n systemctl enable --quiet francerouelibre-assistant
-  ASIG=$(cat "$DIR"/server/assistant_api.py "$DIR"/server/assistant/*.py /etc/systemd/system/francerouelibre-assistant.service | md5sum | cut -d' ' -f1)
+  ASIG=$(cat "$DIR"/server/assistant_api.py "$DIR"/server/assistant/*.py "$DIR"/server/assistant/*.json /etc/systemd/system/francerouelibre-assistant.service 2>/dev/null | md5sum | cut -d' ' -f1)   # saved answers (faq.json) restart it too
   ASIG=$ASIG$(sudo -n md5sum "$AENV" | cut -c1-8)
   if [ "$(cat "$LIB/assistant.md5" 2>/dev/null)" != "$ASIG" ] || ! systemctl is-active --quiet francerouelibre-assistant; then
     sudo -n systemctl restart francerouelibre-assistant && echo "$ASIG" > "$LIB/assistant.md5" && echo "assistant restarted"
