@@ -22,6 +22,7 @@ NAV = [
         ('Budget de l’État', 'etat.html', 'Missions, programmes, exécution mois par mois'),
         ('Opérateurs de l’État', 'operateurs.html', 'Agences et établissements publics'),
         ('Sécurité sociale', 'secu.html', 'Comptes des branches, dépenses d’assurance maladie'),
+        ('Emplois publics et élus', 'emplois.html', 'Agents, élus : combien, où, pour quel coût'),
         ('Aides et subventions', 'aides.html', 'Associations, entreprises, plan de relance'),
         ('Marchés publics', 'marches.html', '1,4 million de contrats depuis 2014'),
         ('UGAP', 'ugap.html', 'Les prix de la centrale d’achat public'),
@@ -38,9 +39,10 @@ RELATED = {
     'index.html': [('impots.html', 'D’où viennent les recettes : chaque impôt, ce qu’il rapporte et coûte'), ('etat.html', 'Le budget de l’État voté et exécuté, mission par mission'), ('secu.html', 'La Sécurité sociale, premier poste de dépense publique'), ('signaux.html', 'Les anomalies repérées dans les comptes locaux et les marchés')],
     'impots.html': [('niches.html', 'Ce que les réductions et crédits d’impôt retirent à ces recettes'), ('etat.html', 'Ce que l’État fait des recettes du budget général'), ('operateurs.html', 'Les agences financées par des taxes affectées'), ('donnees.html', 'Toutes les sources, et ce qui n’est pas publié')],
     'niches.html': [('impots.html', 'Ce que rapporte chaque impôt avant ces réductions'), ('aides.html', 'Les aides directes aux entreprises et associations'), ('etat.html', 'Les missions du budget auxquelles chaque niche se rattache')],
-    'etat.html': [('operateurs.html', 'Les agences et établissements que ces programmes financent'), ('impots.html', 'D’où viennent les recettes du budget général'), ('niches.html', 'Les dépenses qui passent par l’impôt plutôt que par le budget'), ('aides.html', 'Qui reçoit les subventions, bénéficiaire par bénéficiaire')],
+    'etat.html': [('operateurs.html', 'Les agences et établissements que ces programmes financent'), ('emplois.html', 'Les dépenses de personnel, mission par mission'), ('impots.html', 'D’où viennent les recettes du budget général'), ('niches.html', 'Les dépenses qui passent par l’impôt plutôt que par le budget'), ('aides.html', 'Qui reçoit les subventions, bénéficiaire par bénéficiaire')],
     'operateurs.html': [('etat.html', 'Les programmes budgétaires qui financent les opérateurs'), ('impots.html', 'Les taxes affectées à ces organismes'), ('marches.html', 'Ce que les opérateurs achètent')],
     'secu.html': [('impots.html', 'CSG, CRDS et autres prélèvements qui financent la Sécurité sociale'), ('index.html#circuit', 'La Sécurité sociale dans le circuit de l’argent public'), ('donnees.html', 'Hôpitaux, ARS : ce qui n’est pas publié')],
+    'emplois.html': [('etat.html', 'Les crédits de chaque mission, personnel compris'), ('index.html#explorer', 'Les comptes de chaque commune sur la carte'), ('secu.html', 'Hôpitaux et caisses : la Sécurité sociale'), ('operateurs.html', 'Les agences de l’État, qui emploient hors titre 2')],
     'aides.html': [('niches.html', 'Les aides qui passent par l’impôt (crédits d’impôt)'), ('etat.html', 'Les programmes budgétaires qui versent ces aides'), ('signaux.html', 'Subventions à des structures fermées et autres signaux')],
     'marches.html': [('ugap.html', 'Les prix de la centrale d’achat public'), ('signaux.html', 'Offres uniques, avenants, montants sous les seuils'), ('probite.html', 'Favoritisme et corruption : les affaires jugées')],
     'ugap.html': [('marches.html', 'Tous les marchés publics, acheteur par acheteur'), ('signaux.html', 'Les signaux sur la concurrence dans les achats')],
@@ -110,6 +112,8 @@ def render_related(page, indent='    '):
         title = known.get(base, (base, ''))[0]
         if href == 'index.html#circuit':
             title = 'Le circuit de l’argent public'
+        if href == 'index.html#explorer':
+            title = 'La carte des comptes locaux'
         items.append(f'<a class="related__card" href="{href}"><strong>{esc(title)}</strong><span>{esc(why)}</span></a>')
     if not items:
         return ''
