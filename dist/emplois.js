@@ -14,6 +14,7 @@
   const money = v => FRL.money(v);
   const link = (url, text) => url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(text)}</a>` : esc(text);
   const kpi = (label, value, sub) => `<div class="kpi"><span>${esc(label)}</span><strong>${value}</strong>${sub ? `<small>${sub}</small>` : ''}</div>`;
+  const paidAll_ = d => (d.paid.communes || 0) + (d.paid.gfp || 0) + (d.paid.departement || 0) + (d.paid.region || 0);   // indemnities paid at every local level, per département
   const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[-'’]/g, ' ').replace(/\s+/g, ' ').trim();
   const COLORS = ['var(--tx-1)', 'var(--tx-3)', 'var(--tx-2)', 'var(--tx-7)', 'var(--tx-4)', 'var(--tx-8)', 'var(--tx-5)', 'var(--tx-other)'];
   /* Sequential scale for the map: one hue, from the surface (low) to full strength (high), in both themes. */
@@ -152,6 +153,62 @@
     const deputies = Math.floor(seats * REF.municipalSeats.maxDeputyShare), ind = REF.indemnities;
     return { deputies, mayor: 12 * ind.indexMonthly * stepOf(ind.mayor, pop) / 100, deputy: 12 * ind.indexMonthly * stepOf(ind.deputy, pop) / 100,
       total: 12 * ind.indexMonthly / 100 * (stepOf(ind.mayor, pop) + deputies * stepOf(ind.deputy, pop)) };
+  }
+
+  /* ---------- 0. In brief: the whole salary bill, who pays it, who employs, who earns what ---------- */
+  function initSynthese(D) {
+    const nat = D.national.years, last = nat.at(-1), prev = nat.at(-2), W = D.workforce, y = W.year, yk = String(y);
+    const G = D.state.general, st = D.state.year;
+    const shareSpend = 100 * last.d1 / last.spending, shareGdp = 100 * last.d1 / last.gdp;
+    const t2 = (G.t2 + G.t2Annexes) / 1000, shareState = 100 * G.t2 / G.cpNet;
+    const locYear = Math.max(...D.local.levels[0].years);
+    const loc = D.local.levels.reduce((s, l) => { const i = l.years.indexOf(locYear); return s + (i >= 0 ? l.personnel[i] : 0); }, 0) / 1e9;
+    const rest = last.d1 - t2 - loc, total = W.total[yk];
+    const pop = (nat.find(r => r.year === y + 1) || last).population;
+    $('emSynLead').innerHTML = `En ${last.year}, les administrations publiques ont versé ${md(last.d1)} de rémunérations à leurs agents (salaires, primes et cotisations), soit ${pctS(shareSpend)} de toute la dépense publique : un euro dépensé sur ${nf(last.spending / last.d1, 1)}. Pour l’État seul, les dépenses de personnel représentent ${pctS(shareState, 0)} du budget général voté pour ${st}, hors remboursements d’impôts.`;
+    $('emSynKpis').innerHTML = [
+      kpi(`Rémunérations publiques, ${last.year}`, md(last.d1), `${signedPct(100 * (last.d1 / prev.d1 - 1))} en un an ; ${eur(last.d1 * 1e9 / last.population)} par habitant`),
+      kpi('Part de la dépense publique', pctS(shareSpend), `sur ${md(last.spending, 0)} de dépenses publiques ; ${pctS(shareGdp)} du PIB`),
+      kpi(`Part du budget de l’État, ${st}`, pctS(shareState), `${md(G.t2 / 1000)} de dépenses de personnel sur ${md(G.cpNet / 1000)} de budget général, hors ${md(G.cpRefunds / 1000, 0)} de remboursements d’impôts`),
+      kpi(`Agents publics, fin ${y}`, `${nf(total / 1e6, 2)} M`, `${nf(1000 * total / pop)} pour 1 000 habitants ; salaire net moyen ${eur(W.salaries.find(s => s.versant === 'Ensemble FP' && s.population === 'Ensemble').net)} par mois`),
+    ].join('');
+    rows($('emSynPayers'), [
+      { label: 'État : ministères et budgets annexes', value: t2, sub: `${pctS(100 * t2 / last.d1, 0)} · dépenses de personnel votées pour ${st} (titre 2), cotisations de retraite comprises`, color: 'var(--tx-1)' },
+      { label: 'Collectivités et leurs établissements', value: loc, sub: `${pctS(100 * loc / last.d1, 0)} · frais de personnel ${locYear} des communes, intercommunalités, départements, régions, syndicats, Sdis, CCAS`, color: 'var(--tx-3)' },
+      { label: 'Hôpitaux publics, sécurité sociale, opérateurs de l’État et autres', value: rest, sub: `${pctS(100 * rest / last.d1, 0)} · par différence avec le total de ${md(last.d1)} ; aucun compte public ne donne ce montant directement`, color: 'var(--tx-other)' },
+    ], { format: v => md(v) });
+    $('emSynPayersNote').innerHTML = `Trois comptes de périmètres voisins mais pas identiques : comptes nationaux ${last.year} (Insee) pour le total, loi de finances ${st} (crédits votés, pas dépensés) pour l’État, comptes ${locYear} des collectivités (OFGL). Le troisième montant est un ordre de grandeur. Les opérateurs (universités, agences) paient leurs agents avec les subventions de l’État, hors titre 2 : ils tombent dans ce reste. Sources : ${link(D.national.url, 'Insee 3.201')}, ${link(D.state.url, 'PLF ' + st)}, ${link(D.local.url, 'OFGL')}. Détail : <a href="#etat">État</a>, <a href="#collectivites">collectivités</a>.`;
+    $('emSynYear').textContent = y;
+    const vs = { fpe: ['État', 'FPE', 'var(--tx-1)'], fpt: ['Territoriale', 'FPT', 'var(--tx-3)'], fph: ['Hospitalière', 'FPH (ensemble)', 'var(--tx-5)'] };
+    rows($('emSynEmployers'), Object.entries(vs).map(([k, [label, sv, color]]) => {
+      const n = W.versants[k][yk], sal = W.salaries.find(s => s.versant === sv && s.population === 'Ensemble');
+      return { label: `Fonction publique ${label === 'État' ? 'de l’État' : label.toLowerCase()}`, value: n, sub: `${pctS(100 * n / total, 0)} des agents · salaire net moyen ${eur(sal.net)} par mois`, color };
+    }), { format: v => `${nf(v / 1e6, 2)} M` });
+    $('emSynEmployersNote').innerHTML = `Agents au 31 décembre ${y}, fonctionnaires, contractuels et militaires (DGAFP). Les agents des opérateurs de l’État (universités, agences) sont comptés dans la fonction publique de l’État ; ceux des caisses de sécurité sociale, de droit privé, n’y sont pas. Détail : <a href="#effectifs">effectifs</a>.`;
+    // who earns what
+    const GROUPS = {
+      cat: [['dont catégorie A', 'Fonctionnaires de catégorie A'], ['dont catégorie B', 'Catégorie B'], ['dont catégorie C', 'Catégorie C']],
+      pcs: [['PCS cadres et professions intellectuelles supérieures', 'Cadres et professions intellectuelles supérieures'], ['PCS professions intermédiaires', 'Professions intermédiaires'], ['PCS employés et ouvriers', 'Employés et ouvriers']],
+      status: [['Fonctionnaires:', 'Fonctionnaires'], ['Contractuels', 'Contractuels'], ['Autres catégories et statuts', 'Autres statuts'], ['Bénéficiaires de contrats aidés', 'Contrats aidés']],
+      sex: [['Femmes', 'Femmes'], ['Hommes', 'Hommes']],
+      age: [['Moins de 30 ans', 'Moins de 30 ans'], ['30-39 ans', '30 à 39 ans'], ['40-49 ans', '40 à 49 ans'], ['50-59 ans', '50 à 59 ans'], ['60 ans et plus', '60 ans et plus']],
+    };
+    const COLS = [['FPE', 'État', 'État'], ['FPT', 'Territoriale', 'Territ.'], ['FPH (ensemble)', 'Hospitalière', 'Hospit.']];
+    const sal = (v, who) => W.salaries.find(s => s.versant === v && s.population === who);
+    const top = Math.max(...W.salaries.filter(s => COLS.some(([v]) => v === s.versant)).map(s => s.net || 0));
+    const cell = r => r && r.net ? `<td class="num"><span class="em-salbar" style="--w:${(100 * r.net / top).toFixed(1)}%"></span>${eur(r.net)}</td>` : '<td class="num">–</td>';
+    function drawSal(by) {
+      const list = GROUPS[by];
+      let body = list.map(([key, label]) => `<tr><td>${esc(label)}</td>${COLS.map(([v]) => cell(sal(v, key))).join('')}</tr>`).join('');
+      if (by === 'sex') body += `<tr class="muted"><td>Écart femmes / hommes</td>${COLS.map(([v]) => { const f = sal(v, 'Femmes'), h = sal(v, 'Hommes'); return `<td class="num">${f && h ? signedPct(100 * (f.net / h.net - 1), 0) : '–'}</td>`; }).join('')}</tr>`;
+      body += `<tr class="em-sal-total"><td>Ensemble</td>${COLS.map(([v]) => cell(sal(v, 'Ensemble'))).join('')}</tr>`;
+      $('emSal').innerHTML = `<table class="data-table em-sal"><thead><tr><th>${by === 'cat' ? 'Catégorie' : by === 'pcs' ? 'Métier (catégorie socioprofessionnelle)' : by === 'status' ? 'Statut' : by === 'sex' ? 'Sexe' : 'Âge'}</th>${COLS.map(([, l, short]) => `<th class="num"><span class="em-long">${l}</span><span class="em-short">${short}</span></th>`).join('')}</tr></thead><tbody>${body}</tbody></table>`;
+    }
+    drawSal('cat');
+    unitChips($('emSalBy'), drawSal);
+    const hosp = sal('FPH (ensemble)', 'PCS cadres et professions intellectuelles supérieures'), fpt = sal('FPT', 'Ensemble'), fpe = sal('FPE', 'Ensemble');
+    $('emSalNote').innerHTML = `Salaire net mensuel moyen en équivalent temps plein, ${y}, primes comprises, hors militaires. Ce sont des moyennes : un écart entre groupes mêle métiers, ancienneté et temps de travail, ce n’est pas un écart à poste égal. Les cadres hospitaliers (${eur(hosp.net)}) comptent les médecins ; les agents territoriaux gagnent en moyenne ${pctS(100 * (1 - fpt.net / fpe.net), 0)} de moins que ceux de l’État, avec beaucoup plus d’agents de catégorie C. Source : ${link(W.url, 'DGAFP, rapport annuel 2026')}.`;
+    $('emSynQ').innerHTML = `<strong>À demander :</strong> l’État vote chaque année un plafond d’emplois par ministère, et chaque assemblée locale fixe ses effectifs. Aucun de ces votes ne met la masse salariale d’une administration en face du service rendu (voir <a href="#pistes">Coût et résultats</a>).<ul><li>Pour ${md(last.d1, 0)} par an, quel document relie, administration par administration, les emplois payés à un résultat pour le public ?</li><li>Qui devrait le publier : le gouvernement dans les rapports annuels de performances, et chaque exécutif local dans son rapport social unique ?</li></ul>`;
   }
 
   /* ---------- 1. National series ---------- */
@@ -316,9 +373,9 @@
         ],
         q: `<strong>À demander :</strong> Bercy compte ${nf(b0[1] * 1000 - b1[1] * 1000)} agents de moins qu’en ${b0[0]}, pendant que l’impôt se dématérialisait (les à-coups de 2008 à 2011 tiennent aux changements de périmètre du ministère). Dans le même temps, la dette est passée de ${nf(d0[1], 0)} % à ${nf(d1[1], 0)} % du PIB et les échanges de biens sont déficitaires chaque année depuis ${deficitSince}. Les indicateurs de performance publiés pour ces missions mesurent des délais de traitement et des taux de recouvrement, jamais la trajectoire de la dette ni la compétitivité.<ul><li>Qui répond de la dette ? Les lois de finances sont préparées par le gouvernement (ministres de l’Économie et du Budget, administrations de Bercy) et votées par le Parlement.</li><li>Quel indicateur relie le coût des administrations économiques à un résultat pour le public : recettes, dette, emplois, commerce extérieur ?</li></ul>` },
       { id: 'sante', tag: 'Santé', title: 'Hôpital public : plus de médecins et de soignants, un tiers de cadres de santé en moins… et plus d’administratifs',
-        facts: [k(`Rémunérations de la fonction santé, ${fy.at(-1)}`, md(health.d1.at(-1)), `${growth(real(health.d1[0], fy[0]), real(health.d1.at(-1), fy.at(-1)))} depuis ${fy[0]}, inflation déduite`), k(`Administratifs des hôpitaux publics, ${h1.year}`, nf(h1.admin), `ETP ; ${growth(h0.admin, h1.admin)} depuis ${h0.year} (${pctS(100 * h0.admin / h0.total)} puis ${pctS(100 * h1.admin / h1.total)} des emplois)`), k('Cadres de santé', nf(h1.careManagers), `ETP ; ${growth(h0.careManagers, h1.careManagers)} depuis ${h0.year}`), k('Médecins salariés, infirmiers', `${growth(h0.doctors, h1.doctors)} · ${growth(h0.nurses, h1.nurses)}`, `depuis ${h0.year} (ETP) ; aides-soignants ${growth(h0.aides, h1.aides)}`)],
+        facts: [k(`Rémunérations de la fonction santé, ${fy.at(-1)}`, md(health.d1.at(-1)), `${growth(real(health.d1[0], fy[0]), real(health.d1.at(-1), fy.at(-1)))} depuis ${fy[0]}, inflation déduite`), k(`Administratifs des hôpitaux publics, ${h1.year}`, nf(h1.admin), `ETP ; ${growth(h0.admin, h1.admin)} depuis ${h0.year} (${pctS(100 * h0.admin / h0.total)} puis ${pctS(100 * h1.admin / h1.total)} des emplois)`), k('Cadres de santé', nf(h1.careManagers), `ETP ; ${growth(h0.careManagers, h1.careManagers)} depuis ${h0.year}`), k('Médecins salariés, infirmiers', `${growth(h0.doctors, h1.doctors)} · ${growth(h0.nurses, h1.nurses)}`, `depuis ${h0.year} (ETP) ; aides-soignants ${growth(h0.aides, h1.aides)}`), k(`Soignants et médecins, part des emplois`, `${pctS(100 * (h0.care + h0.doctors) / h0.total)} → ${pctS(100 * (h1.care + h1.doctors) / h1.total)}`, `${h0.year} puis ${h1.year} ; personnel soignant ${growth(h0.care, h1.care)}, emplois totaux ${growth(h0.total, h1.total)}`)],
         charts: [{ id: 'piHosp', title: `Hôpitaux publics, emplois en ETP (indice 100 en ${h0.year})`, series: [['Administratifs', 'admin', 'var(--tx-2)'], ['Médecins salariés', 'doctors', 'var(--tx-1)'], ['Infirmiers', 'nurses', 'var(--tx-3)'], ['Aides-soignants', 'aides', 'var(--tx-5)'], ['Cadres de santé', 'careManagers', 'var(--tx-7)']].map(([name, key, color]) => ({ name, color, points: H.map(h => ({ x: h.year, value: 100 * h[key] / h0[key] })) })), format: v => nf(v, 0), tick: v => nf(v), zero: false, legend: true }],
-        q: `<strong>À demander :</strong> en 2000, l’Organisation mondiale de la santé classait le système de santé français au premier rang mondial (${link('https://www.who.int/publications/i/item/924156198X', 'Rapport sur la santé dans le monde 2000')}). Dans les hôpitaux publics, la part des administratifs a peu bougé (${pctS(100 * h0.admin / h0.total)} des ETP en ${h0.year}, ${pctS(100 * h1.admin / h1.total)} en ${h1.year}, secrétaires médicales comprises) : le poids de la gestion se mesure-t-il ailleurs (temps des soignants passé à coder et à remplir, agences régionales de santé, tarification à l’activité) ?<ul><li>Le vieillissement de la population était annoncé dès les années 1990 : qui a fixé, année après année, le nombre de médecins et d’infirmiers formés ?</li><li>Pourquoi le nombre de cadres de santé a-t-il baissé de ${nf(Math.abs(100 * (h1.careManagers / h0.careManagers - 1)), 0)} % quand celui des administratifs augmentait ?</li></ul>` },
+        q: `<strong>À demander :</strong> en 2000, l’Organisation mondiale de la santé classait le système de santé français au premier rang mondial (${link('https://www.who.int/publications/i/item/924156198X', 'Rapport sur la santé dans le monde 2000')}). Dans les hôpitaux publics, la part des administratifs a peu bougé (${pctS(100 * h0.admin / h0.total)} des ETP en ${h0.year}, ${pctS(100 * h1.admin / h1.total)} en ${h1.year}, secrétaires médicales comprises), celle des soignants et des médecins a un peu baissé (${pctS(100 * (h0.care + h0.doctors) / h0.total)} puis ${pctS(100 * (h1.care + h1.doctors) / h1.total)}) : le poids de la gestion se mesure-t-il ailleurs (temps des soignants passé à coder et à remplir, agences régionales de santé, tarification à l’activité) ?<ul><li>Le vieillissement de la population était annoncé dès les années 1990 : qui a fixé, année après année, le nombre de médecins et d’infirmiers formés ?</li><li>Pourquoi le nombre de cadres de santé a-t-il baissé de ${nf(Math.abs(100 * (h1.careManagers / h0.careManagers - 1)), 0)} % quand celui des administratifs augmentait ?</li></ul>` },
       { id: 'ecole', tag: 'École', title: 'Enseignement : premier poste de rémunérations publiques, des résultats PISA en baisse',
         facts: [k(`Rémunérations de l’enseignement, ${fy.at(-1)}`, md(edu.d1.at(-1)), `${growth(real(edu.d1[0], fy[0]), real(edu.d1.at(-1), fy.at(-1)))} depuis ${fy[0]}, inflation déduite`), k('PISA mathématiques', `${nf(p1.math)} points`, `${p1.year} ; ${nf(p0.math)} en ${p0.year}`), k('PISA compréhension de l’écrit', `${nf(p1.reading)} points`, `${p1.year} ; ${nf(p0.reading)} en ${p0.year}`)],
         charts: [
@@ -458,7 +515,7 @@
       { id: 'growth', label: `Évolution ${T.year0}–${T.year}`, unit: '% par habitant', val: d => 100 * ((d.personnelTotal / d.population) / (d.personnel0 / d.population0) - 1), fmt: v => signedPct(v), desc: `Évolution des frais de personnel locaux par habitant entre ${T.year0} et ${T.year}, en euros courants` },
       { id: 'seats', label: 'Élus municipaux', unit: 'pour 1 000 habitants', val: d => 1000 * d.elected.municipaux / d.population, fmt: v => nf(v, 1), desc: 'Conseillers municipaux en fonction (répertoire national des élus) pour 1 000 habitants' },
       { id: 'allElected', label: 'Tous les élus locaux', unit: 'pour 1 000 habitants', val: d => 1000 * (d.elected.municipaux + d.elected.departementaux + d.elected.regionaux) / d.population, fmt: v => nf(v, 1), desc: 'Conseillers municipaux, départementaux et part des conseillers régionaux en fonction, pour 1 000 habitants' },
-      { id: 'paid', label: 'Indemnités versées', unit: '€ par habitant', val: d => (d.paid.communes + d.paid.gfp) / d.population, fmt: v => `${nf(v, 1)} €`, desc: `Indemnités de fonction payées en ${T.paid.year} par les communes et les intercommunalités (réparties selon la population de leurs communes), par habitant` },
+      { id: 'paid', label: 'Indemnités versées', unit: '€ par habitant', val: d => paidAll_(d) / d.population, fmt: v => `${nf(v, 1)} €`, desc: `Indemnités de fonction payées en ${T.paid.year} par les communes, les intercommunalités, le département et la région (intercommunalités, régions et collectivités uniques réparties selon la population), par habitant` },
       { id: 'cap', label: 'Plafond indemnités maires et adjoints', unit: '€ par habitant', val: d => d.cap / d.population, fmt: v => eur(v), desc: 'Plafond légal annuel des indemnités des maires et adjoints (barème 2026), par habitant' },
       { id: 'small', label: 'Petites communes', unit: '% de communes de moins de 500 hab.', val: d => 100 * d.smallCommunes / d.communes, fmt: v => pctS(v, 0), desc: 'Part des communes de moins de 500 habitants' },
     ];
@@ -523,7 +580,7 @@
       const shown = showAll ? list : [...list.slice(0, 8), ...list.slice(-4)];
       const sel = selected && by[selected];
       $('emRankTitle').textContent = showAll ? `Les ${list.length} départements` : 'Les plus hauts et les plus bas';
-      const pick = sel ? `<div class="em-pick"><h4>${esc(sel.name)} (${esc(sel.code)})</h4><div class="em-big">${ind.fmt(ind.val(sel))} <small style="font-size:.8rem;font-weight:500;color:var(--c-muted)">${esc(ind.unit)}</small></div><small style="color:var(--c-muted)">${list.findIndex(x => x.d === sel) + 1}e sur ${list.length}</small><dl><dt>Population</dt><dd>${nf(sel.population)}</dd>${WD[sel.code] ? `<dt>Agents publics civils (${D.workforce.year})</dt><dd>${nf(WD[sel.code].total_civils)}</dd><dt>dont État, territoriale, hospitalière</dt><dd>${nf(WD[sel.code].fpe_civils)} · ${nf(WD[sel.code].fpt)} · ${nf(WD[sel.code].fph)}</dd><dt>ETP pour 1 000 habitants</dt><dd>${nf(WD[sel.code].taux_admin_total_etp_1000hab, 1)}</dd>` : ''}<dt>Personnel des communes</dt><dd>${money(sel.personnel.communes)}</dd><dt>des intercommunalités</dt><dd>${money(sel.personnel.gfp)}</dd><dt>du département</dt><dd>${sel.personnel.departement ? money(sel.personnel.departement) : sel.code === '75' ? 'avec la commune' : 'collectivité unique'}</dd><dt>part de la région</dt><dd>${money(sel.personnel.region)}</dd><dt>Total par habitant</dt><dd>${eur(sel.personnelTotal / sel.population)}</dd><dt>Conseillers municipaux</dt><dd>${nf(sel.elected.municipaux)} · ${nf(1000 * sel.elected.municipaux / sel.population, 1)} ‰</dd><dt>dont adjoints</dt><dd>${nf(sel.elected.adjoints)}</dd><dt>Conseillers départementaux</dt><dd>${nf(sel.elected.departementaux)}</dd><dt>Députés, sénateurs</dt><dd>${nf(sel.elected.deputes)}, ${nf(sel.elected.senateurs)}</dd><dt>Indemnités versées (communes, intercos)</dt><dd>${money(sel.paid.communes + sel.paid.gfp)} en ${T.paid.year}</dd><dt>Plafond indemnités maires et adjoints</dt><dd>${money(sel.cap)} / an</dd></dl></div>` : '';
+      const pick = sel ? `<div class="em-pick"><h4>${esc(sel.name)} (${esc(sel.code)})</h4><div class="em-big">${ind.fmt(ind.val(sel))} <small style="font-size:.8rem;font-weight:500;color:var(--c-muted)">${esc(ind.unit)}</small></div><small style="color:var(--c-muted)">${list.findIndex(x => x.d === sel) + 1}e sur ${list.length}</small><dl><dt>Population</dt><dd>${nf(sel.population)}</dd>${WD[sel.code] ? `<dt>Agents publics civils (${D.workforce.year})</dt><dd>${nf(WD[sel.code].total_civils)}</dd><dt>dont État, territoriale, hospitalière</dt><dd>${nf(WD[sel.code].fpe_civils)} · ${nf(WD[sel.code].fpt)} · ${nf(WD[sel.code].fph)}</dd><dt>ETP pour 1 000 habitants</dt><dd>${nf(WD[sel.code].taux_admin_total_etp_1000hab, 1)}</dd>` : ''}<dt>Personnel des communes</dt><dd>${money(sel.personnel.communes)}</dd><dt>des intercommunalités</dt><dd>${money(sel.personnel.gfp)}</dd><dt>du département</dt><dd>${sel.personnel.departement ? money(sel.personnel.departement) : sel.code === '75' ? 'avec la commune' : 'collectivité unique'}</dd><dt>part de la région</dt><dd>${money(sel.personnel.region)}</dd><dt>Total par habitant</dt><dd>${eur(sel.personnelTotal / sel.population)}</dd><dt>Conseillers municipaux</dt><dd>${nf(sel.elected.municipaux)} · ${nf(1000 * sel.elected.municipaux / sel.population, 1)} ‰</dd><dt>dont adjoints</dt><dd>${nf(sel.elected.adjoints)}</dd><dt>Conseillers départementaux</dt><dd>${nf(sel.elected.departementaux)}</dd><dt>Députés, sénateurs</dt><dd>${nf(sel.elected.deputes)}, ${nf(sel.elected.senateurs)}</dd><dt>Indemnités versées en ${T.paid.year}</dt><dd>${money(paidAll_(sel))}</dd><dt>dont communes, intercommunalités</dt><dd>${money(sel.paid.communes)} · ${money(sel.paid.gfp)}</dd><dt>dont département, part de la région</dt><dd>${sel.paid.departement ? money(sel.paid.departement) : sel.code === '75' ? 'avec la commune' : '–'} · ${money(sel.paid.region)}</dd><dt>Plafond indemnités maires et adjoints</dt><dd>${money(sel.cap)} / an</dd></dl></div>` : '';
       const max = Math.max(...list.map(x => Math.abs(x.v)));
       $('emRank').innerHTML = pick + '<div id="emRankRows"></div>';
       rows($('emRankRows'), shown.map((x, i) => ({ id: x.d.code, label: `${list.indexOf(x) + 1}. ${x.d.name}`, value: x.v, focus: x.d.code === selected, color: colorOf(x.v) === RAMP[0] ? RAMP[1] : colorOf(x.v) })), { format: v => ind.fmt(v), max, onPick: r => select(r.id) });
@@ -552,7 +609,7 @@
       { k: 'sph', label: 'pour 1 000 hab.', val: d => 1000 * d.elected.municipaux / d.population, fmt: v => nf(v, 1), foot: () => 1000 * S_(d => d.elected.municipaux) / P_() },
       { k: 'cd', label: 'Conseillers dép.', val: d => d.elected.departementaux, fmt: v => nf(v), foot: () => S_(d => d.elected.departementaux) },
       { k: 'leg', label: 'Sièges légaux mun.', val: d => d.seats, fmt: v => nf(v), foot: () => S_(d => d.seats) },
-      { k: 'paid', label: `Indemnités versées ${T.paid.year}, € / hab.`, val: d => (d.paid.communes + d.paid.gfp) / d.population, fmt: v => nf(v, 1), foot: () => S_(d => d.paid.communes + d.paid.gfp) / P_() },
+      { k: 'paid', label: `Indemnités versées ${T.paid.year}, € / hab.`, val: d => paidAll_(d) / d.population, fmt: v => nf(v, 1), foot: () => S_(paidAll_) / P_() },
       { k: 'cap', label: 'Plafond indemnités, € / hab.', val: d => d.cap / d.population, fmt: v => nf(v, 1), foot: () => S_(d => d.cap) / P_() },
     ];
     let sortK = 'agr', asc = false;
@@ -703,6 +760,7 @@
 
   function init([D, geo]) {
     REF = D.reference;
+    initSynthese(D);
     initNational(D);
     initWorkforce(D);
     initEurope(D);

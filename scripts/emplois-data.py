@@ -110,8 +110,17 @@ def state():
         missions.append({'code': m['code'], 'type': m['type'], 'name': m['name'], 't2': r(t2, 1), 'cp': r(m['cp'], 1), 'progs': progs})
     missions.sort(key=lambda m: -m['t2'])
     src = etat['sources'].get('plf25-depenses-destination', {})
+    # Budget général: all credits of paiement except tax refunds and rebates (« remboursements et dégrèvements », rd), and its titre 2.
+    by = {}
+    for t in etat['nature']['titres']:
+        key = (t['budget'], bool(t['rd']), t['titre'])
+        by[key] = by.get(key, 0) + (t['cp'] or 0)
+    general = {'cpNet': r(sum(v for (b, rd, _), v in by.items() if b == 'BG' and not rd), 1),
+               'cpRefunds': r(sum(v for (b, rd, _), v in by.items() if b == 'BG' and rd), 1),
+               't2': r(sum(v for (b, rd, t), v in by.items() if b == 'BG' and t == '2'), 1),
+               't2Annexes': r(sum(v for (b, rd, t), v in by.items() if b == 'BA' and t == '2'), 1)}
     return {'year': 2025, 'source': 'Projet de loi de finances 2025, crédits de paiement par mission, programme et titre', 'url': src.get('page'),
-            'missions': missions, 'pensions': pensions, 'powers': powers, 'unit': 'M€'}
+            'missions': missions, 'pensions': pensions, 'powers': powers, 'general': general, 'unit': 'M€'}
 
 
 # ---------- 4. Local authorities: frais de personnel ----------
@@ -473,6 +482,61 @@ def indemnities_paid():
     return levels, posts, communes, others
 
 
+def name_key(text):
+    import unicodedata
+    s = unicodedata.normalize('NFD', str(text)).encode('ascii', 'ignore').decode().upper()
+    for ch in "-'’":
+        s = s.replace(ch, ' ')
+    words = [w for w in s.split() if w not in ('DE', 'DES', 'DU', 'LA', 'LE', 'LES', 'L', 'D', 'ET') and not w.isdigit()]   # « DEP INDRE-ET-LOIRE 37 »
+    return ' '.join(words)
+
+
+# Collectivités uniques, listed as départements in the accounts 653: the départements they cover.
+UNIQUE_COLLECTIVITIES = {'CTU GUYANE': ['973'], 'CTU MARTINIQUE': ['972'], 'COLLECTIVITE CORSE': ['2A', '2B'],
+                         'COLLECTIVITE EUROPEENNE ALSACE': ['67', '68']}
+
+
+def paid_dep_and_region(others, dep_meta, dep_pop):
+    """Indemnities paid by départements and régions (accounts 653), attached to départements.
+    Returns {'byDep': {code: (département part €, région part €)}, 'matched': n}; stops if a name matches nothing."""
+    dep_by_name = {name_key(d['nom']): code for code, d in dep_meta.items()}
+    dep_by_name['TERRITOIRE BELFORT'] = '90'
+    reg_entities = load(LOCAL / 'regions' / '_entities.json')
+    reg_by_name = {name_key(n): c for c, n in zip(reg_entities['codes'], reg_entities['names'])}
+    by_dep, unmatched, matched = {}, [], 0
+
+    def share(targets, amount, slot):
+        weight = sum(dep_pop.get(t, 0) for t in targets)
+        for t in targets:
+            if weight:
+                cur = by_dep.setdefault(t, [0.0, 0.0])
+                cur[slot] += amount * dep_pop.get(t, 0) / weight
+
+    for ent in others.values():
+        if ent['level'] not in ('departement', 'region'):
+            continue
+        key = name_key(ent['name'])
+        if ent['level'] == 'departement':
+            if key in UNIQUE_COLLECTIVITIES:
+                targets = UNIQUE_COLLECTIVITIES[key]
+            else:
+                code = dep_by_name.get(key[4:] if key.startswith('DEP ') else key)
+                targets = [code] if code else []
+            slot = 0
+        else:
+            rc = reg_by_name.get(key[4:] if key.startswith('REG ') else key)
+            targets = [d for d, m in dep_meta.items() if rc and m['codeRegion'] == rc]
+            slot = 1
+        if not targets:
+            unmatched.append(ent['name'])
+            continue
+        matched += 1
+        share(targets, ent['indemnities'], slot)
+    if unmatched:
+        raise SystemExit(f'Indemnités 653 : collectivités non rattachées à un département : {unmatched}')
+    return {'byDep': {k: (v[0], v[1]) for k, v in by_dep.items()}, 'matched': matched}
+
+
 def indemnity_cap(pop, n_seats):
     """Maximum yearly gross indemnities of the mayor and of the largest allowed number of deputies (euros)."""
     if not n_seats:
@@ -601,6 +665,13 @@ def communes_and_departments():
         if ent['level'] == 'gfp' and weight:
             for i in idx:
                 deps[communes[i]['dep']]['paidGfp'] = deps[communes[i]['dep']].get('paidGfp', 0) + ent['indemnities'] * communes[i]['pop'] / weight
+    # départements and régions: accounts 653 are listed by SIREN and name (« DEP AIN », « REG BRETAGNE »); the name is matched to
+    # the département / région, collectivités uniques are shared between their départements by population, like regions.
+    paid_matched = paid_dep_and_region(paid_others, dep_meta, {code: d['pop'] for code, d in deps.items()})
+    for code, (dep_part, reg_part) in paid_matched['byDep'].items():
+        if code in deps:
+            deps[code]['paidDep'] = dep_part
+            deps[code]['paidReg'] = reg_part
 
     def dep_targets(code, y):
         # Ville de Paris: one collectivity, published as the commune 75056, from 2019; Métropole de Lyon: already an intercommunalité
@@ -634,7 +705,7 @@ def communes_and_departments():
                          'elected': {k: r(rdep.get(code, {}).get(k, 0), 2) for k in ('municipaux', 'adjoints', 'departementaux', 'regionaux', 'deputes', 'senateurs')},
                          'personnel': {k: r(v) for k, v in d['fp'].items()}, 'personnelTotal': r(total),
                          'personnel0': r(total0), 'population0': d['pop0'],
-                         'paid': {'communes': r(d.get('paid', 0)), 'gfp': r(d.get('paidGfp', 0)), 'cap2025': r(d.get('cap25', 0))}})
+                         'paid': {'communes': r(d.get('paid', 0)), 'gfp': r(d.get('paidGfp', 0)), 'departement': r(d.get('paidDep', 0)), 'region': r(d.get('paidReg', 0)), 'cap2025': r(d.get('cap25', 0))}})
 
     # Regions: seats per inhabitant
     regions = []
@@ -659,7 +730,7 @@ def communes_and_departments():
               'communesPaid': sum(1 for c in communes if c['paid'] is not None), 'communesAboveCap': sum(1 for c in communes if c['paid'] and c['cap25'] and c['paid'] > c['cap25'] * 1.001),
               'communesBelowLegal': sum(1 for c in communes if c['seats'] and c['cm'] < c['seats']), 'communesWithoutRne': sum(1 for c in communes if c['seats'] and not c['cm'])}
     big = sorted(((paid_others[k]['indemnities'], paid_others[k]['name'], paid_others[k]['level']) for k in paid_others), reverse=True)[:10]
-    paid = {'year': paid_year, 'levels': paid_levels, 'posts': paid_posts, 'largestOthers': big,
+    paid = {'year': paid_year, 'levels': paid_levels, 'posts': paid_posts, 'largestOthers': big, 'depRegMatched': paid_matched['matched'],
             'source': 'DGFiP, balances comptables des collectivités (comptes de gestion), comptes 653', 'url': 'https://data.economie.gouv.fr/explore/?q=balances+comptables'}
     return {'year': year, 'year0': min(fp_years), 'strata': strata, 'departments': out_deps, 'regions': regions, 'totals': totals, 'rne': elected, 'paid': paid}, compact
 

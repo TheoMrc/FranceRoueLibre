@@ -152,3 +152,28 @@ test('indemnities actually paid (accounts 653) against the legal base ceiling', 
   assert.ok(small.paid < small.cap2025); // small communes pay well under the ceiling
   assert.ok(communes.rows.every(r => r.length === 11));
 });
+
+test('in brief: State personnel credits against the budget général, and the payer split', () => {
+  const g = data.state.general;
+  assert.ok(Math.abs((g.t2 + g.t2Annexes) / 1000 - 158.6) < 0.1, 'titre 2 of the budget général and budgets annexes, PLF 2025');
+  assert.ok(g.t2 / g.cpNet > 0.33 && g.t2 / g.cpNet < 0.37, 'personnel is about a third of the budget général, refunds excluded');
+  const last = data.national.years.at(-1);
+  const locYear = Math.max(...data.local.levels[0].years);
+  const loc = data.local.levels.reduce((s, l) => s + (l.personnel[l.years.indexOf(locYear)] || 0), 0) / 1e9;
+  const rest = last.d1 - (g.t2 + g.t2Annexes) / 1000 - loc;
+  assert.ok(rest > 80 && rest < 150, `remainder (hospitals, social security, operators) stays an order of magnitude: ${rest}`);
+  assert.match(html, /id="synthese"/);
+  assert.match(js, /function initSynthese/);
+});
+
+test('indemnities of départements and régions are attached to départements without loss', () => {
+  const deps = data.territory.departments;
+  assert.equal(data.territory.paid.depRegMatched, 112, '98 départements or collectivités uniques and 14 régions');
+  const year = data.territory.paid.year;
+  const lvl = l => data.territory.paid.levels.find(x => x.year === year && x.level === l).indemnities;
+  const sum = k => deps.reduce((s, d) => s + (d.paid[k] || 0), 0);
+  assert.ok(Math.abs(sum('departement') - lvl('departement')) / lvl('departement') < 0.001);
+  assert.ok(Math.abs(sum('region') - lvl('region')) / lvl('region') < 0.001);
+  assert.ok(deps.find(d => d.code === '33').paid.departement > 0);
+  assert.ok(deps.find(d => d.code === '67').paid.departement > 0, 'Collectivité européenne d’Alsace, shared with the Haut-Rhin');
+});

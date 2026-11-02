@@ -89,8 +89,23 @@
         <h1>Agents publics et élus : <span class="gradient-text">combien ils sont, ce qu’ils coûtent, et où.</span></h1>
         <p class="hero__lead" id="emLead">Enseignants, soignants, policiers, militaires, agents des mairies, élus locaux : la rémunération des personnes qui font fonctionner les services publics est le deuxième poste de dépense publique après les prestations sociales. Cette page en mesure le coût, le cartographie échelon par échelon, et pose la question que les comptes publics ne posent jamais : pour quel résultat ?</p>
         <p class="em-scope">Cette page ne traite que des <strong>salaires publics et des élus</strong>. Le reste de la dépense a ses propres pages : <a href="etat.html">Budget de l’État</a>, <a href="operateurs.html">Opérateurs</a>, <a href="secu.html">Sécurité sociale</a>, <a href="aides.html">Aides et subventions</a>, <a href="marches.html">Marchés publics</a>, et la <a href="index.html#explorer">carte des comptes locaux</a>.</p>
-        <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#effectifs">Effectifs</a><a href="#europe">Europe</a><a href="#pistes">Coût et résultats</a><a href="#fonctions">Par pôle de dépense</a><a href="#etat">État</a><a href="#collectivites">Collectivités</a><a href="#carte">Carte</a><a href="#elus">Élus</a><a href="#commune">Ma commune</a><a href="#non-publie">Ce qui manque</a><a href="#methode">Méthode</a></nav>
+        <nav class="tx-index" aria-label="Sections de la page"><a href="#synthese">En bref</a><a href="#ensemble">Depuis 1960</a><a href="#effectifs">Effectifs</a><a href="#europe">Europe</a><a href="#pistes">Coût et résultats</a><a href="#fonctions">Par pôle de dépense</a><a href="#etat">État</a><a href="#collectivites">Collectivités</a><a href="#carte">Carte</a><a href="#elus">Élus</a><a href="#commune">Ma commune</a><a href="#non-publie">Ce qui manque</a><a href="#methode">Méthode</a></nav>
       </div></div>
+    </section>
+
+    <section class="section section--alt" id="synthese" aria-labelledby="emSynTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">En bref · Insee, PLF, OFGL, DGAFP</span><h2 id="emSynTitle">Ce que pèsent les salaires publics</h2><p class="lead" id="emSynLead"></p></div>
+        <div class="kpis" id="emSynKpis"></div>
+        <div class="grid-2">
+          <div class="panel"><h3>Qui verse ces rémunérations</h3><div id="emSynPayers"></div><p class="note" id="emSynPayersNote"></p></div>
+          <div class="panel"><h3>Qui emploie les agents, fin <span id="emSynYear"></span></h3><div id="emSynEmployers"></div><p class="note" id="emSynEmployersNote"></p></div>
+        </div>
+        <div class="panel"><div class="panel__head"><h3 id="emSalTitle">Qui gagne combien : salaire net mensuel moyen</h3></div>
+          <div class="chip-select" id="emSalBy" role="group" aria-label="Regrouper par" style="margin-bottom:1rem"><button type="button" data-unit="cat" class="active">Catégorie</button><button type="button" data-unit="pcs">Métier</button><button type="button" data-unit="status">Statut</button><button type="button" data-unit="sex">Sexe</button><button type="button" data-unit="age">Âge</button></div>
+          <div id="emSal" class="table-wrap"></div><p class="note" id="emSalNote"></p></div>
+        <div class="em-piste__q" id="emSynQ"></div>
+      </div>
     </section>
 
     <section class="section" id="ensemble" aria-labelledby="emAllTitle">

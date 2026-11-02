@@ -189,3 +189,20 @@ main .panel + .grid-2, main .panel + .panel { margin-top: var(--sp-3); }
   main .kpi small { font-size: .7rem; }
   .em-detail .em-big { font-size: 1.6rem; }
 }
+
+/* « En bref »: average salaries by group and versant, with a thin bar under each amount */
+#emSal .em-sal { min-width: 0; }
+.em-sal td.num { position: relative; min-width: 6.2rem; }
+.em-salbar { position: absolute; right: .8rem; bottom: .35rem; height: 3px; width: calc((100% - 1.6rem) * var(--w) / 100); border-radius: 2px; background: color-mix(in srgb, var(--tx-1) 70%, transparent); opacity: .8; }
+.em-sal .em-sal-total td { font-weight: 700; color: var(--c-ink); }
+.em-sal tr.muted td { color: var(--c-muted); font-size: .8rem; }
+.em-sal .em-short { display: none; }
+@media (max-width: 560px) {
+  .em-sal th, .em-sal td { padding: .55rem .4rem; font-size: .8rem; }
+  .em-sal th { white-space: normal; }
+  .em-sal .em-long { display: none; }
+  .em-sal .em-short { display: inline; }
+  .em-sal td:first-child { padding-left: .2rem; }
+  .em-sal td.num { min-width: 0; }
+  .em-salbar { right: .45rem; width: calc((100% - .9rem) * var(--w) / 100); }
+}
