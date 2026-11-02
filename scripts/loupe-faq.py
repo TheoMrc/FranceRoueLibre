@@ -234,6 +234,7 @@ def debt_per_person(q):
     p_now = pop.get(year + 1) or pop[max(y for y in pop if y <= year + 1)]
     per = lambda d, y: d * 1e9 / (pop.get(y + 1) or pop[max(k for k in pop if k <= y + 1)])
     d17, d19 = q['2017-T4'][0], q['2019-T4'][0]
+    prev = f'{year - 1}-{quarter}'
     d, te = cofog()
     ylast = max(d['years'])
     interest = te['GF0107'][ylast] * 1e9 / pop[ylast]
@@ -241,14 +242,12 @@ def debt_per_person(q):
         f'**Environ {fr(round(debt * 1e9 / p_now, -2))} € par habitant.** La dette publique s’élevait à **{fr(debt)} Md€** '
         f'{QUARTER_END[quarter]} {year} (État, Sécurité sociale et collectivités, au sens de Maastricht), pour '
         f'{fr(p_now / 1e6, 1)} millions d’habitants.\n\n'
+        f'- En un an ({QUARTER_END[quarter]} {year - 1} à {QUARTER_END[quarter]} {year}) : **+{fr(round(debt * 1e9 / p_now - per(q[prev][0], year - 1), -1))} € '
+        f'par habitant** (+{fr(debt - q[prev][0])} Md€).\n'
         f'- Fin 2017 : {fr(round(per(d17, 2017), -2))} € par habitant ; fin 2019 : {fr(round(per(d19, 2019), -2))} €.\n'
         f'- Rapportée à la richesse produite en un an, elle représente {fr(ratio, 1)} % du PIB.\n'
         f'- Les seuls intérêts ont coûté environ **{fr(round(interest, -1))} € par habitant** en {ylast} '
         f'({fr(te["GF0107"][ylast])} Md€).\n\n'
-        f'C’est une moyenne : personne ne doit cette somme personnellement. La dette n’est pas remboursée d’un coup, elle '
-        f'est renouvelée en empruntant à nouveau, et ce sont les intérêts qui pèsent chaque année sur le budget. Il '
-        f's’agit de la dette brute : les administrations détiennent aussi des actifs (participations, trésorerie), non '
-        f'déduits ici.\n\n'
         f'Le détail année par année : [Comptes publics](index.html#comptes). Sources : [Insee, dette trimestrielle]({INSEE_PAGE}), '
         f'[Insee, population au 1er janvier]({popd["url"]}), [Eurostat et Insee, dépenses par fonction]({d["url"]}).')
     return {
