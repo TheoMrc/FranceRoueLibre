@@ -54,13 +54,13 @@ const dom = {
   clearSelection: $('clearSelection'),
   zoomIn: $('zoomIn'),
   zoomOut: $('zoomOut'),
-  resetView: $('resetView'),
+  pick: $('mapPick'),
   dataStatus: $('dataStatus'),
   scopeText: $('scopeText')
 };
 
 const state = {
-  mode: 'projects',
+  mode: 'communes',
   communeYear: 2025,
   localYear: 2025,
   metric: 'total',
@@ -1381,6 +1381,7 @@ function renderInspector(rows, summary) {
   const missing = state.mode === 'communes' ? filteredMissingCommunes() : [];
   setText(dom.inspectorSummary, missing.length && state.selectedCommune ? (missing[0].ambiguous ? `Plusieurs comptes partagent ce code en ${state.communeYear} : ils sont exclus pour éviter un double compte.` : `Aucun compte correspondant pour ${context.name} en ${state.communeYear}. Une absence ne signifie pas zéro.`) : `${scopeText} Lecture ${metricText}.`);
   renderInspectorStats(summary, rows);
+  renderPick(context);
   let items = []; let heading = 'À la une'; let countLabel = '';
   if (state.mode === 'projects') { items = [...projectRowsForScope(rows)].sort((a, b) => projectMetric(b) - projectMetric(a)); heading = state.selectedCommune ? 'Projets de la commune' : 'Projets les plus financés'; countLabel = `${formatCount(rows.length)} projets`; }
   else if (state.mode === 'communes') { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); if (state.search || state.selectedCommune) items.push(...missing); heading = state.selectedCommune ? 'Commune sélectionnée' : state.selectedDepartment ? 'Communes du département' : 'Communes les plus dépensières'; countLabel = `${formatCount(rows.length)} comptes${missing.length ? ` · ${formatCount(missing.length)} non apparié${missing.length > 1 ? 's' : ''}` : ''}`; }
@@ -1393,6 +1394,44 @@ function renderInspector(rows, summary) {
   dom.projectList.appendChild(fragment);
   dom.more.hidden = items.length <= state.limit;
   dom.more.textContent = `Afficher davantage (${formatCount(items.length - state.limit)} restant${items.length - state.limit > 1 ? 's' : ''})`;
+}
+
+/* Small screens: the inspector sits under the map, far from the territory just tapped. A card over the map repeats
+   the selection's name and figures, with a link down to the full detail. Hidden by CSS when the inspector is beside. */
+function renderPick(context) {
+  const has = Boolean(state.selectedDepartment || state.selectedCommune || state.region || state.selectedGfp);
+  dom.mapFrame.classList.toggle('has-pick', has);
+  dom.pick.hidden = !has;
+  clearChildren(dom.pick);
+  if (!has) return;
+  const el = (tag, cls, text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text != null) node.textContent = text; return node; };
+  const head = el('div', 'map-pick__head');
+  const names = el('div');
+  names.append(el('span', 'map-pick__kicker', context.kicker), el('strong', 'map-pick__title', context.title));
+  const close = el('button', 'map-pick__close', '×'); close.type = 'button'; close.setAttribute('aria-label', 'Effacer la sélection');
+  close.addEventListener('click', clearSelection);
+  head.append(names, close);
+  const stats = el('div', 'map-pick__stats');
+  [...dom.inspectorStats.children].forEach(card => {
+    const value = card.lastChild?.textContent;
+    if (!value || value === '–' || value === '1') return;  // "1 compte" says nothing about one commune
+    const cell = el('span'); cell.append(el('small', '', card.firstChild?.textContent || ''), el('b', '', value)); stats.appendChild(cell);
+  });
+  const more = el('button', 'map-pick__more', 'Détail et liste ↓'); more.type = 'button';
+  more.addEventListener('click', () => document.querySelector('.inspector')?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }));
+  dom.pick.append(head, stats, more);
+}
+
+/* Phones: shorter first options, so the selects above the map stay readable. */
+function shortLabels() {
+  const small = matchMedia('(max-width: 680px)');
+  const apply = () => {
+    const first = (select, long, short) => { const option = select?.querySelector('option[value=""]'); if (option) option.textContent = small.matches ? short : long; };
+    first(dom.region, 'Toutes les régions', 'Région');
+    first(dom.scheme, 'Tous les dispositifs', 'Dispositif');
+  };
+  small.addEventListener?.('change', apply);
+  apply();
 }
 
 function renderTabs() {
@@ -1408,7 +1447,8 @@ function renderTabs() {
   dom.missingLegend.hidden = state.mode !== 'communes';
   dom.schemeFilter.hidden = state.mode !== 'projects';
   dom.scheme.disabled = state.mode !== 'projects';
-  dom.search.placeholder = state.mode === 'projects' ? 'Projet, bénéficiaire, commune…' : state.mode === 'communes' ? 'Commune, code INSEE, département…' : 'Territoire, code…';
+  const narrow = matchMedia('(max-width: 680px)').matches;
+  dom.search.placeholder = state.mode === 'projects' ? (narrow ? 'Projet, commune…' : 'Projet, bénéficiaire, commune…') : state.mode === 'communes' ? (narrow ? 'Commune, code INSEE…' : 'Commune, code INSEE, département…') : 'Territoire, code…';
 }
 
 function render() {
@@ -1493,7 +1533,6 @@ function setupListeners() {
   dom.scheme.addEventListener('change', event => { state.scheme = event.target.value; state.limit = 8; render(); });
   dom.reset.addEventListener('click', resetAll);
   dom.clearSelection.addEventListener('click', clearSelection);
-  dom.resetView.addEventListener('click', () => { state.selectedDepartment = ''; state.selectedCommune = ''; state.selectedGfp = ''; state.region = ''; dom.region.value = ''; render(); if (mapState.ready) updateCamera(true); });
   dom.zoomIn.addEventListener('click', () => mapState.map?.zoomIn({ duration: 300 }));
   dom.zoomOut.addEventListener('click', () => mapState.map?.zoomOut({ duration: 300 }));
   dom.more.addEventListener('click', () => { state.limit += 8; render(); });
@@ -1587,6 +1626,8 @@ async function init() {
     setupFilters();
     setupIndicators();
     setupListeners();
+    shortLabels();
+    if (state.mode !== 'projects') await loadModeData();
     const projectTotal = Object.values(projectIndex.counts || {}).reduce((a, b) => a + b, 0) || data.projects.length;
     setText(dom.dataStatus, `${formatCount(projectTotal)} projets · ${formatCount(data.communes.length)} communes`);
     setText(dom.scopeText, 'DGCL · OFGL · contours Etalab · 2012–2025');

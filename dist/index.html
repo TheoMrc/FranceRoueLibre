@@ -114,22 +114,17 @@
     <section id="explorer" class="explorer" aria-label="Explorer les dépenses publiques">
       <div class="explorer__bar">
         <div class="mode-tabs" role="tablist" aria-label="Niveau de dépense">
-          <button class="mode-tab active" type="button" role="tab" aria-selected="true" data-mode="projects">Projets aidés</button>
-          <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="communes">Communes</button>
+          <button class="mode-tab active" type="button" role="tab" aria-selected="true" data-mode="communes">Communes</button>
           <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="gfp" hidden>Intercos</button>
           <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="departments">Départements</button>
           <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="regions">Régions</button>
+          <button class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="projects">Projets aidés</button>
         </div>
         <div class="explorer__filters">
           <label class="search-field"><span class="sr-only">Rechercher un projet, une commune ou un territoire</span><input id="search" type="search" placeholder="Projet, bénéficiaire, commune…" autocomplete="off"></label>
           <label class="select-wrap"><span class="sr-only">Région</span><select id="region"><option value="">Toutes les régions</option></select></label>
           <label class="select-wrap scheme-filter"><span class="sr-only">Dispositif</span><select id="scheme"><option value="">Tous les dispositifs</option></select></label>
         <label class="select-wrap indicator-filter" id="indicatorWrap" hidden><span class="sr-only">Indicateur</span><select id="indicator"><option value="depenses-totales">Dépenses totales</option></select></label>
-          <div class="year-control" id="yearWrap" hidden>
-            <button class="year-play" id="yearPlay" type="button" aria-label="Animer les années"><svg viewBox="0 0 20 20" aria-hidden="true"><path class="i-play" d="M6 4.5v11l9-5.5z"/><path class="i-pause" d="M5.5 4.5h3v11h-3zM11.5 4.5h3v11h-3z"/></svg></button>
-            <label class="year-filter"><span class="sr-only">Exercice</span><select id="mapYear" aria-label="Exercice"></select></label>
-          </div>
-          <button id="reset" class="reset-btn" type="button" aria-label="Réinitialiser les filtres" title="Réinitialiser les filtres"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.5 10a6.5 6.5 0 1 0 1.9-4.6M3.5 3.5v3.2h3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
       </div>
 
@@ -139,7 +134,12 @@
             <div id="map" class="map" role="region" aria-label="Carte interactive des territoires français"></div>
             <div class="map-title" aria-live="polite"><span class="map-title__kicker" id="mapKicker">Vue cartographique</span><strong id="mapTitle">Montants par département</strong><span id="mapUnit" class="sr-only">Subventions accordées</span><span id="mapSubtitle" class="sr-only"></span></div>
             <div id="mapTooltip" class="map-tooltip" role="status" aria-live="polite" hidden></div>
-            <div class="map-controls" aria-label="Contrôles de carte"><button id="zoomIn" type="button" aria-label="Augmenter le zoom">+</button><button id="zoomOut" type="button" aria-label="Réduire le zoom">−</button><button id="resetView" type="button" aria-label="Recentrer la carte"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
+            <div class="map-controls" aria-label="Contrôles de carte"><button id="zoomIn" type="button" aria-label="Augmenter le zoom">+</button><button id="zoomOut" type="button" aria-label="Réduire le zoom">−</button><button id="reset" type="button" aria-label="Tout réinitialiser : filtres, sélection et vue de la carte" title="Tout réinitialiser (filtres, sélection, vue)"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.5 10a6.5 6.5 0 1 0 1.9-4.6M3.5 3.5v3.2h3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+            <div class="year-control map-year" id="yearWrap" hidden>
+              <button class="year-play" id="yearPlay" type="button" aria-label="Animer les années"><svg viewBox="0 0 20 20" aria-hidden="true"><path class="i-play" d="M6 4.5v11l9-5.5z"/><path class="i-pause" d="M5.5 4.5h3v11h-3zM11.5 4.5h3v11h-3z"/></svg></button>
+              <label class="year-filter"><span class="sr-only">Exercice</span><select id="mapYear" aria-label="Exercice"></select></label>
+            </div>
+            <div class="map-pick" id="mapPick" hidden></div>
             <div class="map-legend">
               <div class="map-dom" id="mapDom" role="group" aria-label="Outre-mer"></div>
               <div class="metric-toggle metric-toggle--map" role="group" aria-label="Unité de montant">
