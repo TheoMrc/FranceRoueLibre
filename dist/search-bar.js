@@ -1,66 +1,36 @@
-/* Header search box with suggestions, on every page. The engine (search-core.js and the SQLite worker)
-   is loaded only when the box is first focused. */
+/* Header search box, on every page. It gives the same suggestions as the big box of the home page (omni-search.js,
+   loaded here when the page does not already have it): pages and sections of the site, the Loupe for a question,
+   the spending search for a word. Pictograms (icons.js) are used when the page loads them. */
 (() => {
   const here = document.currentScript?.src || location.href;
   const asset = path => new URL(path, here).href;
-  const results = asset('recherche.html');
   const actions = document.querySelector('.nav__actions');
   if (!actions || document.querySelector('.nav-search')) return;
-  // The search index is optional (it is not shipped with every copy of the site): no index, no search box.
-  fetch(asset('data/search/meta.json'), { method: 'HEAD', cache: 'no-cache' }).then(response => { if (response.ok) setup(); }).catch(() => {});
-  function setup() {
 
   const form = document.createElement('form');
   form.className = 'nav-search';
   form.setAttribute('role', 'search');
-  form.action = results;
-  form.innerHTML = `<label class="sr-only" for="navSearch">Rechercher dans les dépenses publiques</label>
+  form.action = asset('recherche.html');
+  form.innerHTML = `<label class="sr-only" for="navSearch">Rechercher sur le site, dans les dépenses ou demander à la Loupe</label>
     <svg class="nav-search__icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m13 13 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    <input id="navSearch" name="q" type="search" placeholder="Rechercher une dépense…" autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="navSearchList" aria-expanded="false">
-    <ul class="nav-search__list" id="navSearchList" role="listbox" hidden></ul>`;
+    <input id="navSearch" name="q" type="search" placeholder="Une page, une question, une dépense…" autocomplete="off" spellcheck="false">
+    <div class="nav-search__panel" id="navSearchList" hidden></div>`;
   actions.prepend(form);
-  const input = form.querySelector('input'), list = form.querySelector('ul');
+  const input = form.querySelector('input'), panel = form.querySelector('.nav-search__panel');
   const params = new URLSearchParams(location.search);
   if (location.pathname.endsWith('recherche.html') && params.get('q')) input.value = params.get('q');
 
-  const euros = value => { const a = Math.abs(value), f = (v, d) => v.toLocaleString('fr-FR', { maximumFractionDigits: d });
-    return a >= 1e9 ? `${f(value / 1e9, 2)} Md€` : a >= 1e6 ? `${f(value / 1e6, 1)} M€` : a >= 1e3 ? `${f(value / 1e3, 0)} k€` : `${f(value, 0)} €`; };
-  let core = null, timer = 0, active = -1, items = [], seq = 0;
-  const ensure = () => core || (core = new Promise((resolve, reject) => {
-    if (window.FRLSearch) { resolve(window.FRLSearch); return; }
-    const script = Object.assign(document.createElement('script'), { src: asset('search-core.js') });
-    script.onload = () => resolve(window.FRLSearch); script.onerror = reject;
-    document.head.appendChild(script);
-  }));
-  const go = text => { if (text.trim()) location.href = `${results}?q=${encodeURIComponent(text.trim())}`; };
-  const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); active = -1; };
-  const paint = () => {
-    list.innerHTML = items.map((item, i) => `<li role="option" id="navOpt${i}" class="${i === active ? 'is-active' : ''}" data-i="${i}" aria-selected="${i === active}">
-      ${item.kind === 'go' ? `<span>Rechercher « <strong>${window.FRLSearch.escapeHtml(item.text)}</strong> »</span>` : `<span>${item.near ? '<em class="nav-search__near">proche</em>' : ''}${window.FRLSearch.escapeHtml(item.text)}</span><small>${item.count.toLocaleString('fr-FR')} ligne${item.count > 1 ? 's' : ''}${item.amount ? ` · ${euros(item.amount)}` : ''}</small>`}</li>`).join('');
-    list.hidden = !items.length; input.setAttribute('aria-expanded', items.length ? 'true' : 'false');
-    if (active >= 0) input.setAttribute('aria-activedescendant', `navOpt${active}`); else input.removeAttribute('aria-activedescendant');
-  };
-  async function update() {
-    const text = input.value, mine = ++seq;
-    if (!text.trim()) { items = []; close(); return; }
-    const engine = await ensure();
-    let suggestions = [];
-    try { suggestions = await engine.suggest(text); } catch (error) { suggestions = []; }
-    if (mine !== seq) return;
-    items = [{ kind: 'go', text }, ...suggestions.filter(s => engine.norm(s.text) !== engine.norm(text)).map(s => ({ kind: 'term', ...s }))];
-    active = -1; paint();
-  }
-  input.addEventListener('focus', () => { ensure().catch(() => {}); }); // loads the suggestion code early (the search itself runs on the server)
-  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(update, 120); });
-  input.addEventListener('keydown', event => {
-    if (list.hidden) return;
-    if (event.key === 'ArrowDown') { active = Math.min(items.length - 1, active + 1); paint(); event.preventDefault(); }
-    else if (event.key === 'ArrowUp') { active = Math.max(-1, active - 1); paint(); event.preventDefault(); }
-    else if (event.key === 'Escape') close();
-    else if (event.key === 'Enter' && active >= 0) { event.preventDefault(); go(items[active].text); }
+  const load = src => new Promise(resolve => {
+    const s = Object.assign(document.createElement('script'), { src: asset(src) });
+    s.onload = s.onerror = resolve;
+    document.head.appendChild(s);
   });
-  list.addEventListener('mousedown', event => { const li = event.target.closest('[data-i]'); if (li) { event.preventDefault(); go(items[Number(li.dataset.i)].text); } });
-  form.addEventListener('submit', event => { event.preventDefault(); go(input.value); });
-  document.addEventListener('click', event => { if (!form.contains(event.target)) close(); });
-  }
+  let ready = null;
+  const ensure = () => ready || (ready = (window.FRLOmni ? Promise.resolve() : load('omni-search.js'))
+    .then(() => (typeof FRL_ICONS === 'undefined' ? load('icons.js') : null))
+    .then(() => window.FRLOmni?.attach(form, input, panel)));
+  /* until the code is there, a typed search still works: Enter goes to the results page */
+  form.addEventListener('submit', event => { if (!ready) { event.preventDefault(); if (input.value.trim()) location.href = `${form.action}?q=${encodeURIComponent(input.value.trim())}`; } });
+  input.addEventListener('focus', () => ensure().then(() => { if (input.value.trim()) input.dispatchEvent(new Event('input')); }), { once: true });
+  if (window.FRLOmni) ensure();
 })();

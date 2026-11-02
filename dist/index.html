@@ -91,28 +91,35 @@
   </header>
 
   <main id="top">
-    <section class="hero">
+    <section class="hero hero--site">
       <div class="hero__bg" aria-hidden="true"></div>
-      <div class="container hero__grid">
+      <div class="container">
         <div class="hero__inner">
-          <span class="eyebrow">France · cartographie ouverte · 2012–2025</span>
-          <h1>Les dépenses publiques, <span class="gradient-text">territoire par territoire.</span></h1>
-          <p class="hero__lead">Une carte pour comprendre où se dépensent les fonds publics, du projet financé par l’État jusqu’au budget de la commune.</p>
-          <div class="hero__search" data-omni="hero"></div>
-          <p class="hero__search-hint">Une page du site, une question, ou un mot à chercher dans les dépenses. Ou directement : <a href="#explorer">la carte</a> · <a href="#comptes">les comptes publics</a></p>
+          <span class="eyebrow">Données publiques ouvertes · État, Sécurité sociale, collectivités</span>
+          <h1>Où va <span class="gradient-text">l’argent public ?</span></h1>
+          <p class="hero__lead">Dépenses, impôts, dette, emplois publics, subventions, marchés : les comptes publiés par l’État, la Sécurité sociale et les collectivités, réunis, recoupés et sourcés. Cherchez une commune, un sujet ou une dépense, ou posez directement votre question.</p>
           <figure class="hero__quote">
             <blockquote>« Les services de l’État eux-mêmes sont dans l’incapacité de dire où part l’argent des Français. L’argent des Français est flambé à la légère, sans études d’impact a priori ni évaluation a posteriori des politiques financées, car les politiques ne sont pas armés intellectuellement : ils font des paris à l’aveugle et des politiques de communication avec de l’argent qui ne sort pas de leurs poches, mais des nôtres. »</blockquote>
             <figcaption>Un data scientist avec trop de temps libre</figcaption>
           </figure>
+          <div class="hero__search" data-omni="hero"></div>
+          <p class="hero__search-hint">Une page du site, une question, ou un mot à chercher dans les dépenses. Ou directement : <a href="#explorer">la carte</a> · <a href="#comptes">les comptes publics</a></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="explorer" class="explorer" aria-label="Explorer les dépenses publiques">
+      <div class="container hero__grid explorer__head">
+        <div class="hero__inner">
+          <span class="eyebrow">France · cartographie ouverte · 2012–2025</span>
+          <h2 class="hero__title">Les dépenses publiques, <span class="gradient-text">territoire par territoire.</span></h2>
+          <p class="hero__lead">Une carte pour comprendre où se dépensent les fonds publics, du projet financé par l’État jusqu’au budget de la commune.</p>
         </div>
         <dl class="hero__facts">
           <div><dt>Sources</dt><dd id="dataStatus">Chargement…</dd></div>
           <div><dt>Périmètre</dt><dd id="scopeText">DGCL · OFGL · contours Etalab</dd></div>
         </dl>
       </div>
-    </section>
-
-    <section id="explorer" class="explorer" aria-label="Explorer les dépenses publiques">
       <div class="explorer__bar">
         <div class="mode-tabs" role="tablist" aria-label="Niveau de dépense">
           <button class="mode-tab active" type="button" role="tab" aria-selected="true" data-mode="communes">Communes</button>
