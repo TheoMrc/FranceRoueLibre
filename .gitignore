@@ -5,6 +5,7 @@ sources/raw/
 sources/derived/
 dist/data/search/frl-search.sqlite3
 _transfer/
+_journal/
 _to_delete/
 __pycache__/
 .claude_runner/
