@@ -60,8 +60,10 @@ DECLARATIONS: List[dict] = [
                     '100 lignes au plus, 5 secondes au plus : agréger avec GROUP BY et LIMIT.',
      'parameters': {'type': 'OBJECT', 'properties': {'sql': {'type': 'STRING'}}, 'required': ['sql']}},
     {'name': 'dossier_collectivite',
-     'description': 'Tout ce que le site a sur une collectivité, en un appel. Commune : comptes OFGL 2018-2025 '
-                    '(dépenses, personnel, dette, par habitant), projets d’investissement subventionnés par l’État, '
+     'description': 'Tout ce que le site a sur une collectivité, en un appel. Commune (par nom, même mal orthographié, '
+                    'par code postal comme « 33980 » ou par code Insee) : les quatre échelons qui dépensent pour ses '
+                    'habitants (commune, intercommunalité, département, région) avec leurs dépenses et par habitant, '
+                    'comptes OFGL 2018-2025 de la commune (dépenses, personnel, dette), projets d’investissement subventionnés par l’État, '
                     'élus et indemnités, signaux, lignes de dépenses qui la citent. Intercommunalité, département, '
                     'région : comptes année par année et par habitant. À utiliser d’abord pour toute question sur une '
                     'collectivité, ou une question qui n’est qu’un nom de commune.',
@@ -548,6 +550,49 @@ def _signals(code: str) -> list:
     return out
 
 
+# What each level of local government pays for, in a few words (Code général des collectivités territoriales; the
+# exact split varies: an intercommunality only exercises what its communes transferred to it).
+ROLES = {'commune': 'écoles, voirie, état civil, équipements de proximité',
+         'intercommunalite': 'déchets, eau, transports, développement économique',
+         'departement': 'aide sociale (RSA, personnes âgées, handicap), collèges, routes',
+         'region': 'lycées, trains régionaux, formation, aides aux entreprises'}
+
+
+def _level_figures(level: str, i: int) -> dict:
+    data, pop = _json(f'local/{level}/depenses-totales.json'), _json(f'local/{level}/_pop.json')
+    y = max(set(data['years']) & set(pop['years']))
+    v, p = data['values'][data['years'].index(y)][i], pop['values'][pop['years'].index(y)][i]
+    return {'annee': y, 'depenses_totales_eur': round(v) if v is not None else None, 'population': p,
+            'par_habitant_eur': round(v / p) if v is not None and p else None}
+
+
+def _echelons(i: int) -> list:
+    """The commune and the three levels above it (intercommunality, département, région), each with its total
+    spending and per inhabitant, and what it pays for."""
+    meta = _json('web/communes-meta.json')
+    code, name, dep = meta['rows'][i][:3]
+    dep_name, region_name = meta['departments'].get(dep, ['', ''])
+    out = [{'echelon': 'commune', 'nom': name, 'code': code, 'sert_a': ROLES['commune'], **_level_figures('communes', i)}]
+    try:
+        members = _json('local/gfp/_communes.json')['members']
+        ents = _json('local/gfp/_entities.json')
+        siren = next((g for g, idx in members.items() if i in idx), None)
+        if siren:
+            j = ents['codes'].index(siren)
+            out.append({'echelon': 'intercommunalite', 'nom': ents['names'][j], 'code': siren, 'communes': len(members[siren]),
+                        'sert_a': ROLES['intercommunalite'], **_level_figures('gfp', j)})
+    except (OSError, ValueError, KeyError):
+        pass
+    for level, key, wanted, label in (('departements', 'departement', dep, dep_name), ('regions', 'region', None, region_name)):
+        try:
+            e = _json(f'local/{level}/_entities.json')
+            j = e['codes'].index(wanted) if wanted and wanted in e['codes'] else e['names'].index(label)
+            out.append({'echelon': key, 'nom': e['names'][j], 'code': e['codes'][j], 'sert_a': ROLES[key], **_level_figures(level, j)})
+        except (OSError, ValueError, KeyError):
+            continue
+    return out
+
+
 def dossier_commune(nom: str) -> dict:
     i, err = _find_commune(nom)
     if err:
@@ -563,6 +608,7 @@ def dossier_commune(nom: str) -> dict:
     signals = _signals(code)
     return clip({
         'commune': {'code': code, 'nom': name, 'lieu': place},
+        'echelons': _echelons(i),
         'comptes': {k: accounts.get(k) for k in accounts if k not in ('entite',)},
         'projets_aides_etat': _projects(code),
         'elus_et_personnel': _elected(i),

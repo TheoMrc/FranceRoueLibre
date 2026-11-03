@@ -119,7 +119,11 @@
       if (my !== seq) return;
       const site = matchSite(entries, q).map(e => ({ kind: 'site', url: e.url, title: e.title, page: e.section ? e.page : '', sub: e.eyebrow || '' }));
       const spend = [{ kind: 'lines', q }, ...words.map(w => ({ kind: 'lines', q: w.text, count: w.count, amount: w.amount }))];
-      const loupe = [{ kind: 'loupe', q }];
+      /* a commune or a département typed: the Loupe is offered the question a reader means by it */
+      const placeQ = !where || !lib?.sure(where) ? '' : where.communes.length === 1 || (where.communes.length && where.type !== 'departement')
+        ? `Quelles sont les informations disponibles sur les dépenses de ${where.communes[0].nom} (${where.communes[0].dep_nom}) ?`
+        : where.departement ? `Quelles sont les informations disponibles sur les dépenses du département ${where.departement.nom} (${where.departement.code}) ?` : '';
+      const loupe = [{ kind: 'loupe', q: placeQ || q }];
       const place = [];
       if (where?.departement) place.push({ kind: 'place', url: lib.deptUrl(where.departement), title: `${where.departement.nom} (${where.departement.code})`, sub: 'Département · ses comptes et ses communes sur la carte', icon: ICON_PIN });
       for (const c of (where?.communes || []).slice(0, where?.departement ? 2 : 4)) {
