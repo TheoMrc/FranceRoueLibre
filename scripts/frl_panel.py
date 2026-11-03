@@ -77,15 +77,15 @@ def journals(offline: bool):
 
 
 REF = re.compile(r'^FRL-\d{4}-\d{4}$')
-ACTIONS = ('valider', 'refuser', 'publier', 'cloturer')
+ACTIONS = ('valider', 'refuser', 'destinataire', 'publier', 'cloturer')
 
 
 def frl_demandes(action: str, ref: str = '', text: str = '') -> dict:
     """Runs frl-demandes on the VPS (server/assistant_api.py --demandes) and returns its JSON."""
     if action != 'tout' and (action not in ACTIONS or not REF.match(ref)):
         return {'error': 'action ou référence refusée'}
-    if action == 'publier' and text.strip():
-        remote = f't=$(mktemp) && cat > "$t" && frl-demandes publier {ref} --texte "$t"; rm -f "$t"'
+    if action in ('publier', 'destinataire') and text.strip():
+        remote = f't=$(mktemp) && cat > "$t" && frl-demandes {action} {ref} --texte "$t"; rm -f "$t"'
     else:
         remote = f'frl-demandes {action} {ref}'.strip()
     try:

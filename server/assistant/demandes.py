@@ -428,7 +428,7 @@ def mail_test() -> dict:
 
 
 def admin(action: str, ref: str = '', text: str = '') -> dict:
-    """liste | tout | voir | valider | refuser | publier (the last reply, anonymized or the given text) | cloturer | test."""
+    """liste | tout | voir | valider | refuser | destinataire (name or INSEE code in text) | publier (the last reply, anonymized or the given text) | cloturer | test."""
     if action == 'test':
         return mail_test()
     if action == 'tout':  # every request in full, for the review panel (frl_panel.bat), with its deadline
@@ -454,6 +454,27 @@ def admin(action: str, ref: str = '', text: str = '') -> dict:
         return d
     if action == 'valider':
         return send(ref)
+    if action == 'destinataire':  # another official recipient for a request not sent yet: its name (or INSEE code)
+        if d['status'] != 'a_valider':  # is looked up in the directory, never typed as an address
+            return {'error': f'destinataire modifiable seulement avant l’envoi (demande {d["status"]})'}
+        q = text.strip()
+        try:
+            found = annuaire(code_insee=q) if re.fullmatch(r'\d[\dAB]\d{3}', q) else annuaire(nom=q)
+        except NetworkError as exc:
+            return {'error': f'annuaire indisponible ({exc})'}
+        exact = [c for c in found if norm(c['nom']) == norm(q) and c['email']]
+        to = (exact or [c for c in found if c['email']] or [None])[0]
+        if not to:
+            return {'error': f'aucun organisme avec une adresse électronique pour « {q} »', 'trouves': [c['nom'] for c in found]}
+        with _lock:
+            old = d['to']
+            d['to'] = to
+            d['subject'], d['body'] = letter(to['nom'], d['fields'], d['ref'], by_site=True)
+            d.setdefault('historique', []).append({'date': dt.datetime.now().isoformat(timespec='seconds'),
+                                                   'destinataire_precedent': old})
+            save(d)
+        return {'ok': True, 'ref': ref, 'status': d['status'], 'destinataire': to,
+                'autres': [c['nom'] for c in found if c is not to][:6]}
     with _lock:
         if action == 'refuser' and d['status'] == 'a_valider':
             d['status'] = 'refusee'

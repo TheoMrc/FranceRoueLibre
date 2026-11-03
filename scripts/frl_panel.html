@@ -104,6 +104,7 @@ tr.detail td { background: var(--soft); white-space: pre-wrap; font-size: 12.5px
 .dm textarea { width: 100%; min-height: 140px; font: 13px/1.5 Inter, sans-serif; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
 .dm-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
 .dm-actions button { font: 500 13px Inter, sans-serif; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+.dm-actions input { flex: 1 1 220px; min-width: 0; font: 13px Inter, sans-serif; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); }
 .dm-actions button.go { background: var(--grad); color: #fff; border: 0; }
 .dm-actions button.go.confirm { background: var(--bad); }
 .dm-actions button:disabled { opacity: .5; cursor: not-allowed; }
@@ -437,7 +438,7 @@ function dmRender() {
       ${last ? `<details ${d.status === 'repondue' ? 'open' : ''}><summary>Réponse du ${fdate(last.date)} (${esc(last.from_domain)})${last.files?.length ? `, pièces : ${esc(last.files.join(', '))}` : ''}</summary><pre>${esc(last.text)}</pre>
         ${d.status === 'repondue' ? `<div class="dm-meta">Texte publié sur la page des demandes (adresses, téléphones et signature retirés, à relire) :</div><textarea data-pub>${esc(last.public_text || d.reponse_anonymisee || '')}</textarea>` : last.public_text ? `<div class="dm-meta">Publié :</div><pre>${esc(last.public_text)}</pre>` : ''}</details>` : ''}
       <div class="dm-actions">${({
-        a_valider: `<button class="go" data-act="valider" ${to.email ? '' : 'disabled'}>Envoyer à ${esc(to.email || '…')}</button><button data-act="refuser">Refuser</button>`,
+        a_valider: `<button class="go" data-act="valider" ${to.email ? '' : 'disabled'}>Envoyer à ${esc(to.email || '…')}</button><button data-act="refuser">Refuser</button><input data-to placeholder="Autre destinataire : nom officiel ou code Insee"><button data-act="destinataire">Changer</button>`,
         repondue: `<button class="go" data-act="publier">Publier la réponse</button><button data-act="cloturer">Clôturer</button>`,
         envoyee: `<button data-act="cloturer">Clôturer</button>`,
       })[d.status] || ''}<span class="dm-msg"></span></div></div>`; }).join('')}</div>`;
@@ -447,14 +448,15 @@ $('dm').addEventListener('click', async e => {
   const b = e.target.closest('button[data-act]'); if (!b || !live) return;
   const box = b.closest('.dm'), d = [...(DM.demandes || [])].sort((a, c) => (DM_ORDER[a.status] ?? 9) - (DM_ORDER[c.status] ?? 9) || String(c.requested || c.created).localeCompare(String(a.requested || a.created)))[+box.dataset.i];
   const msg = box.querySelector('.dm-msg'), act = b.dataset.act;
+  if (act === 'destinataire' && !(box.querySelector('[data-to]')?.value || '').trim()) { msg.textContent = 'Tapez le nom officiel de l’organisme (ou le code Insee d’une commune).'; return; }
   if ((act === 'valider' || act === 'refuser') && !b.classList.contains('confirm')) {   // two clicks: no mail leaves by mistake
     b.classList.add('confirm'); const was = b.textContent; b.textContent = act === 'valider' ? 'Confirmer l’envoi' : 'Confirmer le refus';
     setTimeout(() => { b.classList.remove('confirm'); b.textContent = was; }, 5000); return;
   }
   box.querySelectorAll('button').forEach(x => x.disabled = true); msg.textContent = 'En cours…';
   try {
-    const res = await dmCall({ action: act, ref: d.ref, texte: act === 'publier' ? (box.querySelector('[data-pub]')?.value || '') : '' });
-    msg.textContent = res.error ? `Erreur : ${res.error}` : (res.message || `Fait : ${DM_LABEL[res.status] || res.status}`);
+    const res = await dmCall({ action: act, ref: d.ref, texte: act === 'publier' ? (box.querySelector('[data-pub]')?.value || '') : act === 'destinataire' ? (box.querySelector('[data-to]')?.value || '') : '' });
+    msg.textContent = res.error ? `Erreur : ${res.error}` : res.destinataire ? `Nouveau destinataire : ${res.destinataire.nom} <${res.destinataire.email}>` : (res.message || `Fait : ${DM_LABEL[res.status] || res.status}`);
     const fresh = await dmCall(); if (!fresh.error) { DM = fresh; setTimeout(dmRender, 1200); }
   } catch (err) { msg.textContent = 'Le panneau ne répond plus : relancez frl_panel.bat.'; }
   if (msg.textContent.startsWith('Erreur')) box.querySelectorAll('button').forEach(x => x.disabled = false);
