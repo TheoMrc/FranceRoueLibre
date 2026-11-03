@@ -551,3 +551,33 @@ class PlacesTest(unittest.TestCase):
     def test_not_a_place(self):
         for q in ('La', 'mise en place', 'cantine scolaire'):
             self.assertEqual(self.P.find(q)['communes'], [], q)
+
+
+class PlaceAnswerTest(unittest.TestCase):
+    """fiche.py: a question that is only a place gets an answer from the data, without a model."""
+
+    def setUp(self):
+        if not (S.DATA_DIR / 'web' / 'communes-lookup.json').is_file():
+            self.skipTest('dist/data absent')
+        from assistant import fiche
+        self.F = fiche
+
+    def ask(self, q):
+        return self.F.answer([{'role': 'user', 'text': q}])
+
+    def test_communes_postal_codes_departements(self):
+        r = self.ask('33980')
+        self.assertIn('CA COBAN', r['reply'])
+        self.assertEqual(r['provider'], 'faq')
+        self.assertEqual(len(r['liens']['liens']), 6)
+        self.assertIn('Audenge', self.ask('Quelles sont les informations disponibles sur les dépenses d’Audenge (33) ?')['reply'])
+        self.assertIn('Le Havre', self.ask('Quelles sont les informations disponibles sur les dépenses du Havre (76) ?')['reply'])
+        self.assertIn('département a dépensé', self.ask('33')['reply'])
+        self.assertIn('Plusieurs communes', self.ask('Saint Priest')['reply'])
+        self.assertNotIn('—', self.ask('Hautmont')['reply'])
+
+    def test_real_questions_go_to_the_model(self):
+        for q in ('Combien coûte la cantine à Audenge ?', 'mise en place', 'Pourquoi la dette augmente ?'):
+            self.assertIsNone(self.ask(q), q)
+        self.assertIsNone(self.F.answer([{'role': 'user', 'text': 'Audenge'}, {'role': 'assistant', 'text': '…'},
+                                         {'role': 'user', 'text': 'Audenge'}]), 'a follow-up goes to the model')

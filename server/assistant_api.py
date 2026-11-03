@@ -42,6 +42,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from assistant import demandes  # noqa: E402
 from assistant import faq  # noqa: E402
+from assistant import fiche  # noqa: E402
 from assistant import journal  # noqa: E402
 from assistant import settings as S  # noqa: E402
 from assistant.agent import answer, pick_provider  # noqa: E402
@@ -187,12 +188,13 @@ def enqueue(ip: str, messages: list, provider: str | None) -> str:
     return jid
 
 
-def saved_job(ip: str, entry: dict, messages: list) -> str:
-    """A finished job holding a saved answer: the page polls it like any other and gets it at once."""
+def saved_job(ip: str, entry: dict, messages: list, result: dict = None) -> str:
+    """A finished job holding a saved answer (faq.json) or a templated one (fiche.py): the page polls it like any
+    other and gets it at once."""
     jid = secrets.token_urlsafe(18)
     now = time.time()
     with JOBS_LOCK:
-        JOBS[jid] = {'id': jid, 't': now, 'seen': now, 'ip': ip, 'events': [], 'done': True, 'result': faq.result(entry),
+        JOBS[jid] = {'id': jid, 't': now, 'seen': now, 'ip': ip, 'events': [], 'done': True, 'result': result or faq.result(entry),
                      'cancel': False, 'state': 'done', 'messages': None, 'provider': None}
     journal.write(S.STATE_DIR, journal.answer_entry(jid, journal.reader(ip), messages, [], JOBS[jid]['result'], 0))
     return jid
@@ -320,6 +322,9 @@ class Handler(BaseHTTPRequestHandler):
         saved = faq.find(messages)
         if saved:  # a question many readers ask: answered from faq.json, no model call, no credits
             return self.send(202, {'job': saved_job(self.client_ip(), saved, messages)})
+        place = fiche.answer(messages)
+        if place:  # only a commune, a postal code or a département: answered from the data, no model call
+            return self.send(202, {'job': saved_job(self.client_ip(), None, messages, place)})
         lack = credits_info()
         if lack:
             return self.send(402, lack)

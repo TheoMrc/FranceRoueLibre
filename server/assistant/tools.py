@@ -554,7 +554,7 @@ def _signals(code: str) -> list:
 # exact split varies: an intercommunality only exercises what its communes transferred to it).
 ROLES = {'commune': 'écoles, voirie, état civil, équipements de proximité',
          'intercommunalite': 'déchets, eau, transports, développement économique',
-         'departement': 'aide sociale (RSA, personnes âgées, handicap), collèges, routes',
+         'departement': 'RSA, personnes âgées, handicap, collèges, routes',
          'region': 'lycées, trains régionaux, formation, aides aux entreprises'}
 
 
