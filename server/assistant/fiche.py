@@ -56,7 +56,7 @@ def place_of(text: str) -> Optional[str]:
 
 
 def _commune(code: str) -> Optional[dict]:
-    d = T.dossier_commune(code)
+    d = T.dossier_commune(f'insee:{code}')
     if not d.get('commune'):
         return None
     c, rows = d['commune'], d['comptes']['montants_eur']
@@ -135,6 +135,15 @@ def _homonyms(found: list) -> dict:
     return {'reply': '\n'.join(lines), 'sources': SOURCES[2:], 'liens': None}
 
 
+def _postal(q: str, found: list) -> dict:
+    code = next((w for w in q.split() if w.isdigit() and len(w) == 5), q)
+    found = places.find(code, limit=40)['communes'] or found
+    lines = [f'Le code postal **{code}** couvre {len(found)} communes :', '']
+    lines += [f'- **{c["nom"]}** ({c["dep_nom"]}, {c["dep"]}) : {num(c["population"])} habitants' for c in found]
+    lines += ['', 'Tapez le nom de la commune (par exemple « ' + f'{found[0]["nom"]}' + ' ») pour ses comptes.']
+    return {'reply': '\n'.join(lines), 'sources': SOURCES[2:], 'liens': None}
+
+
 def answer(messages: list) -> Optional[dict]:
     """The templated answer, or None (then the model answers)."""
     if len([m for m in messages if m.get('role') == 'user']) != 1:
@@ -151,6 +160,8 @@ def answer(messages: list) -> Optional[dict]:
             res = _departement(found['departement']['code'], found['departement']['nom'])
         elif found['type'] in ('nom', 'code_postal') and len(communes) > 1 and len({c['nom'] for c in communes}) == 1:
             res = _homonyms(communes)
+        elif found['type'] == 'code_postal' and len(communes) > 1:
+            res = _postal(q, communes)
         elif len(communes) == 1 or (found['type'] == 'approchant' and communes):
             res = _commune(communes[0]['insee'])
         else:
@@ -163,7 +174,7 @@ def answer(messages: list) -> Optional[dict]:
     name = (res.get('liens') or {}).get('commune') or q
     steps = [('dossier_collectivite', f'Dossier de « {name} »', 'comptes, échelons, projets aidés, signaux'),
              ('comparer', f'Comparaison de « {name} » avec les collectivités de même taille', 'médiane et rang')]
-    if 'Plusieurs communes' in res['reply']:
+    if 'Plusieurs communes' in res['reply'] or 'Le code postal' in res['reply']:
         steps = [('dossier_collectivite', f'Communes nommées « {q} »', 'homonymes')]
     events = [{'type': 'tool_done', 'name': n, 'label': l, 'ok': True, 'summary': sm, 's': 0} for n, l, sm in steps]
     return dict(res, searches=[], provider='faq', label='Réponse sourcée automatique', saved='lieu',

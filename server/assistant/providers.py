@@ -339,7 +339,7 @@ class ClaudeClient:
             'max_tokens': 1500,
             'system': SEARCH_SYSTEM,
             'messages': [{'role': 'user', 'content': question}],
-            'tools': [{'type': 'web_search_20250305', 'name': 'web_search', 'max_uses': 3,
+            'tools': [{'type': 'web_search_20250305', 'name': 'web_search', 'max_uses': 2,
                        'user_location': {'type': 'approximate', 'country': 'FR', 'timezone': 'Europe/Paris'}}],
         }
         data = self._post(body, 'web_search', searches=3)

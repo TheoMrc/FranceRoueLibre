@@ -166,7 +166,12 @@ class FakeAndFallbackTest(unittest.TestCase):
         return self.agent.answer([{'role': 'user', 'text': q}], provider, on_event=events.append), events
 
     def test_switch_to_the_next_model(self):
-        r, events = self.ask('test erreur')
+        from assistant import settings as S_
+        keep, S_.ORDER = S_.ORDER, ['gemini', 'claude']   # the fake Gemini fails, Claude takes over
+        try:
+            r, events = self.ask('test erreur')
+        finally:
+            S_.ORDER = keep
         self.assertEqual(r.get('provider'), 'claude', r)
         self.assertTrue(r.get('reply'))
         self.assertIn('switch', [e['type'] for e in events])

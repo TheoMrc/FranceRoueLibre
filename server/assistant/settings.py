@@ -86,7 +86,7 @@ USD_EUR = _float('ASSISTANT_USD_EUR', 1.0)
 # Never more than 90 $ of Claude in all (all of Théo's API credits), whatever CLAUDE_BUDGET_EUR says.
 CLAUDE_MAX_USD = 90
 CLAUDE_BUDGET_EUR = min(CLAUDE_BUDGET_EUR, CLAUDE_MAX_USD * USD_EUR)
-ORDER = [p for p in _str('ASSISTANT_ORDER', 'gemini,claude').lower().replace(' ', '').split(',') if p in ('gemini', 'claude')]
+ORDER = [p for p in _str('ASSISTANT_ORDER', 'claude,gemini').lower().replace(' ', '').split(',') if p in ('gemini', 'claude')]
 
 # ---------------------------------------------------------------- limits of one conversation and of the public
 MAX_STEPS = _int('ASSISTANT_MAX_STEPS', 8)                 # model calls for one question

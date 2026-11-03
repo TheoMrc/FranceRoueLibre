@@ -68,8 +68,9 @@ DECLARATIONS: List[dict] = [
                     'région : comptes année par année et par habitant. À utiliser d’abord pour toute question sur une '
                     'collectivité, ou une question qui n’est qu’un nom de commune.',
      'parameters': {'type': 'OBJECT', 'properties': {
-         'nom': {'type': 'STRING', 'description': 'Nom ou code (Insee de commune, SIREN d’intercommunalité, numéro de '
-                                                  'département, code de région)'},
+         'nom': {'type': 'STRING', 'description': 'Nom ou code. Cinq chiffres seuls = code postal ; un code Insee de '
+                                                  'commune s’écrit « insee:57700 ». SIREN d’intercommunalité, numéro de '
+                                                  'département, code de région'},
          'niveau': {'type': 'STRING', 'enum': ['communes', 'gfp', 'departements', 'regions'],
                     'description': 'gfp = intercommunalités. Par défaut : communes'},
          'agregats': {'type': 'STRING', 'description': 'Hors communes : identifiants OFGL séparés par des virgules, facultatif'}},
@@ -122,7 +123,8 @@ DECLARATIONS: List[dict] = [
      'description': 'Lit un fichier JSON publié par le site (liste dans le prompt système). « chemin » descend dans le '
                     'fichier (clés et indices séparés par des points, ex. « measures » ou « totals.0 ») ; « filtre » '
                     'garde les éléments d’une liste qui contiennent ce texte (sans accents) ; « debut » et « limite » '
-                    'paginent (limite 40 au plus). Sans chemin : la structure du fichier.',
+                    'paginent (limite 40 au plus). Sans chemin : la structure du fichier. Jamais pour une commune, '
+                    'un code Insee ou un code postal : c’est dossier_collectivite.',
      'parameters': {'type': 'OBJECT', 'properties': {
          'fichier': {'type': 'STRING'}, 'chemin': {'type': 'STRING'}, 'filtre': {'type': 'STRING'},
          'debut': {'type': 'INTEGER'}, 'limite': {'type': 'INTEGER'}}, 'required': ['fichier']}},
@@ -155,8 +157,9 @@ DECLARATIONS: List[dict] = [
      'parameters': {'type': 'OBJECT', 'properties': {'recherche': {'type': 'STRING', 'description': 'Organisme, objet ou référence FRL-…'}}}},
     {'name': 'recherche_web',
      'description': 'Recherche sur le web (actualité, textes de loi, rapports, contexte absent des données du site). '
-                    'Renvoie une synthèse et ses sources. À utiliser quand les données du site ne suffisent pas ; '
-                    'une question précise par appel.',
+                    'Renvoie une synthèse et ses sources. Seulement pour une question sur l’argent public que les '
+                    'données du site ne couvrent pas, jamais pour une question hors sujet. Une seule recherche par '
+                    'question du lecteur : formule-la précisément.',
      'parameters': {'type': 'OBJECT', 'properties': {'question': {'type': 'STRING'}}, 'required': ['question']}},
 ]
 
@@ -430,10 +433,34 @@ PROJECT_YEARS = range(2018, 2031)
 def _find_commune(nom: str) -> tuple:
     """(index in communes-meta, None) or (None, error dict). A postal code, a misspelt name or « name + département »
     are resolved by places.py, like the site's search boxes."""
-    q = norm(str(nom or '').strip())
+    raw = str(nom or '').strip()
+    forced = re.fullmatch(r'(?i)insee\s*:?\s*(\d[\dAB]\d{3})', raw)  # « insee:57700 » : the INSEE code, never a postal code
+    q = norm(forced.group(1) if forced else raw)
     if not q:
         return None, {'error': 'nom vide'}
     ents = _entities('communes')
+    if forced:
+        hit = next((i for i, (c, _, _) in enumerate(ents) if norm(c) == q), None)
+        return (hit, None) if hit is not None else (None, {'error': f'aucun code Insee {q}'})
+    if re.fullmatch(r'\d{5}', q):  # readers type postal codes; 57700 is Hayange's postal code and Vaudreching's INSEE code
+        from . import places
+        try:
+            places.load(S.DATA_DIR / 'web' / 'communes-lookup.json')
+            postal = places.find(raw)['communes']
+        except (OSError, ValueError):
+            postal = []
+        insee = next((i for i, (c, _, _) in enumerate(ents) if norm(c) == q), None)
+        if postal:
+            if len(postal) == 1 and insee is None:
+                return next(i for i, (c, _, _) in enumerate(ents) if c == postal[0]['insee']), None
+            out = [{'code': f'insee:{c["insee"]}', 'nom': c['nom'], 'lieu': f'{c["dep_nom"]} ({c["dep"]})',
+                    'population': c['population'], 'pourquoi': f'code postal {q}'} for c in postal]
+            if insee is not None and ents[insee][0] not in {c['insee'] for c in postal}:
+                out.append({'code': f'insee:{q}', 'nom': ents[insee][1], 'lieu': ents[insee][2], 'pourquoi': f'code Insee {q}'})
+            if len(out) == 1:
+                return next(i for i, (c, _, _) in enumerate(ents) if c == postal[0]['insee']), None
+            return None, {'plusieurs': out, 'note': f'{q} est un code postal (le plus probable) : présente ces communes '
+                                                     'et rappelle l’outil avec « insee:CODE ».'}
     if not any(norm(c) == q or norm(n) == q for c, n, _ in ents):
         from . import places
         try:
@@ -445,9 +472,9 @@ def _find_commune(nom: str) -> tuple:
         if len(codes) == 1:
             return next(i for i, (c, _, _) in enumerate(ents) if c == codes[0]), None
         if len(codes) > 1:
-            return None, {'plusieurs': [{'code': c['insee'], 'nom': c['nom'], 'lieu': f'{c["dep_nom"]} ({c["dep"]})',
+            return None, {'plusieurs': [{'code': f'insee:{c["insee"]}', 'nom': c['nom'], 'lieu': f'{c["dep_nom"]} ({c["dep"]})',
                                          'population': c['population']} for c in found['communes']],
-                          'note': 'Plusieurs communes correspondent : rappeler l’outil avec le code Insee.'}
+                          'note': 'Plusieurs communes correspondent : rappeler l’outil avec « insee:CODE ».'}
     loose = lambda s: ' '.join(re.findall(r'[a-z0-9]+', norm(s)))
     lq = loose(q)
     found = [i for i, (c, n, _) in enumerate(ents) if norm(c) == q or norm(n) == q or loose(n) == lq]
@@ -456,7 +483,7 @@ def _find_commune(nom: str) -> tuple:
         return None, {'error': f'aucune commune « {nom} » ; donner le code Insee ou un autre niveau (comptes_collectivite)'}
     if len(found) > 1:
         return None, {'plusieurs': [{'code': ents[i][0], 'nom': ents[i][1], 'lieu': ents[i][2]} for i in found[:15]],
-                      'note': 'Plusieurs communes correspondent : rappeler l’outil avec le code Insee.'}
+                      'note': 'Plusieurs communes correspondent : rappeler l’outil avec « insee:CODE ».'}
     return found[0], None
 
 
@@ -678,7 +705,8 @@ def lire_donnees(fichier: str, chemin: str = '', filtre: str = '', debut: int = 
         elif isinstance(node, list) and key.lstrip('-').isdigit() and -len(node) <= int(key) < len(node):
             node = node[int(key)]
         else:
-            return {'error': f'« {key} » introuvable après « {".".join(walked) or "racine"} »',
+            hint = {'conseil': 'une commune se lit avec dossier_collectivite, pas lire_donnees'} if re.fullmatch(r'\d[\dAB]\d{3}', key) else {}
+            return {**hint, 'error': f'« {key} » introuvable après « {".".join(walked) or "racine"} »',
                     'cles_disponibles': list(node)[:60] if isinstance(node, dict) else f'liste de {len(node)}'
                     if isinstance(node, list) else None}
         walked.append(key)
@@ -710,6 +738,7 @@ class Toolbox:
         self.question = ''             # the reader's question (kept with a request draft)
         self.demande: Optional[dict] = None  # the request draft shown under the answer (preparer_demande)
         self.liens: Optional[dict] = None    # the levels of the commune asked about, shown as buttons (places.links)
+        self.web = 0                         # web searches made for this question (one at most: they cost the most)
 
     def call(self, name: str, args: dict) -> dict:
         args = args if isinstance(args, dict) else {}
@@ -757,6 +786,9 @@ class Toolbox:
                 question = str(args.get('question') or '').strip()[:400]
                 if not question:
                     return {'error': 'question vide'}
+                if self.web >= 1:
+                    return {'error': 'une seule recherche web par question : réponds avec ce que tu as déjà trouvé'}
+                self.web += 1
                 res = self.client.web_search(question)
                 for s in res.get('sources', []):
                     if s['url'] not in {x['url'] for x in self.sources}:

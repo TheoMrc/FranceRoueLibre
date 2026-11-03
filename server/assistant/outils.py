@@ -204,7 +204,7 @@ BANDS = [0, 500, 2000, 3500, 5000, 10000, 20000, 50000, 100000, 10 ** 9]
 def comparer(nom: str, agregat: str = 'depenses-totales', niveau: str = 'communes') -> dict:
     level = niveau if niveau in T.LEVELS else 'communes'
     ents = T._entities(level)
-    q = T.norm(str(nom or '').strip())
+    q = T.norm(re.sub(r'(?i)^insee\s*:?\s*', '', str(nom or '').strip()))
     found = [i for i, (c, n, _) in enumerate(ents) if T.norm(c) == q or T.norm(n) == q] or \
             [i for i, (c, n, _) in enumerate(ents) if q and q in T.norm(n)]
     if not found:
