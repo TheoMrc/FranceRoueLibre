@@ -22,7 +22,7 @@ day, questions per day for everyone, questions answered at once, size of a reque
 
     python server/assistant_api.py [--port 8018]      serve (127.0.0.1 only)
     python server/assistant_api.py --usage            spending so far, by provider and by day
-    python server/assistant_api.py --demandes liste|tout|voir|valider|refuser|destinataire|publier|cloturer [FRL-…] [--texte FICHIER]
+    python server/assistant_api.py --demandes liste|tout|voir|valider|refuser|modifier|destinataire|publier|cloturer [FRL-…] [--texte FICHIER]
     python server/assistant_api.py --fake             fake models (assistant/fake.py): test the panel, no token spent
 """
 from __future__ import annotations

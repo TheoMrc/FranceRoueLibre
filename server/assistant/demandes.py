@@ -428,7 +428,7 @@ def mail_test() -> dict:
 
 
 def admin(action: str, ref: str = '', text: str = '') -> dict:
-    """liste | tout | voir | valider | refuser | destinataire (name or INSEE code in text) | publier (the last reply, anonymized or the given text) | cloturer | test."""
+    """liste | tout | voir | valider | refuser | modifier (JSON subject and body in text) | destinataire (name or INSEE code in text) | publier (the last reply, anonymized or the given text) | cloturer | test."""
     if action == 'test':
         return mail_test()
     if action == 'tout':  # every request in full, for the review panel (frl_panel.bat), with its deadline
@@ -454,6 +454,27 @@ def admin(action: str, ref: str = '', text: str = '') -> dict:
         return d
     if action == 'valider':
         return send(ref)
+    if action == 'modifier':  # the site's own edit of the letter before it is sent: text = {"subject", "body"} (JSON)
+        if d['status'] != 'a_valider':
+            return {'error': f'lettre modifiable seulement avant l’envoi (demande {d["status"]})'}
+        try:
+            new = json.loads(text)
+        except ValueError:
+            return {'error': 'texte illisible'}
+        subject = re.sub(r'\s+', ' ', str(new.get('subject') or '')).strip()[:250]
+        body = str(new.get('body') or '').replace('\r\n', '\n').strip()[:8000]
+        if not subject or len(body) < 40:
+            return {'error': 'objet ou texte vide'}
+        if ref not in subject:  # the reference in the subject is how the reply is found in the mailbox
+            subject = f'{subject} [{ref}]'
+        with _lock:
+            if (subject, body) != (d['subject'], d['body']):
+                d.setdefault('historique', []).append({'date': dt.datetime.now().isoformat(timespec='seconds'),
+                                                       'objet_precedent': d['subject'], 'texte_precedent': d['body']})
+                d['subject'], d['body'] = subject, body
+                d['modifiee'] = True
+                save(d)
+        return {'ok': True, 'ref': ref, 'status': d['status'], 'subject': subject}
     if action == 'destinataire':  # another official recipient for a request not sent yet: its name (or INSEE code)
         if d['status'] != 'a_valider':  # is looked up in the directory, never typed as an address
             return {'error': f'destinataire modifiable seulement avant l’envoi (demande {d["status"]})'}
