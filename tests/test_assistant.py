@@ -285,6 +285,20 @@ class FraudAndNichesTest(unittest.TestCase):
         self.assertIn('recherche', r['resultats'][0]['mesure'].lower(), 'the research tax credit is the largest')
 
 
+class DirectoryTest(unittest.TestCase):
+    def test_closest_name_first(self):
+        """FRL-2026-0001 went to the « Conseil départemental d'accès au droit » instead of the département."""
+        from assistant import demandes as D
+        keep = D.get_json
+        D.get_json = lambda url, timeout=15: (200, {'results': [
+            {'nom': "Conseil départemental d'accès au droit de Gironde", 'adresse_courriel': 'a@example.org'},
+            {'nom': 'Conseil départemental de la Gironde', 'adresse_courriel': 'b@example.org'}]}, None)
+        try:
+            self.assertEqual(D.annuaire(nom='Conseil départemental de Gironde')[0]['nom'], 'Conseil départemental de la Gironde')
+        finally:
+            D.get_json = keep
+
+
 class SavedAnswersTest(unittest.TestCase):
     """faq.json (scripts/loupe-faq.py): frequent questions answered without a model call."""
 

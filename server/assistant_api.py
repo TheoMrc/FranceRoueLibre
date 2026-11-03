@@ -22,7 +22,7 @@ day, questions per day for everyone, questions answered at once, size of a reque
 
     python server/assistant_api.py [--port 8018]      serve (127.0.0.1 only)
     python server/assistant_api.py --usage            spending so far, by provider and by day
-    python server/assistant_api.py --demandes liste|voir|valider|refuser|publier|cloturer [FRL-…] [--texte FICHIER]
+    python server/assistant_api.py --demandes liste|tout|voir|valider|refuser|publier|cloturer [FRL-…] [--texte FICHIER]
     python server/assistant_api.py --fake             fake models (assistant/fake.py): test the panel, no token spent
 """
 from __future__ import annotations
@@ -379,7 +379,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=8018)
     parser.add_argument('--usage', action='store_true')
-    parser.add_argument('--demandes', nargs='+', metavar='ACTION', help='liste | voir REF | valider REF | refuser REF | '
+    parser.add_argument('--demandes', nargs='+', metavar='ACTION', help='liste | tout | voir REF | valider REF | refuser REF | '
                                                                        'publier REF [--texte F] | cloturer REF')
     parser.add_argument('--texte', help='texte publié de la réponse (sinon la réponse anonymisée automatiquement)')
     parser.add_argument('--fake', action='store_true', help='fake models, no network call, no token (tests)')

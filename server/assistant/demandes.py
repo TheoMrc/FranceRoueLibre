@@ -87,7 +87,13 @@ def annuaire(code_insee: str = '', nom: str = '') -> list:
     status, res, _ = get_json(url, timeout=15)
     if status != 200:
         raise NetworkError(f'annuaire : HTTP {status}')
-    return [_record(r) for r in res.get('results', [])]
+    out = [_record(r) for r in res.get('results', [])]
+    if not code_insee:  # the closest name first: « Conseil départemental de la Gironde » before « Conseil départemental
+        asked = set(words)   # d'accès au droit de Gironde », which holds the same words and others
+        extra = lambda c: len([w for w in re.findall(r'[a-z0-9]+', norm(c['nom'])) if len(w) > 2 and w not in asked
+                               and w not in ('les', 'des', 'aux', 'pour')])
+        out.sort(key=extra)
+    return out
 
 
 # ------------------------------------------------------------------------------------------------------- letter
@@ -422,9 +428,21 @@ def mail_test() -> dict:
 
 
 def admin(action: str, ref: str = '', text: str = '') -> dict:
-    """liste | voir | valider | refuser | publier (the last reply, anonymized or the given text) | cloturer | test."""
+    """liste | tout | voir | valider | refuser | publier (the last reply, anonymized or the given text) | cloturer | test."""
     if action == 'test':
         return mail_test()
+    if action == 'tout':  # every request in full, for the review panel (frl_panel.bat), with its deadline
+        rows = []
+        for d in all_requests():
+            if d['status'] == 'brouillon':
+                continue
+            rows.append({**{k: v for k, v in d.items() if k != 'reader'}, 'echeance': public_view(d)['echeance'],
+                         'meme_organisme_30j': sum(1 for x in all_requests() if x is not d and x['to'].get('email')
+                                                   and x['to'].get('email') == d['to'].get('email')
+                                                   and x['status'] not in ('brouillon', 'refusee')),
+                         'reponse_anonymisee': anonymize(d['replies'][-1]['text']) if d.get('replies') else None})
+        return {'demandes': rows, 'delai_jours': DELAY_DAYS, 'envoi_auto': bool(S.MAIL_AUTO_SEND),
+                'envois_par_jour': S.MAIL_DAILY, 'envoyes_aujourdhui': _sent_today()}
     if action == 'liste':
         return {'demandes': [{'ref': d['ref'], 'status': d['status'], 'organisme': d['to']['nom'],
                               'objet': d['fields']['objet'], 'reponses': len(d.get('replies', []))}

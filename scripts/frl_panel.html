@@ -92,6 +92,27 @@ tr.detail td { background: var(--soft); white-space: pre-wrap; font-size: 12.5px
 .heat div { aspect-ratio: 1.4; border-radius: 3px; }
 .heat .lab { aspect-ratio: auto; display: flex; align-items: center; }
 .heat .hh { aspect-ratio: auto; text-align: center; }
+.dm-list { display: flex; flex-direction: column; gap: 12px; }
+.dm { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: var(--soft); min-width: 0; }
+.dm.is-todo { border-color: color-mix(in srgb, var(--c3) 55%, var(--line)); }
+.dm-top { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; justify-content: space-between; }
+.dm-top b { color: var(--ink); font: 600 14px Sora, Inter, sans-serif; }
+.dm-meta { color: var(--muted); font-size: 12.5px; margin: 4px 0 8px; overflow-wrap: anywhere; }
+.dm-meta a { color: var(--c1); }
+.dm pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 13px/1.5 Inter, sans-serif; color: var(--body); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 8px 0; max-height: 340px; overflow: auto; }
+.dm details summary { cursor: pointer; color: var(--c1); font-size: 13px; margin-top: 4px; }
+.dm textarea { width: 100%; min-height: 140px; font: 13px/1.5 Inter, sans-serif; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.dm-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+.dm-actions button { font: 500 13px Inter, sans-serif; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+.dm-actions button.go { background: var(--grad); color: #fff; border: 0; }
+.dm-actions button.go.confirm { background: var(--bad); }
+.dm-actions button:disabled { opacity: .5; cursor: not-allowed; }
+.dm-msg { font-size: 12.5px; color: var(--muted); }
+.dm-warn { color: var(--bad); font-size: 12.5px; margin: 4px 0; }
+.tag.st-a_valider { background: color-mix(in srgb, var(--c3) 18%, transparent); color: var(--c3); }
+.tag.st-envoyee { background: color-mix(in srgb, var(--c1) 16%, transparent); color: var(--c1); }
+.tag.st-repondue { background: color-mix(in srgb, var(--c4) 16%, transparent); color: var(--c4); }
+.tag.st-refusee, .tag.st-close { background: var(--line); color: var(--muted); }
 .empty { color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center; }
 </style>
 </head>
@@ -110,6 +131,9 @@ tr.detail td { background: var(--soft); white-space: pre-wrap; font-size: 12.5px
   <div id="notes"></div>
 
   <div class="kpis" id="kpis"></div>
+
+  <div class="section">Demandes aux administrations</div>
+  <div class="grid"><div class="card s12"><h2>À relire avant envoi, réponses à publier</h2><p class="hint" id="dmHint"></p><div id="dm"></div></div></div>
 
   <div class="section">Audience</div>
   <div class="grid">
@@ -383,6 +407,60 @@ $('theme').onclick = () => { const r = document.documentElement, dark = r.datase
   r.dataset.theme = dark ? 'light' : 'dark'; try { localStorage.setItem('frl-panel-theme', r.dataset.theme); } catch (x) {} render(); };
 try { const t = localStorage.getItem('frl-panel-theme'); if (t) document.documentElement.dataset.theme = t; } catch (x) {}
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+// ---------------------------------------------------------------- requests to public bodies (frl-demandes)
+const DM_LABEL = { a_valider: 'à relire', envoyee: 'envoyée', repondue: 'réponse reçue', refusee: 'refusée', close: 'close' };
+const DM_ORDER = { a_valider: 0, repondue: 1, envoyee: 2, close: 3, refusee: 4 };
+let DM = DATA.demandes || { demandes: [] };
+const live = DATA.live && location.protocol === 'http:' && location.hostname === '127.0.0.1';
+const fdate = t => t ? new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '·';
+async function dmCall(body) {
+  const r = await fetch('/api/demandes', { method: body ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json', 'X-Panel-Token': DATA.live }, body: body ? JSON.stringify(body) : undefined });
+  return r.json();
+}
+function dmRender() {
+  const rows = [...(DM.demandes || [])].sort((a, b) => (DM_ORDER[a.status] ?? 9) - (DM_ORDER[b.status] ?? 9) || String(b.requested || b.created).localeCompare(String(a.requested || a.created)));
+  const todo = rows.filter(d => d.status === 'a_valider').length, rep = rows.filter(d => d.status === 'repondue').length;
+  $('dmHint').innerHTML = `${todo} à relire, ${rep} réponse(s) à publier, ${rows.length} en tout. ${DM.envoi_auto ? '<b class="down">Envoi automatique activé.</b>' : 'Rien ne part sans votre validation.'} ${DM.envois_par_jour ? `${DM.envoyes_aujourdhui || 0} envoi(s) aujourd’hui sur ${DM.envois_par_jour} au plus.` : ''} ${live ? '' : '<b>Boutons inactifs : ouvrez le panneau avec frl_panel.bat.</b>'}`;
+  if (!rows.length) { $('dm').innerHTML = '<div class="empty">Aucune demande.</div>'; return; }
+  $('dm').innerHTML = `<div class="dm-list">${rows.map((d, i) => {
+    const to = d.to || {}, f = d.fields || {}, last = (d.replies || []).at(-1);
+    const days = d.echeance ? Math.ceil((new Date(d.echeance + 'T23:59') - new Date()) / 864e5) : null;
+    const warn = [];
+    if (!to.email) warn.push('Pas d’adresse électronique officielle.');
+    if (d.meme_organisme_30j) warn.push(`${d.meme_organisme_30j} autre(s) demande(s) déjà faite(s) à cette adresse.`);
+    return `<div class="dm ${d.status === 'a_valider' || d.status === 'repondue' ? 'is-todo' : ''}" data-i="${i}">
+      <div class="dm-top"><b>${esc(d.ref)} · ${esc(f.objet)}</b><span class="tag st-${esc(d.status)}">${DM_LABEL[d.status] || esc(d.status)}</span></div>
+      <div class="dm-meta">À <b>${esc(to.nom)}</b> &lt;${esc(to.email || 'pas d’adresse')}&gt;${to.fiche ? ` · <a href="${esc(to.fiche)}" target="_blank" rel="noopener">fiche officielle</a>` : ''} · demandée le ${fdate(d.requested || d.created)}${d.sent ? ` · envoyée le ${fdate(d.sent)}` : ''}${d.echeance && d.status === 'envoyee' ? ` · ${days >= 0 ? `réponse due d’ici ${days} jour(s)` : `sans réponse depuis ${-days} jour(s) : refus implicite, la CADA peut être saisie`}` : ''}</div>
+      ${warn.map(w => `<div class="dm-warn">${esc(w)}</div>`).join('')}
+      ${d.question ? `<div class="dm-meta">Question du lecteur : « ${esc(d.question)} »</div>` : ''}
+      ${d.status === 'a_valider' ? `<pre><b>${esc(d.subject)}</b>\n\n${esc(d.body)}</pre>` : `<details><summary>Lettre envoyée</summary><pre><b>${esc(d.subject)}</b>\n\n${esc(d.body)}</pre></details>`}
+      ${last ? `<details ${d.status === 'repondue' ? 'open' : ''}><summary>Réponse du ${fdate(last.date)} (${esc(last.from_domain)})${last.files?.length ? `, pièces : ${esc(last.files.join(', '))}` : ''}</summary><pre>${esc(last.text)}</pre>
+        ${d.status === 'repondue' ? `<div class="dm-meta">Texte publié sur la page des demandes (adresses, téléphones et signature retirés, à relire) :</div><textarea data-pub>${esc(last.public_text || d.reponse_anonymisee || '')}</textarea>` : last.public_text ? `<div class="dm-meta">Publié :</div><pre>${esc(last.public_text)}</pre>` : ''}</details>` : ''}
+      <div class="dm-actions">${({
+        a_valider: `<button class="go" data-act="valider" ${to.email ? '' : 'disabled'}>Envoyer à ${esc(to.email || '…')}</button><button data-act="refuser">Refuser</button>`,
+        repondue: `<button class="go" data-act="publier">Publier la réponse</button><button data-act="cloturer">Clôturer</button>`,
+        envoyee: `<button data-act="cloturer">Clôturer</button>`,
+      })[d.status] || ''}<span class="dm-msg"></span></div></div>`; }).join('')}</div>`;
+  $('dm').querySelectorAll('.dm-actions button').forEach(b => { if (!live) b.disabled = true; });
+}
+$('dm').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-act]'); if (!b || !live) return;
+  const box = b.closest('.dm'), d = [...(DM.demandes || [])].sort((a, c) => (DM_ORDER[a.status] ?? 9) - (DM_ORDER[c.status] ?? 9) || String(c.requested || c.created).localeCompare(String(a.requested || a.created)))[+box.dataset.i];
+  const msg = box.querySelector('.dm-msg'), act = b.dataset.act;
+  if ((act === 'valider' || act === 'refuser') && !b.classList.contains('confirm')) {   // two clicks: no mail leaves by mistake
+    b.classList.add('confirm'); const was = b.textContent; b.textContent = act === 'valider' ? 'Confirmer l’envoi' : 'Confirmer le refus';
+    setTimeout(() => { b.classList.remove('confirm'); b.textContent = was; }, 5000); return;
+  }
+  box.querySelectorAll('button').forEach(x => x.disabled = true); msg.textContent = 'En cours…';
+  try {
+    const res = await dmCall({ action: act, ref: d.ref, texte: act === 'publier' ? (box.querySelector('[data-pub]')?.value || '') : '' });
+    msg.textContent = res.error ? `Erreur : ${res.error}` : (res.message || `Fait : ${DM_LABEL[res.status] || res.status}`);
+    const fresh = await dmCall(); if (!fresh.error) { DM = fresh; setTimeout(dmRender, 1200); }
+  } catch (err) { msg.textContent = 'Le panneau ne répond plus : relancez frl_panel.bat.'; }
+  if (msg.textContent.startsWith('Erreur')) box.querySelectorAll('button').forEach(x => x.disabled = false);
+});
+dmRender();
+
 $('notes').innerHTML = (DATA.notes || []).map(n => `<div class="notes">${esc(n)}</div>`).join('');
 if (window.Chart) render(); else document.body.insertAdjacentHTML('afterbegin', '<div class="notes">Chart.js n’a pas pu être chargé (pas d’accès à Internet ?).</div>');
 </script>
