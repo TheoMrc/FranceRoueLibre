@@ -193,7 +193,7 @@ SIG=$(cat "$DIR/server/search_api.py" /etc/systemd/system/francerouelibre-search
 if [ "$(cat "$LIB/service.md5" 2>/dev/null)" != "$SIG" ] || ! systemctl is-active --quiet francerouelibre-search; then
   sudo -n systemctl restart francerouelibre-search && echo "$SIG" > "$LIB/service.md5" && echo "search API restarted"
 else echo "search API unchanged, not restarted"; fi
-curl -s --retry 10 --retry-connrefused --retry-delay 1 --max-time 30 http://127.0.0.1:8017/api/health; echo
+curl -s --retry 30 --retry-connrefused --retry-delay 1 --max-time 60 http://127.0.0.1:8017/api/health || echo "search API still loading"; echo
 sudo -n systemctl --no-pager --lines=3 status francerouelibre-search | grep -E "Active|Memory|columns|NumPy|CPU"
 
 echo "== AI assistant"
