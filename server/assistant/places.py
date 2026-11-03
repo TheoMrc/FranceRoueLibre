@@ -9,6 +9,7 @@ import json
 import re
 import threading
 import unicodedata
+import urllib.parse
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -49,6 +50,24 @@ def load(path: Path) -> None:
             for cp in cps.split():
                 by_cp.setdefault(cp, []).append(i)
         deps = {k: {'code': k, 'nom': v, '_n': norm(v)} for k, v in d['deps'].items()}
+        # the intercommunality and the region of each commune (OFGL members, communes-meta)
+        local = Path(path).parent.parent / 'local'
+        try:
+            members = json.loads((local / 'gfp' / '_communes.json').read_text(encoding='utf-8'))['members']
+            ents = json.loads((local / 'gfp' / '_entities.json').read_text(encoding='utf-8'))
+            names = dict(zip(ents['codes'], ents['names']))
+            for siren, idx in members.items():
+                for i in idx:
+                    if i < len(rows):
+                        rows[i]['interco'] = {'code': siren, 'nom': names.get(siren, siren)}
+        except (OSError, ValueError, KeyError):
+            pass
+        try:
+            meta = json.loads((Path(path).parent / 'communes-meta.json').read_text(encoding='utf-8'))['departments']
+            for r in rows:
+                r['region'] = (meta.get(r['dep']) or ['', ''])[1]
+        except (OSError, ValueError, KeyError):
+            pass
         _data.update(path=stamp, rows=rows, by_name=by_name, by_cp=by_cp, by_first=by_first, deps=deps)
 
 
@@ -81,9 +100,37 @@ def _dept_of(words: List[str]) -> Optional[str]:
     return hits[0] if hits else None
 
 
+def links(c: dict, base: str = '') -> list:
+    """Where the site shows a commune, level by level: its spending on the map, its intercommunality, its
+    département, its region, the projects funded by the State, its elected officials and staff. Paths relative to
+    the site (or absolute with base). Shared by the search boxes, the results page and the Loupe."""
+    q = urllib.parse.quote
+    out = [{'cle': 'commune', 'libelle': 'Dépenses de la commune', 'url': f'index.html?commune={c["insee"]}#explorer'}]
+    if c.get('interco'):
+        out.append({'cle': 'interco', 'libelle': c['interco']['nom'], 'url': f'index.html?interco={c["interco"]["code"]}&commune={c["insee"]}#explorer'})
+    out.append({'cle': 'departement', 'libelle': c.get('dep_nom') or c['dep'], 'url': f'index.html?departement={q(c["dep"])}&vue=departements&commune={c["insee"]}#explorer'})
+    if c.get('region'):
+        out.append({'cle': 'region', 'libelle': c['region'], 'url': f'index.html?region={q(c["region"])}&vue=regions&commune={c["insee"]}#explorer'})
+    if c.get('projets_annee'):
+        out.append({'cle': 'projets', 'libelle': 'Projets aidés par l’État', 'url': f'index.html?commune={c["insee"]}&vue=projets&annee={c["projets_annee"]}#explorer'})
+    out.append({'cle': 'elus', 'libelle': 'Élus et employés', 'url': f'emplois.html?commune={c["insee"]}#commune'})
+    if base:
+        for l in out:
+            l['url'] = f'{base.rstrip("/")}/{l["url"]}'
+    return out
+
+
 def _view(i: int, match: str) -> dict:
     r = _data['rows'][i]
-    return {k: v for k, v in r.items() if not k.startswith('_')} | {'correspondance': match}
+    v = {k: val for k, val in r.items() if not k.startswith('_')} | {'correspondance': match}
+    v['liens'] = links(v)
+    return v
+
+
+def by_insee(code: str) -> Optional[dict]:
+    """The commune of this INSEE code, with its links, or None."""
+    i = next((k for k, r in enumerate(_data.get('rows', [])) if r['insee'] == code), None)
+    return None if i is None else _view(i, 'code')
 
 
 def find(query: str, limit: int = 6) -> dict:

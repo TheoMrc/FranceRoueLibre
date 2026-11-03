@@ -593,6 +593,16 @@ def _echelons(i: int) -> list:
     return out
 
 
+def _links(code: str, base: str = None) -> list:
+    from . import places
+    try:
+        places.load(S.DATA_DIR / 'web' / 'communes-lookup.json')
+        c = places.by_insee(code)
+    except (OSError, ValueError):
+        return []
+    return places.links(c, S.SITE_URL if base is None else base) if c else []
+
+
 def dossier_commune(nom: str) -> dict:
     i, err = _find_commune(nom)
     if err:
@@ -614,10 +624,9 @@ def dossier_commune(nom: str) -> dict:
         'elus_et_personnel': _elected(i),
         'signaux': signals or 'aucun signal relevé pour cette commune',
         'mentions_dans_les_depenses': mentions,
-        'pages': {'comptes_sur_la_carte': f'{S.SITE_URL}/index.html?commune={code}#explorer',
-                  'projets_aides_sur_la_carte': f'{S.SITE_URL}/index.html?commune={code}&vue=projets#explorer',
-                  'signaux': f'{S.SITE_URL}/signaux.html'},
-        'note_liens': 'Mettre en lien la carte de la commune et ses projets aidés (adresses ci-dessus).',
+        'liens': _links(code),
+        'note_liens': 'Ces liens (commune, intercommunalité, département, région, projets aidés, élus et employés) sont '
+                      'affichés en boutons sous ta réponse : ne les recopie pas, cite seulement les pages utiles en plus.',
     })
 
 
@@ -700,6 +709,7 @@ class Toolbox:
         self.queries: List[str] = []   # Google searches made by Gemini (Google asks to show them as search suggestions)
         self.question = ''             # the reader's question (kept with a request draft)
         self.demande: Optional[dict] = None  # the request draft shown under the answer (preparer_demande)
+        self.liens: Optional[dict] = None    # the levels of the commune asked about, shown as buttons (places.links)
 
     def call(self, name: str, args: dict) -> dict:
         args = args if isinstance(args, dict) else {}
@@ -710,12 +720,13 @@ class Toolbox:
                 return requete_sql(args.get('sql', ''))
             if name == 'comptes_collectivite':
                 return comptes_collectivite(args.get('nom', ''), args.get('niveau') or 'communes', args.get('agregats') or '')
-            if name == 'dossier_commune':
-                return dossier_commune(args.get('nom', ''))
+            if name in ('dossier_commune', 'dossier_collectivite') and (args.get('niveau') or 'communes') == 'communes':
+                res = dossier_commune(args.get('nom', ''))
+                if res.get('commune') and not self.liens:   # shown as buttons under the answer
+                    self.liens = {'commune': res['commune']['nom'], 'liens': _links(res['commune']['code'], '')}
+                return res
             if name == 'dossier_collectivite':
                 level = args.get('niveau') or 'communes'
-                if level == 'communes':
-                    return dossier_commune(args.get('nom', ''))
                 return comptes_collectivite(args.get('nom', ''), level, args.get('agregats') or '')
             from . import outils as O
             simple = {'indicateur': lambda: O.indicateur(args.get('nom', ''), args.get('depuis') or 0),

@@ -4,7 +4,8 @@
    - « Demander à la Loupe »: a question (Pourquoi, Combien, Qu’est-ce que…, or a sentence ending with « ? ») opens the
      Loupe with the question already asked;
    - « Communes » / « Département »: a commune or a département typed by its name (even misspelt), its postal code or
-     its number (places.js, api/lieux), to its accounts on the map, with a side link to the projects the State funded;
+     its number (places.js, api/lieux), to its accounts on the map; under the first commune, a row of buttons to each
+     level (its intercommunality, département, region), the projects the State funded and its elected officials;
    - « Chercher dans les dépenses »: the spending lines search (recherche.html?q=…), with the words of the published
      lines that start like the query and their number of lines (search-core.js, loaded on first use).
    Enter follows the first suggestion: the Loupe for a question, a section when one matches, the spending search
@@ -50,7 +51,6 @@
     document.head.appendChild(s);
   }));
   const ICON_PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
-  const ICON_BUILD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>';
 
   /* « de Lyon », « d’Audenge », « du Havre », « des Mureaux » */
   const ofName = n => /^Le /.test(n) ? `du ${n.slice(3)}` : /^Les /.test(n) ? `des ${n.slice(4)}` : /^[aeiouyhâàéèêëîïôöûüAEIOUYHÂÀÉÈÊËÎÏÔÖÛÜ]/.test(n) ? `d’${n}` : `de ${n}`;
@@ -123,14 +123,14 @@
       const spend = [{ kind: 'lines', q }, ...words.map(w => ({ kind: 'lines', q: w.text, count: w.count, amount: w.amount }))];
       /* a commune or a département typed: the Loupe is offered the question a reader means by it */
       const placeQ = !where || !lib?.sure(where) ? '' : where.communes.length === 1 || (where.communes.length && where.type !== 'departement')
-        ? `Quelles sont les informations disponibles sur les dépenses ${ofName(where.communes[0].nom)} (${where.communes[0].dep_nom}) ?`
+        ? `Quelles sont les informations disponibles sur les dépenses ${ofName(where.communes[0].nom)} (${where.communes[0].dep}) ?`
         : where.departement ? `Quelles sont les informations disponibles sur les dépenses du département ${where.departement.nom} (${where.departement.code}) ?` : '';
       const loupe = [{ kind: 'loupe', q: placeQ || q }];
       const place = [];
       if (where?.departement) place.push({ kind: 'place', url: lib.deptUrl(where.departement), title: `${where.departement.nom} (${where.departement.code})`, sub: 'Département · ses comptes et ses communes sur la carte', icon: ICON_PIN });
-      for (const c of (where?.communes || []).slice(0, where?.departement ? 2 : 4)) {
+      for (const [k, c] of (where?.communes || []).slice(0, where?.departement ? 2 : 4).entries()) {
         const fix = c.correspondance === 'approchant' ? 'Vouliez-vous dire ? · ' : '';
-        place.push({ kind: 'place', url: lib.mapUrl(c), title: c.nom, sub: `${fix}${c.dep_nom} (${c.dep})${c.population ? ` · ${lib.people(c.population)}` : ''} · ses comptes sur la carte`, icon: ICON_PIN, projects: c.projets_annee ? lib.projectsUrl(c) : '' });
+        place.push({ kind: 'place', url: lib.mapUrl(c), title: c.nom, sub: `${fix}${c.dep_nom} (${c.dep})${c.population ? ` · ${lib.people(c.population)}` : ''}`, icon: ICON_PIN, links: k === 0 ? c.liens : null });
       }
       const placeTitle = where?.type === 'approchant' ? 'Commune (orthographe approchante)' : where?.departement && !where.communes.length ? 'Département' : 'Communes';
       const placeFirst = lib && lib.sure(where);
@@ -147,9 +147,8 @@
           : it.kind === 'loupe' ? `<strong>« ${esc(it.q)} »</strong><small>La Loupe cherche dans les données et sur le web, puis répond avec ses sources</small>`
             : it.count != null ? `<strong>${esc(it.q)}</strong><small>${it.count.toLocaleString('fr-FR')} ligne${it.count > 1 ? 's' : ''}${it.amount ? ` · ${euros(it.amount)}` : ''} dans les dépenses publiées</small>`
               : `<strong>« ${esc(it.q)} » dans les dépenses publiées</strong><small>Associations, marchés publics, projets, aides, budget de l’État</small>`;
-        const extra = it.projects ? `<a class="omni__side" href="${esc(it.projects)}" data-side="${i}" title="Projets d’investissement subventionnés par l’État">${ICON_BUILD}<span>Projets aidés</span></a>` : '';
-        const link = `<a class="omni__item omni__item--${it.kind}" role="option" id="${uid}-o${i}" data-i="${i}" href="${it.kind === 'site' || it.kind === 'place' ? esc(it.url) : esc(spendUrl(it.q))}"><span class="omni__item-icon">${icon}</span><span class="omni__item-body">${body}</span>${i === 0 && !extra ? ENTER : ''}</a>`;
-        return extra ? `<div class="omni__row">${link}${extra}</div>` : link;
+        const link = `<a class="omni__item omni__item--${it.kind}" role="option" id="${uid}-o${i}" data-i="${i}" href="${it.kind === 'site' || it.kind === 'place' ? esc(it.url) : esc(spendUrl(it.q))}"><span class="omni__item-icon">${icon}</span><span class="omni__item-body">${body}</span>${i === 0 ? ENTER : ''}</a>`;
+        return it.links?.length && window.FRLPlaces ? `${link}<div class="omni__chips">${FRLPlaces.chips(it.links, { attr: 'data-side' })}</div>` : link;
       }).join('')}</div>`).join('');
       panel.hidden = false;
       root.classList.add('is-open');
@@ -175,7 +174,7 @@
     panel.addEventListener('mousedown', event => event.preventDefault());   // keep the focus in the input
     panel.addEventListener('click', event => {
       const side = event.target.closest('[data-side]');
-      if (side) { event.preventDefault(); close(); location.href = side.href; return; }
+      if (side) { event.preventDefault(); close(); location.href = side.href; return; }   // a level of the commune
       const a = event.target.closest('[data-i]'); if (!a) return;
       event.preventDefault(); go(items[+a.dataset.i]);
     });

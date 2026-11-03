@@ -259,6 +259,7 @@
         const parts = [];
         if (m.sources?.length) parts.push(`<div class="ai-chips"><span>Sources web</span>${m.sources.map((s, i) => `<a style="--i:${i}" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>`).join('')}</div>`);
         if (m.searches?.length) parts.push(`<div class="ai-chips ai-chips--search"><span>Recherches Google</span>${m.searches.map((s, i) => `<a style="--i:${i + 2}" href="https://www.google.com/search?q=${encodeURIComponent(s)}" target="_blank" rel="noopener noreferrer">${esc(s)}</a>`).join('')}</div>`);
+        if (m.liens?.liens?.length) parts.push(liensHtml(m.liens));
         if (m.demande) parts.push(demandeHtml(m));
         q('.ai-extra').innerHTML = parts.join('');
         const req = q('.ai-req');
@@ -289,6 +290,13 @@
   }
   /* Request for administrative documents drafted by the Loupe (server/assistant/demandes.py): the reader has it sent by
      the site (within the hour of the answer) or copies it and sends it from his own mailbox. */
+  /* The levels of the commune the answer is about (server: places.links), as the same buttons as the search boxes */
+  const siteUrl = path => new URL(path, document.querySelector('script[src*="assistant.js"]')?.src || location.href).href;
+  if (!window.FRLPlaces && !document.querySelector('script[src*="places.js"]')) document.head.appendChild(Object.assign(document.createElement('script'), { src: siteUrl('places.js'), defer: true }));
+  function liensHtml(l) {
+    if (window.FRLPlaces) return `<div class="ai-links"><p>${esc(l.commune)} sur le site</p>${FRLPlaces.chips(l.liens)}</div>`;
+    return `<div class="ai-links"><p>${esc(l.commune)} sur le site</p><div class="frl-chips">${l.liens.map(x => `<a class="frl-chip frl-chip--${esc(x.cle)}" href="${esc(siteUrl(x.url))}"><span>${esc(x.libelle)}</span></a>`).join('')}</div></div>`;
+  }
   const REQ_ICON = {
     letter: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>',
     send: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>',
@@ -434,7 +442,7 @@
         if (j.done) {
           const res = j.result || {};
           if (res.credits === false) { m.donate = res.donate; noCredits(res); }
-          Object.assign(m, { text: res.reply || '', error: res.error || '', sources: res.sources || [], searches: res.searches || [], demande: res.demande || null,
+          Object.assign(m, { text: res.reply || '', error: res.error || '', sources: res.sources || [], searches: res.searches || [], demande: res.demande || null, liens: res.liens || null,
             label: res.label || m.label, provider: res.provider || m.provider, s: res.s });
           break;
         }

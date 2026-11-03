@@ -1328,14 +1328,18 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .dm-reply p { margin: 0; font-size: .9rem; }
 .dm-card h3::first-letter { text-transform: uppercase; }
 
-/* Search boxes: a commune with its side link to the projects funded by the State (omni-search.js) */
-.omni__row { display: flex; align-items: center; gap: .3rem; min-width: 0; }
-.omni__row .omni__item { flex: 1; min-width: 0; }
+/* A commune level by level: small buttons shared by the search boxes, the results page and the Loupe (places.js) */
+.frl-chips { display: flex; flex-wrap: wrap; gap: .35rem; min-width: 0; }
+.frl-chip { display: inline-flex; align-items: center; gap: .35rem; max-width: 100%; padding: .3rem .65rem .3rem .5rem; border: 1px solid var(--c-line); border-radius: 999px; background: var(--c-bg); color: var(--c-ink); font-size: .78rem; font-weight: 600; line-height: 1.2; text-decoration: none; transition: border-color .2s, color .2s, transform .2s; }
+.frl-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.frl-chip svg { flex: none; width: 15px; height: 15px; fill: none; stroke: var(--c-teal-600); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.frl-chip:hover, .frl-chip:focus-visible { border-color: var(--c-teal-500); color: var(--c-teal-600); transform: translateY(-1px); outline: none; }
+.frl-chip--commune { background: var(--c-teal-600); border-color: var(--c-teal-600); color: #fff; }
+.frl-chip--commune svg { stroke: #fff; }
+.frl-chip--commune:hover { color: #fff; filter: brightness(1.08); }
+.omni__chips { padding: 0 .7rem .55rem calc(.7rem + 36px + .75rem); }
+@media (max-width: 480px) { .omni__chips { padding-left: .7rem; } .frl-chip { font-size: .74rem; padding: .28rem .55rem .28rem .45rem; } }
 .omni__item--place .omni__item-icon { background: color-mix(in srgb, var(--c-teal-500) 14%, transparent); }
-.omni__side { flex: none; display: inline-flex; align-items: center; gap: .3rem; padding: .4rem .6rem; border-radius: var(--r-md); border: 1px solid var(--c-line); color: var(--c-teal-600); font-size: .78rem; font-weight: 600; text-decoration: none; white-space: nowrap; transition: border-color .2s, background .2s; }
-.omni__side:hover { border-color: var(--c-teal-500); background: var(--c-surface); }
-.omni__side svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-@media (max-width: 480px) { .omni__side span { display: none; } .omni__side { padding: .5rem; } }
 
 /* Results page: the commune or département typed, first (recherche.js, places.js) */
 .sr-place { margin-bottom: var(--sp-3); }
@@ -1347,7 +1351,5 @@ a.sr-place__card:hover { border-color: var(--c-teal-500); }
 .sr-place__pin svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .sr-place__card > span:not(.sr-place__pin):not(.sr-place__links), .sr-place__body { flex: 1 1 10rem; min-width: 0; display: grid; }
 .sr-place__card small { color: var(--c-muted); }
-.sr-place__links { display: flex; flex-wrap: wrap; gap: .4rem; }
-.sr-place__links a { padding: .35rem .7rem; border-radius: 999px; border: 1px solid var(--c-line); color: var(--c-teal-600); font-size: .8rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
-.sr-place__links a:first-child { background: var(--c-teal-600); border-color: var(--c-teal-600); color: #fff; }
-.sr-place__links a:hover { border-color: var(--c-teal-500); }
+.sr-place__links { flex: 1 1 100%; min-width: 0; }
+.map-theme-snapshot.is-switch { transition: opacity .32s ease !important; }

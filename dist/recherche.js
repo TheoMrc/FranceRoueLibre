@@ -71,7 +71,7 @@
     if (where.departement) cards.push(`<a class="sr-place__card" href="${esc(P.deptUrl(where.departement))}"><span class="sr-place__pin">${PIN}</span><span><strong>${esc(where.departement.nom)} (${esc(where.departement.code)})</strong><small>Le département et ses communes sur la carte</small></span></a>`);
     for (const c of where.communes.slice(0, where.departement ? 2 : 4)) {
       cards.push(`<div class="sr-place__card"><span class="sr-place__pin">${PIN}</span><span class="sr-place__body"><strong>${esc(c.nom)}</strong><small>${esc(c.dep_nom)} (${esc(c.dep)})${c.population ? ` · ${esc(P.people(c.population))}` : ''}${c.codes_postaux.length ? ` · ${esc(c.codes_postaux.slice(0, 3).join(', '))}` : ''}</small></span>`
-        + `<span class="sr-place__links"><a href="${esc(P.mapUrl(c))}">Comptes sur la carte</a>${c.projets_annee ? `<a href="${esc(P.projectsUrl(c))}">Projets aidés par l’État</a>` : ''}</span></div>`);
+        + `<span class="sr-place__links">${P.chips(c.liens)}</span></div>`);
     }
     const head = where.type === 'approchant' ? 'Vouliez-vous dire cette commune ?' : where.type === 'code_postal' ? `Code postal ${esc(q.match(/\d{5}/)?.[0] || q)}` : where.type === 'departement' ? 'Département' : 'Commune';
     box.innerHTML = `<p class="sr-place__head">${head}</p><div class="sr-place__grid">${cards.join('')}</div>`

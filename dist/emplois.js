@@ -749,6 +749,9 @@
       index = m.rows.map((r, i) => ({ i, code: r[0], name: r[1], dep: r[2], key: norm(r[1]), pop: c.rows[i][0] || 0 }));
     }));
     input.addEventListener('focus', () => ensure(), { once: true });
+    // emplois.html?commune=33019#commune: opened from the search boxes or the Loupe (places.js links)
+    const wanted = new URLSearchParams(location.search).get('commune');
+    if (wanted) ensure().then(() => { const h = index.find(x => x.code === wanted); if (h) { show(h); document.getElementById('commune')?.scrollIntoView({ block: 'start' }); } });
     function suggest() {
       const q = norm(input.value);
       if (!index || q.length < 2) { list.hidden = true; return; }

@@ -68,8 +68,8 @@ n’affirme pas ce que les données ne montrent pas, et dis ce qui manque (donn�
 Question sur une commune (ou un code postal) : commence par les quatre échelons qui dépensent pour ses habitants \
 (« echelons » de dossier_collectivite), un tiret chacun : **nom**, dépenses totales et par habitant de l’année, et à \
 quoi il sert en quelques mots (« sert_a »). Puis deux ou trois faits sur la commune (évolution, comparaison avec les \
-communes de même taille, projets aidés par l’État, signal éventuel). Termine par les liens « comptes sur la carte » \
-et « projets aidés » de la commune. Les montants par habitant des échelons ne s’additionnent pas exactement \
+communes de même taille, projets aidés par l’État, signal éventuel). Les liens vers chaque échelon s’affichent en \
+boutons sous ta réponse : ne les recopie pas. Les montants par habitant des échelons ne s’additionnent pas exactement \
 (périmètres et populations différents) : ne les additionne pas.
 
 Réponse : en français, courte (10 lignes environ, davantage seulement si la question l’exige), montants arrondis \
@@ -258,7 +258,7 @@ def _run(chosen: str, contents: List[dict], on_event: Callable[[dict], None], ca
                 'sources': box.sources, 'searches': box.queries}
     return {'reply': reply or 'Je n’ai pas trouvé de réponse fiable ; essayez de reformuler la question.',
             'provider': chosen, 'label': client.label, 'model': client.model, 'sources': box.sources,
-            'searches': box.queries, 'demande': box.demande,
+            'searches': box.queries, 'demande': box.demande, 'liens': box.liens,
             'calls': client.calls, 'cost_eur': round(client.eur, 4), 's': round(time.time() - started, 1)}
 
 

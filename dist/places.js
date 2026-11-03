@@ -22,5 +22,20 @@
   const people = n => n ? `${Number(n).toLocaleString('fr-FR')} hab.` : '';
   /* a match good enough for Enter to go straight to the commune (exact name, postal code, département) */
   const sure = r => r && (r.type === 'nom' || r.type === 'code_postal' || r.type === 'departement' || (r.type === 'approchant' && r.communes.length === 1));
-  window.FRLPlaces = { find, mapUrl, projectsUrl, deptUrl, people, sure };
+  /* The links of a commune level by level (server/assistant/places.py links()), as a row of small buttons:
+     the commune, its intercommunality, its département, its region, the State-aided projects, elected officials. */
+  const ICONS = {
+    commune: '<path d="M3 21h18M5 21V10l7-5 7 5v11M10 21v-5h4v5"/>',
+    interco: '<path d="M2 21h20M4 21v-7l4-3 4 3v7M12 21v-9l4-3 4 3v9"/>',
+    departement: '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/>',
+    region: '<path d="M4 21V4M4 4h12l-2 4 2 4H4"/>',
+    projets: '<path d="M2 20h20M6 20V9h12v11M9 9V5h6v4M10 13h4"/>',
+    elus: '<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 4a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 6"/>',
+  };
+  const icon = key => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[key] || ICONS.commune}</svg>`;
+  const escH = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  function chips(links, { attr = '' } = {}) {
+    return `<div class="frl-chips">${(links || []).map((l, i) => `<a class="frl-chip frl-chip--${escH(l.cle)}" href="${escH(asset(l.url))}"${attr ? ` ${attr}="${i}"` : ''}>${icon(l.cle)}<span>${escH(l.libelle)}</span></a>`).join('')}</div>`;
+  }
+  window.FRLPlaces = { find, mapUrl, projectsUrl, deptUrl, people, sure, chips, icon };
 })();

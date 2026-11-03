@@ -1486,7 +1486,7 @@ function selectGfp(code) {
   state.search = ''; state.searchCodes = null; dom.search.value = '';
   state.selectedGfp = state.selectedGfp === code ? '' : code;
   state.selectedCommune = ''; state.selectedDepartment = ''; state.limit = 8;
-  render();
+  render(); syncUrl();
 }
 
 /* The selection is kept in the address (?commune=…, ?departement=…, &vue=projets), so that a link or a reload opens the
@@ -1494,24 +1494,43 @@ function selectGfp(code) {
 function syncUrl() {
   if (!history.replaceState) return;
   const p = new URLSearchParams();
-  if (state.selectedCommune) p.set('commune', state.selectedCommune);
-  else if (state.selectedDepartment) p.set('departement', state.selectedDepartment);
-  if ((state.selectedCommune || state.selectedDepartment) && state.mode === 'projects') { p.set('vue', 'projets'); p.set('annee', state.year); }
+  const anchor = state.selectedCommune || state.anchorCommune;
+  if (state.mode === 'gfp' && state.selectedGfp) p.set('interco', state.selectedGfp);
+  else if (state.mode === 'regions' && state.region) { p.set('region', state.region); p.set('vue', 'regions'); }
+  else if (state.mode === 'departments' && state.selectedDepartment) { p.set('departement', state.selectedDepartment); p.set('vue', 'departements'); }
+  else if (!state.selectedCommune && state.selectedDepartment) p.set('departement', state.selectedDepartment);
+  if (anchor && (state.selectedCommune || p.toString())) p.set('commune', anchor);
+  if (state.mode === 'projects' && (state.selectedCommune || state.selectedDepartment)) { p.set('vue', 'projets'); p.set('annee', state.year); }
   const qs = p.toString();
   history.replaceState(null, '', `${location.pathname}${qs ? `?${qs}` : ''}${location.hash}`);
 }
 
+/* Opens the view an address asks for: ?commune=…[&vue=projets&annee=…], ?cp=…, ?departement=…[&vue=departements],
+   ?region=…&vue=regions, ?interco=…; with &commune=… the commune stays the anchor for the other maps. */
 async function applyUrl() {
   const p = new URLSearchParams(location.search);
-  let commune = p.get('commune'), department = p.get('departement');
+  let commune = p.get('commune');
+  const department = p.get('departement'), region = p.get('region'), interco = p.get('interco'), vue = p.get('vue');
   const postal = p.get('cp');   // ?cp=33980: the postal code, resolved by the search API (places.js)
   if (postal && !commune && window.FRLPlaces) {
     const where = await window.FRLPlaces.find(postal);
     if (where.communes.length > 1) { state.searchCodes = new Set(where.communes.map(c => c.insee)); return true; }
     commune = where.communes[0]?.insee || '';
   }
-  if (!commune && !department) return false;
-  if (p.get('vue') === 'projets') {
+  if (!commune && !department && !region && !interco) return false;
+  if (interco) {
+    await changeView(() => { state.mode = 'gfp'; });
+    state.anchorCommune = commune || ''; selectGfp(interco); return true;
+  }
+  if (vue === 'regions' && region) {
+    await changeView(() => { state.mode = 'regions'; });
+    state.anchorCommune = commune || ''; selectRegion(region); return true;
+  }
+  if (vue === 'departements' && department) {
+    await changeView(() => { state.mode = 'departments'; });
+    selectDepartment(department); state.anchorCommune = commune || ''; syncUrl(); return true;
+  }
+  if (vue === 'projets') {
     const year = Number(p.get('annee'));
     await changeView(() => { state.mode = 'projects'; if (data.projectYears.includes(year)) state.year = year; });
   }
@@ -1535,7 +1554,7 @@ function selectRegion(name) {
   if (!name) return;
   state.region = name; state.search = ''; state.searchCodes = null; dom.search.value = ''; dom.region.value = name;
   state.selectedDepartment = ''; state.selectedCommune = ''; state.limit = 8;
-  render();
+  render(); syncUrl();
 }
 
 function selectDepartment(code) {
@@ -1565,7 +1584,30 @@ function selectCommune(code) {
 function gfpOfCommune(code) {
   return data.gfp.find(row => row.communes.includes(code))?.code || '';
 }
+/* Freezes the current frame of the map in a 2D canvas laid over it; the returned function fades it out once the new
+   view is drawn underneath. Used when switching map, so that the colours crossfade instead of flickering. */
+function freezeMap(duration = 320) {
+  const map = mapState.map;
+  if (!map || !mapState.ready || matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {};
+  const canvas = map.getCanvas();
+  let snap = null;
+  try {
+    map.redraw();
+    snap = document.createElement('canvas');
+    snap.width = canvas.width; snap.height = canvas.height;
+    snap.className = 'map-theme-snapshot is-switch';
+    snap.getContext('2d').drawImage(canvas, 0, 0);
+    canvas.parentNode.appendChild(snap);
+  } catch (error) { snap?.remove(); return () => {}; }
+  return () => {
+    map.redraw();
+    requestAnimationFrame(() => requestAnimationFrame(() => { snap.style.opacity = '0'; }));
+    setTimeout(() => snap.remove(), duration + 120);
+  };
+}
+
 async function switchMode(to) {
+  const fade = freezeMap();
   const anchor = state.selectedCommune || state.anchorCommune;
   const meta = anchor ? data.communeMetadata.get(anchor) : null;
   const department = meta ? normalizeDepartment(meta.department) : state.selectedDepartment;
@@ -1583,6 +1625,7 @@ async function switchMode(to) {
   });
   if (to === 'gfp' && anchor) { state.selectedGfp = gfpOfCommune(anchor); render(); }
   syncUrl();
+  fade();
 }
 
 function setupListeners() {
