@@ -212,7 +212,12 @@ def _run(chosen: str, contents: List[dict], on_event: Callable[[dict], None], ca
                 reply = 'Arrêté à votre demande.'
                 break
             on_event({'type': 'think', 'step': step})
+            if contents[-1]['role'] != 'user':  # Gemini refuses a request that ends with a model turn
+                contents.append({'role': 'user', 'parts': [{'text': 'Continue, puis réponds.'}]})
             content = client.generate(contents, system, DECLARATIONS)
+            if not (content.get('parts') or []):  # empty turn: not kept (it would end the next request)
+                reply = ''
+                break
             parts = content.get('parts') or []
             contents.append({'role': 'model', 'parts': parts})
             calls = [p['functionCall'] for p in parts if 'functionCall' in p]
