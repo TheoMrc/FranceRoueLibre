@@ -1384,3 +1384,8 @@ a.sr-place__card:hover { border-color: var(--c-teal-500); }
 .nav__menu a:hover .nav__txt, .nav__menu a:focus-visible .nav__txt { transform: translateX(3px); }
 .nav__menu a[aria-current="page"] { background: none; box-shadow: none; }
 @media (prefers-reduced-motion: reduce) { .nav__menu a::before, .nav__txt { transition: none; } }
+/* each item on two lines: its title, then its description (the menu widens to fit, up to the screen) */
+@media (min-width: 681px) {
+  .nav__menu { width: max-content; min-width: 300px; max-width: min(480px, 92vw); }
+  .nav__menu strong, .nav__menu small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
