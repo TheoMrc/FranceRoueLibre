@@ -1368,3 +1368,10 @@ a.sr-place__card:hover { border-color: var(--c-teal-500); }
 .sr-place__links { flex: 1 1 100%; min-width: 0; }
 .map-theme-snapshot.is-switch { transition: opacity .32s ease !important; }
 .omni input { caret-color: var(--c-teal-600); }
+
+/* Menu items with their icon (scripts/sync_nav.py, scripts/nav-icons.json) */
+.nav__menu a, .nav-sheet .nav__menu a { flex-direction: row; align-items: flex-start; gap: .65rem; }
+.nav__txt { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
+.nav__ico { flex: none; display: grid; place-items: center; width: 34px; height: 34px; margin-top: .05rem; border-radius: 10px; background: color-mix(in srgb, var(--c-teal-500) 12%, transparent); }
+.nav__ico svg { width: 20px; height: 20px; fill: var(--c-teal-600); }
+.nav__menu a:hover .nav__ico, .nav__menu a[aria-current="page"] .nav__ico { background: color-mix(in srgb, var(--c-teal-500) 20%, transparent); }

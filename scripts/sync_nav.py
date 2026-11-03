@@ -2,6 +2,7 @@
 page in dist/ (and adds dist/nav.js, dist/collapse.js, dist/assistant.js, dist/scroll-hint.js and dist/touch-hover.js), so that adding a page means adding one line below and running:
     python scripts/sync_nav.py
 On the home page, the map, circuit and accounts links stay in-page anchors."""
+import json
 import pathlib
 import re
 import sys
@@ -30,9 +31,9 @@ NAV = [
         ('UGAP', 'ugap.html', 'Les prix de la centrale d’achat public'),
     ]),
     ('Contrôle', [
+        ('Demandes aux instances publiques', 'demandes.html', 'Les documents demandés aux administrations, et leurs réponses'),
         ('Signaux', 'signaux.html', 'Règles simples appliquées à toutes les données'),
         ('Probité', 'probite.html', 'Corruption, favoritisme : les affaires jugées'),
-        ('Demandes aux instances publiques', 'demandes.html', 'Les documents demandés aux administrations, et leurs réponses'),
         ('Données et angles morts', 'donnees.html', 'Les sources, et ce qui n’est pas publié'),
     ]),
 ]
@@ -71,6 +72,15 @@ FOOTER_EXTRA = (f'<a class="footer__github" href="{X_URL}" target="_blank" rel="
 CHEVRON = '<svg class="nav__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
 
+# One icon per menu item (scripts/nav-icons.json: Material Design Icons, like the ministries' icons of icons.js)
+ICONS = json.loads((ROOT / 'scripts' / 'nav-icons.json').read_text(encoding='utf-8'))['icons']
+
+
+def nav_icon(href):
+    i = ICONS.get(href)
+    return f'<span class="nav__ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><path d="{i["d"]}"/></svg></span>' if i else ''
+
+
 def esc(s):
     return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
 
@@ -88,7 +98,7 @@ def render(page, indent='      '):
         mark = ' aria-current="page"'
         local = lambda h: f'#{h.split("#", 1)[1]}' if home and h.startswith('index.html#') else h
         items = ''.join(
-            f'<li><a href="{local(h)}"{mark if h == page else ""}><strong>{esc(t)}</strong><small>{esc(d)}</small></a></li>'
+            f'<li><a href="{local(h)}"{mark if h == page else ""}>{nav_icon(h)}<span class="nav__txt"><strong>{esc(t)}</strong><small>{esc(d)}</small></span></a></li>'
             for t, h, d in target)
         out.append(
             f'{indent}  <li class="nav__group{" is-current" if current else ""}">'
