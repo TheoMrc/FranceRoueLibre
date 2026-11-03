@@ -1353,3 +1353,4 @@ a.sr-place__card:hover { border-color: var(--c-teal-500); }
 .sr-place__card small { color: var(--c-muted); }
 .sr-place__links { flex: 1 1 100%; min-width: 0; }
 .map-theme-snapshot.is-switch { transition: opacity .32s ease !important; }
+.omni input { caret-color: var(--c-teal-600); }

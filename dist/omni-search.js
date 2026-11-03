@@ -201,7 +201,12 @@
     /* a long example scrolls to the left as it is typed, so the end being typed stays in view */
     const goBtn = root.querySelector('.omni__go');
     /* the example stops before the button, whatever its width (« Rechercher » on a wide screen, an icon on a phone) */
-    const fitGhost = () => { if (goBtn?.offsetWidth) ghost.style.right = `${form.clientWidth - goBtn.offsetLeft + 10}px`; };
+    /* and starts exactly where the reader's own text starts (the icon and paddings differ between phone and PC) */
+    const fitGhost = () => {
+      if (goBtn?.offsetWidth) ghost.style.right = `${form.clientWidth - goBtn.offsetLeft + 10}px`;
+      const f = form.getBoundingClientRect(), r = input.getBoundingClientRect();
+      if (r.width) ghost.style.left = `${r.left - f.left + (parseFloat(getComputedStyle(input).paddingLeft) || 0)}px`;
+    };
     addEventListener('resize', fitGhost, { passive: true });
     const setGhost = text => { fitGhost(); ghostText.textContent = text; const over = Math.max(0, ghostInner.scrollWidth - ghost.clientWidth); ghostInner.style.transform = `translateX(${-over}px)`; ghost.classList.toggle('is-scrolled', over > 0); };
     /* examples typing themselves while the box is empty */
