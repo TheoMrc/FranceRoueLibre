@@ -267,7 +267,7 @@
         window.FRLPlaces?.wire(q('.ai-extra'));
         const req = q('.ai-req');
         if (req) req.addEventListener('click', e => demandeClick(m, e, req));
-        q('.ai-foot').innerHTML = m.provider ? `${provBadge(m.provider, m.label || label(m.provider))}${m.s ? `<span>${Math.round(m.s)} s</span>` : ''}${voteHtml(m)}` : '';
+        q('.ai-foot').innerHTML = m.provider ? `${provBadge(m.provider, m.provider === 'faq' ? 'Réponse sourcée automatique' : (m.label || label(m.provider)))}${m.s ? `<span>${Math.round(m.s)} s</span>` : ''}${voteHtml(m)}` : '';
         const vote = q('.ai-vote');
         if (vote) vote.addEventListener('click', e => { const b = e.target.closest('button[data-vote]'); if (b) sendVote(m, +b.dataset.vote, vote); });
         if (m.error) q('.ai-text').innerHTML = `<p class="ai-error">${esc(m.error)}</p>${m.donate ? donateLink(m.donate) : ''}`;
