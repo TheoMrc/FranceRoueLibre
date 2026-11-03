@@ -41,6 +41,6 @@ test('penalties: prison with full suspension 2025', () => {
 test('page wiring and writing rules', () => {
   const html = read('probite.html'), js = read('probite.js');
   for (const id of ['pbKpis', 'pbYears', 'pbAuthors', 'pbMultiples', 'pbDecTable', 'pbPrison', 'pbCompl', 'pbPenTable', 'pbSources', 'non-publie']) assert.ok(html.includes(`id="${id}"`), id);
-  assert.ok(html.includes('probite.css') && html.includes('probite.js') && html.includes('aria-current="page"><strong>Probité'));
+  assert.ok(html.includes('probite.css') && html.includes('probite.js') && /aria-current="page"><span class="nav__txt"><strong>(<svg[^>]*>.*?<\/svg>)?Probité/.test(html));
   assert.ok(!html.slice(html.indexOf('<main'), html.indexOf('</main>')).includes('—'), 'no em dash in page text');
 });
