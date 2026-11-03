@@ -19,9 +19,20 @@ OUT = ROOT / '_journal'
 SEP = '@@RECHERCHES@@'
 REMOTE = ("sudo -n sh -c 'zcat -f /var/lib/francerouelibre-assistant/journal/*.jsonl* 2>/dev/null; echo " + SEP +
           "; zcat -f /var/lib/francerouelibre/recherches/*.jsonl* 2>/dev/null'")
-LOUPE_COLS = ['t', 'id', 'reader', 'question', 'earlier', 'model', 'provider', 'saved', 'cost_eur', 'calls', 's', 'tools',
+LOUPE_COLS = ['t', 'heure_paris', 'id', 'reader', 'question', 'earlier', 'model', 'provider', 'saved', 'cost_eur', 'calls', 's', 'tools',
               'demande', 'error', 'vote', 'reply', 'sources']
-SEARCH_COLS = ['t', 'q', 'lines', 'cache', 'status', 's', 'prefix']
+SEARCH_COLS = ['t', 'heure_paris', 'q', 'lines', 'cache', 'status', 's', 'prefix']
+
+
+def local(t):
+    """The VPS writes in UTC (the Loupe without offset, nginx with +00:00): shown in the PC's time (Paris)."""
+    try:
+        d = dt.datetime.fromisoformat(str(t))
+    except ValueError:
+        return str(t or '')
+    if d.tzinfo is None:
+        d = d.replace(tzinfo=dt.timezone.utc)
+    return d.astimezone().strftime('%Y-%m-%d %H:%M:%S')
 
 
 def fetch():
@@ -43,13 +54,13 @@ def fetch():
             answers.append(e)
         elif e.get('type') == 'vote':
             votes[e.get('id')] = e.get('vote')
-    loupe = [{'t': a.get('t'), 'id': a.get('id'), 'reader': a.get('reader'), 'question': a.get('question'),
+    loupe = [{'t': a.get('t'), 'heure_paris': local(a.get('t')), 'id': a.get('id'), 'reader': a.get('reader'), 'question': a.get('question'),
               'earlier': a.get('earlier'), 'model': a.get('model'), 'provider': a.get('provider'), 'saved': a.get('saved') or '',
               'cost_eur': a.get('cost_eur'), 'calls': a.get('calls'), 's': a.get('s'),
               'tools': ' | '.join(f'{t.get("name")} ({t.get("summary") or ""})' for t in a.get('tools') or []),
               'demande': a.get('demande') or '', 'error': a.get('error') or '', 'vote': votes.get(a.get('id'), ''),
               'reply': a.get('reply'), 'sources': ' '.join(a.get('sources') or [])} for a in answers]
-    searches = [{'t': e.get('t'), 'q': unquote_plus(e.get('q') or ''), 'lines': e.get('lines'), 'cache': e.get('cache'),
+    searches = [{'t': e.get('t'), 'heure_paris': local(e.get('t')), 'q': unquote_plus(e.get('q') or ''), 'lines': e.get('lines'), 'cache': e.get('cache'),
                  'status': e.get('status'), 's': e.get('s'), 'prefix': e.get('prefix')} for e in rows(search_raw)]
     return sorted(loupe, key=lambda r: r['t'] or ''), sorted(searches, key=lambda r: r['t'] or '')
 
@@ -60,6 +71,10 @@ def save(path, cols, rows, key):
     if path.is_file():
         with open(path, newline='', encoding='utf-8-sig') as h:
             old = {key(r): r for r in csv.DictReader(h)}
+        for r in old.values():   # rows saved before the Paris time column
+            r.setdefault('heure_paris', local(r.get('t')))
+            if not r['heure_paris']:
+                r['heure_paris'] = local(r.get('t'))
     before = len(old)
     for r in rows:
         old[key(r)] = {c: '' if r.get(c) is None else r.get(c) for c in cols}
@@ -81,10 +96,10 @@ def main():
     since = (dt.date.today() - dt.timedelta(days=a.days - 1)).isoformat()
     days = collections.defaultdict(lambda: {'q': 0, 'readers': set(), 'eur': 0.0, 'saved': 0, 'r': 0, 'empty': 0})
     for r in loupe:
-        d = days[(r['t'] or '')[:10]]
+        d = days[r['heure_paris'][:10]]
         d['q'] += 1; d['readers'].add(r['reader']); d['eur'] += float(r['cost_eur'] or 0); d['saved'] += bool(r['saved'])
     for r in searches:
-        d = days[(r['t'] or '')[:10]]
+        d = days[r['heure_paris'][:10]]
         d['r'] += 1; d['empty'] += str(r['lines']) == '0'
     print(f'\n=== Par jour (depuis le {since})\n')
     print(f'{"Jour":10}  {"Questions":>9}  {"Lecteurs":>8}  {"Enregistrées":>12}  {"Coût":>8}  {"Recherches":>10}  {"Sans résultat":>13}')
@@ -95,13 +110,13 @@ def main():
     for r in loupe[-a.last:]:
         who = 'réponse enregistrée' if r['saved'] else f'{r["model"] or r["provider"]}, {r["s"]} s, {float(r["cost_eur"] or 0):.4f} €'
         vote = {1: ' 👍', -1: ' 👎'}.get(r['vote'], '')
-        print(f'{r["t"][5:16].replace("T", " ")}  {r["question"][:150]}  [{who}]{vote}{"  DEMANDE: " + r["demande"] if r["demande"] else ""}')
+        print(f'{r["heure_paris"][5:16]}  {r["question"][:150]}  [{who}]{vote}{"  DEMANDE: " + r["demande"] if r["demande"] else ""}')
         if r['tools']:
             print(f'      outils : {r["tools"][:220]}')
         print(f'      → {(r["error"] or r["reply"] or "").replace(chr(10), " ")[:220]}')
     print(f'\n=== Les {a.last} dernières recherches\n')
     for r in searches[-a.last:]:
-        print(f'{(r["t"] or "")[5:16].replace("T", " ")}  {r["q"][:80]:80}  {r["lines"] or "?":>8} lignes  {r["cache"] or ""}')
+        print(f'{r["heure_paris"][5:16]}  {r["q"][:80]:80}  {r["lines"] or "?":>8} lignes  {r["cache"] or ""}')
     if not a.no_save:
         n1, t1 = save(OUT / 'loupe.csv', LOUPE_COLS, loupe, lambda r: r['id'])
         n2, t2 = save(OUT / 'recherches.csv', SEARCH_COLS, searches, lambda r: f'{r["t"]}|{r["q"]}|{r["cache"]}')
