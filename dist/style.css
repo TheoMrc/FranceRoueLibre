@@ -1332,7 +1332,8 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .frl-chips-wrap { position: relative; min-width: 0; }
 .frl-chips { display: flex; flex-wrap: nowrap; gap: .3rem; min-width: 0; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; scroll-behavior: smooth; }
 .frl-chips::-webkit-scrollbar { display: none; }
-.frl-chips--two { display: grid; grid-auto-flow: column; grid-template-rows: repeat(2, auto); justify-content: start; }   /* under an answer of the Loupe */
+.frl-chips--two { flex-direction: column; }   /* under an answer of the Loupe: two rows, each packed */
+.frl-chips__row { display: flex; gap: .3rem; width: max-content; }
 .frl-chips-wrap.has-more .frl-chips { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 3rem), transparent calc(100% - .5rem)); mask-image: linear-gradient(90deg, #000 calc(100% - 3rem), transparent calc(100% - .5rem)); }
 .frl-chips__more { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 1px solid var(--c-line); border-radius: 50%; background: var(--c-bg); color: var(--c-teal-600); box-shadow: 0 2px 8px rgba(13, 27, 42, .12); cursor: pointer; animation: frl-nudge 1.6s ease-in-out 2; }
 .frl-chips__more[hidden] { display: none; }

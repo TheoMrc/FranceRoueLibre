@@ -36,7 +36,13 @@
   const escH = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function chips(links, { attr = '', rows = 1 } = {}) {
     const short = l => l.cle === 'commune' ? 'Commune' : l.cle === 'projets' ? 'Projets aidés' : l.cle === 'elus' ? 'Élus' : l.libelle;
-    return `<div class="frl-chips-wrap"><div class="frl-chips${rows === 2 ? ' frl-chips--two' : ''}">${(links || []).map((l, i) => `<a class="frl-chip frl-chip--${escH(l.cle)}" href="${escH(asset(l.url))}" title="${escH(l.libelle)}"${attr ? ` ${attr}="${i}"` : ''}>${icon(l.cle)}<span>${escH(short(l))}</span></a>`).join('')}</div>`
+    const one = (l, i) => `<a class="frl-chip frl-chip--${escH(l.cle)}" href="${escH(asset(l.url))}" title="${escH(l.libelle)}"${attr ? ` ${attr}="${i}"` : ''}>${icon(l.cle)}<span>${escH(short(l))}</span></a>`;
+    const list = links || [], half = Math.ceil(list.length / 2);
+    /* two rows packed side by side (no column alignment), scrolling together */
+    const inner = rows === 2
+      ? `<div class="frl-chips__row">${list.slice(0, half).map(one).join('')}</div><div class="frl-chips__row">${list.slice(half).map((l, i) => one(l, i + half)).join('')}</div>`
+      : list.map(one).join('');
+    return `<div class="frl-chips-wrap"><div class="frl-chips${rows === 2 ? ' frl-chips--two' : ''}">${inner}</div>`
       + '<button type="button" class="frl-chips__more" aria-label="Voir les autres échelons" hidden><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button></div>';
   }
   /* Two rows that scroll sideways: an arrow on the right shows there is more, and scrolls when clicked.
