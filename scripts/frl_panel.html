@@ -109,6 +109,10 @@ tr.detail td { background: var(--soft); white-space: pre-wrap; font-size: 12.5px
 .dm-field input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 600 14px Inter, sans-serif; padding: 9px 0; outline: none; }
 .dm-compose textarea { display: block; width: 100%; border: 0; border-radius: 0; resize: none; min-height: 260px; padding: 14px; font: 14px/1.6 Inter, sans-serif; color: var(--ink); background: transparent; outline: none; }
 .dm-compose:focus-within { border-color: var(--c1); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c1) 18%, transparent); }
+.dm-sig { padding: 4px 14px 12px; border-top: 1px dashed var(--line); }
+.dm-sig__lab { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; margin: 8px 0 4px; }
+.dm-sig__paper { display: inline-block; max-width: 100%; overflow: auto; background: #fff; border-radius: 8px; padding: 2px 12px 12px; }
+.dm-sig__paper table { margin-top: 10px !important; }
 .dm-cbar { display: flex; justify-content: space-between; gap: 10px; padding: 6px 14px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
 .dm-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
 .dm-actions button { font: 500 13px Inter, sans-serif; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
@@ -445,6 +449,7 @@ let dmRender = function () {
       ${d.status === 'a_valider' ? `<div class="dm-compose" data-ref="${esc(d.ref)}"><div class="dm-field"><label>À</label><span>${esc(to.nom)} &lt;${esc(to.email || 'pas d’adresse')}&gt;</span></div>
         <div class="dm-field"><label>Objet</label><input data-subj value="${esc(d.subject)}" ${live ? '' : 'readonly'}></div>
         <textarea data-body spellcheck="true" ${live ? '' : 'readonly'}>${esc(d.body)}</textarea>
+        ${DM.signature ? `<div class="dm-sig"><div class="dm-sig__lab">Signature, ajoutée à l’envoi</div><div class="dm-sig__paper">${DM.signature.html}</div></div>` : ''}
         <div class="dm-cbar"><span data-saved>${d.modifiee ? 'Lettre modifiée par vous' : 'Lettre du modèle, modifiable'}</span><span data-words></span></div></div>` : `<details><summary>Lettre envoyée</summary><pre><b>${esc(d.subject)}</b>\n\n${esc(d.body)}</pre></details>`}
       ${last ? `<details ${d.status === 'repondue' ? 'open' : ''}><summary>Réponse du ${fdate(last.date)} (${esc(last.from_domain)})${last.files?.length ? `, pièces : ${esc(last.files.join(', '))}` : ''}</summary><pre>${esc(last.text)}</pre>
         ${d.status === 'repondue' ? `<div class="dm-meta">Texte publié sur la page des demandes (adresses, téléphones et signature retirés, à relire) :</div><textarea data-pub>${esc(last.public_text || d.reponse_anonymisee || '')}</textarea>` : last.public_text ? `<div class="dm-meta">Publié :</div><pre>${esc(last.public_text)}</pre>` : ''}</details>` : ''}

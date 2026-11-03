@@ -299,6 +299,18 @@ class DirectoryTest(unittest.TestCase):
             D.get_json = keep
 
 
+class SignatureTest(unittest.TestCase):
+    def test_signed_letter_has_logo_and_one_signature(self):
+        from assistant import demandes as D
+        subject, body = D.letter('Mairie', {'objet': 'x', 'documents': 'a', 'contexte': ''}, 'FRL-2026-0009')
+        m = D._message('a@example.org', subject, body + '\n\nFranceRoueLibre\nstonks@francerouelibre.fr', 'FRL-2026-0009', signed=True)
+        types = [p.get_content_type() for p in m.walk()]
+        self.assertEqual(types, ['multipart/alternative', 'text/plain', 'multipart/related', 'text/html', 'image/png'])
+        plain = m.get_body(('plain',)).get_content()
+        self.assertEqual(plain.count('stonks@francerouelibre.fr'), 1, 'the old typed signature is not repeated')
+        self.assertIn('cid:', m.get_body(('html',)).get_content())
+
+
 class SavedAnswersTest(unittest.TestCase):
     """faq.json (scripts/loupe-faq.py): frequent questions answered without a model call."""
 

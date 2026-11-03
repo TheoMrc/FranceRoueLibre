@@ -18,6 +18,7 @@ import datetime as dt
 import email
 import email.policy
 import email.utils
+import html
 import imaplib
 import json
 import re
@@ -142,7 +143,7 @@ def letter(to_name: str, fields: dict, ref: str = '', by_site: bool = True) -> t
                   f'ouvertes. Cette demande et votre réponse seront publiées sur {S.SITE_URL}/{PAGE}, sans le nom des '
                   'agents.', '',
                   'Je vous remercie par avance et vous prie d’agréer, Madame, Monsieur, l’expression de mes salutations '
-                  'distinguées.', '', S.MAIL_FROM_NAME, S.MAIL_FROM]
+                  'distinguées.']   # the signature (logo, address, site) is added when the mail is sent
     else:
         parts += ['Je vous remercie par avance et vous prie d’agréer, Madame, Monsieur, l’expression de mes salutations '
                   'distinguées.', '', '[Votre nom]']
@@ -296,14 +297,66 @@ def _smtp() -> smtplib.SMTP:
     return server
 
 
-def _message(to: str, subject: str, body: str, ref: str = '') -> EmailMessage:
+# ------------------------------------------------------------------------------------------------------- signature
+LOGO = Path(__file__).with_name('signature-logo.png')   # the site's logo, 104 px (shown at 52 px)
+INK, TEAL, GREY = '#0d1b2a', '#0e7490', '#6b7c8d'
+
+
+def strip_signature(body: str) -> str:
+    """The letter without a signature typed at its end (older drafts ended with the site's name and address)."""
+    lines = body.rstrip().split('\n')
+    while lines and lines[-1].strip() in ('', S.MAIL_FROM_NAME, S.MAIL_FROM, S.SITE_URL, '--'):
+        lines.pop()
+    return '\n'.join(lines).rstrip()
+
+
+def signature_text() -> str:
+    return '\n'.join(['-- ', S.MAIL_FROM_NAME, S.MAIL_SIG_TAGLINE, S.MAIL_FROM, S.SITE_URL])
+
+
+def signature_html(logo_src: Optional[str]) -> str:
+    e = html.escape
+    name = (f'<a href="{e(S.SITE_URL)}" style="text-decoration:none;font-weight:bold;font-size:11pt">'
+            f'<span style="color:{INK}">France</span><span style="color:{TEAL}">RoueLibre</span></a>')
+    rows = [name, f'<span style="color:{GREY}">{e(S.MAIL_SIG_TAGLINE)}</span>',
+            f'<a href="mailto:{e(S.MAIL_FROM)}" style="color:{INK};text-decoration:none">{e(S.MAIL_FROM)}</a>',
+            f'<a href="{e(S.SITE_URL)}" style="color:{TEAL};text-decoration:none">{e(S.SITE_URL.replace("https://", ""))}</a>']
+    logo = (f'<td style="vertical-align:middle;padding:0 14px 0 0"><a href="{e(S.SITE_URL)}"><img src="{e(logo_src)}" '
+            f'width="52" height="52" alt="FranceRoueLibre" style="display:block;border:0;width:52px;height:52px"></a></td>'
+            if logo_src else '')
+    return (f'<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-top:20px;'
+            f'border-collapse:collapse;font-family:Segoe UI,Helvetica,Arial,sans-serif;font-size:10pt;line-height:1.5;'
+            f'color:{INK}"><tr>{logo}<td style="vertical-align:middle;padding:0 0 0 14px;border-left:2px solid {TEAL}">'
+            f'{"<br>".join(rows)}</td></tr></table>')
+
+
+def letter_html(body: str, logo_src: Optional[str]) -> str:
+    paras = [p for p in re.split(r'\n\s*\n', body.strip()) if p.strip()]
+    text = ''.join('<p style="margin:0 0 14px 0">' + '<br>'.join(html.escape(l) for l in p.split('\n')) + '</p>'
+                   for p in paras)
+    return ('<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0">'
+            '<div style="font-family:Segoe UI,Helvetica,Arial,sans-serif;font-size:11pt;line-height:1.5;color:#1f2328;'
+            f'max-width:680px">{text}{signature_html(logo_src)}</div></body></html>')
+
+
+def _message(to: str, subject: str, body: str, ref: str = '', signed: bool = False) -> EmailMessage:
+    """signed: plain text + HTML with the site's signature, the logo inline (CID) so that no image is fetched."""
     m = EmailMessage()
     m['From'] = email.utils.formataddr((S.MAIL_FROM_NAME, S.MAIL_FROM))
     m['To'] = to
     m['Subject'] = subject
     m['Date'] = email.utils.formatdate(localtime=True)
     m['Message-ID'] = email.utils.make_msgid(idstring=ref or None, domain=S.MAIL_FROM.split('@')[-1])
-    m.set_content(body)
+    if not signed:
+        m.set_content(body)
+        return m
+    body = strip_signature(body)
+    m.set_content(body + '\n\n' + signature_text() + '\n')
+    logo = LOGO.read_bytes() if LOGO.is_file() else None
+    cid = email.utils.make_msgid(domain=S.MAIL_FROM.split('@')[-1])
+    m.add_alternative(letter_html(body, f'cid:{cid[1:-1]}' if logo else None), subtype='html')
+    if logo:
+        m.get_payload()[1].add_related(logo, 'image', 'png', cid=cid, filename='francerouelibre.png', disposition='inline')
     return m
 
 
@@ -326,7 +379,7 @@ def send(ref: str) -> dict:
             return {'error': 'demande inconnue ou pas à valider'}
         if _sent_today() >= S.MAIL_DAILY:
             return {'error': f'{S.MAIL_DAILY} envois par jour au plus : réessayer demain'}
-        m = _message(d['to']['email'], d['subject'], d['body'], ref)
+        m = _message(d['to']['email'], d['subject'], d['body'], ref, signed=True)
         m['Bcc'] = S.MAIL_NOTIFY
         try:
             with _smtp() as server:
@@ -436,12 +489,16 @@ def admin(action: str, ref: str = '', text: str = '') -> dict:
         for d in all_requests():
             if d['status'] == 'brouillon':
                 continue
-            rows.append({**{k: v for k, v in d.items() if k != 'reader'}, 'echeance': public_view(d)['echeance'],
+            view = {k: v for k, v in d.items() if k != 'reader'}
+            if d['status'] == 'a_valider':  # the signature is added when sending: not shown in the editable text
+                view['body'] = strip_signature(d['body'])
+            rows.append({**view, 'echeance': public_view(d)['echeance'],
                          'meme_organisme_30j': sum(1 for x in all_requests() if x is not d and x['to'].get('email')
                                                    and x['to'].get('email') == d['to'].get('email')
                                                    and x['status'] not in ('brouillon', 'refusee')),
                          'reponse_anonymisee': anonymize(d['replies'][-1]['text']) if d.get('replies') else None})
-        return {'demandes': rows, 'delai_jours': DELAY_DAYS, 'envoi_auto': bool(S.MAIL_AUTO_SEND),
+        return {'demandes': rows, 'signature': {'texte': signature_text(), 'html': signature_html(f'{S.SITE_URL}/logo-512.png')},
+                'delai_jours': DELAY_DAYS, 'envoi_auto': bool(S.MAIL_AUTO_SEND),
                 'envois_par_jour': S.MAIL_DAILY, 'envoyes_aujourdhui': _sent_today()}
     if action == 'liste':
         return {'demandes': [{'ref': d['ref'], 'status': d['status'], 'organisme': d['to']['nom'],

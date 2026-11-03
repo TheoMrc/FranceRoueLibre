@@ -143,6 +143,7 @@ MAIL_FROM = _str('MAIL_FROM', 'stonks@francerouelibre.fr')
 MAIL_USER = _str('MAIL_USER', MAIL_FROM)
 MAIL_PASSWORD = _credential('mail-password', 'MAIL_PASSWORD')
 MAIL_FROM_NAME = _str('MAIL_FROM_NAME', 'FranceRoueLibre')
+MAIL_SIG_TAGLINE = _str('MAIL_SIG_TAGLINE', 'Comprendre où va l’argent public, chiffres officiels à l’appui.')
 MAIL_NOTIFY = _str('MAIL_NOTIFY', MAIL_FROM)          # validations and replies are announced here
 MAIL_CONFIGURED = bool(MAIL_SMTP_HOST and MAIL_USER and MAIL_PASSWORD)
 MAIL_AUTO_SEND = _str('MAIL_AUTO_SEND', '0') == '1'   # 0: every request waits for the site's validation

@@ -125,7 +125,7 @@ def serve(page: Path, token: str, port: int = 8765) -> None:
                 return
             if self.path == '/api/demandes':
                 return self.reply(200, frl_demandes('tout')) if self.allowed() else self.reply(403, {'error': 'refusé'})
-            if not (self.path.startswith('/_journal/panel.html') or self.path.startswith('/dist/vendor/fonts/')):
+            if not (self.path.startswith('/_journal/panel.html') or self.path.startswith('/dist/vendor/fonts/') or self.path == '/dist/logo-512.png'):
                 return self.reply(404, {'error': 'introuvable'})
             return super().do_GET()
 
