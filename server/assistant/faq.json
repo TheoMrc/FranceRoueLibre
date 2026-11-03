@@ -334,6 +334,63 @@
      ]
     ]
    }
+  },
+  {
+   "id": "retraites",
+   "question": "Combien coûtent les retraites ?",
+   "match_any": [
+    [
+     [
+      "retraites",
+      "pensions",
+      "vieillesse"
+     ],
+     [
+      "cout",
+      "coute",
+      "depens",
+      "budget",
+      "pese",
+      "montant"
+     ]
+    ]
+   ],
+   "reply": "**392 Md€ en 2024**, pour l’ensemble des régimes publics (fonction « vieillesse » des comptes nationaux), soit **23 % de la dépense publique** (1 euro sur 4,3) et 13,4 % du PIB.\n\n- Pensions et autres prestations versées en argent : 362 Md€ ; prestations en nature : 10,8 Md€ ; rémunérations : 10,1 Md€ ; achats : 4,9 Md€ ; autres : 4,0 Md€.\n- Par habitant : environ **5 710 €** par an.\n- En dix ans (2014 à 2024) : **+34 %** (293 à 392 Md€), quand les prix ont augmenté de 18 % et la population de 3,8 %.\n- L’abattement de 10 % sur les pensions à l’impôt sur le revenu coûte en plus 4,67 Md€ de recettes en 2026 (chiffrage du projet de loi de finances).\n\nCe que ces chiffres ne disent pas : la part payée par les cotisations, par l’impôt et par l’emprunt, le nombre de retraités et la pension moyenne ne sont pas dans les données du site. Le Conseil d’orientation des retraites et la Drees les publient chaque année.\n\nDétail par fonction depuis 1995 : [le circuit de l’argent public](index.html#circuit). Sources : [Eurostat et Insee, dépenses par fonction](https://ec.europa.eu/eurostat/databrowser/view/gov_10a_exp/default/table?lang=fr), [Insee, dépenses en % du PIB](https://www.insee.fr/fr/statistiques/2381414), [Insee, population](https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001641586), [Insee, prix à la consommation](https://www.insee.fr/fr/statistiques/serie/011814653), [Niches fiscales](niches.html).",
+   "sources": [
+    {
+     "title": "Eurostat et Insee, dépenses des administrations par fonction",
+     "url": "https://ec.europa.eu/eurostat/databrowser/view/gov_10a_exp/default/table?lang=fr"
+    },
+    {
+     "title": "Insee, principaux ratios de finances publiques",
+     "url": "https://www.insee.fr/fr/statistiques/2381414"
+    },
+    {
+     "title": "Insee, population au 1er janvier",
+     "url": "https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001641586"
+    },
+    {
+     "title": "Insee, indice des prix à la consommation",
+     "url": "https://www.insee.fr/fr/statistiques/serie/011814653"
+    }
+   ],
+   "data": {
+    "year": 2024,
+    "total": 391.95,
+    "cash": 362.18,
+    "inKind": 10.75,
+    "pay": 10.11,
+    "purchases": 4.89,
+    "sharePct": 23.44,
+    "gdpPct": 13.36,
+    "perPerson": 5710,
+    "rise10y": 33.9,
+    "prices10y": 18.2,
+    "allowance": [
+     2026,
+     4665.0
+    ]
+   }
   }
  ]
 }

@@ -12,18 +12,26 @@ GET /api/search?q=mise+en+place[&prefix=1]  →  JSON
 GET /api/health  →  {"ok": true, "lines": …}
 
 Python standard library only. The index is opened read-only (immutable). Run behind nginx (rate limit, HTTPS):
-  python3 server/search_api.py --db /var/lib/francerouelibre/frl-search.sqlite3 --port 8017
+  python3 server/search_api.py --db /var/lib/francerouelibre/frl-search.sqlite3 --port 8017 [--journal DIR]
+
+The searched words are journaled by nginx (deploy/vps.sh: one JSON line per search, without IP address, in DIR/
+YYYY-MM-DD.jsonl, answers from nginx's cache included). With --journal, this API sweeps that folder once a day:
+finished days are gzipped, files older than JOURNAL_DAYS deleted. Read with scripts/search-review.py.
 """
 import argparse
 import collections
+import datetime as dt
 import functools
+import gzip
 import json
+import shutil
 import re
 import sqlite3
 import threading
 import time
 import unicodedata
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 TOP = 200        # spending lines returned with their labels
@@ -44,6 +52,35 @@ RESULTS = collections.OrderedDict()
 RESULTS_MAX = 500
 RESULTS_LOCK = threading.Lock()
 WAITING = [0]
+JOURNAL = None       # folder of the searched words (written by nginx), swept here
+JOURNAL_DAYS = 90
+_swept = {'day': None}
+
+
+def sweep_journal(folder, today=None):
+    """Gzip the finished days, delete the files older than JOURNAL_DAYS. Never raises."""
+    today = today or dt.date.today()
+    try:
+        for path in Path(folder).iterdir():
+            try:
+                day = dt.date.fromisoformat(path.name[:10])
+            except ValueError:
+                continue
+            if (today - day).days > JOURNAL_DAYS:
+                path.unlink(missing_ok=True)
+            elif path.suffix == '.jsonl' and day < today:
+                with open(path, 'rb') as src, gzip.open(path.with_suffix('.jsonl.gz'), 'ab') as dst:
+                    shutil.copyfileobj(src, dst)
+                path.unlink(missing_ok=True)
+    except OSError:
+        pass
+
+
+def maybe_sweep():
+    day = dt.date.today()
+    if JOURNAL and _swept['day'] != day:
+        _swept['day'] = day
+        threading.Thread(target=sweep_journal, args=(JOURNAL,), daemon=True).start()
 
 
 def connection():
@@ -178,6 +215,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header('Content-Type', 'application/json; charset=utf-8')
         self.send_header('Content-Length', str(len(data)))
         self.send_header('Cache-Control', 'public, max-age=600' if cache and status == 200 else 'no-store')
+        if isinstance(body.get('lines'), int):
+            self.send_header('X-Lines', str(body['lines']))  # for the journal of searched words (nginx)
         self.end_headers()
         self.wfile.write(data)
 
@@ -190,6 +229,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(200, {'ok': True, 'lines': lines}, cache=False)
         if url.path != '/api/search':
             return self.send(404, {'error': 'not found'})
+        maybe_sweep()
         q = (params.get('q') or [''])[0][:MAX_QUERY]
         match = fts_query(q, (params.get('prefix') or ['0'])[0] == '1' or q.rstrip().endswith('*'))
         if not match:
@@ -225,7 +265,7 @@ class Handler(BaseHTTPRequestHandler):
         result = dict(result, ms=round(1000 * (time.monotonic() - started)))
         self.send(200, result)
 
-    def log_message(self, *args):  # nginx already logs requests (and drops the query string after 14 days)
+    def log_message(self, *args):  # nginx logs the requests (and the searched words, see the module's docstring)
         pass
 
 
@@ -234,8 +274,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--db', required=True)
     parser.add_argument('--port', type=int, default=8017)
+    parser.add_argument('--journal', help='folder of the searched words written by nginx, swept once a day')
     args = parser.parse_args()
     DB_PATH = args.db
+    global JOURNAL
+    JOURNAL = args.journal
     global COLS
     if np is not None:
         started = time.monotonic()

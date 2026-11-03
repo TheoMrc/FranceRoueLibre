@@ -52,10 +52,14 @@ write_conf() {
 echo "limit_req_zone \$binary_remote_addr zone=frl_ai:10m rate=3r/s;"
     # Answers of the search API, shared by all visitors: keys in memory (20 Mo), answers on disk (500 Mo at most)
     echo "proxy_cache_path /var/cache/nginx/frl levels=1:2 keys_zone=frl_search:20m max_size=500m inactive=2h use_temp_path=off;"
-    # Own access log, without query strings (searched words never reach the disk), read by frl-stats
+    # Own access log, without query strings, read by frl-stats. The searched words go to a separate journal without
+    # IP address (one file a day in $LIB/recherches, gzipped then deleted after 90 days by the search API), cached
+    # answers included, read by scripts/search-review.py; described in mentions.html.
     cat <<'NGX'
 map $http_referer $frl_referer { default $http_referer; "~^(?<frl_ref_base>[^?]*)\?" $frl_ref_base; }
 log_format frl '$remote_addr [$time_local] "$request_method $uri $server_protocol" $status $body_bytes_sent "$frl_referer" "$http_user_agent"';
+map $time_iso8601 $frl_day { "~^(?<frl_d>\d{4}-\d{2}-\d{2})" $frl_d; default "jour"; }
+log_format frl_q escape=json '{"t":"$time_iso8601","q":"$arg_q","prefix":"$arg_prefix","status":$status,"lines":"$sent_http_x_lines","cache":"$upstream_cache_status","s":"$upstream_response_time"}';
 NGX
     if [ "$https" = 1 ]; then
       cat <<'NGX'
@@ -123,6 +127,8 @@ NGX
         proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
         add_header X-Cache $upstream_cache_status always;
         add_header Strict-Transport-Security "max-age=31536000" always;
+        access_log /var/log/nginx/francerouelibre.access.log frl;
+        access_log /var/lib/francerouelibre/recherches/$frl_day.jsonl frl_q;
         proxy_pass http://127.0.0.1:8017; proxy_read_timeout 20s;
         proxy_set_header Host $host; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
@@ -143,6 +149,8 @@ echo "== search API"
 LIB=/var/lib/francerouelibre
 DBF=$LIB/frl-search.sqlite3
 [ -d "$LIB" ] || { sudo -n mkdir -p "$LIB" && sudo -n chown "$ME":"$ME" "$LIB"; }
+# Journal of the searched words: written by nginx (workers run as www-data), swept by the search API (www-data)
+[ -d "$LIB/recherches" ] || { sudo -n mkdir -p "$LIB/recherches" && sudo -n chown www-data:www-data "$LIB/recherches" && sudo -n chmod 750 "$LIB/recherches"; }
 STAMP=$(md5sum "$WEB/data/search/meta.json" | cut -d' ' -f1)
 if [ ! -f "$DBF" ] || [ "$(cat "$LIB/meta.md5" 2>/dev/null)" != "$STAMP" ]; then
   cat "$WEB"/data/search/db/frl-search.sqlite3.* > "$DBF.tmp" && mv -f "$DBF.tmp" "$DBF" && echo "$STAMP" > "$LIB/meta.md5"
@@ -162,10 +170,11 @@ After=network.target
 
 [Service]
 User=www-data
-ExecStart=$PY $DIR/server/search_api.py --db $DBF --port 8017
+ExecStart=$PY $DIR/server/search_api.py --db $DBF --port 8017 --journal $LIB/recherches
 Restart=on-failure
 NoNewPrivileges=yes
 ProtectSystem=strict
+ReadWritePaths=$LIB/recherches
 ProtectHome=yes
 PrivateTmp=yes
 # Shares the VPS with other sites: at most one CPU core, 512 Mo of memory, lower priority

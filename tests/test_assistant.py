@@ -341,3 +341,72 @@ class ExamplesAreSavedTest(unittest.TestCase):
         self.assertGreaterEqual(len(examples), 3)
         for q in examples:
             self.assertIsNotNone(faq.find([{'role': 'user', 'text': q}]), q)
+
+
+class CommuneDossierTest(unittest.TestCase):
+    """dossier_commune: accounts, State-aided projects, elected officials, signals and mentions in one call."""
+
+    def setUp(self):
+        if not (S.DATA_DIR / 'web' / 'projects-2024.json').is_file():
+            self.skipTest('dist/data absent')
+
+    def test_by_name_and_code(self):
+        r = T.dossier_commune('Hautmont')
+        self.assertEqual(r['commune']['code'], '59291')
+        self.assertGreater(r['projets_aides_etat']['nombre'], 0)
+        self.assertTrue(r['comptes']['montants_eur'])
+        self.assertIn('conseillers_municipaux', r['elus_et_personnel'])
+        self.assertIn('mentions_dans_les_depenses', r)   # an error message when the index is absent, never an exception
+        self.assertEqual(T.dossier_commune('59291')['commune']['nom'], 'Hautmont')
+        self.assertEqual(T.dossier_commune('l arbresle')['commune']['code'], '69010')
+
+    def test_homonyms_and_unknown(self):
+        self.assertGreater(len(T.dossier_commune('Saint-Denis')['plusieurs']), 1)
+        self.assertIn('error', T.dossier_commune('Zzyzx-sur-Rien'))
+
+
+class SeriesByYearTest(unittest.TestCase):
+    def test_lists_aligned_with_years_are_keyed_by_year(self):
+        if not (S.DATA_DIR / 'national-functions.json').is_file():
+            self.skipTest('dist/data absent')
+        r = T.lire_donnees('national-functions.json', 'data.TE.GF1002')
+        self.assertIn('2024', r['valeur'])
+        r = T.lire_donnees('national-functions.json', 'data.D62')
+        self.assertIn('2024', r['valeur']['GF1002'])
+
+    def test_pensions_saved_answer(self):
+        from assistant import faq
+        hit = faq.find([{'role': 'user', 'text': 'Combien coûtent les retraites ?'}])
+        self.assertEqual(hit and hit['id'], 'retraites')
+        self.assertIsNone(faq.find([{'role': 'user', 'text': 'Combien de retraités en France ?'}]))
+        self.assertNotIn('—', hit['reply'])
+
+
+class SearchJournalTest(unittest.TestCase):
+    """Journal of the searched words (nginx, deploy/vps.sh) and its review (scripts/search-review.py)."""
+
+    def test_review_drops_typing_and_finds_empty_searches(self):
+        import importlib.util
+        d = Path(tempfile.mkdtemp())
+        day = dt.date.today().isoformat()
+        rows = [('10:00:00', 'vid', '5'), ('10:00:03', 'vid%C3%A9oprotection', '812'), ('11:00:00', 'Vid%C3%A9oprotection', '812'),
+                ('12:00:00', 'zzqx', '0')]
+        (d / f'{day}.jsonl').write_text(''.join(json.dumps({'t': f'{day}T{t}+00:00', 'q': q, 'status': 200, 'lines': n}) + '\n'
+                                                for t, q, n in rows))
+        spec = importlib.util.spec_from_file_location('sreview', ROOT / 'scripts' / 'search-review.py')
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        r = mod.review(d)
+        self.assertEqual(r['searches'], 3)
+        self.assertEqual(len(r['top'][0]), 2)
+        self.assertEqual(r['empty'], [('zzqx', 1)])
+
+    def test_api_sweep(self):
+        import gzip
+        import search_api
+        d = Path(tempfile.mkdtemp())
+        today = dt.date.today()
+        (d / f'{today - dt.timedelta(days=1)}.jsonl').write_text('{}\n')
+        (d / f'{today}.jsonl').write_text('{}\n')
+        (d / f'{today - dt.timedelta(days=search_api.JOURNAL_DAYS + 1)}.jsonl.gz').write_bytes(gzip.compress(b'{}\n'))
+        search_api.sweep_journal(d, today)
+        self.assertEqual(sorted(p.name for p in d.iterdir()), [f'{today - dt.timedelta(days=1)}.jsonl.gz', f'{today}.jsonl'])

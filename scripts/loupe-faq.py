@@ -262,6 +262,64 @@ def debt_per_person(q):
     }
 
 
+RATIOS = ROOT / 'dist' / 'data' / 'national-ratios-insee.json'
+RATIOS_URL = json.loads(RATIOS.read_text(encoding='utf-8'))['source']
+NICHES = ROOT / 'dist' / 'data' / 'niches.json'
+
+
+def pensions():
+    """« Combien coûtent les retraites ? »: the old-age function of all public administrations (COFOG 10.2), what it
+    is made of, its share of spending and of GDP, per inhabitant, over ten years against prices, and the 10 % income
+    tax allowance on pensions. GDP is derived from the spending of the same year and its ratio to GDP (Insee)."""
+    d, te = cofog()
+    y = max(d['years'])
+    nat = lambda nature: dict(zip(d['years'], d['data'][nature]['GF1002']))
+    total, cash, kind, pay, buy = te['GF1002'][y], nat('D62')[y], nat('D632')[y], nat('D1')[y], nat('P2')[y]
+    other = total - cash - kind - pay - buy
+    spend_pct = next(r['spending'] for r in json.loads(RATIOS.read_text(encoding='utf-8'))['years'] if r['year'] == y)
+    gdp = te['TOTAL'][y] / (spend_pct / 100)
+    share = 100 * total / te['TOTAL'][y]
+    popd = json.loads(POP.read_text(encoding='utf-8'))
+    pop = {r['year']: r['population'] for r in popd['january1']}
+    y0 = y - 10
+    cpi = {int(r['annee']): float(r['ipc_chaine_base2025_100']) for r in csv.DictReader(open(CPI, encoding='utf-8'))}
+    rise, prices = 100 * (total / te['GF1002'][y0] - 1), 100 * (cpi[y] / cpi[y0] - 1)
+    popr = 100 * (pop[y] / pop[y0] - 1)
+    niches = json.loads(NICHES.read_text(encoding='utf-8'))
+    allowance = next(m for m in niches['measures'] if m['id'] == '120401')
+    ny = max(i for i, v in enumerate(allowance['v']) if v is not None)
+    reply = (
+        f'**{fr(total)} Md€ en {y}**, pour l’ensemble des régimes publics (fonction « vieillesse » des comptes '
+        f'nationaux), soit **{fr(share)} % de la dépense publique** (1 euro sur {fr(100 / share, 1)}) et '
+        f'{fr(100 * total / gdp, 1)} % du PIB.\n\n'
+        f'- Pensions et autres prestations versées en argent : {fr(cash)} Md€ ; prestations en nature : {fr(kind, 1)} Md€ ; '
+        f'rémunérations : {fr(pay, 1)} Md€ ; achats : {fr(buy, 1)} Md€ ; autres : {fr(other, 1)} Md€.\n'
+        f'- Par habitant : environ **{fr(round(total * 1e9 / pop[y], -1))} €** par an.\n'
+        f'- En dix ans ({y0} à {y}) : **+{fr(rise)} %** ({fr(te["GF1002"][y0])} à {fr(total)} Md€), quand les prix ont '
+        f'augmenté de {fr(prices)} % et la population de {fr(popr, 1)} %.\n'
+        f'- L’abattement de 10 % sur les pensions à l’impôt sur le revenu coûte en plus {fr(allowance["v"][ny] / 1000, 2)} Md€ '
+        f'de recettes en {niches["years"][ny]} (chiffrage du projet de loi de finances).\n\n'
+        f'Ce que ces chiffres ne disent pas : la part payée par les cotisations, par l’impôt et par l’emprunt, le nombre '
+        f'de retraités et la pension moyenne ne sont pas dans les données du site. Le Conseil d’orientation des retraites '
+        f'et la Drees les publient chaque année.\n\n'
+        f'Détail par fonction depuis 1995 : [le circuit de l’argent public](index.html#circuit). Sources : '
+        f'[Eurostat et Insee, dépenses par fonction]({d["url"]}), [Insee, dépenses en % du PIB]({RATIOS_URL}), '
+        f'[Insee, population]({popd["url"]}), [Insee, prix à la consommation](https://www.insee.fr/fr/statistiques/serie/011814653), '
+        f'[Niches fiscales](niches.html).')
+    return {
+        'id': 'retraites', 'question': 'Combien coûtent les retraites ?',
+        'match_any': [[['retraites', 'pensions', 'vieillesse'], ['cout', 'coute', 'depens', 'budget', 'pese', 'montant']]],
+        'reply': reply,
+        'sources': [{'title': 'Eurostat et Insee, dépenses des administrations par fonction', 'url': d['url']},
+                    {'title': 'Insee, principaux ratios de finances publiques', 'url': RATIOS_URL},
+                    {'title': 'Insee, population au 1er janvier', 'url': popd['url']},
+                    {'title': 'Insee, indice des prix à la consommation', 'url': 'https://www.insee.fr/fr/statistiques/serie/011814653'}],
+        'data': {'year': y, 'total': total, 'cash': cash, 'inKind': kind, 'pay': pay, 'purchases': buy,
+                 'sharePct': round(share, 2), 'gdpPct': round(100 * total / gdp, 2), 'perPerson': round(total * 1e9 / pop[y]),
+                 'rise10y': round(rise, 1), 'prices10y': round(prices, 1), 'allowance': [niches['years'][ny], allowance['v'][ny]]},
+    }
+
+
 def main():
     q = quarterly()
     TIDY.parent.mkdir(parents=True, exist_ok=True)
@@ -275,7 +333,7 @@ def main():
     for y in (2017, 2020, 2024):
         a = next(r['debt'] for r in annual['years'] if r['year'] == y)
         assert abs(q[f'{y}-T4'][0] - a) < 1, f'dette fin {y} : trimestrielle {q[f"{y}-T4"][0]} vs annuelle {a}'
-    entries = [debt_le_maire(q, annual), debt_per_person(q), inflation_debt(q, annual), hundred_euros(annual), associations()]
+    entries = [debt_le_maire(q, annual), debt_per_person(q), inflation_debt(q, annual), hundred_euros(annual), associations(), pensions()]
     OUT.write_text(json.dumps({'generated': 'python3 scripts/loupe-faq.py', 'entries': entries}, ensure_ascii=False, indent=1) + '\n',
                    encoding='utf-8')
     print(f'{TIDY.relative_to(ROOT)}: {len(q)} trimestres ; {OUT.relative_to(ROOT)}: {len(entries)} réponse(s)')

@@ -4,6 +4,8 @@
 * ``requete_sql``: one SELECT on the search index, opened read-only and immutable, under an authorizer that refuses
   anything but reading (no PRAGMA, ATTACH, writes or temp tables), interrupted after 5 seconds, 100 rows at most;
 * ``comptes_collectivite``: accounts of a commune, intercommunalité, département or région (OFGL, dist/data/local);
+* ``dossier_commune``: everything the site has on one commune (accounts, State-aided projects, elected officials,
+  signals, lines of the search index that name it in its département);
 * ``lire_donnees``: browse one of the JSON files published with the site (dist/data), never a path outside it;
 * ``recherche_web``: a web search run by the model provider (see providers.py).
 
@@ -65,6 +67,15 @@ DECLARATIONS: List[dict] = [
          'agregats': {'type': 'STRING', 'description': 'Identifiants séparés par des virgules (voir « liste » '
                                                        'dans une première réponse), facultatif'}},
          'required': ['nom']}},
+    {'name': 'dossier_commune',
+     'description': 'Tout ce que le site a sur une commune, en un appel : comptes OFGL (dépenses, personnel, dette, par '
+                    'habitant), projets d’investissement subventionnés par l’État (DETR, DSIL... 2018-2025), élus et '
+                    'indemnités, signaux (épargne négative, dette, frais de personnel), lignes de dépenses publiées qui '
+                    'citent la commune dans son département. À utiliser d’abord quand la question porte sur une commune '
+                    'ou n’est qu’un nom de commune.',
+     'parameters': {'type': 'OBJECT', 'properties': {
+         'nom': {'type': 'STRING', 'description': 'Nom de la commune ou code Insee (pour départager les homonymes)'}},
+         'required': ['nom']}},
     {'name': 'lire_donnees',
      'description': 'Lit un fichier JSON publié par le site (liste dans le prompt système). « chemin » descend dans le '
                     'fichier (clés et indices séparés par des points, ex. « measures » ou « totals.0 ») ; « filtre » '
@@ -88,13 +99,19 @@ FILES = {
     'niches.json': 'Les 458 dépenses fiscales (niches) : coût 2024-2026 par mesure (« measures »), par impôt, par mission',
     'etat.json': 'Budget de l’État : PLF 2025 par mission, programme, action ; exécution mensuelle ; performance ; budget vert',
     'operateurs.json': 'Les 431 opérateurs de l’État : mission, statut, subventions pour charges de service public, taxes affectées',
-    'secu.json': 'Sécurité sociale : comptes par branche, dépenses d’assurance maladie par région',
+    'secu.json': 'Sécurité sociale : comptes simplifiés des régimes de base par branche (« accounts », années 2009-2010 '
+                 'seulement : dernier fichier publié sur data.gouv.fr, ne pas présenter comme actuel), dépenses '
+                 'd’assurance maladie par région (« regions »)',
     'probite.json': 'Atteintes à la probité jugées 2021-2025 : affaires, infractions, peines',
     'ugap.json': 'Étude des prix du catalogue UGAP comparés au commerce',
     'national-accounts-3201.json': 'Recettes et dépenses de l’ensemble des administrations publiques 1960-2025 (Insee 3.201, Md€)',
     'national-debt.json': 'Dette publique et passage du déficit à la dette (Insee 3.101 et 3.105)',
     'national-sectors-3215.json': 'Comptes par sous-secteur (État, organismes divers, administrations locales, sécurité sociale)',
-    'national-functions.json': 'Dépenses publiques par fonction (COFOG, Eurostat 1995-2024) et par nature',
+    'national-functions.json': 'Dépenses de toutes les administrations publiques par fonction (COFOG, Eurostat '
+                               '1995-2024, Md€). Chemin « data.NATURE.FONCTION » : NATURE = TE dépense totale, D62 '
+                               'prestations sociales, D1 rémunérations, P2 achats, D4 intérêts ; FONCTION = TOTAL, '
+                               'GF10 protection sociale, GF1002 vieillesse (retraites), GF07 santé, GF09 enseignement, '
+                               'GF02 défense, GF0107 dette (« functions » : tous les libellés). Valeurs données par année',
     'national-ratios-insee.json': 'Ratios de finances publiques (% du PIB) 1959-2025',
     'national-taxes-insee.json': 'Prélèvements obligatoires par catégorie (Insee)',
     'insee-population.json': 'Population de la France au 1er janvier',
@@ -336,6 +353,142 @@ def comptes_collectivite(nom: str, niveau: str = 'communes', agregats: str = '')
                  'source': index.get('source'), 'page': f'{S.SITE_URL}/index.html#explorer'})
 
 
+# =========================================================================================== dossier_commune
+PROJECT_YEARS = range(2018, 2031)
+
+
+def _find_commune(nom: str) -> tuple:
+    """(index in communes-meta, None) or (None, error dict)."""
+    q = norm(str(nom or '').strip())
+    if not q:
+        return None, {'error': 'nom vide'}
+    ents = _entities('communes')
+    loose = lambda s: ' '.join(re.findall(r'[a-z0-9]+', norm(s)))
+    lq = loose(q)
+    found = [i for i, (c, n, _) in enumerate(ents) if norm(c) == q or norm(n) == q or loose(n) == lq]
+    found = found or [i for i, (c, n, _) in enumerate(ents) if lq and lq in loose(n)]
+    if not found:
+        return None, {'error': f'aucune commune « {nom} » ; donner le code Insee ou un autre niveau (comptes_collectivite)'}
+    if len(found) > 1:
+        return None, {'plusieurs': [{'code': ents[i][0], 'nom': ents[i][1], 'lieu': ents[i][2]} for i in found[:15]],
+                      'note': 'Plusieurs communes correspondent : rappeler l’outil avec le code Insee.'}
+    return found[0], None
+
+
+def _projects(code: str) -> dict:
+    rows = []
+    for year in PROJECT_YEARS:
+        try:
+            data = _json(f'web/projects-{year}.json')
+        except (OSError, ValueError):
+            continue
+        rows += [(year, data['schemes'][r[0]], r[4], r[5]) for r in data['rows'] if r[3] == code]
+    by_year: Dict[int, float] = {}
+    by_scheme: Dict[str, float] = {}
+    for y, s, _, a in rows:
+        by_year[y] = by_year.get(y, 0) + (a or 0)
+        by_scheme[s] = by_scheme.get(s, 0) + (a or 0)
+    top = sorted(rows, key=lambda r: -(r[3] or 0))[:12]
+    return {'nombre': len(rows), 'total_eur': round(sum(by_year.values())),
+            'par_annee_eur': {y: round(v) for y, v in sorted(by_year.items())},
+            'par_dispositif_eur': {s: round(v) for s, v in sorted(by_scheme.items(), key=lambda kv: -kv[1])},
+            'plus_gros': [{'annee': y, 'dispositif': s, 'objet': (t or '')[:160], 'montant_eur': round(a or 0)}
+                          for y, s, t, a in top],
+            'note': 'Subventions d’investissement de l’État (DETR, DSIL, DPV, DSID) attribuées à la commune, liste DGCL.'}
+
+
+def _mentions(name: str, dept: str) -> dict:
+    """Lines of the search index whose text contains the commune's name, in its département."""
+    tokens = re.findall(r'[a-z0-9]+', norm(name))
+    if not tokens:
+        return {}
+    match = '"' + ' '.join(tokens) + '"'
+    depts = sorted({dept, dept[:2]}) if dept.startswith('97') else [dept]
+    marks = ','.join('?' * len(depts))
+    with _sql_lock:
+        db = _sql_connection()
+        started = time.monotonic()
+        db.set_progress_handler(lambda: 1 if time.monotonic() - started > 5 else 0, 10000)
+        try:
+            per_src = db.execute(
+                f'SELECT doc.src, COUNT(*), SUM(CASE WHEN doc.fw = 0 THEN doc.amount END), SUM(doc.fw) FROM fts '
+                f'JOIN doc ON doc.id = fts.rowid WHERE fts MATCH ? AND doc.dept IN ({marks}) GROUP BY doc.src',
+                [match, *depts]).fetchall()
+            top = db.execute(
+                f'SELECT doc.src, doc.year, doc.amount, doc.title, doc.who FROM fts JOIN doc ON doc.id = fts.rowid '
+                f'WHERE fts MATCH ? AND doc.dept IN ({marks}) AND doc.fw = 0 AND doc.src != 3 '
+                f'ORDER BY doc.amount DESC LIMIT 10', [match, *depts]).fetchall()
+        except sqlite3.Error as exc:
+            return {'error': f'recherche impossible : {str(exc)[:120]}'}
+        finally:
+            db.set_progress_handler(None, 0)
+    return {'par_source': [{'source': SRC.get(s, s), 'lignes': n, 'montant_eur': round(a or 0),
+                            'accords_cadres_lignes': fw or 0} for s, n, a, fw in per_src],
+            'plus_grosses_lignes': [{'source': SRC.get(s), 'annee': y, 'montant_eur': round(a or 0),
+                                     'objet': (t or '')[:160], 'beneficiaire_ou_acheteur': w} for s, y, a, t, w in top],
+            'page': f'{S.SITE_URL}/recherche.html?q={urllib.parse.quote(name)}',
+            'note': 'Lignes du département dont l’objet, le bénéficiaire ou l’acheteur contient le nom de la commune : '
+                    'une mention ne veut pas dire que la dépense est faite par la commune ou pour elle. Les accords-cadres '
+                    '(plafonds) sont exclus des montants.'}
+
+
+def _elected(i: int) -> Optional[dict]:
+    e = _json('emplois-communes.json')
+    if i >= len(e['rows']) or not e['rows'][i]:
+        return None
+    r = dict(zip(e['columns'], e['rows'][i]))
+    out = {'annee': e['year'], 'conseillers_municipaux': r.get('conseillers municipaux (RNE)'),
+           'adjoints': r.get('adjoints (RNE)'), 'indemnites_elus_payees_eur': r.get(f'indemnités payées {e["paidYear"]} (€)'),
+           'indemnites_elus_payees_2019_eur': r.get('indemnités payées 2019 (€)'),
+           'indemnites_cotisations_et_frais_eur': r.get(f'total comptes 653 élus {e["year"]} (€)'),
+           'plafond_de_base_indemnites_eur': r.get(f'plafond légal {e["year"]} (€)'),
+           'frais_de_personnel_keur': r.get('personnel (k€)'), f'frais_de_personnel_{e["year0"]}_keur': r.get('personnel year0 (k€)'),
+           'page': f'{S.SITE_URL}/emplois.html',
+           'note': 'Indemnités de fonction payées (compte 6531, DGFiP). Le plafond de base (maire et 30 % du conseil en '
+                   'adjoints) ne compte ni les majorations légales (chef-lieu, station de tourisme, quartiers '
+                   'prioritaires...) ni les conseillers délégués : le dépasser n’est pas en soi une irrégularité, le '
+                   'détail par élu n’est pas publié. Frais de personnel en milliers d’euros.'}
+    return {k: v for k, v in out.items() if v is not None}
+
+
+def _signals(code: str) -> list:
+    s = _json('local/signals.json')
+    out = []
+    for key, block in s.items():
+        if not isinstance(block, dict) or 'insee' not in (block.get('fields') or []):
+            continue
+        k = block['fields'].index('insee')
+        for row in block.get('rows', []):
+            if row[k] == code:
+                out.append({'signal': block.get('rule'), 'valeurs': {f: v for f, v in zip(block['fields'], row)
+                                                                      if f not in ('insee', 'name', 'dept')}})
+    return out
+
+
+def dossier_commune(nom: str) -> dict:
+    i, err = _find_commune(nom)
+    if err:
+        return err
+    code, name, place = _entities('communes')[i]
+    dept = _json('web/communes-meta.json')['rows'][i][2]
+    accounts = comptes_collectivite(code, 'communes')
+    accounts.pop('liste', None)
+    try:
+        mentions = _mentions(name, dept)
+    except (OSError, sqlite3.Error) as exc:
+        mentions = {'error': f'index de recherche indisponible : {exc}'}
+    signals = _signals(code)
+    return clip({
+        'commune': {'code': code, 'nom': name, 'lieu': place},
+        'comptes': {k: accounts.get(k) for k in accounts if k not in ('entite',)},
+        'projets_aides_etat': _projects(code),
+        'elus_et_personnel': _elected(i),
+        'signaux': signals or 'aucun signal relevé pour cette commune',
+        'mentions_dans_les_depenses': mentions,
+        'pages': {'carte': f'{S.SITE_URL}/index.html#explorer', 'signaux': f'{S.SITE_URL}/signaux.html'},
+    })
+
+
 # =========================================================================================== lire_donnees
 def _describe(value: Any, depth: int = 0) -> Any:
     if isinstance(value, dict):
@@ -349,6 +502,21 @@ def _describe(value: Any, depth: int = 0) -> Any:
     return text if len(text) < 200 else text[:200] + '…'
 
 
+def _is_series(value: Any, years: list) -> bool:
+    return (isinstance(value, list) and len(value) == len(years)
+            and all(v is None or isinstance(v, (int, float)) for v in value))
+
+
+def _by_year(node: Any, years: list) -> Any:
+    """A list of numbers aligned with the file's « years » becomes {year: value} (also one level down), so that a
+    value is never read with the wrong year."""
+    if _is_series(node, years):
+        return dict(zip(map(str, years), node))
+    if isinstance(node, dict) and node and any(_is_series(v, years) for v in node.values()):
+        return {k: dict(zip(map(str, years), v)) if _is_series(v, years) else v for k, v in node.items()}
+    return node
+
+
 def lire_donnees(fichier: str, chemin: str = '', filtre: str = '', debut: int = 0, limite: int = 20) -> dict:
     rel = str(fichier or '').strip().replace('\\', '/').lstrip('/')
     if rel.startswith('data/'):
@@ -360,7 +528,10 @@ def lire_donnees(fichier: str, chemin: str = '', filtre: str = '', debut: int = 
     except (OSError, ValueError) as exc:
         return {'error': f'lecture impossible : {exc}'}
     walked = []
+    years = node.get('years') if isinstance(node, dict) else None
     for key in [k for k in str(chemin or '').split('.') if k]:
+        if isinstance(node, dict) and isinstance(node.get('years'), list):
+            years = node['years']
         if isinstance(node, dict) and key in node:
             node = node[key]
         elif isinstance(node, list) and key.lstrip('-').isdigit() and -len(node) <= int(key) < len(node):
@@ -370,6 +541,8 @@ def lire_donnees(fichier: str, chemin: str = '', filtre: str = '', debut: int = 
                     'cles_disponibles': list(node)[:60] if isinstance(node, dict) else f'liste de {len(node)}'
                     if isinstance(node, list) else None}
         walked.append(key)
+    if walked and years:
+        node = _by_year(node, years)
     if isinstance(node, list):
         items = list(enumerate(node))
         if filtre:  # every word of the filter, accents and punctuation ignored
@@ -403,6 +576,8 @@ class Toolbox:
                 return requete_sql(args.get('sql', ''))
             if name == 'comptes_collectivite':
                 return comptes_collectivite(args.get('nom', ''), args.get('niveau') or 'communes', args.get('agregats') or '')
+            if name == 'dossier_commune':
+                return dossier_commune(args.get('nom', ''))
             if name == 'lire_donnees':
                 return lire_donnees(args.get('fichier', ''), args.get('chemin') or '', args.get('filtre') or '',
                                     args.get('debut') or 0, args.get('limite') or 20)
