@@ -477,3 +477,45 @@ class RequestsTest(unittest.TestCase):
         draft = self.draft()['demande']
         self.assertFalse(draft['envoi_par_le_site'])
         self.assertIn('error', self.D.request_send(draft['id'], 'lecteur'))
+
+
+class ShortcutToolsTest(unittest.TestCase):
+    """server/assistant/outils.py: one call for what used to take several file reads."""
+
+    def setUp(self):
+        if not (S.DATA_DIR / 'insee-ipc.json').is_file():
+            self.skipTest('dist/data absent')
+        from assistant import outils
+        self.O = outils
+
+    def test_indicator_catalog(self):
+        r = self.O.indicateur('retraites')
+        self.assertEqual(r['id'], 'fonction-GF1002')
+        self.assertIn('2024', r['valeurs'])
+        self.assertEqual(self.O.indicateur('inflation')['unite'], '%')
+        self.assertEqual(self.O.indicateur('taux de prélèvements obligatoires')['id'], 'prelevements')
+        self.assertIn('error', self.O.indicateur('zzzz'))
+
+    def test_exact_arithmetic(self):
+        self.assertEqual(self.O.calcul('part', 391.95, 1671.79)['un_sur'], 4.3)
+        self.assertAlmostEqual(self.O.calcul('evolution', 100, 134)['evolution_pct'], 34.0)
+        self.assertGreater(self.O.calcul('euros_constants', 1000, annee=2010, vers=2025)['resultat'], 1000)
+        self.assertEqual(self.O.calcul('expression', expression='(2+3)*4')['resultat'], 20)
+        self.assertIn('error', self.O.calcul('expression', expression='__import__("os")'))
+
+    def test_compare_and_lookups(self):
+        r = self.O.comparer('Hautmont', 'frais de personnel')
+        self.assertIn('mediane_par_habitant_eur', r)
+        self.assertIn('10 000', r['groupe'])
+        r = self.O.chercher_fiche('niches', 'pensions retraites')
+        self.assertTrue(any('pensions' in x['mesure'] for x in r['resultats']))
+        self.assertIn('error', self.O.chercher_fiche('rien', 'x'))
+        self.assertTrue(self.O.page_du_site('indemnités des élus')['sections'][0]['lien'].startswith(S.SITE_URL))
+
+    def test_every_declared_tool_is_dispatched(self):
+        box = T.Toolbox(None)
+        for d in T.DECLARATIONS:
+            if d['name'] in ('recherche_web', 'jeux_ouverts', 'preparer_demande'):
+                continue  # network
+            res = box.call(d['name'], {})
+            self.assertNotIn('outil inconnu', str(res.get('error', '')), d['name'])

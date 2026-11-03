@@ -11,9 +11,11 @@ DIST = ROOT / 'dist'
 
 # (label, href) for direct links; (label, [(title, href, description), ...]) for groups.
 NAV = [
-    ('Carte', 'index.html#explorer'),
-    ('Circuit', 'index.html#circuit'),
-    ('Comptes', 'index.html#comptes'),
+    ('Notre argent', [
+        ('Carte des comptes locaux', 'index.html#explorer', 'Les comptes de chaque commune, département et région'),
+        ('Circuit de l’argent public', 'index.html#circuit', 'Des impôts aux dépenses, qui paie et qui dépense'),
+        ('Comptes de la Nation', 'index.html#comptes', 'Recettes, dépenses, déficit et dette depuis 1960'),
+    ]),
     ('Recettes', [
         ('Impôts et taxes', 'impots.html', 'Ce que rapporte et coûte chaque prélèvement'),
         ('Niches fiscales', 'niches.html', 'Réductions et crédits d’impôt, mesure par mesure'),
@@ -82,10 +84,11 @@ def render(page, indent='      '):
             link = f'#{href[1]}' if home and href[0] == 'index.html' and len(href) == 2 else target
             out.append(f'{indent}  <li><a href="{link}">{esc(label)}</a></li>')
             continue
-        current = any(h == page for _, h, _ in target)
+        current = any(h.split('#')[0] == page for _, h, _ in target)
         mark = ' aria-current="page"'
+        local = lambda h: f'#{h.split("#", 1)[1]}' if home and h.startswith('index.html#') else h
         items = ''.join(
-            f'<li><a href="{h}"{mark if h == page else ""}><strong>{esc(t)}</strong><small>{esc(d)}</small></a></li>'
+            f'<li><a href="{local(h)}"{mark if h == page else ""}><strong>{esc(t)}</strong><small>{esc(d)}</small></a></li>'
             for t, h, d in target)
         out.append(
             f'{indent}  <li class="nav__group{" is-current" if current else ""}">'
@@ -172,7 +175,7 @@ def sync(path):
                 h = target.split('#')
                 links.append((label, f'#{h[1]}' if home and len(h) == 2 else target))
             else:
-                links += [(t, h) for t, h, _ in target]
+                links += [(t, f'#{h.split("#", 1)[1]}' if home and h.startswith('index.html#') else h) for t, h, _ in target]
         text = text[:fstart] + '<div class="footer__links">' + ''.join(f'<a href="{h}">{esc(t)}</a>' for t, h in links) + code + FOOTER_EXTRA + text[fend:]
     # Related pages, just before the end of <main>; rewritten each time.
     start = text.find('<section class="section related"')
@@ -194,7 +197,7 @@ def sync(path):
 if __name__ == '__main__':
     pages = sorted(DIST.glob('*.html'))
     done = [p.name for p in pages if sync(p)]
-    missing = [h for _, t in NAV if not isinstance(t, str) for _, h, _ in t if not (DIST / h).exists()]
+    missing = [h for _, t in NAV if not isinstance(t, str) for _, h, _ in t if not (DIST / h.split('#')[0]).exists()]
     print(f'menu written in {len(done)} pages: {", ".join(done)}')
     if missing:
         print(f'pages in the menu that do not exist yet: {", ".join(missing)}', file=sys.stderr)

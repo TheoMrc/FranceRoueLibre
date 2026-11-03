@@ -212,6 +212,13 @@ if sudo -n test -f "$AENV"; then
   if sudo -n test -f /etc/francerouelibre/vertex-sa.json; then
     CRED=$'LoadCredential=vertex.json:/etc/francerouelibre/vertex-sa.json\nEnvironment=GOOGLE_APPLICATION_CREDENTIALS=%d/vertex.json'
   fi
+  # Requests to public bodies: the mailbox password stored encrypted by mail_credentials.bat (systemd-creds, decrypted
+  # by systemd for this service alone), and a token for the local admin endpoint (frl-demandes), drawn once.
+  sudo -n test -f /etc/francerouelibre/admin-token || { python3 -c 'import secrets; print(secrets.token_urlsafe(32))' | sudo -n tee /etc/francerouelibre/admin-token > /dev/null; sudo -n chmod 600 /etc/francerouelibre/admin-token; }
+  CRED="$CRED"$'\nLoadCredential=admin-token:/etc/francerouelibre/admin-token\nEnvironmentFile=-/etc/francerouelibre/mail.env'
+  if sudo -n test -f /etc/francerouelibre/mail-password.cred; then
+    CRED="$CRED"$'\nLoadCredentialEncrypted=mail-password:/etc/francerouelibre/mail-password.cred'
+  fi
   sudo -n tee /etc/systemd/system/francerouelibre-assistant.service > /dev/null <<UNIT
 [Unit]
 Description=FranceRoueLibre AI assistant API (deploy/vps.sh)
@@ -250,12 +257,15 @@ UNIT
   sudo -n systemctl daemon-reload
   sudo -n systemctl enable --quiet francerouelibre-assistant
   ASIG=$(cat "$DIR"/server/assistant_api.py "$DIR"/server/assistant/*.py "$DIR"/server/assistant/*.json /etc/systemd/system/francerouelibre-assistant.service 2>/dev/null | md5sum | cut -d' ' -f1)   # saved answers (faq.json) restart it too
-  ASIG=$ASIG$(sudo -n md5sum "$AENV" | cut -c1-8)
+  ASIG=$ASIG$(sudo -n cat "$AENV" /etc/francerouelibre/mail.env /etc/francerouelibre/mail-password.cred 2>/dev/null | md5sum | cut -c1-8)
   if [ "$(cat "$LIB/assistant.md5" 2>/dev/null)" != "$ASIG" ] || ! systemctl is-active --quiet francerouelibre-assistant; then
     sudo -n systemctl restart francerouelibre-assistant && echo "$ASIG" > "$LIB/assistant.md5" && echo "assistant restarted"
   else echo "assistant unchanged, not restarted"; fi
   curl -s --retry 5 --retry-connrefused --retry-delay 1 --max-time 20 http://127.0.0.1:8018/api/assistant/status; echo
   sudo -n env STATE_DIRECTORY=/var/lib/francerouelibre-assistant ASSISTANT_ENV_FILE="$AENV" "$APY" "$DIR/server/assistant_api.py" --usage 2>/dev/null || true
+  # frl-demandes liste | voir | valider | refuser | publier | cloturer | test : the site's validation of the requests
+  printf '#!/bin/sh\nexec sudo -n env ASSISTANT_ENV_FILE=%s %s %s --demandes "$@"\n' "$AENV" "$APY" "$DIR/server/assistant_api.py" | sudo -n tee /usr/local/bin/frl-demandes > /dev/null
+  sudo -n chmod 755 /usr/local/bin/frl-demandes
 else
   echo "not installed ($AENV missing, see deploy/assistant.env.example)"
   if systemctl is-active --quiet francerouelibre-assistant 2>/dev/null; then sudo -n systemctl disable --now francerouelibre-assistant; fi

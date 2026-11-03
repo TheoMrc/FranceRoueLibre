@@ -116,19 +116,37 @@ STATE_DIR = Path(_str('ASSISTANT_STATE_DIR', os.environ.get('STATE_DIRECTORY', '
 SITE_URL = _str('ASSISTANT_SITE_URL', 'https://francerouelibre.fr')
 
 # ---------------------------------------------------------------- requests to public bodies (assistant/demandes.py)
-# Mailbox of the site (stonks@francerouelibre.fr): SMTP to send the requests, IMAP to read the replies. Without
-# MAIL_SMTP_HOST, MAIL_USER and MAIL_PASSWORD the reader can only copy the letter and send it himself.
-MAIL_SMTP_HOST = _str('MAIL_SMTP_HOST')
+# Mailbox of the site (stonks@francerouelibre.fr, Zimbra at OVH): SMTP to send the requests, IMAP to read the replies.
+# On the VPS the password is stored encrypted by mail_credentials.bat (systemd-creds, decrypted by systemd for the
+# service alone, in $CREDENTIALS_DIRECTORY/mail-password); MAIL_PASSWORD in the environment also works (tests, PC).
+# Without a password the reader can only copy the letter and send it himself.
+
+
+def _credential(name: str, env: str, fallback: str = '') -> str:
+    value = _str(env)
+    if value:
+        return value
+    for folder in (os.environ.get('CREDENTIALS_DIRECTORY', ''), fallback):
+        try:
+            if folder:
+                return (Path(folder) / name).read_text(encoding='utf-8').strip()
+        except OSError:
+            continue
+    return ''
+
+
+MAIL_SMTP_HOST = _str('MAIL_SMTP_HOST', 'ssl0.ovh.net')
 MAIL_SMTP_PORT = _int('MAIL_SMTP_PORT', 465)          # 465 = TLS from the start, 587 = STARTTLS
-MAIL_IMAP_HOST = _str('MAIL_IMAP_HOST')
+MAIL_IMAP_HOST = _str('MAIL_IMAP_HOST', 'imap.mail.ovh.net')
 MAIL_IMAP_PORT = _int('MAIL_IMAP_PORT', 993)
-MAIL_USER = _str('MAIL_USER')
-MAIL_PASSWORD = _str('MAIL_PASSWORD')
 MAIL_FROM = _str('MAIL_FROM', 'stonks@francerouelibre.fr')
+MAIL_USER = _str('MAIL_USER', MAIL_FROM)
+MAIL_PASSWORD = _credential('mail-password', 'MAIL_PASSWORD')
 MAIL_FROM_NAME = _str('MAIL_FROM_NAME', 'FranceRoueLibre')
 MAIL_NOTIFY = _str('MAIL_NOTIFY', MAIL_FROM)          # validations and replies are announced here
 MAIL_CONFIGURED = bool(MAIL_SMTP_HOST and MAIL_USER and MAIL_PASSWORD)
 MAIL_AUTO_SEND = _str('MAIL_AUTO_SEND', '0') == '1'   # 0: every request waits for the site's validation
 MAIL_DAILY = _int('MAIL_DAILY', 5)                    # requests sent per day, in all
 MAIL_PER_BODY_MONTH = _int('MAIL_PER_BODY_MONTH', 2)  # requests to one body per 30 days
-MAIL_ADMIN_TOKEN = _str('MAIL_ADMIN_TOKEN')           # for assistant_api.py --demandes (localhost only)
+# Token of the local admin endpoint (assistant_api.py --demandes): drawn once by deploy/vps.sh, root only.
+MAIL_ADMIN_TOKEN = _credential('admin-token', 'MAIL_ADMIN_TOKEN', '/etc/francerouelibre')

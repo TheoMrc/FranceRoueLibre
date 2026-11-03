@@ -7,6 +7,8 @@
 * ``dossier_commune``: everything the site has on one commune (accounts, State-aided projects, elected officials,
   signals, lines of the search index that name it in its département);
 * ``lire_donnees``: browse one of the JSON files published with the site (dist/data), never a path outside it;
+* the shortcuts of outils.py (indicateur, calcul, comparer, dossier_beneficiaire, chercher_fiche, page_du_site,
+  jeux_ouverts, suivi_demandes) and ``dossier_collectivite`` (dossier_commune or comptes_collectivite);
 * ``recherche_web``: a web search run by the model provider (see providers.py);
 * ``preparer_demande``: a request for administrative documents to the body that holds them (see demandes.py), shown
   to the reader under the answer, never sent without the reader's click.
@@ -57,27 +59,63 @@ DECLARATIONS: List[dict] = [
                     'dépense, ne jamais l’additionner aux dépenses). dept : code du département. amount en euros. '
                     '100 lignes au plus, 5 secondes au plus : agréger avec GROUP BY et LIMIT.',
      'parameters': {'type': 'OBJECT', 'properties': {'sql': {'type': 'STRING'}}, 'required': ['sql']}},
-    {'name': 'comptes_collectivite',
-     'description': 'Comptes d’une collectivité (OFGL, budgets principaux et annexes consolidés) année par année : '
-                    'communes et intercommunalités 2018-2025, départements et régions 2012-2025. Donne aussi la '
-                    'population et les montants par habitant. Sans « agregats », renvoie les principaux postes.',
+    {'name': 'dossier_collectivite',
+     'description': 'Tout ce que le site a sur une collectivité, en un appel. Commune : comptes OFGL 2018-2025 '
+                    '(dépenses, personnel, dette, par habitant), projets d’investissement subventionnés par l’État, '
+                    'élus et indemnités, signaux, lignes de dépenses qui la citent. Intercommunalité, département, '
+                    'région : comptes année par année et par habitant. À utiliser d’abord pour toute question sur une '
+                    'collectivité, ou une question qui n’est qu’un nom de commune.',
      'parameters': {'type': 'OBJECT', 'properties': {
-         'nom': {'type': 'STRING', 'description': 'Nom ou code (code Insee de commune, SIREN d’intercommunalité, '
-                                                  'numéro de département, code de région)'},
+         'nom': {'type': 'STRING', 'description': 'Nom ou code (Insee de commune, SIREN d’intercommunalité, numéro de '
+                                                  'département, code de région)'},
          'niveau': {'type': 'STRING', 'enum': ['communes', 'gfp', 'departements', 'regions'],
                     'description': 'gfp = intercommunalités. Par défaut : communes'},
-         'agregats': {'type': 'STRING', 'description': 'Identifiants séparés par des virgules (voir « liste » '
-                                                       'dans une première réponse), facultatif'}},
+         'agregats': {'type': 'STRING', 'description': 'Hors communes : identifiants OFGL séparés par des virgules, facultatif'}},
          'required': ['nom']}},
-    {'name': 'dossier_commune',
-     'description': 'Tout ce que le site a sur une commune, en un appel : comptes OFGL (dépenses, personnel, dette, par '
-                    'habitant), projets d’investissement subventionnés par l’État (DETR, DSIL... 2018-2025), élus et '
-                    'indemnités, signaux (épargne négative, dette, frais de personnel), lignes de dépenses publiées qui '
-                    'citent la commune dans son département. À utiliser d’abord quand la question porte sur une commune '
-                    'ou n’est qu’un nom de commune.',
+    {'name': 'comparer',
+     'description': 'Compare une collectivité à celles de même niveau et de même taille (communes de même tranche de '
+                    'population) : montant par habitant, médiane, quartiles, rang. Répond à « est-ce beaucoup ? ».',
      'parameters': {'type': 'OBJECT', 'properties': {
-         'nom': {'type': 'STRING', 'description': 'Nom de la commune ou code Insee (pour départager les homonymes)'}},
+         'nom': {'type': 'STRING'}, 'niveau': {'type': 'STRING', 'enum': ['communes', 'gfp', 'departements', 'regions']},
+         'agregat': {'type': 'STRING', 'description': 'Ex. depenses-totales, frais-de-personnel, encours-de-dette, '
+                                                      'depenses-d-equipement, impots-locaux (ou des mots du libellé)'}},
          'required': ['nom']}},
+    {'name': 'indicateur',
+     'description': 'Une série nationale clé, année par année, avec sa source : dépense publique totale ou par fonction '
+                    '(retraites, santé, enseignement, défense, police et justice, intérêts de la dette...), par nature '
+                    '(salaires des agents, prestations), recettes, déficit, dette, PIB, ratios en % du PIB, taux de '
+                    'prélèvements obligatoires, population, prix et inflation. Le plus rapide pour un chiffre national.',
+     'parameters': {'type': 'OBJECT', 'properties': {
+         'nom': {'type': 'STRING', 'description': 'Ex. « retraites », « dette », « pib », « inflation », « fonction-GF09 »'},
+         'depuis': {'type': 'INTEGER', 'description': 'Première année voulue, facultatif'}},
+         'required': ['nom']}},
+    {'name': 'calcul',
+     'description': 'Calcul exact fait par le serveur : TOUJOURS l’utiliser avant d’écrire une part, une évolution, un '
+                    'montant par habitant ou des euros d’une autre année. operation = part (a sur b), evolution (de a '
+                    'à b), par_habitant (a euros pour b habitants), euros_constants (a euros de l’année « annee » '
+                    'exprimés en euros de « vers ») ou expression (arithmétique libre).',
+     'parameters': {'type': 'OBJECT', 'properties': {
+         'operation': {'type': 'STRING', 'enum': ['part', 'evolution', 'par_habitant', 'euros_constants', 'expression']},
+         'a': {'type': 'NUMBER'}, 'b': {'type': 'NUMBER'}, 'annee': {'type': 'INTEGER'}, 'vers': {'type': 'INTEGER'},
+         'expression': {'type': 'STRING', 'description': 'Ex. « (391.95 - 292.77) / 292.77 * 100 »'}},
+         'required': ['operation']}},
+    {'name': 'dossier_beneficiaire',
+     'description': 'Tout l’argent public publié pour un organisme (association, entreprise, acheteur public), par '
+                    'SIREN ou par nom : subventions de l’État, marchés publics, aides de minimis, Fonds vert, par année '
+                    'et par source, plus grosses lignes, et sa fiche de l’annuaire des entreprises (active ou fermée, '
+                    'activité, siège).',
+     'parameters': {'type': 'OBJECT', 'properties': {'nom': {'type': 'STRING', 'description': 'SIREN (9 chiffres) ou nom'}},
+                    'required': ['nom']}},
+    {'name': 'chercher_fiche',
+     'description': 'Cherche par mots-clés dans un des grands jeux du site : etat (missions et programmes du budget de '
+                    'l’État, crédits), niches (458 dépenses fiscales et leur coût), impots (292 impôts et taxes, '
+                    'rendement, payeur, bénéficiaire), operateurs (431 opérateurs de l’État). Plus rapide que lire_donnees.',
+     'parameters': {'type': 'OBJECT', 'properties': {
+         'jeu': {'type': 'STRING', 'enum': ['etat', 'niches', 'impots', 'operateurs']},
+         'mots': {'type': 'STRING'}}, 'required': ['jeu', 'mots']}},
+    {'name': 'page_du_site',
+     'description': 'Trouve la section précise du site à citer en lien (page et ancre) pour un sujet.',
+     'parameters': {'type': 'OBJECT', 'properties': {'mots': {'type': 'STRING'}}, 'required': ['mots']}},
     {'name': 'lire_donnees',
      'description': 'Lit un fichier JSON publié par le site (liste dans le prompt système). « chemin » descend dans le '
                     'fichier (clés et indices séparés par des points, ex. « measures » ou « totals.0 ») ; « filtre » '
@@ -104,6 +142,15 @@ DECLARATIONS: List[dict] = [
          'contexte': {'type': 'STRING', 'description': 'Une ou deux phrases neutres : ce que les données publiques '
                                                        'montrent déjà et ce qui y manque'}},
          'required': ['organisme', 'objet', 'documents']}},
+    {'name': 'jeux_ouverts',
+     'description': 'Cherche les jeux de données publiés sur data.gouv.fr (budgets, délibérations, subventions d’une '
+                    'collectivité...). À appeler avant preparer_demande, pour ne pas demander ce qui est déjà publié.',
+     'parameters': {'type': 'OBJECT', 'properties': {'mots': {'type': 'STRING', 'description': 'Ex. « subventions associations Lyon »'}},
+                    'required': ['mots']}},
+    {'name': 'suivi_demandes',
+     'description': 'Les demandes de documents déjà envoyées par le site aux organismes publics, leur état et les '
+                    'réponses publiées. Pour « la mairie a-t-elle répondu ? », et avant d’en préparer une nouvelle.',
+     'parameters': {'type': 'OBJECT', 'properties': {'recherche': {'type': 'STRING', 'description': 'Organisme, objet ou référence FRL-…'}}}},
     {'name': 'recherche_web',
      'description': 'Recherche sur le web (actualité, textes de loi, rapports, contexte absent des données du site). '
                     'Renvoie une synthèse et ses sources. À utiliser quand les données du site ne suffisent pas ; '
@@ -148,6 +195,7 @@ FILES = {
     'marches/signals.json': 'Signaux sur les marchés : offre unique, sans concurrence, avenants, seuils, fractionnement',
     'local/signals.json': 'Signaux sur les collectivités : épargne négative, désendettement, frais de personnel, retards de paiement',
     'local/index.json': 'Liste des agrégats OFGL et totaux nationaux par niveau de collectivité',
+    'insee-ipc.json': 'Indice des prix à la consommation 1960-2025 (Insee, base 100 en 2025) et inflation annuelle',
 }
 
 
@@ -600,6 +648,24 @@ class Toolbox:
                 return comptes_collectivite(args.get('nom', ''), args.get('niveau') or 'communes', args.get('agregats') or '')
             if name == 'dossier_commune':
                 return dossier_commune(args.get('nom', ''))
+            if name == 'dossier_collectivite':
+                level = args.get('niveau') or 'communes'
+                if level == 'communes':
+                    return dossier_commune(args.get('nom', ''))
+                return comptes_collectivite(args.get('nom', ''), level, args.get('agregats') or '')
+            from . import outils as O
+            simple = {'indicateur': lambda: O.indicateur(args.get('nom', ''), args.get('depuis') or 0),
+                      'calcul': lambda: O.calcul(args.get('operation', ''), args.get('a'), args.get('b'), args.get('annee'),
+                                                 args.get('vers'), args.get('expression') or ''),
+                      'comparer': lambda: O.comparer(args.get('nom', ''), args.get('agregat') or 'depenses-totales',
+                                                     args.get('niveau') or 'communes'),
+                      'dossier_beneficiaire': lambda: O.dossier_beneficiaire(args.get('nom', '')),
+                      'chercher_fiche': lambda: O.chercher_fiche(args.get('jeu', ''), args.get('mots', '')),
+                      'page_du_site': lambda: O.page_du_site(args.get('mots', '')),
+                      'jeux_ouverts': lambda: O.jeux_ouverts(args.get('mots', '')),
+                      'suivi_demandes': lambda: O.suivi_demandes(args.get('recherche') or '')}
+            if name in simple:
+                return simple[name]()
             if name == 'preparer_demande':
                 if self.demande:
                     return {'error': 'une demande est déjà préparée pour cette réponse'}

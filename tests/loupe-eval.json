@@ -1,0 +1,12 @@
+{"about": "Questions de référence de la Loupe (scripts/loupe-eval.py). « attendu » : au moins une de ces formes doit figurer dans la réponse (chiffres relevés dans les données du site) ; « outils » : outils qui doivent être appelés ; « appels_max » : nombre d'appels d'outils au-delà duquel la réponse est jugée trop lente.",
+ "questions": [
+  {"q": "Combien dépensent les administrations publiques pour l'enseignement ?", "attendu": ["148,6", "149 Md", "148 Md"], "outils": ["indicateur"], "appels_max": 3},
+  {"q": "Quel est le budget de la police nationale ?", "attendu": ["13,4 Md", "13 370", "13,37"], "outils": ["chercher_fiche"], "appels_max": 3},
+  {"q": "Hautmont dépense-t-elle beaucoup en personnel ?", "attendu": ["410", "719"], "outils": ["comparer"], "appels_max": 4},
+  {"q": "Quel est le taux de prélèvements obligatoires en France ?", "attendu": ["43,6"], "outils": ["indicateur"], "appels_max": 2},
+  {"q": "Combien coûte l'abattement de 10 % sur les pensions ?", "attendu": ["4,67", "4,7 Md", "4 665", "5,32", "5,3 Md", "5 322"], "outils": ["chercher_fiche"], "appels_max": 3},
+  {"q": "Que valent 1 000 € de 2010 en euros de 2025 ?", "attendu": ["1 261", "1261"], "outils": ["calcul"], "appels_max": 2},
+  {"q": "Combien d'argent public reçoit la Croix-Rouge française ?", "attendu": ["Croix-Rouge"], "outils": ["dossier_beneficiaire"], "appels_max": 3},
+  {"q": "Hautmont", "attendu": ["Hautmont"], "outils": ["dossier_collectivite"], "appels_max": 3},
+  {"q": "Quelle part de la dépense publique va à la défense ?", "attendu": ["%"], "outils": ["indicateur", "calcul"], "appels_max": 4}
+ ]}

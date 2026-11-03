@@ -401,8 +401,30 @@ def anonymize(text: str) -> str:
     return s.strip()
 
 
+def mail_test() -> dict:
+    """Logs in to SMTP and IMAP without sending anything."""
+    if not S.MAIL_CONFIGURED:
+        return {'error': 'pas de mot de passe : lancer mail_credentials.bat'}
+    out = {'utilisateur': S.MAIL_USER}
+    try:
+        with _smtp():
+            out['smtp'] = f'{S.MAIL_SMTP_HOST}:{S.MAIL_SMTP_PORT} OK'
+    except (OSError, smtplib.SMTPException) as exc:
+        out['smtp'] = f'échec : {type(exc).__name__}'
+    try:
+        box = imaplib.IMAP4_SSL(S.MAIL_IMAP_HOST, S.MAIL_IMAP_PORT, ssl_context=ssl.create_default_context(), timeout=30)
+        box.login(S.MAIL_USER, S.MAIL_PASSWORD)
+        box.logout()
+        out['imap'] = f'{S.MAIL_IMAP_HOST}:{S.MAIL_IMAP_PORT} OK'
+    except (OSError, imaplib.IMAP4.error) as exc:
+        out['imap'] = f'échec : {type(exc).__name__}'
+    return out
+
+
 def admin(action: str, ref: str = '', text: str = '') -> dict:
-    """valider | refuser | publier (the last reply, anonymized or the given text) | cloturer | liste."""
+    """liste | voir | valider | refuser | publier (the last reply, anonymized or the given text) | cloturer | test."""
+    if action == 'test':
+        return mail_test()
     if action == 'liste':
         return {'demandes': [{'ref': d['ref'], 'status': d['status'], 'organisme': d['to']['nom'],
                               'objet': d['fields']['objet'], 'reponses': len(d.get('replies', []))}

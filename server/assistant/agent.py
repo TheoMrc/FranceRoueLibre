@@ -20,11 +20,19 @@ Méthode :
 les données ne couvrent pas (actualité, lois, rapports, définitions officielles). Ne devine jamais un chiffre : \
 chaque montant vient d’un outil, avec son année et sa source. Avant d’écrire un pourcentage, une part (« 1 euro sur \
 5 ») ou une évolution, fais le calcul à partir des deux chiffres lus, de la même année et du même périmètre.
-- Une commune, ou une question qui n’est qu’un nom de commune : dossier_commune d’abord (comptes, projets aidés par \
-l’État, élus, signaux, mentions dans les dépenses). En cas d’homonymes, présente-les et demande laquelle.
-- rechercher_depenses pour un sujet ou un bénéficiaire ; requete_sql pour un calcul précis sur les mêmes lignes ; \
-comptes_collectivite pour une intercommunalité, un département ou une région ; lire_donnees pour les autres jeux \
-(fichiers ci-dessous) : lis d’abord la structure du fichier (sans chemin), puis le chemin voulu.
+- Quel outil, dans l’ordre (le moins d’appels possible) :
+  * chiffre national (dépense par fonction, retraites, dette, déficit, PIB, impôts en % du PIB, population, prix) : \
+indicateur ;
+  * collectivité ou simple nom de commune : dossier_collectivite (homonymes : présente-les et demande laquelle), puis \
+comparer pour situer le montant par rapport aux collectivités de même taille ;
+  * association, entreprise, acheteur ou SIREN : dossier_beneficiaire ;
+  * mission ou programme du budget de l’État, niche fiscale, impôt, opérateur : chercher_fiche ;
+  * un sujet ou un mot dans les dépenses publiées : rechercher_depenses ; un calcul précis sur ces lignes : requete_sql ;
+  * part, évolution, montant par habitant, euros d’une autre année : calcul, toujours, jamais de tête ;
+  * autre jeu du site : lire_donnees (lis d’abord la structure, sans chemin) ;
+  * le lien exact vers la section du site : page_du_site ;
+  * document absent des données : jeux_ouverts (déjà publié ailleurs ?), recherche_web, puis suivi_demandes et \
+preparer_demande.
 - Donnée introuvable : quand les outils du site et une recherche web n’ont pas trouvé un document qui devrait \
 exister chez un organisme public (budget détaillé, coût d’un service, convention, délibération, liste de \
 subventions), dis-le, puis appelle preparer_demande pour que le lecteur puisse le demander à cet organisme. Pas de \
@@ -85,6 +93,15 @@ TOOL_LABELS = {
     'requete_sql': 'Calcul sur les lignes de dépenses',
     'comptes_collectivite': 'Comptes de « {nom} »',
     'dossier_commune': 'Dossier de la commune « {nom} »',
+    'dossier_collectivite': 'Dossier de « {nom} »',
+    'comparer': 'Comparaison de « {nom} » avec les collectivités de même taille',
+    'indicateur': 'Indicateur « {nom} »',
+    'calcul': 'Calcul ({operation})',
+    'dossier_beneficiaire': 'Argent public reçu par « {nom} »',
+    'chercher_fiche': 'Recherche « {mots} » ({jeu})',
+    'page_du_site': 'Section du site sur « {mots} »',
+    'jeux_ouverts': 'Jeux ouverts sur data.gouv.fr : « {mots} »',
+    'suivi_demandes': 'Demandes déjà envoyées',
     'lire_donnees': 'Lecture de {fichier}',
     'recherche_web': 'Recherche sur le web : « {question} »',
     'preparer_demande': 'Préparation d’une demande à « {organisme} »',
@@ -102,7 +119,7 @@ def tool_label(name: str, args: dict) -> str:
     vals = {k: str(v)[:70] for k, v in (args or {}).items()}
     try:
         return TOOL_LABELS.get(name, name).format_map({'requete': '', 'nom': '', 'fichier': '', 'question': '',
-                                                       'organisme': '', **vals})
+                                                       'organisme': '', 'operation': '', 'mots': '', 'jeu': '', **vals})
     except (KeyError, ValueError):
         return name
 
@@ -120,7 +137,21 @@ def tool_summary(name: str, result: dict) -> tuple:
         if result.get('plusieurs'):
             return True, f'{len(result["plusieurs"])} homonymes'
         return True, (result.get('entite') or {}).get('nom', '')
-    if name == 'dossier_commune':
+    if name == 'indicateur':
+        return True, f'{result.get("indicateur", "")} : {next(iter((result.get("dernier") or {}).items()), ("", ""))}'.replace("'", '')[:140]
+    if name == 'calcul':
+        v = {k: x for k, x in result.items() if k in ('resultat', 'part_pct', 'evolution_pct', 'par_habitant_par_an')}
+        return True, ', '.join(f'{k} = {x}' for k, x in v.items())
+    if name == 'comparer':
+        return True, (f'{result.get("par_habitant_eur")} €/hab., médiane {result.get("mediane_par_habitant_eur")} €'
+                      if not result.get('plusieurs') else f'{len(result["plusieurs"])} homonymes')
+    if name == 'dossier_beneficiaire':
+        return True, f'{sum(s.get("lignes", 0) for s in (result.get("par_source") or {}).values())} ligne(s)'
+    if name in ('chercher_fiche',):
+        return True, f'{result.get("trouves", 0)} résultat(s)'
+    if name in ('dossier_commune', 'dossier_collectivite'):
+        if 'entite' in result:
+            return True, (result.get('entite') or {}).get('nom', '')
         if result.get('plusieurs'):
             return True, f'{len(result["plusieurs"])} homonymes'
         c, p = result.get('commune') or {}, result.get('projets_aides_etat') or {}
