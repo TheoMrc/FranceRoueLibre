@@ -55,6 +55,7 @@
         const left = row.scrollWidth - row.clientWidth - row.scrollLeft;
         more.hidden = left < 4;
         wrap.classList.toggle('has-more', left >= 4);
+        wrap.classList.toggle('has-less', row.scrollLeft > 4);   // scrolled: the left edge fades too
       };
       row.addEventListener('scroll', update, { passive: true });
       more.addEventListener('mousedown', e => e.preventDefault());   // keeps the focus in a search box
