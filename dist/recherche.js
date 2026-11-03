@@ -77,6 +77,7 @@
     box.innerHTML = `<p class="sr-place__head">${head}</p><div class="sr-place__grid">${cards.join('')}</div>`
       + (where.type === 'nom' || where.type === 'approchant' ? '<p class="note">Plus bas : les lignes de dépenses publiées dont le libellé contient ce nom (subventions, marchés, projets), pas seulement celles de la commune.</p>' : '');
     box.hidden = false;
+    P.wire(box);
   }
   const COMMON = new Set('la le les l de des du d un une et en a au aux sur sous pour par avec'.split(' '));
 

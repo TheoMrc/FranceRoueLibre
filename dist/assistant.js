@@ -264,6 +264,7 @@
         if (m.liens?.liens?.length) parts.push(liensHtml(m.liens));
         if (m.demande) parts.push(demandeHtml(m));
         q('.ai-extra').innerHTML = parts.join('');
+        window.FRLPlaces?.wire(q('.ai-extra'));
         const req = q('.ai-req');
         if (req) req.addEventListener('click', e => demandeClick(m, e, req));
         q('.ai-foot').innerHTML = m.provider ? `${provBadge(m.provider, m.label || label(m.provider))}${m.s ? `<span>${Math.round(m.s)} s</span>` : ''}${voteHtml(m)}` : '';

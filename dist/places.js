@@ -36,7 +36,26 @@
   const escH = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function chips(links, { attr = '' } = {}) {
     const short = l => l.cle === 'commune' ? 'Commune' : l.cle === 'projets' ? 'Projets aidés' : l.cle === 'elus' ? 'Élus' : l.libelle;
-    return `<div class="frl-chips">${(links || []).map((l, i) => `<a class="frl-chip frl-chip--${escH(l.cle)}" href="${escH(asset(l.url))}" title="${escH(l.libelle)}"${attr ? ` ${attr}="${i}"` : ''}>${icon(l.cle)}<span>${escH(short(l))}</span></a>`).join('')}</div>`;
+    return `<div class="frl-chips-wrap"><div class="frl-chips">${(links || []).map((l, i) => `<a class="frl-chip frl-chip--${escH(l.cle)}" href="${escH(asset(l.url))}" title="${escH(l.libelle)}"${attr ? ` ${attr}="${i}"` : ''}>${icon(l.cle)}<span>${escH(short(l))}</span></a>`).join('')}</div>`
+      + '<button type="button" class="frl-chips__more" aria-label="Voir les autres échelons" hidden><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button></div>';
   }
-  window.FRLPlaces = { find, mapUrl, projectsUrl, deptUrl, people, sure, chips, icon };
+  /* Two rows that scroll sideways: an arrow on the right shows there is more, and scrolls when clicked.
+     Called after the HTML of chips() is put in the page. */
+  function wire(root) {
+    (root || document).querySelectorAll('.frl-chips-wrap:not([data-wired])').forEach(wrap => {
+      wrap.dataset.wired = '1';
+      const row = wrap.querySelector('.frl-chips'), more = wrap.querySelector('.frl-chips__more');
+      const update = () => {
+        const left = row.scrollWidth - row.clientWidth - row.scrollLeft;
+        more.hidden = left < 4;
+        wrap.classList.toggle('has-more', left >= 4);
+      };
+      row.addEventListener('scroll', update, { passive: true });
+      more.addEventListener('mousedown', e => e.preventDefault());   // keeps the focus in a search box
+      more.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); row.scrollBy({ left: row.clientWidth * .7, behavior: 'smooth' }); });
+      if (typeof ResizeObserver === 'function') new ResizeObserver(update).observe(row);
+      requestAnimationFrame(update);
+    });
+  }
+  window.FRLPlaces = { find, mapUrl, projectsUrl, deptUrl, people, sure, chips, icon, wire };
 })();

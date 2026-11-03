@@ -151,6 +151,7 @@
         return it.links?.length && window.FRLPlaces ? `${link}<div class="omni__chips">${FRLPlaces.chips(it.links, { attr: 'data-side' })}</div>` : link;
       }).join('')}</div>`).join('');
       panel.hidden = false;
+      window.FRLPlaces?.wire(panel);
       root.classList.add('is-open');
       input.setAttribute('aria-expanded', 'true');
       mark(0);
