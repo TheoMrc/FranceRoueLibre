@@ -115,7 +115,12 @@ DECLARATIONS: List[dict] = [
                     'rendement, payeur, bénéficiaire), operateurs (431 opérateurs de l’État). Plus rapide que lire_donnees.',
      'parameters': {'type': 'OBJECT', 'properties': {
          'jeu': {'type': 'STRING', 'enum': ['etat', 'niches', 'impots', 'operateurs']},
-         'mots': {'type': 'STRING'}}, 'required': ['jeu', 'mots']}},
+         'mots': {'type': 'STRING', 'description': 'Mots cherchés ; vide avec tri=montant pour les plus gros'},
+         'tri': {'type': 'STRING', 'enum': ['pertinence', 'montant'],
+                 'description': 'montant : les plus gros d’abord (« principales niches », « plus gros opérateurs »)'},
+         'cible': {'type': 'STRING', 'enum': ['entreprises', 'menages', 'mixte'],
+                   'description': 'Niches seulement : celles des entreprises (impôt sur les bénéfices, activité), des '
+                                  'ménages, ou mixtes (TVA, énergie), avec leur total'}}, 'required': ['jeu']}},
     {'name': 'page_du_site',
      'description': 'Trouve la section précise du site à citer en lien (page et ancre) pour un sujet.',
      'parameters': {'type': 'OBJECT', 'properties': {'mots': {'type': 'STRING'}}, 'required': ['mots']}},
@@ -175,6 +180,12 @@ FILES = {
                  'seulement : dernier fichier publié sur data.gouv.fr, ne pas présenter comme actuel), dépenses '
                  'd’assurance maladie par région (« regions »)',
     'probite.json': 'Atteintes à la probité jugées 2021-2025 : affaires, infractions, peines',
+    'fraude.json': 'Fraude et contrôle fiscal (Cour des comptes, décembre 2025 ; Commission européenne, 2025) : '
+                   'résultats du contrôle 2015-2024 (« controle », Md€), droits rappelés par impôt, sommes '
+                   'encaissées (« recouvre »), part dans les recettes, estimations de l’écart fiscal et leur avis '
+                   '(« estimations_ecart_global », « estimations_tva »), écart de TVA 2013-2024 (« ecart_tva_commission », '
+                   'M€, 2024 provisoire), effectifs (« moyens »), fraude détectée sur place, suites pénales (« penal »). '
+                   'Chaque chiffre a sa page du rapport',
     'ugap.json': 'Étude des prix du catalogue UGAP comparés au commerce',
     'national-accounts-3201.json': 'Recettes et dépenses de l’ensemble des administrations publiques 1960-2025 (Insee 3.201, Md€)',
     'national-debt.json': 'Dette publique et passage du déficit à la dette (Insee 3.101 et 3.105)',
@@ -764,7 +775,8 @@ class Toolbox:
                       'comparer': lambda: O.comparer(args.get('nom', ''), args.get('agregat') or 'depenses-totales',
                                                      args.get('niveau') or 'communes'),
                       'dossier_beneficiaire': lambda: O.dossier_beneficiaire(args.get('nom', '')),
-                      'chercher_fiche': lambda: O.chercher_fiche(args.get('jeu', ''), args.get('mots', '')),
+                      'chercher_fiche': lambda: O.chercher_fiche(args.get('jeu', ''), args.get('mots', ''), args.get('tri') or '',
+                                                                 args.get('cible') or ''),
                       'page_du_site': lambda: O.page_du_site(args.get('mots', '')),
                       'jeux_ouverts': lambda: O.jeux_ouverts(args.get('mots', '')),
                       'suivi_demandes': lambda: O.suivi_demandes(args.get('recherche') or '')}

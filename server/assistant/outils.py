@@ -328,7 +328,8 @@ def _records(jeu: str) -> List[dict]:
         return out
     if jeu == 'niches':
         n = T._json('niches.json')
-        return [{'id': m['id'], 'mesure': m['l'], 'impot': m['i'], 'mission': m['m'], 'finalite': m.get('fin'),
+        return [{'id': m['id'], 'mesure': m['l'], 'impot': m['i'], 'section': m.get('s'), 'cible': cible_niche(m),
+                 'mission': m['m'], 'finalite': m.get('fin'),
                  'cout_meur': dict(zip(map(str, n['years']), m['v'])), 'statut': m.get('st')} for m in n['measures']]
     if jeu == 'impots':
         return [{k: v for k, v in t.items() if k in ('id', 'name', 'amount', 'year', 'status', 'beneficiary', 'beneficiaryDetail',
@@ -340,6 +341,23 @@ def _records(jeu: str) -> List[dict]:
     return []
 
 
+BUSINESS = ('bénéfices', 'sociétés', 'cotisation foncière des entreprises', 'cotisation sur la valeur ajoutée')
+
+
+def cible_niche(m: dict) -> str:
+    """Who the measure lowers the tax of, from the tax and the section it belongs to (a classification of the site,
+    not of the budget documents): « entreprises » for the taxes on profits and on business activity, « ménages » for
+    the income tax of individuals, gifts and inheritance, local taxes on homes; « mixte » for VAT, energy and the rest,
+    whose cut is shared between sellers and buyers."""
+    tax, sec = str(m.get('i') or '').lower(), str(m.get('s') or '').lower()
+    if any(w in tax or w in sec for w in BUSINESS):
+        return 'entreprises'
+    if tax.startswith('impôt sur le revenu') or 'mutations' in sec or 'fortune' in tax or 'habitation' in sec \
+            or 'propriétés bâties' in sec or 'assurance vie' in sec:
+        return 'ménages'
+    return 'mixte'
+
+
 UNITS = {'etat': 'montants en millions d’euros, projet de loi de finances 2025', 'niches': 'coûts en millions d’euros par année',
          'impots': 'rendement en millions d’euros', 'operateurs': 'subventions pour charges de service public en euros'}
 
@@ -347,12 +365,48 @@ UNITS = {'etat': 'montants en millions d’euros, projet de loi de finances 2025
 PRIMARY = ('name', 'full', 'acronym', 'short', 'mesure', 'programme', 'mission')
 
 
-def chercher_fiche(jeu: str, mots: str) -> dict:
+def _amount(r: dict) -> float:
+    """The latest amount of a record, to sort by size."""
+    for k in ('cout_meur',):
+        if isinstance(r.get(k), dict):
+            vals = [v for _, v in sorted(r[k].items()) if isinstance(v, (int, float))]
+            return vals[-1] if vals else 0.0
+    for k in ('credits_paiement_meur', 'amount', 'subvention', 'scsp'):
+        if isinstance(r.get(k), (int, float)):
+            return r[k]
+    return max([v for v in r.values() if isinstance(v, (int, float)) and not isinstance(v, bool)] or [0])
+
+
+def _niche_totals(recs: list, cible: str) -> dict:
+    """Total cost per year of these niches (orders of magnitude: each measure is costed alone), and the share of all."""
+    n = T._json('niches.json')
+    years = list(map(str, n['years']))
+    tot = {y: round(sum((r['cout_meur'].get(y) or 0) for r in recs)) for y in years}
+    allt = {str(t['year']): t['total'] for t in n['totals']}
+    return {'total_meur': tot, 'part_du_total_des_niches_pct': {y: round(100 * tot[y] / allt[y], 1) for y in years if allt.get(y)},
+            'mesures_chiffrees': sum(1 for r in recs if (r['cout_meur'].get(years[-1]) or 0) > 0),
+            'note': 'Somme d’ordres de grandeur : chaque niche est chiffrée seule, toutes choses égales par ailleurs. '
+                    + ('Classement « cible » du site d’après l’impôt concerné (bénéfices et activité = entreprises ; '
+                       'impôt sur le revenu des particuliers, successions = ménages ; TVA, énergie = mixte).')}
+
+
+def chercher_fiche(jeu: str, mots: str, tri: str = '', cible: str = '') -> dict:
+    """Records of a big data set matching the words, best matches first, or the largest first (tri = montant).
+    For the niches, cible keeps only those of the companies, the households or the mixed ones, with their total."""
     jeu = str(jeu or '').strip().lower()
     recs = _records(jeu)
     if not recs:
         return {'error': 'jeu : etat (missions et programmes du budget de l’État), niches, impots ou operateurs'}
-    wanted = [w for w in T.words(mots) if len(w) > 2]
+    cible = {'menages': 'ménages', 'ménages': 'ménages', 'entreprises': 'entreprises', 'mixte': 'mixte'}.get(str(cible or '').strip().lower(), '')
+    if jeu == 'niches' and cible:
+        recs = [r for r in recs if r['cible'] == cible]
+    wanted = [w for w in T.words(mots) if len(w) > 2 and not (cible and w.startswith(('entreprise', 'menage')))]
+    if not wanted and (tri == 'montant' or cible):  # « the largest niches of the companies »: no word needed
+        recs = sorted(recs, key=lambda r: -_amount(r))
+        out = {'jeu': jeu, 'unite': UNITS[jeu], 'trouves': len(recs), 'tri': 'du plus gros au plus petit', 'resultats': recs[:15]}
+        if jeu == 'niches':
+            out |= _niche_totals(recs, cible)
+        return T.clip(out)
     if not wanted:
         return {'error': 'mots vides'}
     phrase = ' '.join(T.words(mots))
@@ -366,7 +420,10 @@ def chercher_fiche(jeu: str, mots: str) -> dict:
             scored.append((hits + 2 * strong + (6 if phrase and phrase in main else 0), r))
     scored.sort(key=lambda x: -x[0])
     best = [r for h, r in scored if h == scored[0][0]] if scored else []
-    return T.clip({'jeu': jeu, 'unite': UNITS[jeu], 'trouves': len(scored), 'resultats': (best or [r for _, r in scored])[:12],
+    if tri == 'montant':
+        best = sorted([r for _, r in scored], key=lambda r: -_amount(r))
+    extra = _niche_totals([r for _, r in scored], cible) if jeu == 'niches' and (cible or tri == 'montant') else {}
+    return T.clip({**extra, 'jeu': jeu, 'unite': UNITS[jeu], 'trouves': len(scored), 'resultats': (best or [r for _, r in scored])[:12],
                    'page': f'{S.SITE_URL}/{ {"etat": "etat.html", "niches": "niches.html", "impots": "impots.html", "operateurs": "operateurs.html"}[jeu] }'})
 
 

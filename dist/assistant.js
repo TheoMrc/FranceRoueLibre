@@ -264,6 +264,7 @@
         if (m.liens?.liens?.length) parts.push(liensHtml(m.liens));
         if (m.demande) parts.push(demandeHtml(m));
         q('.ai-extra').innerHTML = parts.join('');
+        nextQuestions(q('.ai-text'));
         window.FRLPlaces?.wire(q('.ai-extra'));
         const req = q('.ai-req');
         if (req) req.addEventListener('click', e => demandeClick(m, e, req));
@@ -275,6 +276,22 @@
     };
     if (m.provider) v.provider(m.provider);
     return v;
+  }
+  /* « Pour aller plus loin : » followed by a list of questions (asked by the system prompt for broad or unclear
+     questions): each question becomes a button that asks it. */
+  function nextQuestions(box) {
+    if (!box || box.querySelector('.ai-next')) return;
+    const head = [...box.querySelectorAll('p')].find(p => /^pour aller plus loin/i.test(p.textContent.trim()));
+    const list = head?.nextElementSibling;
+    if (!list || !/^(UL|OL)$/.test(list.tagName)) return;
+    const items = [...list.querySelectorAll('li')].map(li => li.textContent.trim()).filter(t => t.length > 3 && t.length < 220);
+    if (!items.length) return;
+    const div = document.createElement('div');
+    div.className = 'ai-next';
+    div.innerHTML = `<span>${esc(head.textContent.trim().replace(/\s*:$/, ''))}</span>` +
+      items.map((t, i) => `<button type="button" style="--i:${i}">${esc(t)}</button>`).join('');
+    div.addEventListener('click', e => { const b = e.target.closest('button'); if (b && !busy) ask(b.textContent); });
+    head.remove(); list.replaceWith(div);
   }
   /* 👍 / 👎 under an answer: sent once to the server journal (server/assistant/journal.py), within the hour */
   const VOTE_UP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10v11H3V10zM7 10l4-8a3 3 0 0 1 3 3v4h6a2 2 0 0 1 2 2.3l-1.4 8A2 2 0 0 1 18.6 21H7"/></svg>';

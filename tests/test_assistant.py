@@ -263,6 +263,28 @@ if __name__ == '__main__':
     unittest.main()
 
 
+class FraudAndNichesTest(unittest.TestCase):
+    """dist/data/fraude.json (scripts/fraude-data.py) and the niches sorted by amount and by target."""
+
+    def test_fraud_file_adds_up(self):
+        d = json.loads((ROOT / 'dist' / 'data' / 'fraude.json').read_text(encoding='utf-8'))
+        c = d['controle']
+        for i in range(len(c['annees'])):
+            self.assertAlmostEqual(c['droits_rectifies'][i] + c['penalites_interets'][i], c['resultats_totaux'][i], delta=.03)
+        v = d['ecart_tva_commission']
+        self.assertEqual(len(v['annees']), len(v['ecart_meur']))
+        self.assertTrue(all(e['avis_cour'] for e in d['estimations_ecart_global']))
+
+    def test_niches_by_amount_and_target(self):
+        from assistant import outils as O
+        r = O.chercher_fiche('niches', '', tri='montant', cible='entreprises')
+        costs = [x['cout_meur']['2026'] or 0 for x in r['resultats']]
+        self.assertEqual(costs, sorted(costs, reverse=True))
+        self.assertTrue(all(x['cible'] == 'entreprises' for x in r['resultats']))
+        self.assertIn('total_meur', r)
+        self.assertIn('recherche', r['resultats'][0]['mesure'].lower(), 'the research tax credit is the largest')
+
+
 class SavedAnswersTest(unittest.TestCase):
     """faq.json (scripts/loupe-faq.py): frequent questions answered without a model call."""
 

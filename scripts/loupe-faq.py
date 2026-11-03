@@ -322,6 +322,91 @@ def pensions():
     }
 
 
+FRAUDE = ROOT / 'dist' / 'data' / 'fraude.json'
+
+
+def fraud():
+    """« Combien coûte la fraude fiscale ? » (and the evasion): nobody measures it; what is measured (tax audits, sums
+    recovered, VAT gap) and the estimates in circulation with their author and the Cour des comptes' view. Every figure
+    comes from dist/data/fraude.json (scripts/fraude-data.py: Cour des comptes report of December 2025, European
+    Commission VAT gap tables)."""
+    f = json.loads(FRAUDE.read_text(encoding='utf-8'))
+    popd = json.loads(POP.read_text(encoding='utf-8'))
+    pop = {r['year']: r['population'] for r in popd['january1']}
+    c, ys = f['controle'], f['controle']['annees']
+    y0, y1 = ys[0], ys[-1]
+    rec = f['recouvre']['montants_md_eur']
+    part = f['part_dans_recettes']['pct']
+    inc, ask, mo, det, pen = f['incertitude'], f['estimation_demandee'], f['moyens'], f['fraude_detectee_sur_place'], f['penal']
+    v = f['ecart_tva_commission']
+    full = [y for y in v['annees'] if y not in v['provisoires']]
+    yv, yp = full[-1], (v['provisoires'] or [None])[0]
+    gap = dict(zip(v['annees'], v['ecart_meur'])); pct = dict(zip(v['annees'], v['ecart_pct_tva_due']))
+    tva = {e['id']: e for e in f['estimations_tva']}
+    est = {e['id']: e for e in f['estimations_ecart_global']}
+    per = rec[str(y1)] * 1e9 / pop[y1]
+    gap_per = gap[yv] * 1e6 / pop[yv]
+    sol = est['solidaires']
+    cour_url, ce_url = f['sources']['cour']['url'], f['sources']['commission']['page']
+    reply = (
+        f'**Personne ne connaît le montant de la fraude fiscale en France : aucune administration ne la mesure.** La Cour des '
+        f'comptes le dit sans détour (décembre 2025) : « {inc["citation"]} », sur {fr(inc["prelevements_obligatoires_md_eur"])} Md€ '
+        f'd’impôts et de cotisations en {inc["annee"]}.\n\n'
+        f'Quatre mots à ne pas confondre : la **fraude** est illégale (revenus cachés, fausses factures, TVA encaissée et non '
+        f'reversée) ; l’**évasion** passe par des montages, souvent à l’étranger, illégaux quand ils sont abusifs ; '
+        f'l’**optimisation** utilise la loi au mieux, elle est légale ; les **niches fiscales** sont des réductions d’impôt votées '
+        f'par le Parlement. Ni l’évasion ni l’optimisation ne sont chiffrées.\n\n'
+        f'**Ce qui est mesuré : ce que le fisc rattrape**\n'
+        f'- Le contrôle fiscal a réclamé **{fr(c["resultats_totaux"][-1], 1)} Md€** en {y1} (impôts dus et pénalités), contre '
+        f'{fr(c["resultats_totaux"][0], 1)} Md€ en {y0}. Pendant ce temps, les impôts encaissés par l’administration fiscale ont '
+        f'augmenté de {fr(f["recettes_dgfip"]["hausse_pct"])} % : le contrôle pèse {fr(part[str(y1)], 1)} % des recettes, contre '
+        f'{fr(part[str(y0)], 1)} % en {y0}.\n'
+        f'- Sommes réellement encaissées après contrôle : **{fr(rec[str(y1)], 1)} Md€** en {y1}, soit environ {fr(round(per, -1))} € '
+        f'par habitant, contre {fr(rec[str(y0)], 1)} Md€ en {y0}. Une partie de ce qui est réclamé n’est jamais payé.\n'
+        f'- Fraude repérée lors des contrôles sur place : {fr(det["fraude_md_eur"], 1)} Md€ en {det["annee"]} '
+        f'({fr(det["evolution_pct"])} % depuis {det["depuis"]}), à côté de {fr(det["erreurs_md_eur"], 1)} Md€ d’erreurs de bonne foi.\n'
+        f'- Les agents affectés au contrôle ont diminué de {fr(mo["baisse_effectifs_controle_pct"])} % entre {mo["periode"][0]} et '
+        f'{mo["periode"][1]}.\n\n'
+        f'**Les estimations qui circulent**\n'
+        f'- TVA, le seul impôt estimé : selon la Commission européenne, **{fr(gap[yv] / 1000, 1)} Md€** de TVA due n’ont pas été '
+        f'perçus en {yv} ({fr(pct[yv], 1)} % de la TVA due, environ {fr(round(gap_per, -1))} € par habitant)'
+        + (f', {fr(gap[yp] / 1000, 1)} Md€ en {yp} (estimation provisoire)' if yp else '') +
+        f'. Ce manque mélange fraude, faillites et erreurs. L’administration fiscale trouve {fr(tva["dgfip"]["bas_md_eur"])} à '
+        f'{fr(tva["dgfip"]["haut_md_eur"])} Md€ sur la seule TVA déclarée ({tva["dgfip"]["publie"]}) ; l’Insee '
+        f'{fr(tva["insee"]["bas_md_eur"])} à {fr(tva["insee"]["haut_md_eur"])} Md€ ({tva["insee"]["publie"]}), un chiffre que la Cour '
+        f'juge surestimé.\n'
+        f'- Tous impôts, fraude et évasion mêlées : {fr(sol["bas_md_eur"])} à {fr(sol["haut_md_eur"])} Md€ selon le syndicat '
+        f'Solidaires Finances publiques ({sol["publie_en"]}, sur des données d’avant {sol["donnees_anterieures_a"]}). La Cour '
+        f'note que sa méthode n’est pas détaillée et qu’il mélange l’illégal et le légal. Les deux autres estimations datent de '
+        f'{est["courson-leonard"]["publie_en"]} ({fr(est["courson-leonard"]["bas_md_eur"], 1)} à {fr(est["courson-leonard"]["haut_md_eur"], 1)} Md€) '
+        f'et de {est["cpo"]["publie_en"]} ({fr(est["cpo"]["bas_md_eur"], 1)} à {fr(est["cpo"]["haut_md_eur"], 1)} Md€).\n'
+        f'- Impôt sur le revenu et impôt sur les sociétés : aucune estimation. La Cour demande qu’elle soit faite d’ici '
+        f'{ask["annee"]} ; l’administration y consacre {mo["statisticiens"]} statisticiens depuis {mo["depuis"]}.\n\n'
+        f'**Côté justice** : {fr(list(pen["dossiers_parquet"].values())[-1])} dossiers transmis au procureur en '
+        f'{list(pen["dossiers_parquet"])[-1]} (contre {fr(list(pen["dossiers_parquet"].values())[0])} en {list(pen["dossiers_parquet"])[0]}), '
+        f'mais toujours {pen["condamnes_par_an"][0]} à {pen["condamnes_par_an"][1]} personnes condamnées par an ; '
+        f'{fr(pen["prison_ferme_pct"])} % des peines comportent de la prison ferme ; amende moyenne : {fr(list(pen["amende_moyenne_eur"].values())[0])} € '
+        f'en {list(pen["amende_moyenne_eur"])[0]}.\n\n'
+        f'Pour aller plus loin :\n'
+        f'- Combien coûtent les niches fiscales des entreprises ?\n'
+        f'- Quel impôt fait l’objet du plus de redressements fiscaux ?\n'
+        f'- Comment a évolué le manque de TVA depuis 2013 ?\n\n'
+        f'Sources : [Cour des comptes, La lutte contre la fraude fiscale, décembre 2025]({cour_url}) (pages {c["page"]}, '
+        f'{f["recouvre"]["page"]}, {inc["page"]} à {tva["dgfip"]["page"]}), [Commission européenne, écart de TVA]({ce_url}), '
+        f'[Insee, population]({popd["url"]}).')
+    return {
+        'id': 'fraude', 'question': 'Combien coûte la fraude fiscale en France ?',
+        'match_any': [[['fraude', 'evasion', 'fraudeurs'], ['fiscal', 'impot', 'fisc', 'tva']],
+                      [['evasion fiscale', 'fraude fiscale', 'fraudes fiscales']]],
+        'reply': reply,
+        'sources': [{'title': 'Cour des comptes, La lutte contre la fraude fiscale (décembre 2025)', 'url': cour_url},
+                    {'title': 'Commission européenne, écart de TVA (rapport 2025)', 'url': ce_url},
+                    {'title': 'Insee, population au 1er janvier', 'url': popd['url']}],
+        'data': {'controle': [y0, c['resultats_totaux'][0], y1, c['resultats_totaux'][-1]], 'recouvre': rec, 'perPerson': round(per),
+                 'vatGap': [yv, gap[yv], pct[yv]], 'vatGapProvisional': [yp, gap.get(yp)] if yp else None},
+    }
+
+
 def main():
     q = quarterly()
     TIDY.parent.mkdir(parents=True, exist_ok=True)
@@ -335,7 +420,7 @@ def main():
     for y in (2017, 2020, 2024):
         a = next(r['debt'] for r in annual['years'] if r['year'] == y)
         assert abs(q[f'{y}-T4'][0] - a) < 1, f'dette fin {y} : trimestrielle {q[f"{y}-T4"][0]} vs annuelle {a}'
-    entries = [debt_le_maire(q, annual), debt_per_person(q), inflation_debt(q, annual), hundred_euros(annual), associations(), pensions()]
+    entries = [debt_le_maire(q, annual), debt_per_person(q), inflation_debt(q, annual), hundred_euros(annual), associations(), pensions(), fraud()]
     OUT.write_text(json.dumps({'generated': 'python3 scripts/loupe-faq.py', 'entries': entries}, ensure_ascii=False, indent=1) + '\n',
                    encoding='utf-8')
     print(f'{TIDY.relative_to(ROOT)}: {len(q)} trimestres ; {OUT.relative_to(ROOT)}: {len(entries)} réponse(s)')

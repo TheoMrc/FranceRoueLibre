@@ -43,7 +43,7 @@ def find(messages: list) -> dict | None:
 COMMON = set('''quel quelle quels quelles combien comment pourquoi quand dans pour avec sans sont etre etait cela cette
 ces ceux celle leur leurs nous vous elle elles plus moins tres tout tous toute toutes depuis entre chaque annee annees
 france francais francaise publique publiques public montant total exactement environ vraiment donc alors aussi
-recu recus recues donne donnes donner ete fait faire peut peux veux savoir dire bercy etat gouvernement'''.split())
+recu recus recues donne donnes donner ete fait faire peut peux veux savoir dire bercy etat gouvernement represente represent dernier derniers derniere dernieres ans actuel actuelle actuellement aujourd hui'''.split())
 
 
 def _narrower(q: str, entry: dict, groups: list, raw: str = '') -> bool:
@@ -56,7 +56,7 @@ def _narrower(q: str, entry: dict, groups: list, raw: str = '') -> bool:
     stems = [norm(w).strip() for group in groups for w in group]
     extra = [w for w in q.split() if len(w) >= 4 and not w.isdigit() and w not in known
              and not any(w.startswith(s) or s.startswith(w[:5]) for s in stems if s)
-             and not any(k.startswith(w[:5]) for k in known if len(k) >= 5)]
+             and not any(k.startswith(w[:5]) for k in known if len(k) >= 6)]
     names = [norm(w).strip() for w in re.findall(r"[^\W\d_][\w-]*", str(raw or ''))[1:] if w[:1].isupper()]
     if any(n and n in extra for n in names):   # a proper name the saved answer does not cover (« Article 1 »)
         return True

@@ -391,6 +391,69 @@
      4665.0
     ]
    }
+  },
+  {
+   "id": "fraude",
+   "question": "Combien coûte la fraude fiscale en France ?",
+   "match_any": [
+    [
+     [
+      "fraude",
+      "evasion",
+      "fraudeurs"
+     ],
+     [
+      "fiscal",
+      "impot",
+      "fisc",
+      "tva"
+     ]
+    ],
+    [
+     [
+      "evasion fiscale",
+      "fraude fiscale",
+      "fraudes fiscales"
+     ]
+    ]
+   ],
+   "reply": "**Personne ne connaît le montant de la fraude fiscale en France : aucune administration ne la mesure.** La Cour des comptes le dit sans détour (décembre 2025) : « Nul ne peut aujourd’hui se hasarder à affirmer que ce montant est proche de 30 ou de 130 Md€ », sur 1 268 Md€ d’impôts et de cotisations en 2024.\n\nQuatre mots à ne pas confondre : la **fraude** est illégale (revenus cachés, fausses factures, TVA encaissée et non reversée) ; l’**évasion** passe par des montages, souvent à l’étranger, illégaux quand ils sont abusifs ; l’**optimisation** utilise la loi au mieux, elle est légale ; les **niches fiscales** sont des réductions d’impôt votées par le Parlement. Ni l’évasion ni l’optimisation ne sont chiffrées.\n\n**Ce qui est mesuré : ce que le fisc rattrape**\n- Le contrôle fiscal a réclamé **20,1 Md€** en 2024 (impôts dus et pénalités), contre 21,2 Md€ en 2015. Pendant ce temps, les impôts encaissés par l’administration fiscale ont augmenté de 44 % : le contrôle pèse 2,8 % des recettes, contre 4,3 % en 2015.\n- Sommes réellement encaissées après contrôle : **11,4 Md€** en 2024, soit environ 170 € par habitant, contre 12,2 Md€ en 2015. Une partie de ce qui est réclamé n’est jamais payé.\n- Fraude repérée lors des contrôles sur place : 4,4 Md€ en 2024 (-44 % depuis 2015), à côté de 5,0 Md€ d’erreurs de bonne foi.\n- Les agents affectés au contrôle ont diminué de 19 % entre 2015 et 2024.\n\n**Les estimations qui circulent**\n- TVA, le seul impôt estimé : selon la Commission européenne, **12,1 Md€** de TVA due n’ont pas été perçus en 2023 (5,6 % de la TVA due, environ 180 € par habitant), 16,5 Md€ en 2024 (estimation provisoire). Ce manque mélange fraude, faillites et erreurs. L’administration fiscale trouve 6 à 10 Md€ sur la seule TVA déclarée (septembre 2024) ; l’Insee 20 à 25 Md€ (2022), un chiffre que la Cour juge surestimé.\n- Tous impôts, fraude et évasion mêlées : 80 à 100 Md€ selon le syndicat Solidaires Finances publiques (2018, sur des données d’avant 2013). La Cour note que sa méthode n’est pas détaillée et qu’il mélange l’illégal et le légal. Les deux autres estimations datent de 1996 (17,4 à 22,7 Md€) et de 2007 (20,5 à 25,6 Md€).\n- Impôt sur le revenu et impôt sur les sociétés : aucune estimation. La Cour demande qu’elle soit faite d’ici 2027 ; l’administration y consacre 3 statisticiens depuis septembre 2024.\n\n**Côté justice** : 2 176 dossiers transmis au procureur en 2024 (contre 935 en 2018), mais toujours 650 à 700 personnes condamnées par an ; 17 % des peines comportent de la prison ferme ; amende moyenne : 33 500 € en 2024.\n\nPour aller plus loin :\n- Combien coûtent les niches fiscales des entreprises ?\n- Quel impôt fait l’objet du plus de redressements fiscaux ?\n- Comment a évolué le manque de TVA depuis 2013 ?\n\nSources : [Cour des comptes, La lutte contre la fraude fiscale, décembre 2025](https://www.ccomptes.fr/sites/default/files/2025-12/20251216-Lutte-contre-la-fraude-fiscale.pdf) (pages 25, 18, 28 à 31), [Commission européenne, écart de TVA](https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en), [Insee, population](https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001641586).",
+   "sources": [
+    {
+     "title": "Cour des comptes, La lutte contre la fraude fiscale (décembre 2025)",
+     "url": "https://www.ccomptes.fr/sites/default/files/2025-12/20251216-Lutte-contre-la-fraude-fiscale.pdf"
+    },
+    {
+     "title": "Commission européenne, écart de TVA (rapport 2025)",
+     "url": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en"
+    },
+    {
+     "title": "Insee, population au 1er janvier",
+     "url": "https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001641586"
+    }
+   ],
+   "data": {
+    "controle": [
+     2015,
+     21.19,
+     2024,
+     20.05
+    ],
+    "recouvre": {
+     "2015": 12.2,
+     "2024": 11.4
+    },
+    "perPerson": 166,
+    "vatGap": [
+     2023,
+     12121.0,
+     5.6
+    ],
+    "vatGapProvisional": [
+     2024,
+     16451.0
+    ]
+   }
   }
  ]
 }

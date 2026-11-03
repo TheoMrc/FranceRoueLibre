@@ -206,6 +206,12 @@
 .ai-chips a { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: .15rem .55rem; border: 1px solid var(--c-line); border-radius: 999px; background: var(--c-bg); text-decoration: none;
   animation: ai-in .35s calc(var(--i) * .07s) var(--ai-ease) both; transition: border-color .2s, transform .2s var(--ai-spring); }
 .ai-chips a:hover { border-color: var(--c-teal-500); transform: translateY(-1px); }
+.ai-next { display: flex; flex-direction: column; align-items: flex-start; gap: .35rem; margin: .7rem 0 .6rem; }
+.ai-next > span { font-size: .72rem; font-weight: 600; letter-spacing: .02em; color: var(--c-muted); }
+.ai-next button { max-width: 100%; text-align: left; font: inherit; font-size: .84rem; line-height: 1.35; color: var(--c-ink); padding: .4rem .7rem; border: 1px solid var(--c-line);
+  border-radius: 12px; background: var(--c-bg); cursor: pointer; animation: ai-in .35s calc(var(--i) * .07s) var(--ai-ease) both; transition: border-color .2s, transform .2s var(--ai-spring), background .2s; }
+.ai-next button::before { content: "→ "; color: var(--c-teal-500); }
+.ai-next button:hover { border-color: var(--c-teal-500); transform: translateX(2px); }
 .ai-foot { display: flex; align-items: center; gap: .5rem; margin-top: .55rem; font-size: .72rem; color: var(--c-muted); }
 .ai-foot:empty { display: none; }
 .ai-foot .ai-prov { padding: .1rem .45rem; border-radius: 999px; background: var(--c-bg); border: 1px solid var(--c-line); }

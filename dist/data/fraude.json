@@ -1,0 +1,432 @@
+{
+ "source": "python scripts/fraude-data.py",
+ "sources": {
+  "cour": {
+   "titre": "Cour des comptes, La lutte contre la fraude fiscale, rapport public thématique, décembre 2025",
+   "url": "https://www.ccomptes.fr/sites/default/files/2025-12/20251216-Lutte-contre-la-fraude-fiscale.pdf"
+  },
+  "commission": {
+   "titre": "Commission européenne, VAT gap in the EU, rapport 2025, tableaux statistiques",
+   "url": "https://taxation-customs.ec.europa.eu/document/download/b3045343-a25a-4fcf-97c8-b27c413b95ad_en?filename=VAT-GAP-2025-tables.xlsx",
+   "sha256": "1737a555538d11d7338f32913dd8bc38715ce058375b5f7f6347ccaec92ef613",
+   "telecharge_le": "2026-11-03",
+   "octets": 126330,
+   "page": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en"
+  }
+ },
+ "controle": {
+  "annees": [
+   2015,
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "page": 25,
+  "droits_nets_rappeles": [
+   14.49,
+   13.55,
+   12.23,
+   11.27,
+   9.68,
+   6.9,
+   11.06,
+   11.95,
+   12.63,
+   14.04
+  ],
+  "credits_non_rembourses": [
+   1.63,
+   1.75,
+   1.76,
+   1.64,
+   1.78,
+   1.97,
+   2.22,
+   3.03,
+   3.3,
+   3.38
+  ],
+  "droits_rectifies": [
+   16.12,
+   15.29,
+   13.98,
+   12.92,
+   11.46,
+   8.88,
+   13.28,
+   14.98,
+   15.93,
+   17.42
+  ],
+  "penalites_interets": [
+   5.07,
+   4.17,
+   3.92,
+   3.23,
+   2.41,
+   1.34,
+   2.38,
+   2.66,
+   2.56,
+   2.64
+  ],
+  "resultats_totaux": [
+   21.19,
+   19.47,
+   17.9,
+   16.15,
+   13.87,
+   10.22,
+   15.66,
+   17.64,
+   18.49,
+   20.05
+  ]
+ },
+ "droits_par_impot": {
+  "annees": [
+   2015,
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "page": 26,
+  "impot_societes": [
+   4.84,
+   4.03,
+   3.93,
+   3.65,
+   3.02,
+   2.0,
+   3.08,
+   3.42,
+   3.19,
+   4.14
+  ],
+  "impot_revenu": [
+   2.79,
+   2.82,
+   2.45,
+   2.17,
+   1.69,
+   1.09,
+   1.77,
+   1.62,
+   2.24,
+   1.95
+  ],
+  "tva": [
+   2.24,
+   2.27,
+   2.13,
+   2.0,
+   1.76,
+   0.91,
+   1.59,
+   2.11,
+   2.07,
+   2.41
+  ],
+  "droits_enregistrement": [
+   1.73,
+   1.64,
+   1.35,
+   0.95,
+   1.24,
+   1.43,
+   2.37,
+   2.69,
+   2.98,
+   3.57
+  ],
+  "impot_fortune": [
+   1.02,
+   0.64,
+   0.63,
+   0.41,
+   0.4,
+   0.35,
+   0.38,
+   0.35,
+   0.3,
+   0.31
+  ],
+  "impots_locaux": [
+   0.51,
+   0.68,
+   0.59,
+   0.53,
+   0.5,
+   0.35,
+   0.57,
+   0.51,
+   0.47,
+   0.49
+  ],
+  "autres": [
+   1.5,
+   1.61,
+   1.29,
+   1.07,
+   0.92,
+   1.0,
+   1.3,
+   1.24,
+   1.37,
+   1.19
+  ]
+ },
+ "recouvre": {
+  "montants_md_eur": {
+   "2015": 12.2,
+   "2024": 11.4
+  },
+  "page": 18
+ },
+ "part_dans_recettes": {
+  "pct": {
+   "2015": 4.3,
+   "2024": 2.8
+  },
+  "page": 18
+ },
+ "recettes_dgfip": {
+  "hausse_pct": 44.0,
+  "de": 2015,
+  "a": 2024,
+  "page": 24
+ },
+ "incertitude": {
+  "de": 30.0,
+  "a": 130.0,
+  "prelevements_obligatoires_md_eur": 1268.0,
+  "annee": 2024,
+  "page": 28,
+  "citation": "Nul ne peut aujourd’hui se hasarder à affirmer que ce montant est proche de 30 ou de 130 Md€"
+ },
+ "estimation_demandee": {
+  "impots": [
+   "impôt sur les sociétés",
+   "impôt sur le revenu"
+  ],
+  "annee": 2027,
+  "page": 32,
+  "note": "Aucune estimation de l’écart fiscal n’existe pour ces deux impôts : la Cour demande qu’elle soit faite."
+ },
+ "estimations_ecart_global": [
+  {
+   "id": "courson-leonard",
+   "auteur": "Rapport des députés de Courson et Léonard",
+   "publie_en": 1996,
+   "bas_md_eur": 17.4,
+   "haut_md_eur": 22.7,
+   "pct_pib": [
+    1.4,
+    1.8
+   ],
+   "pct_prelevements": [
+    3.6,
+    4.7
+   ],
+   "page": 29,
+   "avis_cour": "Données trop anciennes pour être extrapolées ; méthode à considérer avec précaution selon ses auteurs.",
+   "extrapolation_md_eur": 58.7,
+   "extrapolation_avis": "hypothèse simplificatrice et probablement infondée (Cour des comptes)"
+  },
+  {
+   "id": "cpo",
+   "auteur": "Conseil des prélèvements obligatoires",
+   "publie_en": 2007,
+   "bas_md_eur": 20.5,
+   "haut_md_eur": 25.6,
+   "pct_pib": [
+    1.1,
+    1.4
+   ],
+   "pct_prelevements": [
+    2.6,
+    3.2
+   ],
+   "page": 29,
+   "avis_cour": "Méthode expérimentale et fragile, selon le CPO lui-même."
+  },
+  {
+   "id": "solidaires",
+   "auteur": "Syndicat Solidaires Finances publiques",
+   "publie_en": 2018,
+   "bas_md_eur": 80.0,
+   "haut_md_eur": 100.0,
+   "pct_pib": [
+    3.5,
+    4.4
+   ],
+   "pct_prelevements": [
+    7.7,
+    9.6
+   ],
+   "page": 29,
+   "donnees_anterieures_a": 2013,
+   "avis_cour": "Méthode non détaillée ; associe fraude et évasion fiscale, ce qui « entretient une confusion entre agissements légaux et illégaux » ; c’est en réalité une estimation de l’écart fiscal."
+  }
+ ],
+ "estimations_tva": [
+  {
+   "id": "dgfip",
+   "auteur": "DGFiP (méthode « ascendante », à partir des contrôles)",
+   "publie": "septembre 2024",
+   "bas_md_eur": 6.0,
+   "haut_md_eur": 10.0,
+   "pct_tva_collectee": [
+    4.0,
+    5.0
+   ],
+   "page": 31,
+   "perimetre": "TVA des entreprises qui la déclarent, sans les entreprises défaillantes ni les activités non déclarées",
+   "avis_cour": "Seule estimation récente par une méthode rigoureuse, mais incomplète."
+  },
+  {
+   "id": "insee",
+   "auteur": "Insee (document de travail)",
+   "publie": "2022",
+   "bas_md_eur": 20.0,
+   "haut_md_eur": 25.0,
+   "page": 31,
+   "perimetre": "extrapolation des seuls contrôles sur place",
+   "avis_cour": "Surestimée : les contrôles sur place visent les cas les plus suspects."
+  },
+  {
+   "id": "commission-cour",
+   "auteur": "Commission européenne (cité par la Cour)",
+   "annees": [
+    2020,
+    2021
+   ],
+   "bas_md_eur": 10.0,
+   "haut_md_eur": 15.0,
+   "page": 31,
+   "perimetre": "méthode « descendante » : TVA théorique d’après la comptabilité nationale, moins la TVA perçue",
+   "avis_cour": "La DGFiP juge que cette méthode ne tient pas compte des spécificités françaises."
+  }
+ ],
+ "moyens": {
+  "statisticiens": 3,
+  "depuis": "septembre 2024",
+  "page_statisticiens": 32,
+  "baisse_effectifs_controle_pct": 19.0,
+  "periode": [
+   2015,
+   2024
+  ],
+  "page_effectifs": 36,
+  "annee_controles": 2024,
+  "controles_professionnels": 280000,
+  "controles_particuliers": 1120000,
+  "page_controles": 23
+ },
+ "fraude_detectee_sur_place": {
+  "annee": 2024,
+  "fraude_md_eur": 4.4,
+  "erreurs_md_eur": 5.0,
+  "page": 24,
+  "note": "Seulement les contrôles sur place : la fraude trouvée lors des contrôles sur pièces n’est pas comptée à part.",
+  "evolution_pct": -44.0,
+  "depuis": 2015
+ },
+ "penal": {
+  "dossiers_parquet": {
+   "2018": 935,
+   "2024": 2176
+  },
+  "page_parquet": 71,
+  "condamnes_par_an": [
+   650,
+   700
+  ],
+  "page_condamnes": 11,
+  "prison_ferme_pct": 17.0,
+  "amende_moyenne_eur": {
+   "2024": 33500.0
+  },
+  "suites": {
+   "annee": 2023,
+   "tribunal_pct": 25,
+   "classement_sans_suite_pct": 44.0,
+   "alternatives_pct": 27.0
+  }
+ },
+ "ecart_tva_commission": {
+  "annees": [
+   2013,
+   2014,
+   2015,
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "ecart_meur": [
+   16140.0,
+   17066.0,
+   15841.0,
+   14822.0,
+   16544.0,
+   14259.0,
+   12823.0,
+   13056.0,
+   8093.0,
+   10670.0,
+   12121.0,
+   16451.0
+  ],
+  "recettes_meur": [
+   144490.0,
+   148454.0,
+   151680.0,
+   154490.0,
+   162011.0,
+   168177.0,
+   174424.0,
+   162090.0,
+   185350.0,
+   199272.0,
+   206049.0,
+   206332.0
+  ],
+  "ecart_pct_tva_due": [
+   10.0,
+   10.3,
+   9.5,
+   8.8,
+   9.3,
+   7.8,
+   6.8,
+   7.5,
+   4.2,
+   5.1,
+   5.6,
+   7.4
+  ],
+  "provisoires": [
+   2024
+  ],
+  "estimations_completes_depuis": 2019,
+  "definition": "TVA due d’après la comptabilité nationale moins la TVA perçue : fraude, faillites, erreurs et optimisation mêlées."
+ }
+}
