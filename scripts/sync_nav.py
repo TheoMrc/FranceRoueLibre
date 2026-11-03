@@ -30,6 +30,7 @@ NAV = [
     ('Contrôle', [
         ('Signaux', 'signaux.html', 'Règles simples appliquées à toutes les données'),
         ('Probité', 'probite.html', 'Corruption, favoritisme : les affaires jugées'),
+        ('Demandes aux instances publiques', 'demandes.html', 'Les documents demandés aux administrations, et leurs réponses'),
         ('Données et angles morts', 'donnees.html', 'Les sources, et ce qui n’est pas publié'),
     ]),
 ]
@@ -46,6 +47,7 @@ RELATED = {
     'aides.html': [('niches.html', 'Les aides qui passent par l’impôt (crédits d’impôt)'), ('etat.html', 'Les programmes budgétaires qui versent ces aides'), ('signaux.html', 'Subventions à des structures fermées et autres signaux')],
     'marches.html': [('ugap.html', 'Les prix de la centrale d’achat public'), ('signaux.html', 'Offres uniques, avenants, montants sous les seuils'), ('probite.html', 'Favoritisme et corruption : les affaires jugées')],
     'ugap.html': [('marches.html', 'Tous les marchés publics, acheteur par acheteur'), ('signaux.html', 'Les signaux sur la concurrence dans les achats')],
+    'demandes.html': [('donnees.html', 'Les sources, et ce que les administrations ne publient pas'), ('signaux.html', 'Les anomalies repérées dans les données publiques')],
     'signaux.html': [('marches.html', 'Les marchés publics en détail'), ('probite.html', 'Les atteintes à la probité jugées'), ('aides.html', 'Les subventions en détail')],
     'probite.html': [('signaux.html', 'Les anomalies repérées dans les données publiques'), ('marches.html', 'Les marchés publics, où se joue le favoritisme')],
     'donnees.html': [('impots.html#a-publier', 'Ce que le gouvernement devrait publier sur les impôts'), ('signaux.html', 'Ce qu’on peut déjà tirer des données publiées')],

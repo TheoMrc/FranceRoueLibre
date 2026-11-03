@@ -25,6 +25,10 @@ l’État, élus, signaux, mentions dans les dépenses). En cas d’homonymes, p
 - rechercher_depenses pour un sujet ou un bénéficiaire ; requete_sql pour un calcul précis sur les mêmes lignes ; \
 comptes_collectivite pour une intercommunalité, un département ou une région ; lire_donnees pour les autres jeux \
 (fichiers ci-dessous) : lis d’abord la structure du fichier (sans chemin), puis le chemin voulu.
+- Donnée introuvable : quand les outils du site et une recherche web n’ont pas trouvé un document qui devrait \
+exister chez un organisme public (budget détaillé, coût d’un service, convention, délibération, liste de \
+subventions), dis-le, puis appelle preparer_demande pour que le lecteur puisse le demander à cet organisme. Pas de \
+demande pour une question d’opinion, une explication ou une donnée personnelle, ni quand la réponse est trouvée.
 - Les accords-cadres sont des plafonds, pas des dépenses : ne les additionne jamais aux dépenses. Un mot trouvé \
 dans un libellé ne veut pas dire que tout le montant y est consacré : dis-le quand c’est le cas.
 - Ne donne que des liens vers les pages du site (liste ci-dessous) ou renvoyés par recherche_web : n’invente jamais \
@@ -73,7 +77,7 @@ PAGES = [
     ('Aides et subventions', 'aides.html'), ('Marchés publics', 'marches.html'), ('UGAP', 'ugap.html'),
     ('Recherche dans les dépenses (recherche.html?q=mot)', 'recherche.html'), ('Signaux', 'signaux.html'),
     ('Probité', 'probite.html'), ('Élus et emplois des communes', 'emplois.html'),
-    ('Données et angles morts', 'donnees.html'),
+    ('Données et angles morts', 'donnees.html'), ('Demandes aux instances publiques (documents demandés aux administrations)', 'demandes.html'),
 ]
 
 TOOL_LABELS = {
@@ -83,6 +87,7 @@ TOOL_LABELS = {
     'dossier_commune': 'Dossier de la commune « {nom} »',
     'lire_donnees': 'Lecture de {fichier}',
     'recherche_web': 'Recherche sur le web : « {question} »',
+    'preparer_demande': 'Préparation d’une demande à « {organisme} »',
 }
 
 
@@ -96,7 +101,8 @@ def system_prompt() -> str:
 def tool_label(name: str, args: dict) -> str:
     vals = {k: str(v)[:70] for k, v in (args or {}).items()}
     try:
-        return TOOL_LABELS.get(name, name).format_map({'requete': '', 'nom': '', 'fichier': '', 'question': '', **vals})
+        return TOOL_LABELS.get(name, name).format_map({'requete': '', 'nom': '', 'fichier': '', 'question': '',
+                                                       'organisme': '', **vals})
     except (KeyError, ValueError):
         return name
 
@@ -121,6 +127,9 @@ def tool_summary(name: str, result: dict) -> tuple:
         return True, f'{c.get("nom", "")} ({c.get("code", "")}), {p.get("nombre", 0)} projet(s) aidé(s)'
     if name == 'recherche_web':
         return True, f'{len(result.get("sources", []))} source(s)'
+    if name == 'preparer_demande':
+        d = result.get('demande') or {}
+        return True, d.get('email') or ('formulaire de contact' if d.get('formulaire') else 'sans adresse publiée')
     return True, ''
 
 
@@ -161,6 +170,8 @@ def _run(chosen: str, contents: List[dict], on_event: Callable[[dict], None], ca
     """The tool loop with one provider."""
     client = CLIENTS[chosen]()
     box = Toolbox(client)
+    box.question = next((p.get('text', '') for c in reversed(contents) if c['role'] == 'user'
+                         for p in c['parts'] if p.get('text')), '')[:500]
     on_event({'type': 'model', 'provider': chosen, 'label': client.label, 'model': client.model})
     system = system_prompt()
     reply, started = '', time.time()
@@ -204,7 +215,7 @@ def _run(chosen: str, contents: List[dict], on_event: Callable[[dict], None], ca
                 'sources': box.sources, 'searches': box.queries}
     return {'reply': reply or 'Je n’ai pas trouvé de réponse fiable ; essayez de reformuler la question.',
             'provider': chosen, 'label': client.label, 'model': client.model, 'sources': box.sources,
-            'searches': box.queries,
+            'searches': box.queries, 'demande': box.demande,
             'calls': client.calls, 'cost_eur': round(client.eur, 4), 's': round(time.time() - started, 1)}
 
 

@@ -209,6 +209,21 @@
 .ai-foot { display: flex; align-items: center; gap: .5rem; margin-top: .55rem; font-size: .72rem; color: var(--c-muted); }
 .ai-foot:empty { display: none; }
 .ai-foot .ai-prov { padding: .1rem .45rem; border-radius: 999px; background: var(--c-bg); border: 1px solid var(--c-line); }
+.ai-req { margin-top: .75rem; padding: .7rem .8rem; border: 1px solid var(--c-line); border-left: 3px solid var(--c-teal-500); border-radius: 10px; background: var(--c-bg); font-size: .84rem; animation: ai-in .35s var(--ai-ease) both; min-width: 0; }
+.ai-req__head { display: flex; flex-wrap: wrap; gap: .2rem .5rem; align-items: baseline; }
+.ai-req__head span { color: var(--c-muted); min-width: 0; overflow-wrap: anywhere; }
+.ai-req__to { font-family: var(--font-mono, ui-monospace, monospace); font-size: .78rem; }
+.ai-req details { margin: .45rem 0; }
+.ai-req summary { cursor: pointer; color: var(--c-teal-600); font-weight: 600; }
+.ai-req__text { margin: .4rem 0 0; padding: .6rem; max-height: 16rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: .8rem; line-height: 1.45; border-radius: 8px; background: var(--c-surface, var(--c-card, transparent)); border: 1px solid var(--c-line); }
+.ai-req__actions { display: flex; flex-wrap: wrap; gap: .4rem; }
+.ai-req__actions button, .ai-req__btn { padding: .38rem .7rem; border-radius: 8px; border: 1px solid var(--c-line); background: none; color: inherit; font: inherit; font-size: .8rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: border-color .2s, transform .2s; }
+.ai-req__actions button:hover, .ai-req__btn:hover { border-color: var(--c-teal-500); transform: translateY(-1px); }
+.ai-req__actions .ai-req__send { background: var(--c-teal-600); border-color: var(--c-teal-600); color: #fff; }
+.ai-req__actions button:disabled { opacity: .6; cursor: progress; }
+.ai-req__msg:empty { display: none; }
+.ai-req__msg, .ai-req__done { margin: .45rem 0 0; font-weight: 600; color: var(--c-teal-600); }
+.ai-req__note { margin: .45rem 0 0; color: var(--c-muted); font-size: .76rem; }
 .ai-vote { display: inline-flex; align-items: center; gap: .15rem; margin-left: auto; }
 .ai-vote > span { margin-right: .2rem; }
 .ai-vote button { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--c-muted); cursor: pointer; transition: color .2s, background .2s, transform .2s; }

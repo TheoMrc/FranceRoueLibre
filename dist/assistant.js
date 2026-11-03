@@ -259,7 +259,10 @@
         const parts = [];
         if (m.sources?.length) parts.push(`<div class="ai-chips"><span>Sources web</span>${m.sources.map((s, i) => `<a style="--i:${i}" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>`).join('')}</div>`);
         if (m.searches?.length) parts.push(`<div class="ai-chips ai-chips--search"><span>Recherches Google</span>${m.searches.map((s, i) => `<a style="--i:${i + 2}" href="https://www.google.com/search?q=${encodeURIComponent(s)}" target="_blank" rel="noopener noreferrer">${esc(s)}</a>`).join('')}</div>`);
+        if (m.demande) parts.push(demandeHtml(m));
         q('.ai-extra').innerHTML = parts.join('');
+        const req = q('.ai-req');
+        if (req) req.addEventListener('click', e => demandeClick(m, e, req));
         q('.ai-foot').innerHTML = m.provider ? `${provBadge(m.provider, m.label || label(m.provider))}${m.s ? `<span>${Math.round(m.s)} s</span>` : ''}${voteHtml(m)}` : '';
         const vote = q('.ai-vote');
         if (vote) vote.addEventListener('click', e => { const b = e.target.closest('button[data-vote]'); if (b) sendVote(m, +b.dataset.vote, vote); });
@@ -283,6 +286,43 @@
     el.classList.add('is-done');
     el.innerHTML = vote > 0 ? 'Merci !' : 'Merci, la réponse sera relue.';
     fetch(API + 'feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ job: m.job, vote }) }).catch(() => {});
+  }
+  /* Request for administrative documents drafted by the Loupe (server/assistant/demandes.py): the reader has it sent by
+     the site (within the hour of the answer) or copies it and sends it from his own mailbox. */
+  function demandeHtml(m) {
+    const d = m.demande;
+    const fresh = Date.now() - (m.at || 0) < 55 * 60 * 1000;
+    const to = d.email ? ` <span class="ai-req__to">${esc(d.email)}</span>` : d.formulaire ? ' <span class="ai-req__to">formulaire de contact</span>' : '';
+    const sent = d.envoyee ? `<p class="ai-req__done">Demande ${esc(d.envoyee)} enregistrée. Elle est suivie sur <a href="demandes.html">Demandes aux instances publiques</a>.</p>` : '';
+    const siteBtn = d.envoi_par_le_site && !d.envoyee && fresh ? '<button type="button" class="ai-req__send" data-req="send">Faire envoyer par FranceRoueLibre</button>' : '';
+    const own = d.email ? `<a class="ai-req__btn" href="mailto:${esc(d.email)}?subject=${encodeURIComponent(d.objet)}&body=${encodeURIComponent(d.texte)}">Ouvrir dans ma messagerie</a>`
+      : d.formulaire ? `<a class="ai-req__btn" href="${esc(d.formulaire)}" target="_blank" rel="noopener noreferrer">Ouvrir le formulaire</a>` : '';
+    return `<div class="ai-req"><div class="ai-req__head"><strong>Demande de documents prête</strong><span>à ${esc(d.destinataire)}${to}</span></div>`
+      + `<details><summary>Lire la lettre</summary><pre class="ai-req__text">${esc(d.objet)}\n\n${esc(d.texte)}</pre></details>`
+      + `<div class="ai-req__actions">${siteBtn}<button type="button" class="ai-req__btn" data-req="copy">Copier la lettre</button>${own}</div>`
+      + `<p class="ai-req__msg" role="status"></p>${sent}`
+      + `<p class="ai-req__note">L’organisme a un mois pour répondre (code des relations entre le public et l’administration). Envoyée par le site, la demande est relue puis publiée avec la réponse, sans nom d’agent.${d.fiche ? ` <a href="${esc(d.fiche)}" target="_blank" rel="noopener noreferrer">Fiche officielle de l’organisme</a>` : ''}</p></div>`;
+  }
+  async function demandeClick(m, e, box) {
+    const b = e.target.closest('button[data-req]');
+    if (!b) return;
+    const msg = box.querySelector('.ai-req__msg');
+    const d = m.demande;
+    if (b.dataset.req === 'copy') {
+      const text = `${d.objet}\n\n${d.texte}`;
+      try { await navigator.clipboard.writeText(text); msg.textContent = 'Lettre copiée : remplacez « [Votre nom] » avant de l’envoyer.'; }
+      catch (err) { const pre = box.querySelector('.ai-req__text'); box.querySelector('details').open = true; getSelection().selectAllChildren(pre); msg.textContent = 'Lettre sélectionnée : copiez-la (Ctrl+C).'; }
+      return;
+    }
+    b.disabled = true; msg.textContent = 'Envoi…';
+    try {
+      const r = await fetch(API + 'demande', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ job: m.job, id: d.id }) });
+      const res = await r.json();
+      if (!r.ok || !res.ok) { msg.textContent = res.error || 'Envoi impossible.'; b.disabled = false; return; }
+      d.envoyee = res.ref; saveStore();
+      msg.textContent = res.message;
+      b.remove();
+    } catch (err) { msg.textContent = 'Envoi impossible : réessayez.'; b.disabled = false; }
   }
   function staticBot(m) {
     const v = botView(m);
@@ -379,7 +419,7 @@
         if (j.done) {
           const res = j.result || {};
           if (res.credits === false) { m.donate = res.donate; noCredits(res); }
-          Object.assign(m, { text: res.reply || '', error: res.error || '', sources: res.sources || [], searches: res.searches || [],
+          Object.assign(m, { text: res.reply || '', error: res.error || '', sources: res.sources || [], searches: res.searches || [], demande: res.demande || null,
             label: res.label || m.label, provider: res.provider || m.provider, s: res.s });
           break;
         }

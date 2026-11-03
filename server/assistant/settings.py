@@ -114,3 +114,21 @@ SEARCH_API = _str('ASSISTANT_SEARCH_API', 'http://127.0.0.1:8017')
 # Spending ledger and counters. systemd sets STATE_DIRECTORY on the VPS.
 STATE_DIR = Path(_str('ASSISTANT_STATE_DIR', os.environ.get('STATE_DIRECTORY', '') or str(ROOT / '.assistant')))
 SITE_URL = _str('ASSISTANT_SITE_URL', 'https://francerouelibre.fr')
+
+# ---------------------------------------------------------------- requests to public bodies (assistant/demandes.py)
+# Mailbox of the site (stonks@francerouelibre.fr): SMTP to send the requests, IMAP to read the replies. Without
+# MAIL_SMTP_HOST, MAIL_USER and MAIL_PASSWORD the reader can only copy the letter and send it himself.
+MAIL_SMTP_HOST = _str('MAIL_SMTP_HOST')
+MAIL_SMTP_PORT = _int('MAIL_SMTP_PORT', 465)          # 465 = TLS from the start, 587 = STARTTLS
+MAIL_IMAP_HOST = _str('MAIL_IMAP_HOST')
+MAIL_IMAP_PORT = _int('MAIL_IMAP_PORT', 993)
+MAIL_USER = _str('MAIL_USER')
+MAIL_PASSWORD = _str('MAIL_PASSWORD')
+MAIL_FROM = _str('MAIL_FROM', 'stonks@francerouelibre.fr')
+MAIL_FROM_NAME = _str('MAIL_FROM_NAME', 'FranceRoueLibre')
+MAIL_NOTIFY = _str('MAIL_NOTIFY', MAIL_FROM)          # validations and replies are announced here
+MAIL_CONFIGURED = bool(MAIL_SMTP_HOST and MAIL_USER and MAIL_PASSWORD)
+MAIL_AUTO_SEND = _str('MAIL_AUTO_SEND', '0') == '1'   # 0: every request waits for the site's validation
+MAIL_DAILY = _int('MAIL_DAILY', 5)                    # requests sent per day, in all
+MAIL_PER_BODY_MONTH = _int('MAIL_PER_BODY_MONTH', 2)  # requests to one body per 30 days
+MAIL_ADMIN_TOKEN = _str('MAIL_ADMIN_TOKEN')           # for assistant_api.py --demandes (localhost only)

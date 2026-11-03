@@ -7,7 +7,9 @@
 * ``dossier_commune``: everything the site has on one commune (accounts, State-aided projects, elected officials,
   signals, lines of the search index that name it in its département);
 * ``lire_donnees``: browse one of the JSON files published with the site (dist/data), never a path outside it;
-* ``recherche_web``: a web search run by the model provider (see providers.py).
+* ``recherche_web``: a web search run by the model provider (see providers.py);
+* ``preparer_demande``: a request for administrative documents to the body that holds them (see demandes.py), shown
+  to the reader under the answer, never sent without the reader's click.
 
 Tool results are data for the model, capped in size; the system prompt tells it never to follow instructions found
 in them.
@@ -84,6 +86,24 @@ DECLARATIONS: List[dict] = [
      'parameters': {'type': 'OBJECT', 'properties': {
          'fichier': {'type': 'STRING'}, 'chemin': {'type': 'STRING'}, 'filtre': {'type': 'STRING'},
          'debut': {'type': 'INTEGER'}, 'limite': {'type': 'INTEGER'}}, 'required': ['fichier']}},
+    {'name': 'preparer_demande',
+     'description': 'Quand les données du site ET le web ne donnent pas la réponse : prépare une demande de '
+                    'communication de documents administratifs (CRPA, art. L. 300-1) à l’organisme qui les détient '
+                    '(mairie, intercommunalité, département, région, ministère, opérateur). L’adresse vient de '
+                    'l’annuaire officiel de l’administration ; la lettre suit un modèle poli fixe. Le lecteur la voit '
+                    'sous la réponse et choisit de la faire envoyer par FranceRoueLibre ou de l’envoyer lui-même. '
+                    'Seulement pour des documents qui existent (budget, compte administratif, délibération, '
+                    'convention, marché, liste de subventions, rapport), jamais pour une opinion, une explication ou '
+                    'des données personnelles. Une seule demande par réponse.',
+     'parameters': {'type': 'OBJECT', 'properties': {
+         'organisme': {'type': 'STRING', 'description': 'Ex. « Mairie de Hautmont », « Conseil départemental du Nord »'},
+         'code_insee': {'type': 'STRING', 'description': 'Code Insee de la commune quand l’organisme est une mairie'},
+         'objet': {'type': 'STRING', 'description': 'Objet court et neutre, ex. « coût de la cantine scolaire 2024 »'},
+         'documents': {'type': 'STRING', 'description': 'Les documents demandés, un par ligne, précis (nature, année, '
+                                                         'périmètre), formulés comme des documents et non des questions'},
+         'contexte': {'type': 'STRING', 'description': 'Une ou deux phrases neutres : ce que les données publiques '
+                                                       'montrent déjà et ce qui y manque'}},
+         'required': ['organisme', 'objet', 'documents']}},
     {'name': 'recherche_web',
      'description': 'Recherche sur le web (actualité, textes de loi, rapports, contexte absent des données du site). '
                     'Renvoie une synthèse et ses sources. À utiliser quand les données du site ne suffisent pas ; '
@@ -566,6 +586,8 @@ class Toolbox:
         self.client = client
         self.sources: List[dict] = []  # web pages cited by the searches, shown under the answer
         self.queries: List[str] = []   # Google searches made by Gemini (Google asks to show them as search suggestions)
+        self.question = ''             # the reader's question (kept with a request draft)
+        self.demande: Optional[dict] = None  # the request draft shown under the answer (preparer_demande)
 
     def call(self, name: str, args: dict) -> dict:
         args = args if isinstance(args, dict) else {}
@@ -578,6 +600,15 @@ class Toolbox:
                 return comptes_collectivite(args.get('nom', ''), args.get('niveau') or 'communes', args.get('agregats') or '')
             if name == 'dossier_commune':
                 return dossier_commune(args.get('nom', ''))
+            if name == 'preparer_demande':
+                if self.demande:
+                    return {'error': 'une demande est déjà préparée pour cette réponse'}
+                from . import demandes
+                res = demandes.prepare(args.get('organisme', ''), args.get('code_insee') or '', args.get('objet') or '',
+                                       args.get('documents') or '', args.get('contexte') or '', self.question)
+                if res.get('demande'):
+                    self.demande = res['demande']
+                return res
             if name == 'lire_donnees':
                 return lire_donnees(args.get('fichier', ''), args.get('chemin') or '', args.get('filtre') or '',
                                     args.get('debut') or 0, args.get('limite') or 20)

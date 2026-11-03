@@ -410,3 +410,70 @@ class SearchJournalTest(unittest.TestCase):
         (d / f'{today - dt.timedelta(days=search_api.JOURNAL_DAYS + 1)}.jsonl.gz').write_bytes(gzip.compress(b'{}\n'))
         search_api.sweep_journal(d, today)
         self.assertEqual(sorted(p.name for p in d.iterdir()), [f'{today - dt.timedelta(days=1)}.jsonl.gz', f'{today}.jsonl'])
+
+
+class RequestsTest(unittest.TestCase):
+    """Requests to public bodies (assistant/demandes.py): official address, fixed polite letter, validation, publication."""
+
+    def setUp(self):
+        from assistant import demandes as D
+        self.D = D
+        self.dir = tempfile.TemporaryDirectory()
+        self.old = (S.STATE_DIR, S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND, D.annuaire, D.notify, D.send)
+        S.STATE_DIR = Path(self.dir.name)
+        self.sent = []
+        D.annuaire = lambda code_insee='', nom='': [{'nom': 'Mairie - Hautmont', 'email': 'mairie@mairie-hautmont.fr',
+                                                    'formulaire': None, 'site': None, 'fiche': 'https://lannuaire.service-public.gouv.fr/x', 'siret': None}]
+        D.notify = lambda subject, body: self.sent.append(subject)
+
+    def tearDown(self):
+        S.STATE_DIR, S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND, self.D.annuaire, self.D.notify, self.D.send = self.old
+        self.dir.cleanup()
+
+    def draft(self, **kw):
+        args = dict(organisme='Mairie de Hautmont', code_insee='59291', objet='coût de la cantine scolaire 2024',
+                    documents='Le compte administratif 2024\nLe contrat de restauration scolaire en vigueur',
+                    contexte='Les comptes publiés ne détaillent pas la restauration scolaire.')
+        args.update(kw)
+        return self.D.prepare(**args)
+
+    def test_letter_is_polite_and_addressed_officially(self):
+        r = self.draft()
+        d = r['demande']
+        self.assertEqual(d['email'], 'mairie@mairie-hautmont.fr')
+        self.assertIn('L. 300-1', d['texte'])
+        self.assertIn('[Votre nom]', d['texte'], 'the reader signs the copy he sends himself')
+        self.assertNotIn('—', d['texte'])
+
+    def test_rude_or_shouting_fields_are_refused(self):
+        self.assertIn('error', self.draft(contexte='Ces voleurs gaspillent notre argent'))
+        self.assertIn('error', self.draft(objet='RÉPONDEZ ENFIN À NOS QUESTIONS'))
+        cleaned = self.D.clean('Voir https://x.fr ou écrire à a@b.fr, 06 12 34 56 78 !!!', 200)
+        self.assertNotIn('http', cleaned); self.assertNotIn('@', cleaned); self.assertNotIn('06 12', cleaned)
+
+    def test_send_waits_for_validation_then_is_published(self):
+        S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND = True, False
+        draft = self.draft()['demande']
+        r = self.D.request_send(draft['id'], 'lecteur')
+        self.assertEqual(r['status'], 'a_valider')
+        self.assertEqual(self.D.published(), [], 'nothing public before it is sent')
+        d = self.D.load(r['ref'])
+        self.assertIn(r['ref'], d['subject'])
+        self.assertIn('demandes.html', d['body'], 'the site-signed letter says it will be published')
+        self.assertIn('error', self.D.request_send(self.draft()['demande']['id'], 'lecteur'), 'same request twice')
+        d.update(status='envoyee', sent='2026-11-03T10:00:00')
+        d['replies'] = [{'date': '2026-11-10T09:00:00', 'text': 'Bonjour, voici le document.\nCordialement,\nJean Dupont\n03 27 00 00 00',
+                         'files': ['ca2024.pdf'], 'public_text': None}]
+        self.D.save(d)
+        self.assertEqual(self.D.published()[0]['reponses'], [], 'a reply is published only once validated')
+        self.D.admin('publier', r['ref'])
+        text = self.D.published()[0]['reponses'][0]['texte']
+        self.assertIn('voici le document', text)
+        self.assertNotIn('Dupont', text)
+        self.assertEqual(self.D.published()[0]['echeance'], '2026-12-03')
+
+    def test_without_mailbox_the_reader_copies(self):
+        S.MAIL_CONFIGURED = False
+        draft = self.draft()['demande']
+        self.assertFalse(draft['envoi_par_le_site'])
+        self.assertIn('error', self.D.request_send(draft['id'], 'lecteur'))

@@ -4,6 +4,11 @@ POST /api/assistant/ask          {"messages": [{"role": "user"|"assistant", "tex
                                   -> {"job": id}   the question is answered in the background
 GET  /api/assistant/job/<id>?after=N  -> {"events": [...], "next": N, "done": bool, "result": {...}}
 POST /api/assistant/job/<id>/cancel
+POST /api/assistant/demande      {"job": id, "id": draft}  the reader asks the site to send the request drafted under
+                                  that answer (assistant/demandes.py): sent, or waiting for the site's validation
+GET  /api/assistant/demandes     -> the published requests and their replies (page demandes.html)
+POST /api/assistant/admin        {"action": "liste"|"voir"|"valider"|"refuser"|"publier"|"cloturer", "ref", "texte"}
+                                  127.0.0.1 only, never through nginx, with MAIL_ADMIN_TOKEN (--demandes below)
 GET  /api/assistant/status       -> which models can answer now (no amount of money is published), whether the site
                                     still has credits (else a message and the donation link), length of the queue
 
@@ -17,6 +22,7 @@ day, questions per day for everyone, questions answered at once, size of a reque
 
     python server/assistant_api.py [--port 8018]      serve (127.0.0.1 only)
     python server/assistant_api.py --usage            spending so far, by provider and by day
+    python server/assistant_api.py --demandes liste|voir|valider|refuser|publier|cloturer [FRL-…] [--texte FICHIER]
     python server/assistant_api.py --fake             fake models (assistant/fake.py): test the panel, no token spent
 """
 from __future__ import annotations
@@ -34,6 +40,7 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from assistant import demandes  # noqa: E402
 from assistant import faq  # noqa: E402
 from assistant import journal  # noqa: E402
 from assistant import settings as S  # noqa: E402
@@ -223,6 +230,9 @@ class Handler(BaseHTTPRequestHandler):
         url = urlparse(self.path)
         if url.path == '/api/assistant/status':
             return self.send(200, status())
+        if url.path == '/api/assistant/demandes':
+            return self.send(200, {'demandes': demandes.published(), 'delai_jours': demandes.DELAY_DAYS,
+                                   'envoi': S.MAIL_CONFIGURED})
         if url.path.startswith('/api/assistant/job/'):
             jid = url.path.rsplit('/', 1)[-1]
             job = JOBS.get(jid)
@@ -266,6 +276,28 @@ class Handler(BaseHTTPRequestHandler):
                 job['voted'] = vote
                 journal.write(S.STATE_DIR, journal.vote_entry(job['id'], journal.reader(job['ip']), vote, body.get('note')))
             return self.send(200, {'ok': True})
+        if url.path in ('/api/assistant/demande', '/api/assistant/admin'):
+            try:
+                size = int(self.headers.get('Content-Length') or 0)
+                body = json.loads(self.rfile.read(size)) if 0 < size <= 20000 else {}
+            except (ValueError, AttributeError):
+                body = {}
+            if url.path == '/api/assistant/admin':  # local only: nginx always adds X-Real-IP
+                local = self.client_address[0] in ('127.0.0.1', '::1') and not self.headers.get('X-Real-IP')
+                if not (local and S.MAIL_ADMIN_TOKEN and secrets.compare_digest(
+                        str(self.headers.get('X-Admin-Token') or ''), S.MAIL_ADMIN_TOKEN)):
+                    return self.send(403, {'error': 'refusé'})
+                return self.send(200, demandes.admin(str(body.get('action') or ''), str(body.get('ref') or ''),
+                                                     str(body.get('texte') or '')))
+            job = JOBS.get(str(body.get('job') or ''))
+            draft = ((job or {}).get('result') or {}).get('demande') or {}
+            if not job or job['ip'] != self.client_ip() or not draft or draft.get('id') != body.get('id'):
+                return self.send(400, {'error': 'demande introuvable : reposez la question si la page est restée ouverte '
+                                                'plus d’une heure'})
+            res = demandes.request_send(draft['id'], journal.reader(job['ip']))
+            if res.get('ok'):
+                draft['envoyee'] = res['ref']
+            return self.send(200 if res.get('ok') else 400, res)
         if url.path != '/api/assistant/ask':
             return self.send(404, {'error': 'not found'})
         try:
@@ -321,14 +353,34 @@ def print_usage() -> None:
         print(f'  {day} {p:7s} {n:5d} appels {eur:8.3f} €')
 
 
+def admin_cli(args) -> None:
+    """The site's validation of requests, through the running service (which owns its state folder)."""
+    import urllib.request
+    action, ref = (args.demandes + [''])[:2]
+    text = Path(args.texte).read_text(encoding='utf-8') if args.texte else ''
+    req = urllib.request.Request(f'http://127.0.0.1:{args.port}/api/assistant/admin', method='POST',
+                                 data=json.dumps({'action': action, 'ref': ref, 'texte': text}).encode(),
+                                 headers={'Content-Type': 'application/json', 'X-Admin-Token': S.MAIL_ADMIN_TOKEN})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            print(json.dumps(json.loads(r.read()), ensure_ascii=False, indent=1))
+    except OSError as exc:
+        print(f'service injoignable ou refus : {exc} (MAIL_ADMIN_TOKEN renseigné ?)')
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=8018)
     parser.add_argument('--usage', action='store_true')
+    parser.add_argument('--demandes', nargs='+', metavar='ACTION', help='liste | voir REF | valider REF | refuser REF | '
+                                                                       'publier REF [--texte F] | cloturer REF')
+    parser.add_argument('--texte', help='texte publié de la réponse (sinon la réponse anonymisée automatiquement)')
     parser.add_argument('--fake', action='store_true', help='fake models, no network call, no token (tests)')
     args = parser.parse_args()
     if args.usage:
         return print_usage()
+    if args.demandes:
+        return admin_cli(args)
     if args.fake:
         from assistant import fake
         fake.install()
@@ -339,6 +391,8 @@ def main():
     print('assistant: ' + ', '.join(f'{p["label"]} {"prêt" if p["available"] else p["reason"]}' for p in st['providers']),
           flush=True)
     start_workers()
+    if S.MAIL_CONFIGURED and S.MAIL_IMAP_HOST:  # replies to the requests, every 15 minutes
+        threading.Thread(target=demandes.poller, args=(threading.Event(),), daemon=True).start()
     ThreadingHTTPServer.daemon_threads = True
     ThreadingHTTPServer(('127.0.0.1', args.port), Handler).serve_forever()
 

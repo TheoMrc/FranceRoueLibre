@@ -93,7 +93,8 @@ def answer_entry(jid: str, who: str, messages: list, events: list, result: dict,
             'reply': str(result.get('reply') or '')[:MAX_TEXT], 'error': result.get('error'),
             'provider': result.get('provider'), 'model': result.get('model'), 'saved': result.get('saved'),
             'cost_eur': result.get('cost_eur', 0), 'calls': result.get('calls'), 's': round(seconds, 1),
-            'sources': [s.get('url') for s in result.get('sources') or []][:10]}
+            'sources': [s.get('url') for s in result.get('sources') or []][:10],
+            'demande': (result.get('demande') or {}).get('destinataire')}
 
 
 def vote_entry(jid: str, who: str, vote: int, note: str = '') -> dict:

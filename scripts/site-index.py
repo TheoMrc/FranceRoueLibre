@@ -39,6 +39,7 @@ SYNONYMS = {
     'marches.html': 'marchés publics appels d’offres contrats acheteurs fournisseurs commande publique',
     'ugap.html': 'UGAP centrale d’achat prix catalogue',
     'signaux.html': 'anomalies signaux alertes contrôles',
+    'demandes.html': 'demandes documents administratifs cada courrier mairie réponse',
     'probite.html': 'corruption favoritisme prise illégale d’intérêts condamnations probité',
     'donnees.html': 'sources données ouvertes open data angles morts méthode',
 }
