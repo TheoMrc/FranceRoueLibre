@@ -1184,7 +1184,9 @@ function renderMap() {
   });
   const communesVisible = ['communes', 'projects', 'gfp'].includes(state.mode);
   // Behind commune colours, departments stay neutral so the communes read clearly.
-  map.setPaintProperty('dept-fill', 'fill-color', communesVisible ? MAP_THEME[currentTheme()].empty : fillColorFromState(MAP_THEME[currentTheme()].empty));
+  // always a data expression (never a constant colour): MapLibre fails on feature states of a layer whose colour
+  // switched from an expression to a constant (« this.expression.evaluate is not a function »)
+  map.setPaintProperty('dept-fill', 'fill-color', communesVisible ? ['to-color', ['coalesce', ['feature-state', 'none'], MAP_THEME[currentTheme()].empty]] : fillColorFromState(MAP_THEME[currentTheme()].empty));
   map.setLayoutProperty('region-line', 'visibility', state.mode === 'regions' ? 'visible' : 'none');
   map.setPaintProperty('dept-line', 'line-opacity', state.mode === 'regions' ? .18 : state.mode === 'communes' ? .55 : 1);
   ['commune-fill', 'commune-line', 'commune-detail-fill', 'commune-detail-line', 'commune-hover', 'commune-detail-hover'].forEach(id => map.setLayoutProperty(id, 'visibility', communesVisible ? 'visible' : 'none'));
@@ -1600,14 +1602,17 @@ function freezeMap(duration = 320) {
     canvas.parentNode.appendChild(snap);
   } catch (error) { snap?.remove(); return () => {}; }
   return () => {
-    map.redraw();
+    // the snapshot always goes, even if the map fails to draw this frame
+    setTimeout(() => snap.remove(), duration + 600);
+    try { map.triggerRepaint(); } catch (error) { /* the map draws on its own next frame */ }
     requestAnimationFrame(() => requestAnimationFrame(() => { snap.style.opacity = '0'; }));
-    setTimeout(() => snap.remove(), duration + 120);
   };
 }
 
 async function switchMode(to) {
+  document.querySelectorAll('.map-theme-snapshot.is-switch').forEach(node => node.remove());   // a previous switch still fading
   const fade = freezeMap();
+  try {
   const anchor = state.selectedCommune || state.anchorCommune;
   const meta = anchor ? data.communeMetadata.get(anchor) : null;
   const department = meta ? normalizeDepartment(meta.department) : state.selectedDepartment;
@@ -1625,7 +1630,7 @@ async function switchMode(to) {
   });
   if (to === 'gfp' && anchor) { state.selectedGfp = gfpOfCommune(anchor); render(); }
   syncUrl();
-  fade();
+  } finally { fade(); }   // the snapshot never stays over the map, whatever happens
 }
 
 function setupListeners() {

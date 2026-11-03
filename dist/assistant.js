@@ -297,7 +297,7 @@
   const siteUrl = path => new URL(path, document.querySelector('script[src*="assistant.js"]')?.src || location.href).href;
   if (!window.FRLPlaces && !document.querySelector('script[src*="places.js"]')) document.head.appendChild(Object.assign(document.createElement('script'), { src: siteUrl('places.js'), defer: true }));
   function liensHtml(l) {
-    if (window.FRLPlaces) return `<div class="ai-links"><p>${esc(l.commune)} sur le site</p>${FRLPlaces.chips(l.liens)}</div>`;
+    if (window.FRLPlaces) return `<div class="ai-links"><p>${esc(l.commune)} sur le site</p>${FRLPlaces.chips(l.liens, { rows: 2 })}</div>`;
     return `<div class="ai-links"><p>${esc(l.commune)} sur le site</p><div class="frl-chips">${l.liens.map(x => `<a class="frl-chip frl-chip--${esc(x.cle)}" href="${esc(siteUrl(x.url))}"><span>${esc(x.libelle)}</span></a>`).join('')}</div></div>`;
   }
   const REQ_ICON = {
