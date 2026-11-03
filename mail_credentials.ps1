@@ -18,7 +18,7 @@ try {
   [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr); $plain = $null
 }
 Write-Host "`n=== Redéploiement (le service reçoit le mot de passe déchiffré par systemd)"
-Get-Content -Raw deploy\vps.sh | ssh -o BatchMode=yes biodevs-vps "bash -s"
+cmd /c 'ssh -o BatchMode=yes biodevs-vps "bash -s" < deploy\vps.sh'   # as deploy_vps.bat: PowerShell would add a CR to the last line
 if ($LASTEXITCODE -ne 0) { throw 'Le redéploiement a échoué.' }
 Write-Host "`n=== Test d'envoi et de lecture depuis le service"
 ssh -o BatchMode=yes biodevs-vps "frl-demandes test"
