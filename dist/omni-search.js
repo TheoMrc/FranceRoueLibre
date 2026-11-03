@@ -52,6 +52,8 @@
   const ICON_PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
   const ICON_BUILD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>';
 
+  /* « de Lyon », « d’Audenge », « du Havre », « des Mureaux » */
+  const ofName = n => /^Le /.test(n) ? `du ${n.slice(3)}` : /^Les /.test(n) ? `des ${n.slice(4)}` : /^[aeiouyhâàéèêëîïôöûüAEIOUYHÂÀÉÈÊËÎÏÔÖÛÜ]/.test(n) ? `d’${n}` : `de ${n}`;
   const isQuestion = q => QUESTION.test(q) && norm(q).split(' ').length >= 3;
   /* pages and sections that match the words typed; the last word may be unfinished */
   function matchSite(entries, q) {
@@ -121,7 +123,7 @@
       const spend = [{ kind: 'lines', q }, ...words.map(w => ({ kind: 'lines', q: w.text, count: w.count, amount: w.amount }))];
       /* a commune or a département typed: the Loupe is offered the question a reader means by it */
       const placeQ = !where || !lib?.sure(where) ? '' : where.communes.length === 1 || (where.communes.length && where.type !== 'departement')
-        ? `Quelles sont les informations disponibles sur les dépenses de ${where.communes[0].nom} (${where.communes[0].dep_nom}) ?`
+        ? `Quelles sont les informations disponibles sur les dépenses ${ofName(where.communes[0].nom)} (${where.communes[0].dep_nom}) ?`
         : where.departement ? `Quelles sont les informations disponibles sur les dépenses du département ${where.departement.nom} (${where.departement.code}) ?` : '';
       const loupe = [{ kind: 'loupe', q: placeQ || q }];
       const place = [];
