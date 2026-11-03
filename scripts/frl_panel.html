@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FRL · Tableau de bord</title>
+<style>
+@font-face { font-family: 'Inter'; font-weight: 400; src: url('../dist/vendor/fonts/inter-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 500; src: url('../dist/vendor/fonts/inter-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 600; src: url('../dist/vendor/fonts/inter-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Sora'; font-weight: 600; src: url('../dist/vendor/fonts/sora-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Sora'; font-weight: 700; src: url('../dist/vendor/fonts/sora-latin-700-normal.woff2') format('woff2'); }
+:root {
+  --bg: #f3f6f9; --card: #ffffff; --ink: #0d1b2a; --body: #36485a; --muted: #6b7c8d; --line: #e4ebf1; --soft: #f6f9fb;
+  --c1: #2563eb; --c2: #0e7490; --c3: #d97706; --c4: #7c3aed; --good: #15803d; --bad: #b91c1c;
+  --grad: linear-gradient(100deg, #0e7490 0%, #2563eb 100%);
+  --shadow: 0 1px 2px rgba(13,27,42,.05), 0 4px 16px rgba(13,27,42,.05);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0a131d; --card: #111d2a; --ink: #e8eef4; --body: #c0ccd8; --muted: #8597a8; --line: #1f2f40; --soft: #15222f;
+  --c1: #60a5fa; --c2: #22d3ee; --c3: #fbbf24; --c4: #a78bfa; --good: #4ade80; --bad: #f87171;
+  --grad: linear-gradient(100deg, #22d3ee 0%, #60a5fa 100%); --shadow: 0 1px 2px rgba(0,0,0,.3); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0a131d; --card: #111d2a; --ink: #e8eef4; --body: #c0ccd8; --muted: #8597a8; --line: #1f2f40; --soft: #15222f;
+  --c1: #60a5fa; --c2: #22d3ee; --c3: #fbbf24; --c4: #a78bfa; --good: #4ade80; --bad: #f87171;
+  --grad: linear-gradient(100deg, #22d3ee 0%, #60a5fa 100%); --shadow: 0 1px 2px rgba(0,0,0,.3); color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--body); font: 14px/1.5 Inter, "Segoe UI", system-ui, sans-serif; }
+.wrap { max-width: 1440px; margin: 0 auto; padding: 20px max(16px, env(safe-area-inset-left, 0px)) 48px; }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; justify-content: space-between; margin-bottom: 18px; }
+h1 { font: 700 22px/1.2 Sora, Inter, sans-serif; color: var(--ink); margin: 0; letter-spacing: -.01em; }
+h1 span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sub { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.seg { display: inline-flex; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 3px; box-shadow: var(--shadow); }
+.seg button { border: 0; background: none; color: var(--muted); font: 500 13px Inter, sans-serif; padding: 6px 12px; border-radius: 7px; cursor: pointer; }
+.seg button.on { background: var(--grad); color: #fff; }
+.tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.icon-btn { border: 1px solid var(--line); background: var(--card); color: var(--body); border-radius: 10px; padding: 7px 10px; cursor: pointer; font: 500 13px Inter, sans-serif; box-shadow: var(--shadow); }
+.notes { margin: 0 0 16px; padding: 10px 14px; border-radius: 10px; background: color-mix(in srgb, var(--c3) 12%, var(--card)); color: var(--ink); border: 1px solid color-mix(in srgb, var(--c3) 35%, var(--line)); font-size: 13px; }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; box-shadow: var(--shadow); min-width: 0; }
+.card h2 { font: 600 14px/1.3 Sora, Inter, sans-serif; color: var(--ink); margin: 0 0 2px; }
+.card .hint { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
+.s12 { grid-column: span 12; } .s8 { grid-column: span 8; } .s7 { grid-column: span 7; } .s6 { grid-column: span 6; } .s5 { grid-column: span 5; } .s4 { grid-column: span 4; }
+@media (max-width: 1100px) { .s8, .s7, .s6, .s5, .s4 { grid-column: span 12; } }
+.section { font: 600 12px Inter, sans-serif; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 26px 0 10px; display: flex; align-items: center; gap: 10px; }
+.section::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+@media (min-width: 1300px) { .kpis { grid-template-columns: repeat(9, minmax(0, 1fr)); } }
+.kpi { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+.kpi::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--grad); }
+.kpi .l { font-size: 12px; color: var(--muted); }
+.kpi .v { font: 700 24px/1.2 Sora, Inter, sans-serif; color: var(--ink); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.kpi .d { font-size: 12px; margin-top: 2px; color: var(--muted); }
+.up { color: var(--good); } .down { color: var(--bad); }
+.chart { position: relative; height: 280px; } .chart.tall { height: 320px; } .chart.short { height: 220px; }
+.bars { display: flex; flex-direction: column; gap: 6px; }
+.bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; font-size: 13px; }
+.bar .n { color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 500; }
+.bar .lab { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .track { grid-column: 1 / -1; height: 5px; border-radius: 3px; background: var(--soft); overflow: hidden; }
+.bar .track i { display: block; height: 100%; background: var(--grad); border-radius: 3px; }
+.bar.zero .track i { background: var(--bad); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.scroll { overflow-x: auto; }
+.tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
+.tag.claude { background: color-mix(in srgb, var(--c3) 16%, transparent); color: var(--c3); }
+.tag.gemini { background: color-mix(in srgb, var(--c1) 16%, transparent); color: var(--c1); }
+.tag.faq { background: color-mix(in srgb, var(--c2) 16%, transparent); color: var(--c2); }
+.tag.err { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+.tag.dem { background: color-mix(in srgb, var(--c4) 16%, transparent); color: var(--c4); }
+.gauge { margin: 10px 0 16px; }
+.gauge .top { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink); gap: 10px; }
+.gauge .track { height: 10px; border-radius: 6px; background: var(--soft); margin-top: 6px; overflow: hidden; }
+.gauge .track i { display: block; height: 100%; border-radius: 6px; }
+.gauge .foot { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.filters input, .filters select { font: 13px Inter, sans-serif; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); color: var(--ink); }
+.filters input { flex: 1; min-width: 180px; }
+tr.q { cursor: pointer; } tr.q:hover td { background: var(--soft); }
+tr.detail td { background: var(--soft); white-space: pre-wrap; font-size: 12.5px; color: var(--body); }
+.qtext { color: var(--ink); }
+.muted { color: var(--muted); }
+.more { margin-top: 10px; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.heat { display: grid; grid-template-columns: 34px repeat(24, minmax(0, 1fr)); gap: 2px; font-size: 10.5px; color: var(--muted); }
+.heat div { aspect-ratio: 1.4; border-radius: 3px; }
+.heat .lab { aspect-ratio: auto; display: flex; align-items: center; }
+.heat .hh { aspect-ratio: auto; text-align: center; }
+.empty { color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>France<span>RoueLibre</span> · tableau de bord</h1>
+      <div class="sub" id="sub"></div>
+    </div>
+    <div class="tools">
+      <div class="seg" id="period"></div>
+      <button class="icon-btn" id="theme" title="Thème clair ou sombre">Thème</button>
+    </div>
+  </header>
+  <div id="notes"></div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="section">Audience</div>
+  <div class="grid">
+    <div class="card s8"><h2>Visiteurs et pages vues par jour</h2><p class="hint">Robots exclus. Un visiteur = une adresse et un navigateur sur une journée.</p><div class="chart tall"><canvas id="cAud"></canvas></div></div>
+    <div class="card s4"><h2>Pages les plus vues</h2><p class="hint" id="pagesHint"></p><div class="bars" id="pages"></div></div>
+    <div class="card s6"><h2>Sites qui envoient des visiteurs</h2><p class="hint">Domaine du lien suivi, hors francerouelibre.fr.</p><div class="bars" id="refs"></div></div>
+    <div class="card s6"><h2>Activité par heure</h2><p class="hint">Recherches et questions à la Loupe, heure de Paris, jour par jour.</p><div id="heat"></div></div>
+  </div>
+
+  <div class="section">La Loupe</div>
+  <div class="grid">
+    <div class="card s8"><h2>Questions par jour et coût</h2><p class="hint">Barres : qui a répondu. Ligne : coût du jour en euros (axe de droite).</p><div class="chart tall"><canvas id="cLoupe"></canvas></div></div>
+    <div class="card s4"><h2>Budgets des modèles</h2><p class="hint">Dépense cumulée d'après le journal, plafonds de server/assistant/settings.py.</p><div id="budgets"></div></div>
+    <div class="card s7"><h2>Coût et durée de chaque réponse</h2><p class="hint">Un point par question. Les réponses automatiques (gratuites, immédiates) ne sont pas tracées.</p><div class="chart"><canvas id="cScatter"></canvas></div></div>
+    <div class="card s5"><h2>Outils appelés</h2><p class="hint">Nombre d'appels sur la période.</p><div class="chart"><canvas id="cTools"></canvas></div></div>
+    <div class="card s12"><h2>Par moteur de réponse</h2><p class="hint">Sur la période choisie.</p><div class="scroll" id="prov"></div></div>
+  </div>
+
+  <div class="section">Recherches</div>
+  <div class="grid">
+    <div class="card s6"><h2>Les plus cherchées</h2><p class="hint">Saisies complètes (hors suggestions pendant la frappe), casse ignorée.</p><div class="bars" id="topq"></div></div>
+    <div class="card s6"><h2>Sans résultat</h2><p class="hint">Recherches qui n'ont trouvé aucune ligne de dépense.</p><div class="bars" id="zeroq"></div></div>
+  </div>
+
+  <div class="section">Détail</div>
+  <div class="grid">
+    <div class="card s12"><h2>Questions à la Loupe</h2><p class="hint">Cliquer sur une ligne pour lire la réponse, les outils et les sources.</p>
+      <div class="filters"><input id="fq" placeholder="Filtrer (question, réponse, outil)"><select id="fp"><option value="">Tous les moteurs</option><option value="claude">Claude</option><option value="gemini">Gemini</option><option value="faq">Réponse automatique</option><option value="err">Erreurs</option></select></div>
+      <div class="scroll"><table id="qt"></table></div><button class="icon-btn more" id="qmore" hidden>Afficher plus</button></div>
+    <div class="card s12"><h2>Dernières recherches</h2><p class="hint"></p>
+      <div class="filters"><input id="fs" placeholder="Filtrer les recherches"></div>
+      <div class="scroll"><table id="st"></table></div><button class="icon-btn more" id="smore" hidden>Afficher plus</button></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const DATA = /*__DATA__*/null;
+const $ = id => document.getElementById(id);
+const fmt = (n, d = 0) => n == null || isNaN(n) ? '·' : n.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+const eur = (n, d = 2) => fmt(n, d) + ' €';
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const pct = (a, q) => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(q * s.length))]; };
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const PROV = { faq: 'Réponse automatique', claude: 'Claude', gemini: 'Gemini' };
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// ---------------------------------------------------------------- period
+const allDays = new Set([...Object.keys(DATA.visits || {}), ...DATA.loupe.map(r => r.t.slice(0, 10)), ...DATA.searches.map(r => r.t.slice(0, 10))]);
+const firstDay = [...allDays].sort()[0] || iso(new Date());
+const PERIODS = [[7, '7 j'], [14, '14 j'], [30, '30 j'], [90, '90 j'], [0, 'Tout']];
+let period = 14;
+try { period = +(localStorage.getItem('frl-panel-period') ?? 14); } catch (e) {}
+function span(n, offset = 0) {
+  const end = new Date(); end.setDate(end.getDate() - offset * (n || 0));
+  const out = [];
+  if (!n) { for (let d = new Date(firstDay + 'T12:00'); iso(d) <= iso(end); d.setDate(d.getDate() + 1)) out.push(iso(d)); return out; }
+  for (let i = n - 1; i >= 0; i--) { const d = new Date(end); d.setDate(d.getDate() - i); out.push(iso(d)); }
+  return offset ? out : out.filter(d => d >= firstDay);   // no empty days before the first data
+}
+
+function totals(days) {
+  const set = new Set(days), V = DATA.visits || {};
+  const L = DATA.loupe.filter(r => set.has(r.t.slice(0, 10))), S = DATA.searches.filter(r => set.has(r.t.slice(0, 10)) && !r.p);
+  const sum = k => days.reduce((a, d) => a + ((V[d] || {})[k] || 0), 0);
+  const cost = L.reduce((a, r) => a + r.c, 0), paid = L.filter(r => r.p !== 'faq');
+  return { days, L, S, views: sum('views'), visitors: sum('visitors'), hasVisits: days.some(d => V[d]),
+    q: L.length, readers: new Set(L.map(r => r.rd)).size, cost, avg: paid.length ? cost / paid.length : null,
+    free: L.length ? L.filter(r => r.p === 'faq').length / L.length : null, searches: S.length,
+    zero: S.length ? S.filter(r => r.n === 0).length / S.length : null };
+}
+
+// ---------------------------------------------------------------- KPIs
+function delta(cur, prev, inverse) {
+  if (!period || prev == null || cur == null || !prev) return '<span class="muted">pas de période précédente</span>';
+  const p = 100 * (cur / prev - 1), good = inverse ? p < 0 : p > 0;
+  return `<span class="${Math.abs(p) < .5 ? '' : good ? 'up' : 'down'}">${p > 0 ? '+' : ''}${fmt(p)} %</span> <span class="muted">vs période précédente</span>`;
+}
+function kpis(t, p) {
+  const k = [
+    ['Visiteurs (somme des jours)', t.hasVisits ? fmt(t.visitors) : '·', delta(t.visitors, p.visitors)],
+    ['Pages vues', t.hasVisits ? fmt(t.views) : '·', delta(t.views, p.views)],
+    ['Recherches', fmt(t.searches), delta(t.searches, p.searches)],
+    ['Questions à la Loupe', fmt(t.q), delta(t.q, p.q)],
+    ['Lecteurs de la Loupe', fmt(t.readers), delta(t.readers, p.readers)],
+    ['Coût de la Loupe', eur(t.cost), delta(t.cost, p.cost, true)],
+    ['Coût par question payante', t.avg == null ? '·' : fmt(100 * t.avg, 2) + ' c', delta(t.avg, p.avg, true)],
+    ['Réponses sans modèle', t.free == null ? '·' : fmt(100 * t.free) + ' %', '<span class="muted">gratuites et immédiates</span>'],
+    ['Recherches sans résultat', t.zero == null ? '·' : fmt(100 * t.zero) + ' %', delta(t.zero, p.zero, true)],
+  ];
+  $('kpis').innerHTML = k.map(([l, v, d]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join('');
+}
+
+// ---------------------------------------------------------------- bars (HTML)
+function bars(el, rows, cls = '') {
+  const max = Math.max(1, ...rows.map(r => r[1]));
+  $(el).innerHTML = rows.length ? rows.map(([lab, n, extra]) => `<div class="bar ${cls}"><span class="lab" title="${esc(lab)}">${esc(lab)}${extra ? ` <span class="muted">${extra}</span>` : ''}</span><span class="n">${fmt(n)}</span><span class="track"><i style="width:${100 * n / max}%"></i></span></div>`).join('')
+    : '<div class="empty">Rien sur la période.</div>';
+}
+function topOf(days, key) {
+  const c = {};
+  for (const d of days) for (const [k, n] of Object.entries(((DATA.visits || {})[d] || {})[key] || {})) c[k] = (c[k] || 0) + n;
+  return Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 12);
+}
+
+// ---------------------------------------------------------------- charts
+const charts = {};
+function chart(id, cfg) {
+  charts[id]?.destroy();
+  const grid = css('--line'), muted = css('--muted');
+  Chart.defaults.locale = 'fr-FR'; Chart.defaults.font.family = 'Inter, "Segoe UI", system-ui, sans-serif'; Chart.defaults.font.size = 12; Chart.defaults.color = muted;
+  for (const ax of Object.values(cfg.options.scales || {})) { ax.grid = { color: grid, drawTicks: false, ...(ax.grid || {}) }; ax.border = { display: false }; ax.ticks = { padding: 6, ...(ax.ticks || {}) }; }
+  cfg.options.maintainAspectRatio = false; cfg.options.animation = { duration: 350 };
+  cfg.options.plugins = { legend: { position: 'top', align: 'end', labels: { boxWidth: 10, boxHeight: 10, useBorderRadius: true, borderRadius: 3 } },
+    tooltip: { backgroundColor: css('--ink'), titleColor: css('--card'), bodyColor: css('--card'), padding: 10, cornerRadius: 8, boxPadding: 4 }, ...(cfg.options.plugins || {}) };
+  charts[id] = new Chart($(id), cfg);
+}
+const dayLab = d => new Date(d + 'T12:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+
+function drawAudience(t) {
+  const V = DATA.visits || {};
+  chart('cAud', { data: { labels: t.days.map(dayLab), datasets: [
+    { type: 'bar', label: 'Visiteurs', data: t.days.map(d => V[d]?.visitors ?? null), backgroundColor: css('--c1'), borderRadius: 4, maxBarThickness: 28, order: 2 },
+    { type: 'line', label: 'Pages vues', data: t.days.map(d => V[d]?.views ?? null), borderColor: css('--c2'), backgroundColor: css('--c2'), tension: .3, pointRadius: 2, borderWidth: 2, order: 1 },
+  ] }, options: { interaction: { mode: 'index', intersect: false }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true } } } });
+}
+
+function drawLoupe(t) {
+  const by = p => t.days.map(d => t.L.filter(r => r.t.startsWith(d) && (p === 'err' ? r.e : r.p === p && !r.e)).length);
+  const cost = t.days.map(d => t.L.filter(r => r.t.startsWith(d)).reduce((a, r) => a + r.c, 0));
+  chart('cLoupe', { data: { labels: t.days.map(dayLab), datasets: [
+    { type: 'bar', label: 'Réponse automatique', data: by('faq'), backgroundColor: css('--c2'), stack: 's', borderRadius: 3, maxBarThickness: 28 },
+    { type: 'bar', label: 'Claude', data: by('claude'), backgroundColor: css('--c3'), stack: 's', borderRadius: 3, maxBarThickness: 28 },
+    { type: 'bar', label: 'Gemini', data: by('gemini'), backgroundColor: css('--c1'), stack: 's', borderRadius: 3, maxBarThickness: 28 },
+    { type: 'bar', label: 'Erreur', data: by('err'), backgroundColor: css('--bad'), stack: 's', borderRadius: 3, maxBarThickness: 28 },
+    { type: 'line', label: 'Coût (€)', data: cost, yAxisID: 'y2', borderColor: css('--ink'), backgroundColor: css('--ink'), borderDash: [4, 3], pointRadius: 2, borderWidth: 1.5, tension: .3 },
+  ] }, options: { interaction: { mode: 'index', intersect: false },
+    plugins: { tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y2' ? ` Coût : ${eur(c.raw, 3)}` : ` ${c.dataset.label} : ${c.raw}` } } },
+    scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } },
+      y2: { position: 'right', beginAtZero: true, grid: { display: false }, ticks: { callback: v => fmt(v, 2) + ' €' } } } } });
+}
+
+function drawScatter(t) {
+  const pts = p => t.L.filter(r => r.p === p && r.s != null && !r.e).map(r => ({ x: r.s, y: 100 * r.c, q: r.q }));
+  chart('cScatter', { type: 'scatter', data: { datasets: [
+    { label: 'Claude', data: pts('claude'), backgroundColor: css('--c3') + 'cc', pointRadius: 4, pointHoverRadius: 6 },
+    { label: 'Gemini', data: pts('gemini'), backgroundColor: css('--c1') + 'cc', pointRadius: 4, pointHoverRadius: 6 },
+  ] }, options: { plugins: { tooltip: { callbacks: { title: c => c[0].raw.q.slice(0, 90), label: c => ` ${fmt(c.raw.x, 1)} s · ${fmt(c.raw.y, 2)} centime(s)` } } },
+    scales: { x: { type: 'logarithmic', title: { display: true, text: 'Durée (secondes, échelle log)' } },
+      y: { beginAtZero: true, title: { display: true, text: 'Coût (centimes)' } } } } });
+}
+
+function drawTools(t) {
+  const c = {};
+  for (const r of t.L) for (const x of r.tl) c[x] = (c[x] || 0) + 1;
+  const rows = Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 14);
+  chart('cTools', { type: 'bar', data: { labels: rows.map(r => r[0]), datasets: [{ label: 'Appels', data: rows.map(r => r[1]), backgroundColor: css('--c2'), borderRadius: 4, maxBarThickness: 18 }] },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } }, y: { grid: { display: false } } } } });
+}
+
+function heat(t) {
+  const first = [...DATA.loupe, ...DATA.searches].map(r => r.t.slice(0, 10)).sort()[0] || '';
+  const days = t.days.filter(d => d >= first).slice(-14), grid = {};
+  for (const r of [...t.L, ...t.S]) { const k = r.t.slice(0, 13); grid[k] = (grid[k] || 0) + 1; }
+  const max = Math.max(1, ...Object.values(grid));
+  let h = '<div class="heat"><div class="lab"></div>' + Array.from({ length: 24 }, (_, i) => `<div class="hh">${i % 3 ? '' : i}</div>`).join('');
+  for (const d of days) {
+    h += `<div class="lab">${dayLab(d).replace('.', '')}</div>`;
+    for (let i = 0; i < 24; i++) {
+      const n = grid[`${d} ${String(i).padStart(2, '0')}`] || 0;
+      h += `<div title="${dayLab(d)} ${i} h : ${n}" style="background:${n ? `color-mix(in srgb, var(--c1) ${15 + 85 * n / max}%, var(--soft))` : 'var(--soft)'}"></div>`;
+    }
+  }
+  $('heat').innerHTML = days.length ? h + '</div>' : '<div class="empty">Rien sur la période.</div>';
+}
+
+// ---------------------------------------------------------------- budgets and providers
+function budgets() {
+  const C = DATA.caps || {}, all = DATA.loupe, spent = p => all.filter(r => r.p === p).reduce((a, r) => a + r.c, 0);
+  const g = (label, used, cap, foot, color) => {
+    const share = cap ? Math.min(100, 100 * used / cap) : 0;
+    return `<div class="gauge"><div class="top"><span>${label}</span><span><b>${eur(used)}</b> / ${cap ? eur(cap, 0) : '?'}</span></div>
+      <div class="track"><i style="width:${share}%;background:${color}"></i></div><div class="foot">${foot}</div></div>`;
+  };
+  const rate = p => { const t0 = all.filter(r => r.p === p).map(r => r.t)[0]; return t0 ? spent(p) / Math.max(1, (new Date() - new Date(t0.replace(' ', 'T'))) / 864e5) : 0; };
+  const left = C.gemini_until ? Math.ceil((new Date(C.gemini_until + 'T23:59') - new Date()) / 864e5) : null;
+  const cCap = Math.min(C.claude_eur || Infinity, C.claude_usd || Infinity);
+  const today = all.filter(r => r.t.startsWith(iso(new Date()))).reduce((a, r) => a + r.c, 0);
+  $('budgets').innerHTML =
+    g('Claude', spent('claude'), cCap, `Crédit Anthropic, sans date de fin. Rythme moyen : ${eur(rate('claude'), 3)} par jour.`, css('--c3')) +
+    g('Gemini', spent('gemini'), C.gemini_eur, `Crédits Google Cloud${left != null ? `, ${left > 0 ? `encore ${left} jour(s), jusqu'au ${new Date(C.gemini_until + 'T12:00').toLocaleDateString('fr-FR')}` : 'expirés'}` : ''}.`, css('--c1')) +
+    g("Aujourd'hui (les deux)", today, C.daily_eur, 'Plafond quotidien commun, contre un emballement.', css('--c2')) +
+    `<p class="hint" style="margin:6px 0 0">Ordre des moteurs par défaut : <b>${esc((C.order || '').replace(',', ' puis '))}</b>.</p>`;
+}
+
+function providers(t) {
+  const rows = ['faq', 'claude', 'gemini'].map(p => {
+    const L = t.L.filter(r => r.p === p), ok = L.filter(r => !r.e), c = ok.map(r => r.c), s = ok.map(r => r.s).filter(x => x != null);
+    return [p, L.length, L.reduce((a, r) => a + r.c, 0), c.length ? c.reduce((a, b) => a + b, 0) / c.length : null, median(c), median(s), pct(s, .9),
+      ok.length ? ok.reduce((a, r) => a + r.n, 0) / ok.length : null, L.filter(r => r.e).length, L.filter(r => r.tl.includes('recherche_web')).length, L.filter(r => r.v == '1').length, L.filter(r => r.v == '-1').length];
+  }).filter(r => r[1]);
+  const tot = t.L.length || 1;
+  $('prov').innerHTML = rows.length ? `<table><tr><th>Moteur</th><th class="r">Questions</th><th class="r">Part</th><th class="r">Coût total</th><th class="r">Coût moyen</th><th class="r">Coût médian</th><th class="r">Durée médiane</th><th class="r">Durée 90 %</th><th class="r">Appels moyens</th><th class="r">Erreurs</th><th class="r">Recherches web</th><th class="r">👍 / 👎</th></tr>` +
+    rows.map(r => `<tr><td><span class="tag ${r[0]}">${PROV[r[0]]}</span></td><td class="r">${r[1]}</td><td class="r">${fmt(100 * r[1] / tot)} %</td><td class="r">${eur(r[2], 3)}</td>
+      <td class="r">${r[3] == null ? '·' : fmt(100 * r[3], 2) + ' c'}</td><td class="r">${r[4] == null ? '·' : fmt(100 * r[4], 2) + ' c'}</td><td class="r">${r[5] == null ? '·' : fmt(r[5], 1) + ' s'}</td><td class="r">${r[6] == null ? '·' : fmt(r[6], 0) + ' s'}</td>
+      <td class="r">${r[7] == null ? '·' : fmt(r[7], 1)}</td><td class="r">${r[8]}</td><td class="r">${r[9]}</td><td class="r">${r[10]} / ${r[11]}</td></tr>`).join('') + '</table>'
+    : '<div class="empty">Aucune question sur la période.</div>';
+}
+
+// ---------------------------------------------------------------- searches
+function searches(t) {
+  const c = {}, z = {};
+  for (const r of t.S) { const k = r.q.trim().toLowerCase(); if (!k) continue; (c[k] ||= [0, r.n])[0]++; if (r.n === 0) z[k] = (z[k] || 0) + 1; }
+  bars('topq', Object.entries(c).sort((a, b) => b[1][0] - a[1][0]).slice(0, 15).map(([k, [n, l]]) => [k, n, l == null ? '' : `${fmt(l)} lignes`]));
+  bars('zeroq', Object.entries(z).sort((a, b) => b[1] - a[1]).slice(0, 15), 'zero');
+}
+
+// ---------------------------------------------------------------- tables
+let qLimit = 25, sLimit = 25;
+function qTable(t) {
+  const f = $('fq').value.trim().toLowerCase(), p = $('fp').value;
+  let rows = [...t.L].reverse().filter(r => (!p || (p === 'err' ? r.e : r.p === p)) && (!f || (r.q + ' ' + r.a + ' ' + r.tl.join(' ')).toLowerCase().includes(f)));
+  const n = rows.length; rows = rows.slice(0, qLimit);
+  $('qt').innerHTML = `<tr><th>Quand</th><th>Question</th><th>Moteur</th><th class="r">Durée</th><th class="r">Coût</th><th class="r">Appels</th></tr>` +
+    (rows.map((r, i) => `<tr class="q" data-i="${i}"><td class="muted" style="white-space:nowrap">${r.t.slice(5, 16).replace('-', '/')}</td>
+      <td class="qtext">${esc(r.q)}${r.f ? ' <span class="muted">(suite)</span>' : ''}${r.d ? ' <span class="tag dem">demande</span>' : ''}${r.v == '1' ? ' 👍' : r.v == '-1' ? ' 👎' : ''}</td>
+      <td>${r.e ? '<span class="tag err">erreur</span>' : `<span class="tag ${r.p}">${PROV[r.p] || r.p}</span>`}</td>
+      <td class="r">${r.s == null ? '·' : fmt(r.s, 1) + ' s'}</td><td class="r">${r.c ? fmt(100 * r.c, 2) + ' c' : '·'}</td><td class="r">${r.n || '·'}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">Aucune question.</td></tr>');
+  $('qt').querySelectorAll('tr.q').forEach(tr => tr.onclick = () => {
+    const nx = tr.nextElementSibling;
+    if (nx && nx.classList.contains('detail')) return nx.remove();
+    const r = rows[+tr.dataset.i], d = document.createElement('tr');
+    d.className = 'detail';
+    d.innerHTML = `<td></td><td colspan="5">${r.e ? `<b class="down">${esc(r.e)}</b>\n\n` : ''}${esc(r.a || '(pas de réponse)')}${r.tl.length ? `\n\n<span class="muted">Outils : ${esc(r.tl.join(', '))}</span>` : ''}${r.src.length ? `\n<span class="muted">Sources : ${r.src.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//, '').slice(0, 60))}</a>`).join(' · ')}</span>` : ''}${r.m ? `\n<span class="muted">Modèle : ${esc(r.m)}</span>` : ''}</td>`;
+    tr.after(d);
+  });
+  $('qmore').hidden = n <= qLimit;
+}
+function sTable(t) {
+  const f = $('fs').value.trim().toLowerCase();
+  let rows = DATA.searches.filter(r => t.days.includes(r.t.slice(0, 10)) && (!f || r.q.toLowerCase().includes(f))).reverse();
+  const n = rows.length; rows = rows.slice(0, sLimit);
+  $('st').innerHTML = `<tr><th>Quand</th><th>Recherche</th><th class="r">Lignes trouvées</th><th>Cache</th></tr>` +
+    (rows.map(r => `<tr><td class="muted" style="white-space:nowrap">${r.t.slice(5, 16).replace('-', '/')}</td><td class="qtext">${esc(r.q)}${r.p ? ' <span class="muted">(suggestion)</span>' : ''}</td>
+      <td class="r ${r.n === 0 ? 'down' : ''}">${r.n == null ? '·' : fmt(r.n)}</td><td class="muted">${esc(r.c)}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">Aucune recherche.</td></tr>');
+  $('smore').hidden = n <= sLimit;
+}
+
+// ---------------------------------------------------------------- render
+let T;
+function render() {
+  const days = span(period); T = totals(days);
+  const P = period ? totals(span(period, 1)) : null;
+  kpis(T, P || {});
+  const shown = period && days.length === period ? `${period} derniers jours` : `depuis le ${new Date(days[0] + 'T12:00').toLocaleDateString('fr-FR')} (début des données)`;
+  $('sub').textContent = `Généré le ${DATA.generated.replace(' ', ' à ')} · ${shown} · ${DATA.loupe.length} questions et ${DATA.searches.length} recherches au journal`;
+  $('pagesHint').textContent = `Sur la période (${days.length} jours).`;
+  bars('pages', topOf(days, 'pages').map(([k, n]) => [k === '/' ? 'Accueil' : k.replace(/^\//, '').replace(/\.html$/, ''), n]));
+  bars('refs', topOf(days, 'refs'));
+  drawAudience(T); drawLoupe(T); drawScatter(T); drawTools(T); heat(T); budgets(); providers(T); searches(T); qTable(T); sTable(T);
+}
+$('period').innerHTML = PERIODS.map(([n, l]) => `<button data-n="${n}" class="${n === period ? 'on' : ''}">${l}</button>`).join('');
+$('period').onclick = e => { const b = e.target.closest('button'); if (!b) return; period = +b.dataset.n; try { localStorage.setItem('frl-panel-period', period); } catch (x) {}
+  $('period').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); qLimit = 25; sLimit = 25; render(); };
+$('fq').oninput = $('fp').onchange = () => qTable(T);
+$('fs').oninput = () => sTable(T);
+$('qmore').onclick = () => { qLimit += 100; qTable(T); };
+$('smore').onclick = () => { sLimit += 200; sTable(T); };
+$('theme').onclick = () => { const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  r.dataset.theme = dark ? 'light' : 'dark'; try { localStorage.setItem('frl-panel-theme', r.dataset.theme); } catch (x) {} render(); };
+try { const t = localStorage.getItem('frl-panel-theme'); if (t) document.documentElement.dataset.theme = t; } catch (x) {}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+$('notes').innerHTML = (DATA.notes || []).map(n => `<div class="notes">${esc(n)}</div>`).join('');
+if (window.Chart) render(); else document.body.insertAdjacentHTML('afterbegin', '<div class="notes">Chart.js n’a pas pu être chargé (pas d’accès à Internet ?).</div>');
+</script>
+</body>
+</html>
