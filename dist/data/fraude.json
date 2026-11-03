@@ -3,7 +3,10 @@
  "sources": {
   "cour": {
    "titre": "Cour des comptes, La lutte contre la fraude fiscale, rapport public thématique, décembre 2025",
-   "url": "https://www.ccomptes.fr/sites/default/files/2025-12/20251216-Lutte-contre-la-fraude-fiscale.pdf"
+   "url": "https://www.ccomptes.fr/sites/default/files/2025-12/20251216-Lutte-contre-la-fraude-fiscale.pdf",
+   "sha256": "5c98756648c9bd69de36ff3a8c5445d4a748de191afccbfbc826d0f7dfc789d5",
+   "telecharge_le": "2026-11-03",
+   "octets": 1597203
   },
   "commission": {
    "titre": "Commission européenne, VAT gap in the EU, rapport 2025, tableaux statistiques",

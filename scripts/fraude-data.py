@@ -277,7 +277,7 @@ def main():
             **cour(pages), 'ecart_tva_commission': vat(vpath)}
     OUT.write_text(json.dumps(data, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
     c, v = data['controle'], data['ecart_tva_commission']
-    print(f'{OUT.relative_to(ROOT)} : contrôle {c["annees"][0]}-{c["annees"][-1]} ({c["resultats_totaux"][0]} → {c["resultats_totaux"][-1]} Md€), '
+    print(f'{OUT.relative_to(ROOT)} : contrôle {c["annees"][0]}-{c["annees"][-1]} ({c["resultats_totaux"][0]} puis {c["resultats_totaux"][-1]} Md€), '
           f'écart de TVA {v["annees"][0]}-{v["annees"][-1]} ({v["ecart_meur"][-1]:.0f} M€ en {v["annees"][-1]}, provisoire {v["provisoires"]})')
 
 
