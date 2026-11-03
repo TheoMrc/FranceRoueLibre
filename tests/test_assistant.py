@@ -284,6 +284,11 @@ class SavedAnswersTest(unittest.TestCase):
         self.assertIsNotNone(ask('Combien nous a coûté Bruno Le Maire ?'), 'example question of the Loupe panel')
         self.assertIsNone(ask('Combien coûte la mairie de Lyon ?'))
         self.assertIsNone(ask('Bruno Le Maire, quel salaire ?'))
+        # a narrower question than the saved answer goes to the model (journal of 2026-11-03)
+        self.assertIsNone(ask('Quel est le budget des associations finances par l education nationale ?'))
+        self.assertIsNone(ask('Toutes les subventions reçues par l association "article 1 " depuis 2017'))
+        self.assertIsNone(ask('Subventions de l association Article 1'))
+        self.assertIsNotNone(ask('Quelles sont les associations les plus financées par l’État'))
         follow = [{'role': 'user', 'text': 'Bonjour'}, {'role': 'assistant', 'text': '…'},
                   {'role': 'user', 'text': 'Et la dette sous Bruno Le Maire, combien ?'}]
         self.assertIsNone(faq.find(follow), 'a follow-up goes to the model, which has the context')
