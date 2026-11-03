@@ -1058,9 +1058,10 @@ function focusBounds() {
   }
   if (state.selectedCommune) {
     const box = data.communeBBox.get(state.selectedCommune);
-    if (box) return { box, maxZoom: 11.5 };
+    // a margin around the commune, so that its neighbours stay in view
+    if (box) { const m = .6 * Math.max(box[2] - box[0], box[3] - box[1]); return { box: [box[0] - m, box[1] - m, box[2] + m, box[3] + m], maxZoom: 10.5 }; }
     const commune = data.communeMetadata.get(state.selectedCommune);
-    if (commune) return { box: [commune.lon - .05, commune.lat - .04, commune.lon + .05, commune.lat + .04], maxZoom: 11.5 };
+    if (commune) return { box: [commune.lon - .1, commune.lat - .07, commune.lon + .1, commune.lat + .07], maxZoom: 10.5 };
   }
   if (state.selectedDepartment) {
     const box = data.departmentBBox.get(normalizeDepartment(state.selectedDepartment));
