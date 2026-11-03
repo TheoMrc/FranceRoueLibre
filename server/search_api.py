@@ -9,6 +9,8 @@ GET /api/search?q=mise+en+place[&prefix=1]  →  JSON
   depts   [{key, src, n, value}]                largest départements, per source
   top     [{id, src, year, amount, fw, dept, title, who, siren, extra}]  the TOP largest spending lines, with labels
   ms      server time
+GET /api/lieux?q=33980  →  {"communes": [...], "departement": {...} | null, "type": ...}  communes and départements
+  from a name (typos tolerated), a postal code or a département number (server/assistant/places.py)
 GET /api/health  →  {"ok": true, "lines": …}
 
 Python standard library only. The index is opened read-only (immutable). Run behind nginx (rate limit, HTTPS):
@@ -31,8 +33,14 @@ import threading
 import time
 import unicodedata
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import sys
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from assistant import places  # noqa: E402
+
+DATA_DIR = Path(__file__).resolve().parents[1] / 'dist' / 'data'
 
 TOP = 200        # spending lines returned with their labels
 RANK = 15        # entries in each ranking
@@ -227,6 +235,13 @@ class Handler(BaseHTTPRequestHandler):
             with LOCK:
                 lines = connection().execute('SELECT max(id) FROM agg').fetchone()[0]
             return self.send(200, {'ok': True, 'lines': lines}, cache=False)
+        if url.path == '/api/lieux':
+            q = (params.get('q') or [''])[0][:100]
+            try:
+                places.load(DATA_DIR / 'web' / 'communes-lookup.json')
+                return self.send(200, places.find(q))
+            except (OSError, ValueError, RuntimeError) as error:
+                return self.send(503, {'error': f'lieux indisponibles ({type(error).__name__})'}, cache=False)
         if url.path != '/api/search':
             return self.send(404, {'error': 'not found'})
         maybe_sweep()
@@ -275,8 +290,12 @@ def main():
     parser.add_argument('--db', required=True)
     parser.add_argument('--port', type=int, default=8017)
     parser.add_argument('--journal', help='folder of the searched words written by nginx, swept once a day')
+    parser.add_argument('--data', help='the published data folder (dist/data), for /api/lieux')
     args = parser.parse_args()
     DB_PATH = args.db
+    global DATA_DIR
+    if args.data:
+        DATA_DIR = Path(args.data)
     global JOURNAL
     JOURNAL = args.journal
     global COLS

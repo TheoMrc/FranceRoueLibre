@@ -426,11 +426,26 @@ PROJECT_YEARS = range(2018, 2031)
 
 
 def _find_commune(nom: str) -> tuple:
-    """(index in communes-meta, None) or (None, error dict)."""
+    """(index in communes-meta, None) or (None, error dict). A postal code, a misspelt name or « name + département »
+    are resolved by places.py, like the site's search boxes."""
     q = norm(str(nom or '').strip())
     if not q:
         return None, {'error': 'nom vide'}
     ents = _entities('communes')
+    if not any(norm(c) == q or norm(n) == q for c, n, _ in ents):
+        from . import places
+        try:
+            places.load(S.DATA_DIR / 'web' / 'communes-lookup.json')
+            found = places.find(nom)
+        except (OSError, ValueError):
+            found = {'communes': []}
+        codes = [c['insee'] for c in found['communes']]
+        if len(codes) == 1:
+            return next(i for i, (c, _, _) in enumerate(ents) if c == codes[0]), None
+        if len(codes) > 1:
+            return None, {'plusieurs': [{'code': c['insee'], 'nom': c['nom'], 'lieu': f'{c["dep_nom"]} ({c["dep"]})',
+                                         'population': c['population']} for c in found['communes']],
+                          'note': 'Plusieurs communes correspondent : rappeler l’outil avec le code Insee.'}
     loose = lambda s: ' '.join(re.findall(r'[a-z0-9]+', norm(s)))
     lq = loose(q)
     found = [i for i, (c, n, _) in enumerate(ents) if norm(c) == q or norm(n) == q or loose(n) == lq]
@@ -553,7 +568,10 @@ def dossier_commune(nom: str) -> dict:
         'elus_et_personnel': _elected(i),
         'signaux': signals or 'aucun signal relevé pour cette commune',
         'mentions_dans_les_depenses': mentions,
-        'pages': {'carte': f'{S.SITE_URL}/index.html#explorer', 'signaux': f'{S.SITE_URL}/signaux.html'},
+        'pages': {'comptes_sur_la_carte': f'{S.SITE_URL}/index.html?commune={code}#explorer',
+                  'projets_aides_sur_la_carte': f'{S.SITE_URL}/index.html?commune={code}&vue=projets#explorer',
+                  'signaux': f'{S.SITE_URL}/signaux.html'},
+        'note_liens': 'Mettre en lien la carte de la commune et ses projets aidés (adresses ci-dessus).',
     })
 
 

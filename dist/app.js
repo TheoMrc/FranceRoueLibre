@@ -70,8 +70,10 @@ const state = {
   region: '',
   scheme: '',
   search: '',
+  searchCodes: null,   // communes found by postal code or approaching spelling (places.js), instead of the text filter
   selectedDepartment: '',
   selectedCommune: '',
+  anchorCommune: '',   // the commune picked last: switching to départements, régions or intercos shows the one around it
   limit: 8
 };
 
@@ -313,6 +315,7 @@ function filteredProjects() {
     if (state.scheme && row.scheme !== state.scheme) return false;
     if (state.selectedDepartment && normalizeDepartment(row.department) !== normalizeDepartment(state.selectedDepartment)) return false;
     if (state.selectedCommune && row.commune !== state.selectedCommune) return false;
+    if (state.searchCodes) return state.searchCodes.has(row.commune);
     if (!state.search) return true;
     return [row.title, row.beneficiary, row.scheme, row.communeData?.name, row.departmentName].some(value => matches(value, state.search));
   });
@@ -323,6 +326,7 @@ function filteredCommunes() {
     if (state.region && row.regionName !== state.region) return false;
     if (state.selectedDepartment && normalizeDepartment(row.department) !== normalizeDepartment(state.selectedDepartment)) return false;
     if (state.selectedCommune && row.code !== state.selectedCommune) return false;
+    if (state.searchCodes) return state.searchCodes.has(row.code);
     if (!state.search) return true;
     return [row.name, row.code, row.departmentName, row.regionName].some(value => matches(value, state.search));
   });
@@ -358,6 +362,7 @@ function filteredMissingCommunes() {
     if (state.region && row.regionName !== state.region) return false;
     if (state.selectedDepartment && normalizeDepartment(row.department) !== normalizeDepartment(state.selectedDepartment)) return false;
     if (state.selectedCommune && row.code !== state.selectedCommune) return false;
+    if (state.searchCodes) return state.searchCodes.has(row.code);
     return !state.search || [row.name, row.code, row.departmentName, row.regionName].some(value => matches(value, state.search));
   });
 }
@@ -901,7 +906,16 @@ function handleHover(point, forcedHit) {
   const communeCode = hit?.type === 'commune' ? hit.code : '';
   const departmentCode = hit?.type === 'department' && state.mode !== 'regions' ? hit.code : '';
   const regionCode = hit?.type === 'department' && state.mode === 'regions' ? hit.region : '';
-  setHover('communes', mapState.hoverCommune, communeCode); mapState.hoverCommune = communeCode;
+  if (state.mode === 'gfp') {
+    // an intercommunality is hovered as a whole, as it is selected on click
+    const gfp = communeCode ? data.activeCommuneRowsByCode.get(communeCode)?.gfp || '' : '';
+    if (gfp !== mapState.hoverGfp) {
+      for (const code of mapState.hoverGfpCodes || []) setHover('communes', code, '');
+      mapState.hoverGfpCodes = gfp ? (data.gfpByCode.get(gfp)?.communes || []) : [];
+      for (const code of mapState.hoverGfpCodes) setHover('communes', '', code);
+      mapState.hoverGfp = gfp;
+    }
+  } else { setHover('communes', mapState.hoverCommune, communeCode); mapState.hoverCommune = communeCode; }
   setHover('departments', mapState.hoverDepartment, departmentCode); mapState.hoverDepartment = departmentCode;
   setHover('regions', mapState.hoverRegion, regionCode); mapState.hoverRegion = regionCode;
   dom.map.style.cursor = hit ? 'pointer' : '';
@@ -936,7 +950,7 @@ function handleClick(point, forcedHit) {
     if (state.selectedCommune || state.selectedDepartment || state.region) clearSelection();
     return;
   }
-  if (hit.type === 'commune' && state.mode === 'gfp') selectGfp(data.activeCommuneRowsByCode.get(hit.code)?.gfp);
+  if (hit.type === 'commune' && state.mode === 'gfp') { state.anchorCommune = hit.code; selectGfp(data.activeCommuneRowsByCode.get(hit.code)?.gfp); }
   else if (hit.type === 'commune') selectCommune(hit.code);
   else if (state.mode === 'regions') selectRegion(regionNameForCode(hit.region));
   else selectDepartment(hit.code);
@@ -972,6 +986,8 @@ function initMap() {
     pendingPoint = null;
     if (!mapState.ready) return;
     setHover('communes', mapState.hoverCommune, ''); mapState.hoverCommune = '';
+    for (const code of mapState.hoverGfpCodes || []) setHover('communes', code, '');
+    mapState.hoverGfpCodes = []; mapState.hoverGfp = '';
     setHover('departments', mapState.hoverDepartment, ''); mapState.hoverDepartment = '';
     setHover('regions', mapState.hoverRegion, ''); mapState.hoverRegion = '';
     hideTooltip();
@@ -1450,7 +1466,7 @@ function renderTabs() {
   dom.schemeFilter.hidden = state.mode !== 'projects';
   dom.scheme.disabled = state.mode !== 'projects';
   const narrow = matchMedia('(max-width: 680px)').matches;
-  dom.search.placeholder = state.mode === 'projects' ? (narrow ? 'Projet, commune…' : 'Projet, bénéficiaire, commune…') : state.mode === 'communes' ? (narrow ? 'Commune, code INSEE…' : 'Commune, code INSEE, département…') : 'Territoire, code…';
+  dom.search.placeholder = state.mode === 'projects' ? (narrow ? 'Projet, commune, code postal…' : 'Projet, bénéficiaire, commune, code postal…') : state.mode === 'communes' ? (narrow ? 'Commune, code postal…' : 'Commune, code postal, n° de département…') : 'Territoire, code…';
 }
 
 function render() {
@@ -1467,19 +1483,49 @@ function render() {
 
 function selectGfp(code) {
   if (!code) return;
-  state.search = ''; dom.search.value = '';
+  state.search = ''; state.searchCodes = null; dom.search.value = '';
   state.selectedGfp = state.selectedGfp === code ? '' : code;
   state.selectedCommune = ''; state.selectedDepartment = ''; state.limit = 8;
   render();
 }
 
+/* The selection is kept in the address (?commune=…, ?departement=…, &vue=projets), so that a link or a reload opens the
+   same view; the search boxes of the site link here the same way (places.js). */
+function syncUrl() {
+  if (!history.replaceState) return;
+  const p = new URLSearchParams();
+  if (state.selectedCommune) p.set('commune', state.selectedCommune);
+  else if (state.selectedDepartment) p.set('departement', state.selectedDepartment);
+  if ((state.selectedCommune || state.selectedDepartment) && state.mode === 'projects') { p.set('vue', 'projets'); p.set('annee', state.year); }
+  const qs = p.toString();
+  history.replaceState(null, '', `${location.pathname}${qs ? `?${qs}` : ''}${location.hash}`);
+}
+
+async function applyUrl() {
+  const p = new URLSearchParams(location.search);
+  let commune = p.get('commune'), department = p.get('departement');
+  const postal = p.get('cp');   // ?cp=33980: the postal code, resolved by the search API (places.js)
+  if (postal && !commune && window.FRLPlaces) {
+    const where = await window.FRLPlaces.find(postal);
+    if (where.communes.length > 1) { state.searchCodes = new Set(where.communes.map(c => c.insee)); return true; }
+    commune = where.communes[0]?.insee || '';
+  }
+  if (!commune && !department) return false;
+  if (p.get('vue') === 'projets') {
+    const year = Number(p.get('annee'));
+    await changeView(() => { state.mode = 'projects'; if (data.projectYears.includes(year)) state.year = year; });
+  }
+  if (commune) selectCommune(commune); else selectDepartment(department);
+  return true;
+}
+
 function clearSelection() {
-  state.selectedDepartment = ''; state.selectedCommune = ''; state.region = ''; state.selectedGfp = ''; dom.region.value = '';
-  render();
+  state.selectedDepartment = ''; state.selectedCommune = ''; state.region = ''; state.selectedGfp = ''; state.anchorCommune = ''; dom.region.value = '';
+  render(); syncUrl();
 }
 
 function resetAll() {
-  state.region = ''; state.scheme = ''; state.search = ''; state.selectedDepartment = ''; state.selectedCommune = ''; state.selectedGfp = ''; state.limit = 8;
+  state.region = ''; state.scheme = ''; state.search = ''; state.searchCodes = null; state.selectedDepartment = ''; state.selectedCommune = ''; state.selectedGfp = ''; state.anchorCommune = ''; state.limit = 8;
   dom.search.value = ''; dom.region.value = ''; dom.scheme.value = '';
   render();
   if (mapState.ready) updateCamera(true);
@@ -1487,34 +1533,62 @@ function resetAll() {
 
 function selectRegion(name) {
   if (!name) return;
-  state.region = name; state.search = ''; dom.search.value = ''; dom.region.value = name;
+  state.region = name; state.search = ''; state.searchCodes = null; dom.search.value = ''; dom.region.value = name;
   state.selectedDepartment = ''; state.selectedCommune = ''; state.limit = 8;
   render();
 }
 
 function selectDepartment(code) {
-  state.search = ''; dom.search.value = '';
+  state.search = ''; state.searchCodes = null; dom.search.value = '';
   state.selectedDepartment = normalizeDepartment(code);
+  const anchor = data.communeMetadata.get(state.anchorCommune);
+  if (anchor && normalizeDepartment(anchor.department) !== state.selectedDepartment) state.anchorCommune = '';
   state.selectedCommune = ''; state.limit = 8;
-  render();
+  render(); syncUrl();
 }
 
 function selectCommune(code) {
   const commune = data.communeByCode.get(code) || data.communeMetadata.get(code);
   const feature = data.communeFeatureByCode.get(code);
   if (!commune && !feature) return;
-  if (state.selectedCommune === code) { state.selectedCommune = ''; state.selectedDepartment = ''; render(); return; }
-  state.search = ''; dom.search.value = '';
-  state.selectedCommune = code;
+  if (state.selectedCommune === code) { state.selectedCommune = ''; state.selectedDepartment = ''; render(); syncUrl(); return; }
+  state.search = ''; state.searchCodes = null; dom.search.value = '';
+  state.selectedCommune = code; state.anchorCommune = code;
   state.selectedDepartment = normalizeDepartment(commune?.department || feature?.properties?.departement || '');
   state.limit = 8;
-  render();
+  render(); syncUrl();
+}
+
+/* Switching map keeps the place being looked at, at the right level: the commune picked (Audenge) stays selected on
+   « Communes » and « Projets aidés », becomes its département (Gironde) on « Départements », its region (Nouvelle-
+   Aquitaine) on « Régions », its intercommunality on « Intercos »; back on « Communes », Audenge again. */
+function gfpOfCommune(code) {
+  return data.gfp.find(row => row.communes.includes(code))?.code || '';
+}
+async function switchMode(to) {
+  const anchor = state.selectedCommune || state.anchorCommune;
+  const meta = anchor ? data.communeMetadata.get(anchor) : null;
+  const department = meta ? normalizeDepartment(meta.department) : state.selectedDepartment;
+  const regionName = meta?.regionName || (department ? regionForDepartment(department) : '') || state.region;
+  await changeView(() => {
+    state.mode = to; state.limit = 8;
+    state.selectedCommune = ''; state.selectedGfp = '';
+    state.selectedDepartment = '';
+    if (anchor || department) { state.region = ''; dom.region.value = ''; }
+    if (to === 'communes' || to === 'projects') {
+      if (anchor) state.selectedCommune = anchor;
+      state.selectedDepartment = department || '';
+    } else if (to === 'departments') state.selectedDepartment = department || '';
+    else if (to === 'regions' && regionName) { state.region = regionName; dom.region.value = regionName; }
+  });
+  if (to === 'gfp' && anchor) { state.selectedGfp = gfpOfCommune(anchor); render(); }
+  syncUrl();
 }
 
 function setupListeners() {
   dom.modeTabs.forEach(button => button.addEventListener('click', () => {
     if (state.mode === button.dataset.mode) return;
-    changeView(() => { state.mode = button.dataset.mode; state.selectedCommune = ''; state.selectedDepartment = ''; state.selectedGfp = ''; state.limit = 8; });
+    switchMode(button.dataset.mode);
   }));
   dom.indicator.addEventListener('change', () => changeView(() => { state.indicator = dom.indicator.value; state.limit = 8; }));
   dom.mapYear.addEventListener('change', () => changeView(() => { state.year = Number(dom.mapYear.value); }));
@@ -1523,11 +1597,33 @@ function setupListeners() {
   let searchTimer = 0;
   dom.search.addEventListener('input', event => {
     window.clearTimeout(searchTimer);
-    searchTimer = window.setTimeout(() => {
-      state.search = event.target.value.trim();
+    searchTimer = window.setTimeout(async () => {
+      const typed = event.target.value.trim();
+      state.search = typed; state.searchCodes = null;
       state.limit = 8;
+      // a postal code (33980) or a département number (33, 2A, 974): resolved by the search API (places.js)
+      if (window.FRLPlaces && /^(\d{5}|\d{2}|2[abAB]|97\d)$/.test(typed)) {
+        const where = await window.FRLPlaces.find(typed);
+        if (dom.search.value.trim() !== typed) return;
+        if (where.departement) { selectDepartment(where.departement.code); dom.search.value = typed; return; }
+        if (where.communes.length === 1) { selectCommune(where.communes[0].insee); dom.search.value = typed; return; }
+        if (where.communes.length) {
+          state.search = ''; state.searchCodes = new Set(where.communes.map(c => c.insee));
+          if (state.mode !== 'communes' && state.mode !== 'projects') { changeView(() => { state.mode = 'communes'; state.selectedDepartment = ''; state.selectedCommune = ''; }); return; }
+          render(); return;
+        }
+      }
       const inferredMode = inferSearchMode(state.search);
       if (inferredMode && inferredMode !== state.mode && state.mode !== 'gfp') { changeView(() => { state.mode = inferredMode; state.selectedDepartment = ''; state.selectedCommune = ''; }); return; }
+      // nothing matches the letters typed: a misspelt commune name (« Carcassone »)?
+      if (!inferredMode && typed.length >= 4 && window.FRLPlaces) {
+        const where = await window.FRLPlaces.find(typed);
+        if (dom.search.value.trim() !== typed) return;
+        if (where.communes.length) {
+          state.search = ''; state.searchCodes = new Set(where.communes.map(c => c.insee));
+          if (state.mode !== 'communes' && state.mode !== 'projects') { changeView(() => { state.mode = 'communes'; }); return; }
+        }
+      }
       render();
     }, 180);
   });
@@ -1633,10 +1729,12 @@ async function init() {
     const projectTotal = Object.values(projectIndex.counts || {}).reduce((a, b) => a + b, 0) || data.projects.length;
     setText(dom.dataStatus, `${formatCount(projectTotal)} projets · ${formatCount(data.communes.length)} communes`);
     setText(dom.scopeText, 'DGCL · OFGL · contours Etalab · 2012–2025');
+    const linked = await applyUrl();
     render();
     await initMap();
     render();
     dom.mapLoading.classList.add('is-done');
+    if (linked) { updateCamera(true); document.getElementById('explorer')?.scrollIntoView({ block: 'start' }); }
   } catch (error) {
     console.error(error);
     setText(dom.dataStatus, 'Données indisponibles');

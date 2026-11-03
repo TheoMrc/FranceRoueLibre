@@ -132,6 +132,14 @@ NGX
         proxy_pass http://127.0.0.1:8017; proxy_read_timeout 20s;
         proxy_set_header Host $host; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
+    # Communes and départements for the search boxes (one request per word typed): cached like the searches
+    location = /api/lieux {
+        limit_req zone=frl_api burst=40 nodelay; limit_req_status 429;
+        proxy_cache frl_search; proxy_cache_valid 200 1h; proxy_cache_use_stale error timeout updating;
+        add_header X-Cache $upstream_cache_status always;
+        proxy_pass http://127.0.0.1:8017; proxy_read_timeout 10s;
+        proxy_set_header Host $host;
+    }
     location /api/ {
         limit_req zone=frl_api burst=20 nodelay; limit_req_status 429;
         proxy_pass http://127.0.0.1:8017; proxy_read_timeout 20s;
@@ -170,7 +178,7 @@ After=network.target
 
 [Service]
 User=www-data
-ExecStart=$PY $DIR/server/search_api.py --db $DBF --port 8017 --journal $LIB/recherches
+ExecStart=$PY $DIR/server/search_api.py --db $DBF --port 8017 --journal $LIB/recherches --data $WEB/data
 Restart=on-failure
 NoNewPrivileges=yes
 ProtectSystem=strict
@@ -189,7 +197,7 @@ UNIT
 sudo -n systemctl daemon-reload
 sudo -n systemctl enable --quiet francerouelibre-search
 # Restarted only when its code, its unit or the index changed (a restart reloads 1.9 M lines, about 8 s of CPU)
-SIG=$(cat "$DIR/server/search_api.py" /etc/systemd/system/francerouelibre-search.service "$LIB/meta.md5" | md5sum | cut -d' ' -f1)
+SIG=$(cat "$DIR/server/search_api.py" "$DIR/server/assistant/places.py" /etc/systemd/system/francerouelibre-search.service "$LIB/meta.md5" | md5sum | cut -d' ' -f1)
 if [ "$(cat "$LIB/service.md5" 2>/dev/null)" != "$SIG" ] || ! systemctl is-active --quiet francerouelibre-search; then
   sudo -n systemctl restart francerouelibre-search && echo "$SIG" > "$LIB/service.md5" && echo "search API restarted"
 else echo "search API unchanged, not restarted"; fi

@@ -3,6 +3,8 @@
    - « Sur le site »: pages and sections of the site (data/site-index.json, built by scripts/site-index.py);
    - « Demander à la Loupe »: a question (Pourquoi, Combien, Qu’est-ce que…, or a sentence ending with « ? ») opens the
      Loupe with the question already asked;
+   - « Communes » / « Département »: a commune or a département typed by its name (even misspelt), its postal code or
+     its number (places.js, api/lieux), to its accounts on the map, with a side link to the projects the State funded;
    - « Chercher dans les dépenses »: the spending lines search (recherche.html?q=…), with the words of the published
      lines that start like the query and their number of lines (search-core.js, loaded on first use).
    Enter follows the first suggestion: the Loupe for a question, a section when one matches, the spending search
@@ -39,6 +41,16 @@
       document.head.appendChild(s);
     }).catch(() => resolve(null));
   }));
+
+  /* communes and départements (places.js, api/lieux) */
+  let placesPromise = null;
+  const placesLib = () => placesPromise || (placesPromise = window.FRLPlaces ? Promise.resolve(window.FRLPlaces) : new Promise(resolve => {
+    const s = Object.assign(document.createElement('script'), { src: asset('places.js') });
+    s.onload = () => resolve(window.FRLPlaces || null); s.onerror = () => resolve(null);
+    document.head.appendChild(s);
+  }));
+  const ICON_PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+  const ICON_BUILD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>';
 
   const isQuestion = q => QUESTION.test(q) && norm(q).split(' ').length >= 3;
   /* pages and sections that match the words typed; the last word may be unfinished */
@@ -83,7 +95,7 @@
 
     const go = item => {
       if (!item) return;
-      if (item.kind === 'site') { close(); location.href = item.url; }
+      if (item.kind === 'site' || item.kind === 'place') { close(); location.href = item.url; }
       else if (item.kind === 'loupe') {
         close(); input.blur();
         if (window.FRLLoupe) window.FRLLoupe.ask(item.q);
@@ -100,25 +112,38 @@
     async function suggest() {
       const q = input.value.trim(), my = ++seq;
       if (!q) { close(); return; }
-      const [entries, engine] = await Promise.all([siteIndex(), core()]);
+      const [entries, engine, lib] = await Promise.all([siteIndex(), core(), placesLib()]);
+      const where = lib && !isQuestion(q) ? await lib.find(q) : null;
       let words = [];
       if (engine && !isQuestion(q)) { try { words = (await engine.suggest(q)).filter(s => engine.norm(s.text) !== engine.norm(q)).slice(0, 3); } catch { words = []; } }
       if (my !== seq) return;
       const site = matchSite(entries, q).map(e => ({ kind: 'site', url: e.url, title: e.title, page: e.section ? e.page : '', sub: e.eyebrow || '' }));
       const spend = [{ kind: 'lines', q }, ...words.map(w => ({ kind: 'lines', q: w.text, count: w.count, amount: w.amount }))];
       const loupe = [{ kind: 'loupe', q }];
+      const place = [];
+      if (where?.departement) place.push({ kind: 'place', url: lib.deptUrl(where.departement), title: `${where.departement.nom} (${where.departement.code})`, sub: 'Département · ses comptes et ses communes sur la carte', icon: ICON_PIN });
+      for (const c of (where?.communes || []).slice(0, where?.departement ? 2 : 4)) {
+        const fix = c.correspondance === 'approchant' ? 'Vouliez-vous dire ? · ' : '';
+        place.push({ kind: 'place', url: lib.mapUrl(c), title: c.nom, sub: `${fix}${c.dep_nom} (${c.dep})${c.population ? ` · ${lib.people(c.population)}` : ''} · ses comptes sur la carte`, icon: ICON_PIN, projects: c.projets_annee ? lib.projectsUrl(c) : '' });
+      }
+      const placeTitle = where?.type === 'approchant' ? 'Commune (orthographe approchante)' : where?.departement && !where.communes.length ? 'Département' : 'Communes';
+      const placeFirst = lib && lib.sure(where);
       const groups = isQuestion(q)
         ? [['Demander à la Loupe', loupe], ['Sur le site', site], ['Chercher dans les dépenses', spend]]
-        : [['Sur le site', site], ['Chercher dans les dépenses', spend], ['Demander à la Loupe', loupe]];
+        : placeFirst ? [[placeTitle, place], ['Sur le site', site], ['Chercher dans les dépenses', spend], ['Demander à la Loupe', loupe]]
+          : [['Sur le site', site], [placeTitle, place], ['Chercher dans les dépenses', spend], ['Demander à la Loupe', loupe]];
       items = [];
       panel.innerHTML = groups.filter(([, list]) => list.length).map(([title, list]) => `<div class="omni__group"><p class="omni__group-title">${esc(title)}</p>${list.map(it => {
         const i = items.push(it) - 1;
-        const icon = it.kind === 'site' ? ((typeof FRL_ICONS !== 'undefined' && FRL_ICONS.forText(`${it.title} ${it.page}`)) || ICON_LINES) : it.kind === 'loupe' ? ICON_LOUPE : ICON_SEARCH;
-        const body = it.kind === 'site' ? `<strong>${esc(it.title)}</strong><small>${esc(it.page || 'Page du site')}${it.sub ? ` · ${esc(it.sub)}` : ''}</small>`
+        const icon = it.kind === 'place' ? it.icon : it.kind === 'site' ? ((typeof FRL_ICONS !== 'undefined' && FRL_ICONS.forText(`${it.title} ${it.page}`)) || ICON_LINES) : it.kind === 'loupe' ? ICON_LOUPE : ICON_SEARCH;
+        const body = it.kind === 'place' ? `<strong>${esc(it.title)}</strong><small>${esc(it.sub)}</small>`
+          : it.kind === 'site' ? `<strong>${esc(it.title)}</strong><small>${esc(it.page || 'Page du site')}${it.sub ? ` · ${esc(it.sub)}` : ''}</small>`
           : it.kind === 'loupe' ? `<strong>« ${esc(it.q)} »</strong><small>La Loupe cherche dans les données et sur le web, puis répond avec ses sources</small>`
             : it.count != null ? `<strong>${esc(it.q)}</strong><small>${it.count.toLocaleString('fr-FR')} ligne${it.count > 1 ? 's' : ''}${it.amount ? ` · ${euros(it.amount)}` : ''} dans les dépenses publiées</small>`
               : `<strong>« ${esc(it.q)} » dans les dépenses publiées</strong><small>Associations, marchés publics, projets, aides, budget de l’État</small>`;
-        return `<a class="omni__item omni__item--${it.kind}" role="option" id="${uid}-o${i}" data-i="${i}" href="${it.kind === 'site' ? esc(it.url) : esc(spendUrl(it.q))}"><span class="omni__item-icon">${icon}</span><span class="omni__item-body">${body}</span>${i === 0 ? ENTER : ''}</a>`;
+        const extra = it.projects ? `<a class="omni__side" href="${esc(it.projects)}" data-side="${i}" title="Projets d’investissement subventionnés par l’État">${ICON_BUILD}<span>Projets aidés</span></a>` : '';
+        const link = `<a class="omni__item omni__item--${it.kind}" role="option" id="${uid}-o${i}" data-i="${i}" href="${it.kind === 'site' || it.kind === 'place' ? esc(it.url) : esc(spendUrl(it.q))}"><span class="omni__item-icon">${icon}</span><span class="omni__item-body">${body}</span>${i === 0 && !extra ? ENTER : ''}</a>`;
+        return extra ? `<div class="omni__row">${link}${extra}</div>` : link;
       }).join('')}</div>`).join('');
       panel.hidden = false;
       root.classList.add('is-open');
@@ -127,7 +152,7 @@
     }
     let timer = 0;
     input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(suggest, 90); });
-    input.addEventListener('focus', () => { siteIndex(); core(); if (input.value.trim()) suggest(); });
+    input.addEventListener('focus', () => { siteIndex(); core(); placesLib(); if (input.value.trim()) suggest(); });
     input.addEventListener('keydown', event => {
       if (panel.hidden) return;
       if (event.key === 'ArrowDown') { event.preventDefault(); mark(Math.min(items.length - 1, active + 1)); }
@@ -143,6 +168,8 @@
     });
     panel.addEventListener('mousedown', event => event.preventDefault());   // keep the focus in the input
     panel.addEventListener('click', event => {
+      const side = event.target.closest('[data-side]');
+      if (side) { event.preventDefault(); close(); location.href = side.href; return; }
       const a = event.target.closest('[data-i]'); if (!a) return;
       event.preventDefault(); go(items[+a.dataset.i]);
     });

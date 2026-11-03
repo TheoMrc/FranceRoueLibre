@@ -1327,3 +1327,27 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .dm-reply h4 { margin: 0 0 .3rem; font-size: .85rem; }
 .dm-reply p { margin: 0; font-size: .9rem; }
 .dm-card h3::first-letter { text-transform: uppercase; }
+
+/* Search boxes: a commune with its side link to the projects funded by the State (omni-search.js) */
+.omni__row { display: flex; align-items: center; gap: .3rem; min-width: 0; }
+.omni__row .omni__item { flex: 1; min-width: 0; }
+.omni__item--place .omni__item-icon { background: color-mix(in srgb, var(--c-teal-500) 14%, transparent); }
+.omni__side { flex: none; display: inline-flex; align-items: center; gap: .3rem; padding: .4rem .6rem; border-radius: var(--r-md); border: 1px solid var(--c-line); color: var(--c-teal-600); font-size: .78rem; font-weight: 600; text-decoration: none; white-space: nowrap; transition: border-color .2s, background .2s; }
+.omni__side:hover { border-color: var(--c-teal-500); background: var(--c-surface); }
+.omni__side svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 480px) { .omni__side span { display: none; } .omni__side { padding: .5rem; } }
+
+/* Results page: the commune or département typed, first (recherche.js, places.js) */
+.sr-place { margin-bottom: var(--sp-3); }
+.sr-place__head { margin: 0 0 .5rem; font-size: .75rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--c-muted); }
+.sr-place__grid { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
+.sr-place__card { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; min-width: 0; padding: .75rem .9rem; border: 1px solid var(--c-line); border-radius: var(--r-md); background: var(--c-surface); color: var(--c-ink); text-decoration: none; }
+a.sr-place__card:hover { border-color: var(--c-teal-500); }
+.sr-place__pin { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; background: color-mix(in srgb, var(--c-teal-500) 14%, transparent); color: var(--c-teal-600); }
+.sr-place__pin svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sr-place__card > span:not(.sr-place__pin):not(.sr-place__links), .sr-place__body { flex: 1 1 10rem; min-width: 0; display: grid; }
+.sr-place__card small { color: var(--c-muted); }
+.sr-place__links { display: flex; flex-wrap: wrap; gap: .4rem; }
+.sr-place__links a { padding: .35rem .7rem; border-radius: 999px; border: 1px solid var(--c-line); color: var(--c-teal-600); font-size: .8rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.sr-place__links a:first-child { background: var(--c-teal-600); border-color: var(--c-teal-600); color: #fff; }
+.sr-place__links a:hover { border-color: var(--c-teal-500); }

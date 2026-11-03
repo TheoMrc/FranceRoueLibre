@@ -57,6 +57,29 @@
     return changed ? out.join(' ') : null;
   }
 
+  /* A commune or a département typed (name, postal code, number): its accounts on the map and the projects the State
+     funded there come first, above the spending lines that mention it (places.js, api/lieux). */
+  const PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+  async function showPlace(q, runId) {
+    const box = $('srPlace');
+    box.hidden = true; box.innerHTML = '';
+    if (!window.FRLPlaces) return;
+    const where = await FRLPlaces.find(q);
+    if (runId !== state.run || !where || (!where.departement && !where.communes.length)) return;
+    const P = FRLPlaces;
+    const cards = [];
+    if (where.departement) cards.push(`<a class="sr-place__card" href="${esc(P.deptUrl(where.departement))}"><span class="sr-place__pin">${PIN}</span><span><strong>${esc(where.departement.nom)} (${esc(where.departement.code)})</strong><small>Le département et ses communes sur la carte</small></span></a>`);
+    for (const c of where.communes.slice(0, where.departement ? 2 : 4)) {
+      cards.push(`<div class="sr-place__card"><span class="sr-place__pin">${PIN}</span><span class="sr-place__body"><strong>${esc(c.nom)}</strong><small>${esc(c.dep_nom)} (${esc(c.dep)})${c.population ? ` · ${esc(P.people(c.population))}` : ''}${c.codes_postaux.length ? ` · ${esc(c.codes_postaux.slice(0, 3).join(', '))}` : ''}</small></span>`
+        + `<span class="sr-place__links"><a href="${esc(P.mapUrl(c))}">Comptes sur la carte</a>${c.projets_annee ? `<a href="${esc(P.projectsUrl(c))}">Projets aidés par l’État</a>` : ''}</span></div>`);
+    }
+    const head = where.type === 'approchant' ? 'Vouliez-vous dire cette commune ?' : where.type === 'code_postal' ? `Code postal ${esc(q.match(/\d{5}/)?.[0] || q)}` : where.type === 'departement' ? 'Département' : 'Commune';
+    box.innerHTML = `<p class="sr-place__head">${head}</p><div class="sr-place__grid">${cards.join('')}</div>`
+      + (where.type === 'nom' || where.type === 'approchant' ? '<p class="note">Plus bas : les lignes de dépenses publiées dont le libellé contient ce nom (subventions, marchés, projets), pas seulement celles de la commune.</p>' : '');
+    box.hidden = false;
+  }
+  const COMMON = new Set('la le les l de des du d un une et en a au aux sur sous pour par avec'.split(' '));
+
   async function run(q, { exact = false, from = null } = {}) {
     const runId = ++state.run;
     const stale = () => runId !== state.run;
@@ -69,6 +92,12 @@
     document.body.classList.add('has-query');
     $('srTitle').innerHTML = `« ${esc(state.q)} »`;
     $('srResults').hidden = false; clearPanels();
+    showPlace(state.q, runId);
+    if (state.words.every(w => COMMON.has(w))) {
+      // « La », « de la » : in almost every line, nothing to learn from them alone
+      $('srSummary').innerHTML = `<div class="sr-error"><strong>« ${esc(state.q)} » est un mot trop courant pour une recherche.</strong><p>Il figure dans presque toutes les lignes publiées. Ajoutez un mot (un objet, un bénéficiaire, une commune), par exemple « la poste » ou « la rochelle ».</p></div>`;
+      return;
+    }
     progress.started = performance.now();
     try {
       await showProgress(5, 'Recherche sur le serveur');

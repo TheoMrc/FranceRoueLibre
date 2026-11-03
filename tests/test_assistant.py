@@ -519,3 +519,35 @@ class ShortcutToolsTest(unittest.TestCase):
                 continue  # network
             res = box.call(d['name'], {})
             self.assertNotIn('outil inconnu', str(res.get('error', '')), d['name'])
+
+
+class PlacesTest(unittest.TestCase):
+    """server/assistant/places.py: what readers typed in the search boxes (journal of 3 Nov 2026)."""
+
+    def setUp(self):
+        path = S.DATA_DIR / 'web' / 'communes-lookup.json'
+        if not path.is_file():
+            self.skipTest('dist/data absent')
+        from assistant import places
+        places.load(path)
+        self.P = places
+
+    def first(self, q):
+        r = self.P.find(q)
+        return r['communes'][0]['nom'] if r['communes'] else (r['departement'] or {}).get('nom')
+
+    def test_names_postal_codes_and_departements(self):
+        self.assertEqual(self.first('33980'), 'Audenge')
+        self.assertEqual(self.first('33'), 'Gironde')
+        self.assertEqual(self.first('L Arbresle'), "L'Arbresle")
+        self.assertEqual(self.first('Carcassone'), 'Carcassonne')
+        self.assertEqual(self.first('Le havrr'), 'Le Havre')
+        self.assertEqual(self.first('57700 Hayange'), 'Hayange')
+        self.assertEqual(self.first('Lignerolles allier'), 'Lignerolles')
+        self.assertEqual(self.first('75020'), 'Paris')
+        self.assertEqual(self.P.find('69280')['type'], 'code_postal')
+        self.assertEqual(len(self.P.find('69280')['communes']), 2)
+
+    def test_not_a_place(self):
+        for q in ('La', 'mise en place', 'cantine scolaire'):
+            self.assertEqual(self.P.find(q)['communes'], [], q)

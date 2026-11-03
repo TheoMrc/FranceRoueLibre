@@ -57,7 +57,7 @@ def postal_codes():
 
 def last_project_year():
     last = {}
-    for path in sorted(WEB.glob('projects-*.json')):
+    for path in sorted(WEB.glob('projects-[0-9][0-9][0-9][0-9].json')):
         year = int(path.stem[-4:])
         for row in json.loads(path.read_text(encoding='utf-8'))['rows']:
             last[row[3]] = max(last.get(row[3], 0), year)

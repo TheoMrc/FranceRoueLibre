@@ -33,6 +33,7 @@
   <link rel="stylesheet" href="./style.css">
   <script defer src="./common.js"></script>
   <script defer src="./search-core.js"></script>
+  <script defer src="./places.js"></script>
   <script defer src="./recherche.js"></script>
   <script defer src="./nav.js"></script>
   <script defer src="./touch-hover.js"></script>
@@ -94,6 +95,7 @@
     </section>
     <section class="section" id="srResults" hidden aria-live="polite">
       <div class="container">
+        <div class="sr-place" id="srPlace" hidden></div>
         <div class="sr-summary" id="srSummary"></div>
         <div id="srPanels" hidden>
         <div class="sr-filters"><div class="chip-select" id="srSources" role="group" aria-label="Source"></div><label class="cx-unit">Trier <select id="srSort"><option value="amount">par montant</option><option value="year">par année</option></select></label></div>
