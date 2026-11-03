@@ -1378,7 +1378,7 @@ a.sr-place__card:hover { border-color: var(--c-teal-500); }
 .nav__menu a::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: 3px; border-radius: 3px; background: var(--brand-gradient); transform: scaleY(0); transition: transform .25s var(--ease, ease); }
 .nav__txt { display: flex; flex-direction: column; gap: .12rem; min-width: 0; transition: transform .25s var(--ease, ease); }
 .nav__menu strong { display: flex; align-items: center; gap: .45rem; }
-.nav__ico { flex: none; width: 18px; height: 18px; fill: var(--c-teal-600); }
+.nav__ico { flex: none; width: 18px; height: 18px; fill: var(--c-teal-600); fill: url(#frlNavGrad); }
 .nav__menu a:hover, .nav__menu a:focus-visible, .nav-sheet .nav__menu a:hover { background: none; }
 .nav__menu a:hover::before, .nav__menu a:focus-visible::before, .nav__menu a[aria-current="page"]::before { transform: scaleY(1); }
 .nav__menu a:hover .nav__txt, .nav__menu a:focus-visible .nav__txt { transform: translateX(3px); }

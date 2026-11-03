@@ -66,6 +66,10 @@ HEADER_EXTRA = (f'<a class="nav-support" href="{SUPPORT_URL}" target="_blank" re
                 f'{HEART}<span>Soutenir</span></a>'
                 f'<a class="nav-github nav-x" href="{X_URL}" target="_blank" rel="noopener noreferrer" aria-label="FranceRoueLibre sur X" '
                 f'title="FranceRoueLibre sur X">{X_ICON.format(s=16)}</a>')
+# The gradient of the menu icons (same as icons.js frlIcoGrad), defined once in the header, which is always shown
+HEADER_EXTRA += ('<svg class="nav-grad" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>'
+                 '<linearGradient id="frlNavGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--c-teal-600)"/>'
+                 '<stop offset="1" style="stop-color:var(--tx-1)"/></linearGradient></defs></svg>')
 FOOTER_EXTRA = (f'<a class="footer__github" href="{X_URL}" target="_blank" rel="noopener noreferrer">{X_ICON.format(s=13)}@FranceRoueLibre</a>'
                 f'<a class="footer__github footer__support" href="{SUPPORT_URL}" target="_blank" rel="noopener">{HEART.replace("16", "15")}Soutenir sur Tipeee</a>')
 
@@ -163,7 +167,7 @@ def sync(path):
         if f'src="./{extra}"' not in text:
             text = text.replace('<script defer src="./nav.js"></script>', f'<script defer src="./nav.js"></script>\n  <script defer src="./{extra}"></script>', 1)
     # Header: « Soutenir » and X before the GitHub link (rewritten each time). search-bar.js puts its form first.
-    text = re.sub(r'[ \t]*<a class="nav-support".*?</a><a class="nav-github nav-x".*?</a>\n', '', text, flags=re.S)
+    text = re.sub(r'[ \t]*<a class="nav-support".*?</a><a class="nav-github nav-x".*?</a>(<svg class="nav-grad".*?</svg>)?\n', '', text, flags=re.S)
     i = text.find('<div class="nav__actions">')
     if i >= 0:
         j = text.find('\n', i) + 1
