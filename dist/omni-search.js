@@ -20,7 +20,7 @@
   const STOP = new Set('le la les l de des du d un une et en a au aux pour par sur dans est ce que qui quoi quel quelle quels quelles combien pourquoi comment ou on il elle se sa son ses leur leurs plus moins y'.split(' '));
   const QUESTION = /^\s*(pourquoi|combien|comment|qu[’' ]?est[- ]ce|que |quel(le)?s? |qui |quand|o[uù] |est[- ]ce|peut[- ]on|faut[- ]il|explique|c[’']est quoi)|\?\s*$/i;
   const DEFAULT_EXAMPLES = [
-    'Carte des dépenses par commune', 'Levallois-Perret', 'Emplois publics', 'Fonctionnaires',
+    'Carte des dépenses par commune', 'Levallois-Perret', 'Emplois publics',
     'De combien a augmenté la dette sous le mandat de Bruno Le Maire ?', '33000', 'Pourquoi la dette de la France augmente-t-elle ?',
     'Piscines', 'Combien a coûté le nouveau fauteuil de Gérard Larcher ?', 'Disneyland', 'Terrain de pétanque',
   ];

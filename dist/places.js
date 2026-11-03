@@ -32,10 +32,11 @@
     projets: '<path d="M2 20h20M6 20V9h12v11M9 9V5h6v4M10 13h4"/>',
     elus: '<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 4a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 6"/>',
   };
-  const icon = key => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[key] || ICONS.commune}</svg>`;
+  const icon = key => `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" aria-hidden="true">${ICONS[key] || ICONS.commune}</svg>`;
   const escH = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function chips(links, { attr = '' } = {}) {
-    return `<div class="frl-chips">${(links || []).map((l, i) => `<a class="frl-chip frl-chip--${escH(l.cle)}" href="${escH(asset(l.url))}"${attr ? ` ${attr}="${i}"` : ''}>${icon(l.cle)}<span>${escH(l.libelle)}</span></a>`).join('')}</div>`;
+    const short = l => l.cle === 'commune' ? 'Commune' : l.cle === 'projets' ? 'Projets aidés' : l.cle === 'elus' ? 'Élus' : l.libelle;
+    return `<div class="frl-chips">${(links || []).map((l, i) => `<a class="frl-chip frl-chip--${escH(l.cle)}" href="${escH(asset(l.url))}" title="${escH(l.libelle)}"${attr ? ` ${attr}="${i}"` : ''}>${icon(l.cle)}<span>${escH(short(l))}</span></a>`).join('')}</div>`;
   }
   window.FRLPlaces = { find, mapUrl, projectsUrl, deptUrl, people, sure, chips, icon };
 })();

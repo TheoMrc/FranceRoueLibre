@@ -49,7 +49,7 @@
     back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   };
   /* answers built without a model (saved answers, places): the Loupe's lens alone, without its bubble */
-  const LENS = '<svg class="ai-prov__lens" viewBox="12 10.5 23 23" aria-hidden="true"><circle cx="22" cy="21" r="8.5"/><path d="M28.3 27.3L33.3 32.3"/><path class="ai-prov__spark" d="M22 15.6Q22.8 20.2 27.4 21Q22.8 21.8 22 26.4Q21.2 21.8 16.6 21Q21.2 20.2 22 15.6Z"/></svg>';
+  const LENS = '<svg class="ai-prov__lens" viewBox="12 10.5 23 23" width="15" height="15" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="22" cy="21" r="8.5"/><path d="M28.3 27.3L33.3 32.3"/><path class="ai-prov__spark" d="M22 15.6Q22.8 20.2 27.4 21Q22.8 21.8 22 26.4Q21.2 21.8 16.6 21Q21.2 20.2 22 15.6Z"/></svg>';
   const provBadge = (p, text = label(p)) => p ? `<span class="ai-prov ai-prov--${esc(p)}">${p === 'faq' ? LENS : logoOK[p] ? `<img src="${PROVIDERS[p].img}" alt="">` : '<i aria-hidden="true"></i>'}<span>${esc(text)}</span></span>` : '';
 
   /* Answers use a small subset of Markdown: paragraphs, lists, **bold**, *italic*, [links](https://…). Everything is
