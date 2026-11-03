@@ -3,3 +3,23 @@
 .tx-aff td.tx-aff-back { color: var(--tx-8); font-weight: 700; }
 .tx-aff th { white-space: normal; min-width: 5.5rem; }
 .tx-aff td:nth-child(2) { min-width: 180px; }
+
+/* Contrôle fiscal et fraude */
+#ecarts .chip-select { margin: 0 0 .6rem; }
+.tx-tip__dot { display: inline-block; width: .6rem; height: .6rem; border-radius: 2px; margin-right: .35rem; vertical-align: -1px; }
+.tx-range { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .85rem; }
+.tx-range li { min-width: 0; }
+.tx-range__head { display: flex; justify-content: space-between; gap: .75rem; font-size: .86rem; color: var(--c-ink); }
+.tx-range__head span { min-width: 0; }
+.tx-range__head small { color: var(--c-muted); font-size: .76rem; margin-left: .25rem; }
+.tx-range__head strong { flex: none; font-variant-numeric: tabular-nums; }
+.tx-range__track { position: relative; display: block; height: 8px; margin: .3rem 0 .25rem; border-radius: 4px; background: var(--c-line); }
+.tx-range__fill { position: absolute; top: 0; bottom: 0; border-radius: 4px; background: var(--tx-1); }
+.tx-range li.is-all .tx-range__fill { background: var(--tx-2); }
+.tx-range__avis { display: block; color: var(--c-muted); font-size: .76rem; line-height: 1.4; }
+.tx-range__axis { display: flex; justify-content: space-between; margin-top: .6rem; padding-top: .3rem; border-top: 1px solid var(--c-line); font-size: .72rem; color: var(--c-muted); font-variant-numeric: tabular-nums; }
+.tx-words .gap { background: var(--c-surface); }
+.tx-words .gap h3 { font-size: 1rem; margin: 0 0 .35rem; }
+.tx-words .gap p { font-size: .88rem; margin: 0; }
+#ecarts .tx-counts { margin-top: var(--sp-3); }
+@media (max-width: 680px) { #ecarts .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } #ecarts .kpis .kpi:last-child { grid-column: 1 / -1; } }

@@ -362,6 +362,7 @@
   "amende_moyenne_eur": {
    "2024": 33500.0
   },
+  "amende_maximale_eur": 500000.0,
   "suites": {
    "annee": 2023,
    "tribunal_pct": 25,

@@ -136,6 +136,115 @@
   }
 
 
+  /* ---------- Stacked bars (one bar per year) ---------- */
+  function stackBars(el, years, series, { height = 260, format = v => md(v), label = '' } = {}) {
+    const draw = W => {
+      const H = height, L = 44, R = 8, T = 12, B = 26;
+      const totals = years.map((_, i) => series.reduce((s, x) => s + x.values[i], 0));
+      const step = niceStep(Math.max(...totals)), hi = Math.ceil(Math.max(...totals) / step) * step;
+      const y = v => T + (H - T - B) * (1 - v / hi), bw = (W - L - R) / years.length, gap = Math.min(10, bw * .28);
+      let svg = '';
+      for (let v = 0; v <= hi + step / 2; v += step) svg += `<line class="tx-grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text class="tx-tick" x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${nf(v, 0)}</text>`;
+      years.forEach((yr, i) => {
+        let base = 0;
+        const x = L + i * bw + gap / 2;
+        series.forEach(sr => {
+          const v = sr.values[i];
+          svg += `<rect x="${x.toFixed(1)}" y="${y(base + v).toFixed(1)}" width="${(bw - gap).toFixed(1)}" height="${Math.max(0, y(base) - y(base + v)).toFixed(1)}" fill="${sr.color}"/>`;
+          base += v;
+        });
+        if (bw > 26 || i % 2 === 0 || i === years.length - 1) svg += `<text class="tx-tick" x="${(x + (bw - gap) / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle">${bw > 34 ? yr : String(yr).slice(2)}</text>`;
+        svg += `<rect class="tx-hit" data-i="${i}" x="${(L + i * bw).toFixed(1)}" y="${T}" width="${bw.toFixed(1)}" height="${H - T - B}"/>`;
+      });
+      el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(label)}">${svg}</svg>`;
+      el.querySelectorAll('.tx-hit').forEach(r => {
+        r.addEventListener('pointermove', event => {
+          const i = +r.dataset.i;
+          showTip(event, `<strong>${years[i]}</strong><span class="tx-tip__value">${format(totals[i])}</span>${series.slice().reverse().map(sr => `<br><i class="tx-tip__dot" style="background:${sr.color}"></i>${esc(sr.label)} : ${format(sr.values[i])}`).join('')}`);
+        });
+        r.addEventListener('pointerleave', hideTip);
+      });
+    };
+    return responsive(el, draw);
+  }
+
+  /* Contrôle fiscal et fraude: every figure from data/fraude.json (Cour des comptes, décembre 2025 ; Commission européenne). */
+  function fraud(f, data) {
+    const pop = Object.fromEntries((data.macro || []).map(r => [r.year, r.population]));
+    const popOf = y => pop[y] || pop[Math.max(...Object.keys(pop).map(Number).filter(k => k <= y))];
+    const cour = f.sources.cour, ce = f.sources.commission;
+    const src = (page, text = 'Cour des comptes') => `${link(`${cour.url}#page=${page}`, `${text}, p. ${page}`)}`;
+    const c = f.controle, ys = c.annees, y0 = ys[0], y1 = ys.at(-1);
+    const rec = f.recouvre.montants_md_eur, part = f.part_dans_recettes.pct;
+    const v = f.ecart_tva_commission, full = v.annees.filter(y => !v.provisoires.includes(y)), yv = full.at(-1);
+    const gap = Object.fromEntries(v.annees.map((y, i) => [y, v.ecart_meur[i]])), gpct = Object.fromEntries(v.annees.map((y, i) => [y, v.ecart_pct_tva_due[i]]));
+    const inc = f.incertitude, mo = f.moyens, det = f.fraude_detectee_sur_place, pen = f.penal;
+    const perHab = (mdEur, y) => Math.round(mdEur * 1e9 / popOf(y) / 10) * 10;
+
+    $('txFraudLead').innerHTML = `Personne ne mesure la fraude fiscale en France. « ${esc(inc.citation)} », écrit la Cour des comptes (${src(inc.page, 'décembre 2025')}), sur ${nf(inc.prelevements_obligatoires_md_eur, 0)} Md€ d’impôts et de cotisations en ${inc.annee}. Ce qui est mesuré : ce que le contrôle fiscal rattrape, et la TVA due mais non perçue.`;
+    const k = [
+      ['Réclamé après contrôle', md(c.resultats_totaux.at(-1)), `impôts et pénalités en ${y1}, contre ${md(c.resultats_totaux[0])} en ${y0}`],
+      ['Réellement encaissé', md(rec[y1]), `en ${y1}, soit environ ${nf(perHab(rec[y1], y1), 0)} € par habitant`],
+      ['Part des impôts encaissés', pct(part[y1]), `rattrapée par le contrôle en ${y1}, contre ${pct(part[y0])} en ${y0}`],
+      ['TVA due non perçue', md(gap[yv] / 1000), `${pct(gpct[yv])} de la TVA due en ${yv}, soit ${nf(perHab(gap[yv] / 1000, yv), 0)} € par habitant`],
+      ['Agents du contrôle', `−${nf(mo.baisse_effectifs_controle_pct, 0)} %`, `entre ${mo.periode[0]} et ${mo.periode[1]}`],
+    ];
+    $('txGapKpis').innerHTML = k.map(([l, val, sub]) => `<div class="kpi"><span>${esc(l)}</span><strong>${esc(val)}</strong><small>${esc(sub)}</small></div>`).join('');
+
+    const ser = [
+      { label: 'Impôts rappelés', values: c.droits_nets_rappeles, color: 'var(--tx-1)' },
+      { label: 'Crédits d’impôt bloqués', values: c.credits_non_rembourses, color: 'var(--tx-3)' },
+      { label: 'Pénalités et intérêts de retard', values: c.penalites_interets, color: 'var(--tx-2)' },
+    ];
+    stackBars($('txFraudCtl'), ys, ser, { label: `Résultats du contrôle fiscal ${y0}-${y1}` });
+    $('txFraudCtlLegend').innerHTML = ser.slice().reverse().map(sr => `<span><i style="background:${sr.color}"></i>${esc(sr.label)} <b>${md(sr.values.at(-1))}</b></span>`).join('');
+    $('txFraudCtlNote').innerHTML = `En milliards d’euros. ${md(c.resultats_totaux[0])} en ${y0}, ${md(Math.min(...c.resultats_totaux))} au plus bas en ${ys[c.resultats_totaux.indexOf(Math.min(...c.resultats_totaux))]} (contrôles sur place suspendus en 2020), ${md(c.resultats_totaux.at(-1))} en ${y1}, pendant que les impôts encaissés par l’administration fiscale augmentaient de ${nf(f.recettes_dgfip.hausse_pct, 0)} %. Réclamé ne veut pas dire payé : ${md(rec[y1])} ont été réellement encaissés en ${y1} (${md(rec[y0])} en ${y0}). « Crédits d’impôt bloqués » : remboursements refusés quand une fraude est détectée (carrousel de TVA). Source : ${src(c.page)} et ${src(f.recouvre.page)}.`;
+
+    let unit = 'md';
+    const vatPts = () => v.annees.map((y, i) => ({ x: y, value: unit === 'md' ? v.ecart_meur[i] / 1000 : v.ecart_pct_tva_due[i], note: v.provisoires.includes(y) ? 'estimation provisoire' : '',
+      sub: `${nf(v.ecart_meur[i] / 1000, 1)} Md€, ${pct(v.ecart_pct_tva_due[i])} de la TVA due<br>${nf(perHab(v.ecart_meur[i] / 1000, y), 0)} € par habitant` }));
+    const drawVat = () => lineChart($('txFraudVat'), vatPts(), { height: 236, format: unit === 'md' ? (x => md(x)) : (x => pct(x)), tickFormat: unit === 'md' ? (x => nf(x, 0)) : (x => `${nf(x, 0)} %`), label: 'Écart de TVA de la France' });
+    drawVat();
+    $('txFraudVatUnit').addEventListener('click', event => {
+      const b = event.target.closest('button[data-unit]'); if (!b) return;
+      unit = b.dataset.unit; $('txFraudVatUnit').querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b)); drawVat();
+    });
+    $('txFraudVatNote').innerHTML = `La TVA que les entreprises auraient dû reverser d’après la comptabilité nationale, moins celle encaissée. Ce manque mélange fraude, faillites, erreurs et optimisation : ce n’est pas la fraude seule. ${v.provisoires.length ? `${v.provisoires.join(', ')} : estimation provisoire. ` : ''}Avant ${v.estimations_completes_depuis}, séries recalculées par la Commission. Source : ${link(ce.page, 'Commission européenne, rapport 2025 sur l’écart de TVA')}.`;
+
+    const est = [...f.estimations_tva.filter(e => e.id !== 'commission-cour').map(e => ({ label: `TVA : ${e.auteur.split(' (')[0]}`, when: e.publie, lo: e.bas_md_eur, hi: e.haut_md_eur, avis: e.avis_cour, page: e.page, kind: 'tva' })),
+      { label: 'TVA : Commission européenne', when: String(yv), lo: gap[yv] / 1000, hi: gap[yv] / 1000, avis: 'Mêle fraude, faillites et erreurs ; méthode « descendante » contestée par l’administration fiscale.', page: null, kind: 'tva' },
+      ...f.estimations_ecart_global.map(e => ({ label: `Tous impôts : ${e.auteur.replace('Rapport des députés', 'députés')}`, when: `${e.publie_en}${e.donnees_anterieures_a ? `, données d’avant ${e.donnees_anterieures_a}` : ''}`, lo: e.bas_md_eur, hi: e.haut_md_eur, avis: e.avis_cour, page: e.page, kind: 'all' }))];
+    const top = Math.ceil(Math.max(...est.map(e => e.hi)) / 20) * 20;
+    $('txFraudEst').innerHTML = `<ul class="tx-range">${est.map(e => `<li class="is-${e.kind}"><div class="tx-range__head"><span>${esc(e.label)} <small>${esc(e.when)}</small></span><strong>${e.lo === e.hi ? md(e.lo) : `${nf(e.lo, 1)} à ${md(e.hi)}`}</strong></div>
+      <span class="tx-range__track" aria-hidden="true"><span class="tx-range__fill" style="left:${(100 * e.lo / top).toFixed(1)}%;width:max(6px, ${(100 * (e.hi - e.lo) / top).toFixed(1)}%)"></span></span>
+      <small class="tx-range__avis">${esc(e.avis)}${e.page ? ` (${src(e.page, 'Cour')})` : ''}</small></li>`).join('')}</ul><div class="tx-range__axis" aria-hidden="true">${[0, .25, .5, .75, 1].map(t => `<span>${nf(top * t, 0)}</span>`).join('')}</div>`;
+    $('txFraudEstNote').innerHTML = `En milliards d’euros par an, sur la même échelle. Aucune n’est une mesure officielle de la fraude : ce sont des estimations de l’écart entre l’impôt dû et l’impôt payé, faites à des dates et sur des périmètres différents. Pour l’impôt sur le revenu et l’impôt sur les sociétés, il n’en existe aucune : la Cour demande qu’elle soit faite d’ici ${f.estimation_demandee.annee} ; l’administration y consacre ${mo.statisticiens} statisticiens depuis ${esc(mo.depuis)} (${src(mo.page_statisticiens)}).`;
+
+    const t = f.droits_par_impot, last = t.annees.length - 1;
+    const taxes = [['impot_societes', 'Impôt sur les sociétés'], ['droits_enregistrement', 'Droits d’enregistrement (successions, ventes)'], ['tva', 'TVA'], ['impot_revenu', 'Impôt sur le revenu'], ['impots_locaux', 'Impôts locaux'], ['impot_fortune', 'Impôt sur la fortune'], ['autres', 'Autres impôts']];
+    $('txFraudTaxTitle').textContent = `Impôts rappelés par impôt, ${t.annees[last]}`;
+    hbars($('txFraudTax'), taxes.map(([key, l]) => ({ label: l, sub: `${t.annees[0]} : ${md(t[key][0])}`, value: t[key][last] })).sort((a, b) => b.value - a.value), { format: x => md(x) });
+    $('txFraudTaxNote').innerHTML = `Hors pénalités et crédits bloqués. Ce classement ne dit pas quel impôt est le plus fraudé : il reflète surtout l’intensité du contrôle, nettement plus forte sur les grandes entreprises, donc sur l’impôt sur les sociétés. Source : ${src(t.page)}.`;
+
+    const words = [
+      ['Fraude', 'Illégale : revenus cachés, fausses factures, TVA encaissée et non reversée. Seule celle trouvée lors des contrôles sur place est chiffrée : ' + `${md(det.fraude_md_eur)} en ${det.annee} (${nf(det.evolution_pct, 0)} % depuis ${det.depuis}), à côté de ${md(det.erreurs_md_eur)} d’erreurs de bonne foi.`],
+      ['Évasion', 'Montages pour échapper à l’impôt, souvent par l’étranger. Illégale quand le montage est abusif. Aucun chiffrage officiel.'],
+      ['Optimisation', 'Utiliser la loi au mieux pour payer moins. Légale. Non chiffrée.'],
+      ['Niches fiscales', 'Réductions et crédits d’impôt votés par le Parlement. Légales, chiffrées chaque année dans le budget.'],
+    ];
+    $('txFraudWords').innerHTML = words.map(([h, txt], i) => `<article class="gap"><h3>${esc(h)}</h3><p>${esc(txt)}${i === 3 ? ` <a href="niches.html">Voir les niches fiscales</a>` : ''}</p></article>`).join('');
+
+    const dp = Object.entries(pen.dossiers_parquet), am = Object.entries(pen.amende_moyenne_eur)[0];
+    const just = [
+      [nf(dp.at(-1)[1], 0), `dossiers de fraude transmis au procureur en ${dp.at(-1)[0]}, contre ${nf(dp[0][1], 0)} en ${dp[0][0]}, depuis la fin du « verrou de Bercy »`, pen.page_parquet],
+      [`${pen.condamnes_par_an[0]} à ${pen.condamnes_par_an[1]}`, `personnes condamnées pour fraude fiscale chaque année ; ${nf(pen.prison_ferme_pct, 0)} % des peines comportent de la prison ferme`, pen.page_condamnes],
+      [`${nf(pen.suites.classement_sans_suite_pct, 0)} %`, `des personnes mises en cause en ${pen.suites.annee} : affaire classée sans suite ; ${nf(pen.suites.tribunal_pct, 0)} % seulement jugées au tribunal correctionnel`, pen.page_condamnes],
+      [`${nf(am[1], 0)} €`, `amende moyenne prononcée en ${am[0]}, quand la loi prévoit jusqu’à ${nf(pen.amende_maximale_eur, 0)} € ou le double de l’impôt fraudé`, pen.page_condamnes],
+    ];
+    $('txFraudJustice').innerHTML = just.map(([val, txt, page]) => `<div class="tx-count"><strong>${esc(val)}</strong><p>${esc(txt)}</p>${src(page)}</div>`).join('');
+    $('txFraudSources').innerHTML = `Chiffres lus par script dans le ${link(cour.url, 'rapport de la Cour des comptes sur la lutte contre la fraude fiscale (décembre 2025)')} et dans les ${link(ce.url, 'tableaux de la Commission européenne sur l’écart de TVA')} (scripts/fraude-data.py). Population : Insee.`;
+  }
+
   load('./data/impots.json').then(init).catch(error => {
     console.error(error);
     $('txTreemap').innerHTML = '<p class="tx-empty">Données indisponibles. Le site doit être servi par HTTP.</p>';
@@ -462,10 +571,11 @@
 
     if (C.noLossQuote) $('txQuote').innerHTML = `« ${esc(C.noLossQuote.text)} »${link(C.noLossQuote.url, C.noLossQuote.title)}`;
 
-    /* ---------- Gaps ---------- */
-    const gaps = C.gaps || [];
-    $('txGapKpis').innerHTML = gaps.filter(g => g.kpi).map(g => `<div class="kpi"><span>${esc(g.label)}</span><strong>${esc(g.kpi)}</strong><small>${esc(g.sub || '')}</small></div>`).join('');
-    $('txGapList').innerHTML = gaps.map(g => `<article class="gap"><h3>${esc(g.label)}</h3><p>${esc(g.text)}</p><p class="note">${link(g.url, g.title || 'source')}</p></article>`).join('') || '<p class="tx-empty">Aucune estimation officielle trouvée.</p>';
+    /* ---------- Contrôle fiscal et fraude (data/fraude.json, scripts/fraude-data.py) ---------- */
+    load('./data/fraude.json').then(f => fraud(f, data)).catch(error => {
+      console.error(error);
+      $('txGapKpis').innerHTML = '<p class="tx-empty">Données sur le contrôle fiscal indisponibles.</p>';
+    });
 
 
     /* ---------- What the government should publish: computed counts, then one card per missing publication ---------- */

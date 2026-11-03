@@ -61,10 +61,18 @@ test('one list for every chart: every tax once, sourced, fractions never added t
 test('published collection costs carry their source', () => {
   const c = data.costs;
   for (const r of c.dgfip) { assert.ok(r.year >= 1990 && r.year <= 2026); assert.match(r.url, /^https:\/\//); }
-  for (const r of [...c.collectors, ...c.localFees, ...c.costDots, ...c.perTax, ...c.gaps]) assert.match(r.url, /^https:\/\//);
+  for (const r of [...c.collectors, ...c.localFees, ...c.costDots, ...c.perTax]) assert.match(r.url, /^https:\/\//);
   for (const r of c.costDots) assert.ok(r.per100 > 0 && r.per100 < 100, r.name);
   // The series breaks are documented, and the latest DGFiP rate stays below the 1999 level.
   assert.ok(c.dgfip.at(-1).gross < c.dgfip.find(r => r.year === 2010).gross);
+});
+
+test('fraud section: every figure from the downloaded reports, with its page', () => {
+  const f = JSON.parse(fs.readFileSync(new URL('../dist/data/fraude.json', import.meta.url), 'utf8'));
+  assert.match(f.sources.cour.url, /^https:\/\/www\.ccomptes\.fr\//);
+  assert.ok(f.controle.page > 0 && f.recouvre.page > 0 && f.estimations_ecart_global.every(e => e.page > 0));
+  assert.equal(f.controle.annees.length, f.controle.resultats_totaux.length);
+  assert.ok(!('gaps' in data.costs), 'the hand-typed gaps are gone: the section reads fraude.json');
 });
 
 test('built file is up to date', () => {

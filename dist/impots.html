@@ -87,7 +87,7 @@
         <span class="eyebrow">Impôts, taxes et prélèvements</span>
         <h1>Ce que rapporte chaque impôt, <span class="gradient-text">et ce que coûte sa collecte.</span></h1>
         <p class="hero__lead" id="txLead">Tous les prélèvements recensés, des grands impôts aux plus petites taxes, sur les mêmes graphiques : leur produit, qui les paie, qui les reçoit, qui les collecte, et ce que coûte leur collecte.</p>
-        <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#un-a-un">Du plus gros au plus petit</a><a href="#histoire">Depuis 1995</a><a href="#collecte">Coût de collecte</a><a href="#ecarts">Fraude et écarts</a><a href="#a-publier">Ce que l’État devrait publier</a><a href="#tableau">Tableau complet</a><a href="#affectees">Taxes affectées et plafonds</a><a href="#methode">Méthode</a></nav>
+        <nav class="tx-index" aria-label="Sections de la page"><a href="#ensemble">Vue d’ensemble</a><a href="#un-a-un">Du plus gros au plus petit</a><a href="#histoire">Depuis 1995</a><a href="#collecte">Coût de collecte</a><a href="#ecarts">Contrôle fiscal et fraude</a><a href="#a-publier">Ce que l’État devrait publier</a><a href="#tableau">Tableau complet</a><a href="#affectees">Taxes affectées et plafonds</a><a href="#methode">Méthode</a></nav>
       </div></div>
     </section>
 
@@ -153,9 +153,19 @@
 
     <section class="section" id="ecarts" aria-labelledby="txGapTitle">
       <div class="container">
-        <div class="section__head"><span class="eyebrow">Ce qui n’est pas perçu</span><h2 id="txGapTitle">Fraude, écarts et contrôle</h2><p class="lead">L’impôt dû n’est pas toujours l’impôt encaissé. Estimations officielles de l’écart de recouvrement et résultats du contrôle.</p></div>
+        <div class="section__head"><span class="eyebrow">Ce qui n’est pas perçu</span><h2 id="txGapTitle">Contrôle fiscal et fraude</h2><p class="lead" id="txFraudLead">Personne ne mesure la fraude fiscale en France. Ce qui est mesuré : ce que le contrôle fiscal rattrape, et la TVA due mais non perçue.</p></div>
         <div class="kpis" id="txGapKpis"></div>
-        <div id="txGapList" class="gap-grid"></div>
+        <div class="grid-2 tx-onebyone">
+          <div class="panel"><h3>Ce que le contrôle fiscal réclame chaque année</h3><div id="txFraudCtl" class="tx-line"></div><div id="txFraudCtlLegend" class="tx-legend"></div><p class="note" id="txFraudCtlNote"></p></div>
+          <div class="panel"><h3>TVA due mais non perçue</h3><div class="chip-select" id="txFraudVatUnit" role="group" aria-label="Unité"><button type="button" data-unit="md" class="active">Md€</button><button type="button" data-unit="pct">% de la TVA due</button></div><div id="txFraudVat" class="tx-line"></div><p class="note" id="txFraudVatNote"></p></div>
+        </div>
+        <div class="grid-2 tx-onebyone">
+          <div class="panel"><h3>Les estimations qui circulent, et ce qu’en dit la Cour des comptes</h3><div id="txFraudEst"></div><p class="note" id="txFraudEstNote"></p></div>
+          <div class="panel"><h3 id="txFraudTaxTitle">Redressements par impôt</h3><div id="txFraudTax"></div><p class="note" id="txFraudTaxNote"></p></div>
+        </div>
+        <div class="panel panel--wide"><h3>Quatre mots à ne pas confondre</h3><div class="gap-grid tx-words" id="txFraudWords"></div></div>
+        <div id="txFraudJustice" class="tx-counts"></div>
+        <p class="note" id="txFraudSources"></p>
       </div>
     </section>
 

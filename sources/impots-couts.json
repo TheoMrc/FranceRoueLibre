@@ -629,32 +629,6 @@
   "sub": "pour ses déclarations et paiements d’impôts et cotisations (10,3 paiements par an), Banque mondiale, Doing Business 2020 (données 2018)",
   "url": "https://www.doingbusiness.org/content/dam/doingBusiness/country/f/france/FRA.pdf"
  },
- "gaps": [
-  {
-   "label": "Écart de TVA",
-   "kpi": "12 Md€",
-   "sub": "6 % de la TVA due en 2023",
-   "text": "Différence entre la TVA qui aurait dû être payée et celle encaissée (fraude, faillites, erreurs, optimisation). Moyenne de l’Union européenne : 9,5 %.",
-   "url": "https://data.consilium.europa.eu/doc/document/ST-16801-2025-ADD-10/en/pdf",
-   "title": "Commission européenne, document de travail des services (2025)"
-  },
-  {
-   "label": "Contrôle fiscal : notifié",
-   "kpi": "17,1 Md€",
-   "sub": "droits et pénalités notifiés en 2025",
-   "text": "Montants réclamés après un contrôle fiscal de la DGFiP (≈ 9,8 Md€ de contrôles externes, 7,3 Md€ de contrôles sur pièces).",
-   "url": "https://www.economie.gouv.fr/actualites/lutte-contre-la-fraude-un-controle-fiscal-toujours-plus-efficace-en-2025",
-   "title": "Ministère de l’Économie (2026)"
-  },
-  {
-   "label": "Contrôle fiscal : encaissé",
-   "kpi": "11,4 Md€",
-   "sub": "effectivement encaissés en 2025",
-   "text": "Sommes encaissées dans l’année sur les créances de contrôle fiscal, y compris d’années antérieures : notifié et encaissé ne portent pas sur les mêmes dossiers.",
-   "url": "https://www.economie.gouv.fr/actualites/lutte-contre-la-fraude-un-controle-fiscal-toujours-plus-efficace-en-2025",
-   "title": "Ministère de l’Économie (2026)"
-  }
- ],
  "sources": [
   {
    "title": "DGFiP, rapports annuels de performance (programme 156)",

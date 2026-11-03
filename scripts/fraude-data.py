@@ -182,6 +182,8 @@ def cour(pages: dict) -> dict:
     penal['prison_ferme_pct'] = n(m.group(1))
     m, _ = r.find(r'pour un montant moyen de ([\d ]+) € en (\d{4})', 'amende moyenne')
     penal['amende_moyenne_eur'] = {m.group(2): n(m.group(1))}
+    m, _ = r.find(r'aux peines encourues de par la loi \(jusqu’à ([\d ]+) € ou le double des impôts fraudés\)', 'amende maximale')
+    penal['amende_maximale_eur'] = n(m.group(1))
     m, _ = r.find(r'en (\d{4}), seul un quart des personnes mises en cause ont réellement fait l’objet de poursuites devant le tribunal correctionnel, tandis que pour (\d+) % d’entre elles, la procédure pénale s’est conclue par un classement sans suite et pour (\d+) % par des alternatives aux poursuites', 'suites pénales')
     penal['suites'] = {'annee': int(m.group(1)), 'tribunal_pct': 25, 'classement_sans_suite_pct': n(m.group(2)), 'alternatives_pct': n(m.group(3))}
 
