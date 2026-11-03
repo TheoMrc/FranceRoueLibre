@@ -1369,9 +1369,18 @@ a.sr-place__card:hover { border-color: var(--c-teal-500); }
 .map-theme-snapshot.is-switch { transition: opacity .32s ease !important; }
 .omni input { caret-color: var(--c-teal-600); }
 
-/* Menu items with their icon (scripts/sync_nav.py, scripts/nav-icons.json) */
-.nav__menu a, .nav-sheet .nav__menu a { flex-direction: row; align-items: flex-start; gap: .65rem; }
-.nav__txt { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
-.nav__ico { flex: none; display: grid; place-items: center; width: 34px; height: 34px; margin-top: .05rem; border-radius: 10px; background: color-mix(in srgb, var(--c-teal-500) 12%, transparent); }
-.nav__ico svg { width: 20px; height: 20px; fill: var(--c-teal-600); }
-.nav__menu a:hover .nav__ico, .nav__menu a[aria-current="page"] .nav__ico { background: color-mix(in srgb, var(--c-teal-500) 20%, transparent); }
+/* Menu items (scripts/sync_nav.py): icon in line with the title, thin separators; on hover a gradient bar grows on
+   the left and the text moves by a hair (a transform: it never changes the line breaks) */
+.nav__menu li + li { border-top: 1px solid var(--c-line); }
+.nav__menu a, .nav-sheet .nav__menu a { position: relative; display: block; padding: .6rem .8rem .6rem 1rem; border-radius: 0; background: none; }
+.nav__menu li:first-child a { border-radius: var(--r-sm) var(--r-sm) 0 0; }
+.nav__menu li:last-child a { border-radius: 0 0 var(--r-sm) var(--r-sm); }
+.nav__menu a::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: 3px; border-radius: 3px; background: var(--brand-gradient); transform: scaleY(0); transition: transform .25s var(--ease, ease); }
+.nav__txt { display: flex; flex-direction: column; gap: .12rem; min-width: 0; transition: transform .25s var(--ease, ease); }
+.nav__menu strong { display: flex; align-items: center; gap: .45rem; }
+.nav__ico { flex: none; width: 18px; height: 18px; fill: var(--c-teal-600); }
+.nav__menu a:hover, .nav__menu a:focus-visible, .nav-sheet .nav__menu a:hover { background: none; }
+.nav__menu a:hover::before, .nav__menu a:focus-visible::before, .nav__menu a[aria-current="page"]::before { transform: scaleY(1); }
+.nav__menu a:hover .nav__txt, .nav__menu a:focus-visible .nav__txt { transform: translateX(3px); }
+.nav__menu a[aria-current="page"] { background: none; box-shadow: none; }
+@media (prefers-reduced-motion: reduce) { .nav__menu a::before, .nav__txt { transition: none; } }

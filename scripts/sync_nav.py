@@ -78,7 +78,7 @@ ICONS = json.loads((ROOT / 'scripts' / 'nav-icons.json').read_text(encoding='utf
 
 def nav_icon(href):
     i = ICONS.get(href)
-    return f'<span class="nav__ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><path d="{i["d"]}"/></svg></span>' if i else ''
+    return f'<svg class="nav__ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="{i["d"]}"/></svg>' if i else ''
 
 
 def esc(s):
@@ -98,7 +98,7 @@ def render(page, indent='      '):
         mark = ' aria-current="page"'
         local = lambda h: f'#{h.split("#", 1)[1]}' if home and h.startswith('index.html#') else h
         items = ''.join(
-            f'<li><a href="{local(h)}"{mark if h == page else ""}>{nav_icon(h)}<span class="nav__txt"><strong>{esc(t)}</strong><small>{esc(d)}</small></span></a></li>'
+            f'<li><a href="{local(h)}"{mark if h == page else ""}><span class="nav__txt"><strong>{nav_icon(h)}{esc(t)}</strong><small>{esc(d)}</small></span></a></li>'
             for t, h, d in target)
         out.append(
             f'{indent}  <li class="nav__group{" is-current" if current else ""}">'
