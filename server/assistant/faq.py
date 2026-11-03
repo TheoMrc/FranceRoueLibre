@@ -41,4 +41,4 @@ def find(messages: list) -> dict | None:
 def result(entry: dict) -> dict:
     """Same shape as an answer of agent.answer(), marked as saved."""
     return {'reply': entry['reply'], 'sources': entry.get('sources', []), 'searches': [], 'provider': 'faq',
-            'label': 'Réponse enregistrée', 'saved': entry['id']}
+            'label': 'Réponse automatique sourcée', 'saved': entry['id']}

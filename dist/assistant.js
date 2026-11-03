@@ -48,7 +48,9 @@
     stop: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></svg>',
     back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   };
-  const provBadge = (p, text = label(p)) => p ? `<span class="ai-prov ai-prov--${esc(p)}">${logoOK[p] ? `<img src="${PROVIDERS[p].img}" alt="">` : '<i aria-hidden="true"></i>'}<span>${esc(text)}</span></span>` : '';
+  /* answers built without a model (saved answers, places): the Loupe's lens alone, without its bubble */
+  const LENS = '<svg class="ai-prov__lens" viewBox="12 10.5 23 23" aria-hidden="true"><circle cx="22" cy="21" r="8.5"/><path d="M28.3 27.3L33.3 32.3"/><path class="ai-prov__spark" d="M22 15.6Q22.8 20.2 27.4 21Q22.8 21.8 22 26.4Q21.2 21.8 16.6 21Q21.2 20.2 22 15.6Z"/></svg>';
+  const provBadge = (p, text = label(p)) => p ? `<span class="ai-prov ai-prov--${esc(p)}">${p === 'faq' ? LENS : logoOK[p] ? `<img src="${PROVIDERS[p].img}" alt="">` : '<i aria-hidden="true"></i>'}<span>${esc(text)}</span></span>` : '';
 
   /* Answers use a small subset of Markdown: paragraphs, lists, **bold**, *italic*, [links](https://…). Everything is
      escaped first, and only http(s) or site-relative links become anchors. */
@@ -257,7 +259,7 @@
         v.think(null); v.setRunning(false);
         if (m.steps.length) v.summary(false);
         const parts = [];
-        if (m.sources?.length) parts.push(`<div class="ai-chips"><span>Sources web</span>${m.sources.map((s, i) => `<a style="--i:${i}" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>`).join('')}</div>`);
+        if (m.sources?.length) parts.push(`<div class="ai-chips"><span>${m.provider === 'faq' ? 'Sources' : 'Sources web'}</span>${m.sources.map((s, i) => `<a style="--i:${i}" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>`).join('')}</div>`);
         if (m.searches?.length) parts.push(`<div class="ai-chips ai-chips--search"><span>Recherches Google</span>${m.searches.map((s, i) => `<a style="--i:${i + 2}" href="https://www.google.com/search?q=${encodeURIComponent(s)}" target="_blank" rel="noopener noreferrer">${esc(s)}</a>`).join('')}</div>`);
         if (m.liens?.liens?.length) parts.push(liensHtml(m.liens));
         if (m.demande) parts.push(demandeHtml(m));
@@ -280,7 +282,7 @@
     if (!m.job || m.error || !m.text) return '';
     if (m.vote) return `<span class="ai-vote is-done">${m.vote > 0 ? 'Merci !' : 'Merci, la réponse sera relue.'}</span>`;
     if (Date.now() - (m.at || 0) > 55 * 60 * 1000) return '';
-    return `<span class="ai-vote"><span>Utile ?</span><button type="button" data-vote="1" aria-label="Réponse utile">${VOTE_UP}</button><button type="button" data-vote="-1" aria-label="Réponse fausse ou inutile">${VOTE_DOWN}</button></span>`;
+    return `<span class="ai-vote" title="Cette réponse est-elle utile ?"><button type="button" data-vote="1" aria-label="Réponse utile">${VOTE_UP}</button><button type="button" data-vote="-1" aria-label="Réponse fausse ou inutile">${VOTE_DOWN}</button></span>`;
   }
   function sendVote(m, vote, el) {
     m.vote = vote; saveStore();

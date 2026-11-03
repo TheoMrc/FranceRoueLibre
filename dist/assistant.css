@@ -316,3 +316,7 @@ html.ai-locked body { position: fixed; left: 0; right: 0; width: 100%; }
 .ai-links .frl-chip { color: var(--c-ink); }
 .ai-links .frl-chip:hover { color: var(--c-teal-600); }
 .ai-links .frl-chip--commune, .ai-links .frl-chip--commune:hover { color: #fff; }
+.ai-prov__lens { width: 15px; height: 15px; fill: none; stroke: var(--c-teal-600); stroke-width: 3; stroke-linecap: round; }
+.ai-prov__lens .ai-prov__spark { fill: #e11d48; stroke: none; }
+.ai-foot .ai-prov--faq { white-space: nowrap; }
+.ai-vote > span { white-space: nowrap; }
