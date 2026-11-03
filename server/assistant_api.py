@@ -193,10 +193,12 @@ def saved_job(ip: str, entry: dict, messages: list, result: dict = None) -> str:
     other and gets it at once."""
     jid = secrets.token_urlsafe(18)
     now = time.time()
+    result = dict(result) if result else faq.result(entry)
+    events = result.pop('events', [])
     with JOBS_LOCK:
-        JOBS[jid] = {'id': jid, 't': now, 'seen': now, 'ip': ip, 'events': [], 'done': True, 'result': result or faq.result(entry),
+        JOBS[jid] = {'id': jid, 't': now, 'seen': now, 'ip': ip, 'events': events, 'done': True, 'result': result,
                      'cancel': False, 'state': 'done', 'messages': None, 'provider': None}
-    journal.write(S.STATE_DIR, journal.answer_entry(jid, journal.reader(ip), messages, [], JOBS[jid]['result'], 0))
+    journal.write(S.STATE_DIR, journal.answer_entry(jid, journal.reader(ip), messages, events, JOBS[jid]['result'], 0))
     return jid
 
 

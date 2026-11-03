@@ -20,9 +20,9 @@
   const STOP = new Set('le la les l de des du d un une et en a au aux pour par sur dans est ce que qui quoi quel quelle quels quelles combien pourquoi comment ou on il elle se sa son ses leur leurs plus moins y'.split(' '));
   const QUESTION = /^\s*(pourquoi|combien|comment|qu[’' ]?est[- ]ce|que |quel(le)?s? |qui |quand|o[uù] |est[- ]ce|peut[- ]on|faut[- ]il|explique|c[’']est quoi)|\?\s*$/i;
   const DEFAULT_EXAMPLES = [
-    'Carte des dépenses par commune', 'Emplois publics', 'Fonctionnaires',
-    'De combien a augmenté la dette sous le mandat de Bruno Le Maire ?', 'Pourquoi la dette de la France augmente-t-elle ?',
-    'Piscines', 'Disneyland', 'Terrain de pétanque',
+    'Carte des dépenses par commune', 'Levallois-Perret', 'Emplois publics', 'Fonctionnaires',
+    'De combien a augmenté la dette sous le mandat de Bruno Le Maire ?', '33000', 'Pourquoi la dette de la France augmente-t-elle ?',
+    'Piscines', 'Combien a coûté le nouveau fauteuil de Gérard Larcher ?', 'Disneyland', 'Terrain de pétanque',
   ];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const results = asset('recherche.html');
@@ -199,7 +199,11 @@
     const form = root.querySelector('form'), input = root.querySelector('input'), panel = root.querySelector('.omni__panel');
     const ghost = root.querySelector('.omni__ghost'), ghostText = root.querySelector('.omni__ghost-text'), ghostInner = root.querySelector('.omni__ghost-inner');
     /* a long example scrolls to the left as it is typed, so the end being typed stays in view */
-    const setGhost = text => { ghostText.textContent = text; const over = Math.max(0, ghostInner.scrollWidth - ghost.clientWidth); ghostInner.style.transform = `translateX(${-over}px)`; ghost.classList.toggle('is-scrolled', over > 0); };
+    const goBtn = root.querySelector('.omni__go');
+    /* the example stops before the button, whatever its width (« Rechercher » on a wide screen, an icon on a phone) */
+    const fitGhost = () => { if (goBtn?.offsetWidth) ghost.style.right = `${form.clientWidth - goBtn.offsetLeft + 10}px`; };
+    addEventListener('resize', fitGhost, { passive: true });
+    const setGhost = text => { fitGhost(); ghostText.textContent = text; const over = Math.max(0, ghostInner.scrollWidth - ghost.clientWidth); ghostInner.style.transform = `translateX(${-over}px)`; ghost.classList.toggle('is-scrolled', over > 0); };
     /* examples typing themselves while the box is empty */
     let ex = 0, typing = null;
     function typeLoop() {

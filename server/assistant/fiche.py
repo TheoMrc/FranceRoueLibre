@@ -159,4 +159,12 @@ def answer(messages: list) -> Optional[dict]:
         return None
     if not res:
         return None
-    return dict(res, searches=[], provider='faq', label='Réponse construite à partir des données du site', saved='lieu')
+    # the steps shown under « Recherches » in the panel, as for a model's answer
+    name = (res.get('liens') or {}).get('commune') or q
+    steps = [('dossier_collectivite', f'Dossier de « {name} »', 'comptes, échelons, projets aidés, signaux'),
+             ('comparer', f'Comparaison de « {name} » avec les collectivités de même taille', 'médiane et rang')]
+    if 'Plusieurs communes' in res['reply']:
+        steps = [('dossier_collectivite', f'Communes nommées « {q} »', 'homonymes')]
+    events = [{'type': 'tool_done', 'name': n, 'label': l, 'ok': True, 'summary': sm, 's': 0} for n, l, sm in steps]
+    return dict(res, searches=[], provider='faq', label='Réponse construite à partir des données du site', saved='lieu',
+                events=events)
