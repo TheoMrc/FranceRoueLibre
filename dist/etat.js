@@ -271,9 +271,9 @@
     /* Spent in 2024, voted for 2025, asked for 2026 (budget vert of the PLF 2026, the only 2026 file by programme) */
     function years3(x) {
       if (x.cp26 == null) return '';
-      const d = x.cp25lfi ? 100 * (x.cp26 - x.cp25lfi) / x.cp25lfi : null;
+      const d = x.cp25lfi > 0 ? 100 * (x.cp26 - x.cp25lfi) / x.cp25lfi : null;
       return `<h4 class="et-h4">D’une année à l’autre</h4><dl><dt>Payé en 2024</dt><dd>${meur(x.cp24exe)}</dd><dt>Voté pour 2025 (loi de finances)</dt><dd>${meur(x.cp25lfi)}</dd><dt>Demandé pour 2026 (PLF)</dt><dd>${meur(x.cp26)}${d == null ? '' : ` <span class="muted">(${d >= 0 ? '+' : ''}${pct(d, 1)})</span>`}</dd></dl>
-        <p class="note">Crédits de paiement tirés du ${src('plf26-budget-vert', 'budget vert du PLF 2026')}, qui reprend chaque ligne de crédits du budget général.</p>`;
+        <p class="note">Crédits de paiement du ${src('plf26-budget-vert', 'budget vert du PLF 2026')}, le seul fichier ouvert du projet 2026 par programme. ${esc(data.plf26?.perimetre || '')}</p>`;
     }
     function detailMission(m) {
       const list = m.type === 'BG' && m !== rd ? bgNet : m.type === 'BG' ? bg : others, tot = sum(list, x => x.cp);

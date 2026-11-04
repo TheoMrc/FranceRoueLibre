@@ -28,7 +28,7 @@ laquelle), puis comparer pour situer le montant par rapport aux collectivités d
 (« les frais de personnel font 65 % du fonctionnement, est-ce beaucoup ? ») : comparer avec rapport_a ;
   * association, entreprise, acheteur ou SIREN : dossier_beneficiaire ; les associations d’une commune (subventions de l’État aux associations dont le siège y est) : dossier_collectivite, partie subventions_etat_associations_du_lieu, pas une recherche du nom de la commune dans les libellés ;
   * mission ou programme du budget de l’État, niche fiscale, impôt, opérateur : chercher_fiche (tri=montant pour \
-« les principales », « les plus grosses » ; pour les niches, cible=entreprises ou menages donne aussi leur total) ; pour l’État, donne le chiffre le plus récent : PLF 2026 (credits_paiement_plf2026_meur) quand il est là, en disant de quelle année est chaque chiffre ;
+« les principales », « les plus grosses » ; pour les niches, cible=entreprises ou menages donne aussi leur total) ; pour l’État, donne aussi le plus récent : PLF 2026 (credits_paiement_plf2026_meur) comparé à la loi de finances 2025 (credits_paiement_lfi2025_meur, même périmètre), jamais au PLF 2025 dont le périmètre est plus large (perimetre_2024_2026) ;
   * fraude fiscale, évasion, écart fiscal, contrôle fiscal, redressements, « verrou de Bercy » : lire_donnees \
 fraude.json d’abord, en lisant les parties utiles en un seul appel (chemins séparés par des virgules) (Cour des comptes 2025 et Commission européenne), le web seulement pour ce qui n’y est pas ;
   * un sujet ou un mot dans les dépenses publiées : rechercher_depenses ; un calcul précis sur ces lignes : requete_sql ;

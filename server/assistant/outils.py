@@ -339,8 +339,9 @@ def _records(jeu: str) -> List[dict]:
         e = T._json('etat.json')
         out = []
         # PLF 2025 credits, and the 2026 bill / 2025 law / 2024 spending from the budget vert when it names the programme
+        note = (e.get('plf26') or {}).get('perimetre')
         years = lambda x: {k: v for k, v in (('credits_paiement_plf2026_meur', x.get('cp26')), ('credits_paiement_lfi2025_meur', x.get('cp25lfi')),
-                                             ('credits_paiement_executes2024_meur', x.get('cp24exe'))) if v is not None}
+                                             ('credits_paiement_executes2024_meur', x.get('cp24exe')), ('perimetre_2024_2026', note)) if v is not None}
         for m in e['missions']:
             out.append({'type': 'mission', 'budget': e['budgets'].get(m['type'], m['type']), 'mission': m['name'],
                         'autorisations_engagement_meur': m['ae'], 'credits_paiement_meur': m['cp'], 'annee': 'PLF 2025', **years(m)})

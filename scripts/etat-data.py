@@ -278,8 +278,7 @@ def plf26(missions):
             sums[(key(r['mission']), key(r['programme']))][i] += num(r[c])
     used, matched = set(), 0
     for mi in missions:
-        tot = [0.0, 0.0, 0.0]
-        hit = False
+        mkeys = set()
         for pr in mi['progs']:
             k = (key(mi['name']), key(pr['name']))
             if k not in sums:  # a mission renamed between the two bills: the programme name alone, when unique
@@ -288,12 +287,16 @@ def plf26(missions):
             if k in sums:
                 v = sums[k]
                 pr.update(cp24exe=m(v[0]), cp25lfi=m(v[1]), cp26=m(v[2]))
-                used.add(k); matched += 1; hit = True
-                tot = [a + b for a, b in zip(tot, v)]
-        if hit:
+                used.add(k); matched += 1
+                mkeys.add(k[0])
+        if mkeys:  # the mission: every line of the budget vert under its name(s), programmes not matched included
+            tot = [sum(v[i] for (mk, _), v in sums.items() if mk in mkeys) for i in range(3)]
             mi.update(cp24exe=m(tot[0]), cp25lfi=m(tot[1]), cp26=m(tot[2]))
     rest = sorted(((mk, pk, v) for (mk, pk), v in sums.items() if (mk, pk) not in used and abs(v[2]) >= 1e6), key=lambda x: -abs(x[2][2]))
     return {'source': 'plf26-budget-vert', 'programmes': matched,
+            'perimetre': 'Le budget vert ne reprend pas les cotisations de retraite des agents de l’État (compte Pensions) '
+                         'ni la charge de la dette : ses montants sont souvent plus bas que les crédits du PLF 2025. '
+                         'Comparer 2024, 2025 et 2026 entre eux, pas au PLF 2025.',
             'total26': m(sum(v[2] for v in sums.values())), 'total25lfi': m(sum(v[1] for v in sums.values())),
             'non_rattaches': [{'mission': a, 'programme': b, 'cp26': m(v[2])} for a, b, v in rest[:40]]}
 
