@@ -259,7 +259,7 @@
         v.think(null); v.setRunning(false);
         if (m.steps.length) v.summary(false);
         const parts = [];
-        if (m.sources?.length) parts.push(`<div class="ai-chips"><span>${m.provider === 'faq' ? 'Sources' : 'Sources web'}</span>${m.sources.map((s, i) => `<a style="--i:${i}" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>`).join('')}</div>`);
+        if (m.sources?.length) parts.push(`<div class="ai-chips"><span>${m.provider === 'faq' ? 'Sources' : 'Sources web'}</span>${m.sources.filter(s => /^https?:\/\//i.test(s?.url || '')).map((s, i) => `<a style="--i:${i}" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>`).join('')}</div>`);
         if (m.searches?.length) parts.push(`<div class="ai-chips ai-chips--search"><span>Recherches Google</span>${m.searches.map((s, i) => `<a style="--i:${i + 2}" href="https://www.google.com/search?q=${encodeURIComponent(s)}" target="_blank" rel="noopener noreferrer">${esc(s)}</a>`).join('')}</div>`);
         if (m.liens?.liens?.length) parts.push(liensHtml(m.liens));
         if (m.demande) parts.push(demandeHtml(m));

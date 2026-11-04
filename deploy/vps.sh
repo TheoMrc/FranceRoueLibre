@@ -46,6 +46,30 @@ rsync -a --checksum --delete --delay-updates --chmod=Da+rx,Fa+r --itemize-change
 
 write_conf() {
   local https=$1
+  # Security headers, included in every server and in each location that sets its own add_header (nginx drops the
+  # server's headers there). The CSP allows only the site itself, the inline theme script by its hash (computed here
+  # from dist at each deploy, so it follows the pages) and the State's company-name API called from common.js.
+  local hashes
+  hashes=$(python3 - "$DIR/dist" <<'PY'
+import base64, glob, hashlib, re, sys
+seen = set()
+for f in glob.glob(sys.argv[1] + '/*.html'):
+    for attrs, body in re.findall(r'<script(?![^>]*\bsrc=)([^>]*)>(.*?)</script>', open(f, encoding='utf-8').read(), re.S):
+        if 'ld+json' not in attrs:
+            seen.add("'sha256-" + base64.b64encode(hashlib.sha256(body.encode()).digest()).decode() + "'")
+print(' '.join(sorted(seen)))
+PY
+)
+  {
+    echo "# francerouelibre.fr security headers – written by deploy/vps.sh"
+    [ "$https" = 1 ] && echo 'add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;'
+    echo "add_header Content-Security-Policy \"default-src 'self'; script-src 'self' $hashes 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://recherche-entreprises.api.gouv.fr; worker-src 'self' blob:; child-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'$([ "$https" = 1 ] && echo '; upgrade-insecure-requests')\" always;"
+    echo 'add_header X-Content-Type-Options "nosniff" always;'
+    echo 'add_header X-Frame-Options "DENY" always;'
+    echo 'add_header Referrer-Policy "strict-origin-when-cross-origin" always;'
+    echo 'add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()" always;'
+    echo 'add_header Cross-Origin-Opener-Policy "same-origin" always;'
+  } | sudo -n tee /etc/nginx/snippets/francerouelibre-headers.conf > /dev/null
   {
     echo "# francerouelibre.fr – written by deploy/vps.sh (FranceRoueLibre repo), static files from $WEB"
     echo "limit_req_zone \$binary_remote_addr zone=frl_api:10m rate=5r/s;"
@@ -67,12 +91,14 @@ NGX
 server {
     listen 80; listen [::]:80;
     server_name francerouelibre.fr www.francerouelibre.fr;
+    server_tokens off;
     location /.well-known/acme-challenge/ { root /var/www/francerouelibre/dist; }
     location / { return 301 https://francerouelibre.fr$request_uri; }
 }
 server {
     listen 443 ssl; listen [::]:443 ssl; http2 on;
     server_name www.francerouelibre.fr;
+    server_tokens off;
     ssl_certificate     /etc/letsencrypt/live/francerouelibre.fr/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/francerouelibre.fr/privkey.pem;
     include             /etc/letsencrypt/options-ssl-nginx.conf;
@@ -86,7 +112,6 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/francerouelibre.fr/privkey.pem;
     include             /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
-    add_header Strict-Transport-Security "max-age=31536000" always;
 NGX
     else
       cat <<'NGX'
@@ -97,6 +122,8 @@ NGX
     fi
     cat <<'NGX'
     root /var/www/francerouelibre-web;
+    server_tokens off;
+    include snippets/francerouelibre-headers.conf;
     access_log /var/log/nginx/francerouelibre.access.log frl;
     index index.html;
     charset utf-8;
@@ -109,7 +136,7 @@ NGX
     # Let's Encrypt (^~ wins over the dotfile rule below)
     location ^~ /.well-known/acme-challenge/ { root /var/www/francerouelibre/dist; default_type text/plain; }
     # Search index: read by HTTP range requests (nginx serves ranges natively); never gzip these
-    location /data/search/db/ { gzip off; add_header Cache-Control "no-cache" always; add_header Strict-Transport-Security "max-age=31536000" always; }
+    location /data/search/db/ { gzip off; add_header Cache-Control "no-cache" always; include snippets/francerouelibre-headers.conf; }
     location ~ \.geojson$ { default_type application/json; expires 10m; }
     # Search API (server/search_api.py, systemd unit francerouelibre-search)
     # AI assistant (server/assistant_api.py, systemd unit francerouelibre-assistant); answers 502 when not installed
@@ -127,7 +154,7 @@ NGX
         proxy_cache frl_search; proxy_cache_lock on; proxy_cache_lock_timeout 12s; proxy_cache_background_update on;
         proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
         add_header X-Cache $upstream_cache_status always;
-        add_header Strict-Transport-Security "max-age=31536000" always;
+        include snippets/francerouelibre-headers.conf;
         access_log /var/log/nginx/francerouelibre.access.log frl;
         access_log /var/lib/francerouelibre/recherches/$frl_day.jsonl frl_q if=$frl_q_log;
         proxy_pass http://127.0.0.1:8017; proxy_read_timeout 20s;
@@ -138,6 +165,7 @@ NGX
         limit_req zone=frl_api burst=40 nodelay; limit_req_status 429;
         proxy_cache frl_search; proxy_cache_valid 200 1h; proxy_cache_use_stale error timeout updating;
         add_header X-Cache $upstream_cache_status always;
+        include snippets/francerouelibre-headers.conf;
         proxy_pass http://127.0.0.1:8017; proxy_read_timeout 10s;
         proxy_set_header Host $host;
     }
