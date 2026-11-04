@@ -1403,7 +1403,7 @@ function renderInspector(rows, summary) {
   renderPick(context);
   let items = []; let heading = 'À la une'; let countLabel = '';
   if (state.mode === 'projects') { items = [...projectRowsForScope(rows)].sort((a, b) => projectMetric(b) - projectMetric(a)); heading = state.selectedCommune ? 'Projets de la commune' : 'Projets les plus financés'; countLabel = `${formatCount(rows.length)} projets`; }
-  else if (state.mode === 'communes') { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); if (state.search || state.selectedCommune) items.push(...missing); heading = state.selectedCommune ? 'Commune sélectionnée' : state.selectedDepartment ? 'Communes du département' : 'Communes les plus dépensières'; countLabel = `${formatCount(rows.length)} comptes${missing.length ? ` · ${formatCount(missing.length)} non apparié${missing.length > 1 ? 's' : ''}` : ''}`; }
+  else if (state.mode === 'communes') { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); if (state.search || state.selectedCommune) items.push(...missing); heading = state.selectedCommune ? 'Commune sélectionnée' : state.selectedDepartment ? 'Communes du département' : 'Communes les plus dépensières'; countLabel = `${formatCount(rows.length)} compte${rows.length > 1 ? "s" : ""}${missing.length ? ` · ${formatCount(missing.length)} non apparié${missing.length > 1 ? 's' : ''}` : ''}`; }
   else if (state.mode === 'departments') { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); heading = 'Départements'; countLabel = `${formatCount(rows.length)} départements`; }
   else if (state.mode === 'gfp') { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); heading = 'Intercommunalités'; countLabel = `${formatCount(rows.length)} intercommunalités`; }
   else { items = [...rows].sort((a, b) => valueForBudget(b) - valueForBudget(a)); heading = 'Régions'; countLabel = `${formatCount(rows.length)} régions`; }
@@ -1413,6 +1413,36 @@ function renderInspector(rows, summary) {
   dom.projectList.appendChild(fragment);
   dom.more.hidden = items.length <= state.limit;
   dom.more.textContent = `Afficher davantage (${formatCount(items.length - state.limit)} restant${items.length - state.limit > 1 ? 's' : ''})`;
+  renderAssociations(context);
+}
+
+/* State grants to the associations whose seat is in the selected commune (annexes « jaunes », by département:
+   data/aides/associations-communes/DEP.json, scripts/process_subsidies.py). */
+const assocCache = new Map();
+async function renderAssociations(context) {
+  const box = document.getElementById('assocBlock');
+  if (!box) return;
+  const code = state.selectedCommune;
+  if (!code || state.mode === 'gfp') { box.hidden = true; box.innerHTML = ''; return; }
+  const dep = code.startsWith('97') ? code.slice(0, 3) : code.slice(0, 2);
+  if (!assocCache.has(dep)) assocCache.set(dep, fetchJson(`./data/aides/associations-communes/${dep}.json`).catch(() => null));
+  const file = await assocCache.get(dep);
+  if (state.selectedCommune !== code) return;
+  const e = file?.communes?.[code];
+  const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  if (!e) {
+    box.innerHTML = `<div class="inspector-divider"><span>Associations du lieu aidées par l’État</span></div><p class="detail-summary">Aucune subvention de l’État publiée pour une association dont le siège est à ${esc(context.name)}.</p>`;
+    box.hidden = !file;
+    return;
+  }
+  const years = Object.entries(e.annees);
+  const total = years.reduce((s, [, v]) => s + v[0], 0);
+  const first = years[0][0], last = years[years.length - 1][0];
+  box.innerHTML = `<div class="inspector-divider"><span>Associations du lieu aidées par l’État</span><span>${formatCount(e.beneficiaires)} association${e.beneficiaires > 1 ? 's' : ''}</span></div>
+    <p class="detail-summary"><strong>${formatCompact(total)}</strong> de subventions de l’État ${first === last ? `en ${first}` : `de ${first} à ${last}`} aux associations dont le siège est à ${esc(context.name)}, dont ${formatCompact(e.annees[last][0])} en ${last}.</p>
+    <div class="project-list">${e.principaux.slice(0, 3).map(([siren, name, amount]) => `<a class="project-item clickable assoc-item" href="recherche.html?q=${encodeURIComponent(siren || name)}"><div><p class="project-name">${esc(name)}</p><p class="project-meta">${siren ? `SIREN ${esc(siren)}` : 'sans SIREN'}</p></div><div class="project-amount">${formatCompact(amount)}</div></a>`).join('')}</div>
+    <p class="stat-context">Années publiées seulement (aucune annexe pour 2017 ni 2019 à 2022). Une association nationale est comptée en entier dans la commune de son siège. Les subventions de la commune elle-même n’y sont pas. Source : annexes « jaunes » des lois de finances, <a href="aides.html">page Subventions</a>.</p>`;
+  box.hidden = false;
 }
 
 /* Small screens: the inspector sits under the map, far from the territory just tapped. A card over the map repeats

@@ -50,7 +50,8 @@
     for (const [i, word] of words.entries()) {
       const last = i === words.length - 1;
       const known = await S.lookup(word) || (last && (prefix || word.length >= 4) && (await S.complete(word, 1)).length);
-      const best = known ? null : (await S.nearest(word, 1))[0];
+      // a short word is often an acronym or a brand (LVMH): its « closest word » (lvh) would be another company
+      const best = known || word.length < 5 ? null : (await S.nearest(word, 1))[0];
       out.push(best ? best.display : word);
       if (best) changed = true;
     }
@@ -65,7 +66,10 @@
     box.hidden = true; box.innerHTML = '';
     if (!window.FRLPlaces) return;
     const where = await FRLPlaces.find(q);
-    if (runId !== state.run || !where || (!where.departement && !where.communes.length)) return;
+    if (runId !== state.run) return;
+    state.where = where;
+    if (!where || (!where.departement && !where.communes.length)) return;
+    if (where.type === 'dans_la_phrase') $('srSummary').querySelector('.sr-didyoumean.is-near')?.remove();
     const P = FRLPlaces;
     const cards = [];
     if (where.departement) cards.push(`<a class="sr-place__card" href="${esc(P.deptUrl(where.departement))}"><span class="sr-place__pin">${PIN}</span><span><strong>${esc(where.departement.nom)} (${esc(where.departement.code)})</strong><small>Le département et ses communes sur la carte</small></span></a>`);
@@ -81,6 +85,40 @@
     P.wire(box);
   }
   const COMMON = new Set('la le les l de des du d un une et en a au aux sur sous pour par avec'.split(' '));
+
+  /* Nothing published under these words: where else to look. The site's own pages on the subject (« évasion
+     fiscale » → Contrôle fiscal et fraude), the other words of a sentence that names a place, the Loupe for a
+     company, a brand or a question (omni-search.js gives the site's index, assistant.js the Loupe). */
+  const loadScript = src => new Promise(resolve => {
+    const el = Object.assign(document.createElement('script'), { src: `./${src}` });
+    el.onload = el.onerror = () => resolve(); document.head.appendChild(el);
+  });
+  const FILLER = new Set('mairie ville commune communes depense depenses budget analyse analyser cout couts combien quel quelle quels quelles est sont'.split(' '));
+  const plain = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  async function hints(q, runId) {
+    const box = $('srHints');
+    if (!box) return;
+    if (!window.FRLOmni) await loadScript('omni-search.js');
+    let site = [];
+    try { site = window.FRLOmni ? (await window.FRLOmni.matchSite(q)).slice(0, 3) : []; } catch { site = []; }
+    if (runId !== state.run) return;
+    const out = [];
+    if (site.length) out.push(`<p class="sr-hints__head">Sur le site</p><div class="sr-chips">${site.map(e => `<a class="sr-chip" href="${esc(e.url)}">${esc(e.title)}<small>${esc(e.page)}</small></a>`).join('')}</div>`);
+    const c = state.where?.type === 'dans_la_phrase' && state.where.communes[0];
+    if (c) {
+      const place = new Set(plain(c.nom).split(' '));
+      const rest = plain(q).split(' ').filter(w => w.length > 2 && !place.has(w) && !COMMON.has(w) && !FILLER.has(w));
+      if (rest.length) out.push(`<p class="sr-hints__head">Sans le nom de lieu</p><div class="sr-chips"><a class="sr-chip" href="?q=${encodeURIComponent(rest.join(' '))}">« ${esc(rest.join(' '))} » dans les dépenses</a></div>`);
+    }
+    out.push(`<p class="sr-hints__head">Une question, une entreprise, une marque ?</p><div class="sr-chips"><button type="button" class="sr-chip sr-chip--loupe" data-loupe="${esc(q)}">Demander à la Loupe : « ${esc(q)} »</button></div>`);
+    box.innerHTML = out.join('');
+    box.hidden = false;
+    box.querySelector('[data-loupe]')?.addEventListener('click', e => {
+      const text = /\?$|^(combien|quel|quelle|qui|pourquoi|comment)\b/i.test(q.trim()) ? q : `Combien d'argent public reçoit ou dépense « ${q} » ?`;
+      if (window.FRLLoupe) window.FRLLoupe.ask(text);
+      else e.currentTarget.textContent = 'La Loupe se charge, réessayez dans un instant';
+    });
+  }
 
   async function run(q, { exact = false, from = null } = {}) {
     const runId = ++state.run;
@@ -256,9 +294,11 @@
   function summaryText(t, whoTop, extraTop) {
     const q = `« ${esc(state.q)} »`;
     if (!t.lines && !t.fwLines && !t.budgetLines) {
-      const advice = state.family || state.related.length ? `<p class="sr-didyoumean">Mots proches qui apparaissent dans les libellés : ${[...(state.family ? [`<a href="?q=${encodeURIComponent(state.family.q)}">toutes les formes de « ${esc(state.family.label)} »</a>`] : []), ...state.related.filter(r => r.lines).slice(0, 4).map(r => `<a href="?q=${encodeURIComponent(r.q)}">${esc(r.label)}</a> (${count(r.lines)} ligne${r.lines > 1 ? 's' : ''}${r.amount ? `, ${money(r.amount)}` : ''})`)].join(' · ')}.</p>` : '';
+      const inSentence = state.where?.type === 'dans_la_phrase';   // « Analyse les dépenses a Alès »: near words are noise
+      const advice = !inSentence && (state.family || state.related.length) ? `<p class="sr-didyoumean is-near">Mots proches qui apparaissent dans les libellés : ${[...(state.family ? [`<a href="?q=${encodeURIComponent(state.family.q)}">toutes les formes de « ${esc(state.family.label)} »</a>`] : []), ...state.related.filter(r => r.lines).slice(0, 4).map(r => `<a href="?q=${encodeURIComponent(r.q)}">${esc(r.label)}</a> (${count(r.lines)} ligne${r.lines > 1 ? 's' : ''}${r.amount ? `, ${money(r.amount)}` : ''})`)].join(' · ')}.</p>` : '';
       return `${advice}<p class="sr-lead">${q} n’apparaît dans aucun libellé de dépense publique publié en données ouvertes.</p>
-        <p>Cela ne veut pas dire qu’aucun argent public n’y est consacré : les libellés sont courts, rédigés par chaque administration, et beaucoup de dépenses (salaires, subventions des collectivités, petits marchés) ne sont pas publiées ligne à ligne.${state.related.length ? ' Essayez un mot proche ci-dessous.' : ''}</p>`;
+        <p>Cela ne veut pas dire qu’aucun argent public n’y est consacré : les libellés sont courts, rédigés par chaque administration, et beaucoup de dépenses (salaires, subventions des collectivités, petits marchés) ne sont pas publiées ligne à ligne.${state.related.length && !inSentence ? ' Essayez un mot proche ci-dessous.' : ''}</p>
+        <div class="sr-hints" id="srHints" hidden></div>`;
     }
     const parts = [];
     const sources = Object.entries(t.bySrc).sort((a, b) => b[1].amount - a[1].amount);
@@ -304,6 +344,7 @@
     const whoTop = api ? apiTop(api.who, item => item.label) : groupTop(rows, 'whoKey', whoLabel);
     const extraTop = api ? apiTop(api.extra, item => item.label) : groupTop(rows, 'extraKey', extraLabel);
     $('srSummary').innerHTML = summaryText(t, whoTop, extraTop);
+    if ($('srHints')) hints(state.q, state.run);
     const chips = Object.keys(t.all).map(Number).sort((a, b) => t.all[b] - t.all[a]);
     $('srSources').innerHTML = chips.length ? [`<button type="button" data-src="0" class="${state.src ? '' : 'active'}">Toutes (${count(Object.values(t.all).reduce((s, n) => s + n, 0))})</button>`,
       ...chips.map(src => `<button type="button" data-src="${src}" class="${state.src === src ? 'active' : ''}">${esc(S.SOURCES[src].short)} (${count(t.all[src])})</button>`)].join('') : '';

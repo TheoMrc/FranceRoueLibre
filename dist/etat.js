@@ -249,7 +249,7 @@
     const titreBars = titres => {
       const entries = TITRE_ORDER.filter(t => titres?.[t]).map(t => [t, titres[t]]);
       const total = sum(entries, e => Math.max(0, e[1]));
-      return entries.length ? `<div class="et-mini">${entries.map(([t, v]) => `<div><span><i style="background:${titreColor(t)}"></i>${esc(TITRES[t])}</span><strong>${meur(v)}</strong><em style="--w:${(100 * Math.max(0, v) / (total || 1)).toFixed(1)}%;--c:${titreColor(t)}"></em></div>`).join('')}</div>` : '';
+      return entries.length ? `<div class="et-mini">${entries.map(([t, v]) => `<div><span>${typeof FRL_ICONS !== 'undefined' && FRL_ICONS.forTitre ? `<b class="et-mini__ico" style="--c:${titreColor(t)}">${FRL_ICONS.forTitre(t)}</b>` : `<i style="background:${titreColor(t)}"></i>`}${esc(TITRES[t])}</span><strong>${meur(v)}</strong><em style="--w:${(100 * Math.max(0, v) / (total || 1)).toFixed(1)}%;--c:${titreColor(t)}"></em></div>`).join('')}</div>` : '';
     };
     const perfLink = m => {
       const code = m.code, n = data.rap.rows.filter(r => data.rap.missions[r[0]][1] === code).length;
@@ -275,17 +275,19 @@
       return `<h4 class="et-h4">D’une année à l’autre</h4><dl><dt>Payé 2024</dt><dd>${meur(x.cp24exe)}</dd><dt>Voté 2025 (loi)</dt><dd>${meur(x.cp25lfi)}</dd><dt>Demandé 2026 (projet)</dt><dd>${meur(x.cp26)}${d == null ? '' : ` <span class="muted">(${d >= 0 ? '+' : ''}${pct(d, 1)})</span>`}</dd></dl>
         <p class="note">Crédits de paiement du ${src('plf26-budget-vert', 'budget vert du PLF 2026')}, le seul fichier ouvert du projet 2026 par programme. ${esc(data.plf26?.perimetre || '')}</p>`;
     }
+    /* a programme gets its own pictogram when its name has one (« Administration pénitentiaire »), else its mission's */
+    const progIco = (m, p) => typeof FRL_ICONS === 'undefined' ? '' : FRL_ICONS.forText(p.name) || ico(m.code, m.name);
     function detailMission(m) {
       const list = m.type === 'BG' && m !== rd ? bgNet : m.type === 'BG' ? bg : others, tot = sum(list, x => x.cp);
       detail.innerHTML = `<span class="tx-pill">${esc(data.budgets[m.type])}</span><h3>${ico(m.code, m.name)}${esc(m.name)}</h3>
         <div class="tx-amount">${md(m.cp, 2)}</div><p class="note">crédits de paiement 2025 · ${pct(100 * m.cp / tot, 1)} du périmètre</p>
         <dl><dt>Autorisations d’engagement</dt><dd>${meur(m.ae)}</dd><dt>Écart AE − CP</dt><dd>${meur(m.ae - m.cp)}${Math.abs(m.ae - m.cp) > 0.05 * m.cp ? ' <span class="muted">(engagements pluriannuels)</span>' : ''}</dd><dt>Programmes</dt><dd>${m.progs.length}</dd><dt>Ministères</dt><dd>${esc([...new Set(m.progs.map(p => p.min))].join(', '))}</dd></dl>
         ${years3(m)}<h4 class="et-h4">Par nature</h4>${titreBars(m.titres)}
-        <h4 class="et-h4">Programmes</h4><ul class="et-list">${m.progs.map(p => `<li><button type="button" class="tx-rowlink" data-prog="${esc(p.code)}">${esc(p.code)} · ${esc(p.name)}</button><span>${meur(p.cp)}</span></li>`).join('')}</ul>
+        <h4 class="et-h4">Programmes</h4><ul class="et-list">${m.progs.map(p => `<li><button type="button" class="tx-rowlink" data-prog="${esc(p.code)}">${progIco(m, p)}${esc(p.code)} · ${esc(p.name)}</button><span>${meur(p.cp)}</span></li>`).join('')}</ul>
         ${perfLink(m)}`;
     }
     function detailProgramme(m, p) {
-      detail.innerHTML = `<span class="tx-pill">Programme ${esc(p.code)}</span><h3>${esc(p.name)}</h3>
+      detail.innerHTML = `<span class="tx-pill">Programme ${esc(p.code)}</span><h3>${progIco(m, p)}${esc(p.name)}</h3>
         <div class="tx-amount">${md(p.cp, 2)}</div><p class="note">crédits de paiement 2025 · ${pct(100 * p.cp / m.cp, 1)} de la mission « ${esc(m.name)} »</p>
         <dl><dt>Autorisations d’engagement</dt><dd>${meur(p.ae)}</dd><dt>Ministère</dt><dd>${esc(p.min)}</dd><dt>Actions</dt><dd>${p.actions.length}</dd></dl>
         ${years3(p)}<h4 class="et-h4">Par nature</h4>${titreBars(p.titres)}

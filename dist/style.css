@@ -362,6 +362,9 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .inspector-stat strong { display: block; margin-top: .15rem; color: var(--c-ink); font-family: var(--font-display); font-weight: 600; font-size: .95rem; line-height: 1.25; overflow-wrap: anywhere; }
 .stats-row { display: none; }
 .stat-context { margin-bottom: 1.1rem; color: var(--c-muted); font-size: .74rem; line-height: 1.5; }
+.assoc-block { margin-top: 1.2rem; }
+.assoc-item { text-decoration: none; color: inherit; }
+.assoc-item .project-name { overflow-wrap: anywhere; }
 .inspector-divider { display: flex; justify-content: space-between; align-items: baseline; gap: .75rem; padding-bottom: .5rem; color: var(--c-ink); font-family: var(--font-display); font-weight: 600; font-size: .9rem; }
 .inspector-divider span:last-child { color: var(--c-muted); font-family: var(--font-body); font-weight: 500; font-size: .74rem; }
 .project-list { display: grid; gap: 2px; }
@@ -788,6 +791,9 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .sr-chip { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .8rem; border-radius: var(--r-pill); background: var(--c-surface-2); color: var(--c-ink); font-size: .84rem; font-weight: 500; transition: background .2s var(--ease); }
 .sr-chip:hover { background: var(--c-line); }
 .sr-chip small { color: var(--c-muted); }
+.sr-hints { display: grid; gap: .5rem; margin-top: 1rem; }
+.sr-hints__head { margin: .4rem 0 0; font-size: .78rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--c-muted); }
+.sr-chip--loupe { border: 0; cursor: pointer; font: inherit; font-size: .84rem; font-weight: 500; text-align: left; max-width: 100%; overflow-wrap: anywhere; }
 .sr-chip--family { background: color-mix(in srgb, var(--c-blue-500) 14%, var(--c-surface-2)); }
 .sr-didyoumean { margin: 0 0 .9rem; padding: .7rem .95rem; border-radius: var(--r-md); background: var(--c-surface-2); color: var(--c-ink); font-size: .92rem; line-height: 1.55; }
 .sr-didyoumean a { color: var(--c-blue-600); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }

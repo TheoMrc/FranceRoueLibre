@@ -17,7 +17,10 @@ import json
 import os
 import unicodedata
 
-import duckdb
+try:
+    import duckdb
+except ImportError:  # --split needs only the json already built
+    duckdb = None
 
 RAW = 'sources/raw'
 OUT = 'dist/data/aides'
@@ -144,6 +147,22 @@ def by_commune(con):
                        'rattache_par_siren': round(via_siren)},
         'communes': communes})
     print(f'✓ associations par commune : {len(communes)} communes, {100 * matched / total:.1f} % du montant rattaché')
+    split_communes()
+
+
+def split_communes():
+    """associations-communes.json cut by département (associations-communes/DEP.json), for the commune panel of
+    the map: a reader's browser loads only its département (a few dozen kilobytes, not 4 MB)."""
+    d = json.load(open(f'{OUT}/associations-communes.json', encoding='utf-8'))
+    by = {}
+    for code, e in d['communes'].items():
+        dep = code[:3] if code.startswith('97') else code[:2]
+        by.setdefault(dep, {})[code] = e
+    os.makedirs(f'{OUT}/associations-communes', exist_ok=True)
+    for dep, rows in by.items():
+        with open(f'{OUT}/associations-communes/{dep}.json', 'w', encoding='utf-8') as h:
+            json.dump({'source': d['source'], 'couverture': d['couverture'], 'communes': rows}, h, ensure_ascii=False, separators=(',', ':'))
+    print(f'✓ associations par commune, découpées : {len(by)} départements')
 
 
 def main():
@@ -262,4 +281,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    split_communes() if '--split' in sys.argv else main()

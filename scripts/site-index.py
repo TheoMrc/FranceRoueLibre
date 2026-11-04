@@ -32,6 +32,8 @@ SYNONYMS = {
     'etat.html#missions': 'ministères missions éducation défense police justice',
     'etat.html#recettes': 'recettes de l’état TVA impôt sur le revenu',
     'impots.html': 'impôts taxes TVA impôt sur le revenu CSG prélèvements taxes affectées petites taxes',
+    'impots.html#ecarts': 'évasion fiscale fraude fiscale fraude à la TVA contrôle fiscal redressements verrou de Bercy '
+                          'optimisation fiscale paradis fiscaux écart de TVA impôts non payés',
     'niches.html': 'niches fiscales crédit d’impôt réduction d’impôt dépenses fiscales exonérations',
     'operateurs.html': 'agences opérateurs établissements publics universités France Travail ADEME CNRS',
     'secu.html': 'sécurité sociale assurance maladie retraites hôpitaux CNAM branches déficit de la sécu',

@@ -276,7 +276,7 @@ def step_journal(accept: bool) -> None:
         path.write_text(json.dumps(photo, ensure_ascii=False, indent=0), encoding='utf-8')
     say(True, 'journal', f'{len(searches)} recherches et {len(questions)} questions réelles ; '
                          f'{len(changes)} changement(s) depuis la dernière photo' + (' (photo mise à jour)' if accept or not old else
-                                                                                   ' : à relire, puis --accepter'))
+                                                                                   ' : à relire, puis --accepter' if changes else ''))
     for c in changes[:60]:
         print('    ', c)
 

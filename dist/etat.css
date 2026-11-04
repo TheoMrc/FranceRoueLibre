@@ -16,6 +16,8 @@
 .et-mini div { display: grid; grid-template-columns: 1fr auto; gap: .15rem .6rem; font-size: .8rem; color: var(--c-body); }
 .et-mini span { display: inline-flex; align-items: center; gap: .4rem; }
 .et-mini i { width: .6rem; height: .6rem; border-radius: 2px; flex: none; }
+.et-mini__ico { display: inline-grid; place-items: center; width: 1.35rem; height: 1.35rem; flex: none; border-radius: 6px; background: color-mix(in srgb, var(--c) 16%, transparent); }
+.et-mini__ico .frl-ico { width: .95rem; height: .95rem; margin: 0; fill: var(--c); vertical-align: 0; }
 .et-mini strong { color: var(--c-ink); font-variant-numeric: tabular-nums; }
 .et-mini em { grid-column: 1 / -1; display: block; height: 5px; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--c) var(--w), var(--c-surface-2) var(--w)); }
 .et-list { display: grid; gap: .3rem; max-height: 300px; margin: 0; padding: 0 .3rem 0 0; overflow-y: auto; list-style: none; font-size: .8rem; }
