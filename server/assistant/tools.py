@@ -186,7 +186,9 @@ FILES = {
     'impots.json': 'Les 292 impôts et taxes : rendement, assiette, payeur, affectataire, collecteur, avis de la Cour '
                    'des comptes (« all »), série Insee 1995-2025 (« insee »), coûts de collecte (« costs »)',
     'niches.json': 'Les 458 dépenses fiscales (niches) : coût 2024-2026 par mesure (« measures »), par impôt, par mission',
-    'etat.json': 'Budget de l’État : PLF 2025 par mission, programme, action ; exécution mensuelle ; performance ; budget vert',
+    'etat.json': 'Budget de l’État : PLF 2025 par mission, programme, action (AE, CP, titres) ; chaque mission et '
+                 'programme porte aussi cp26 (PLF 2026), cp25lfi (loi de finances 2025) et cp24exe (exécuté 2024), '
+                 'en M€, tirés du budget vert du PLF 2026 ; exécution mensuelle ; performance ; budget vert',
     'operateurs.json': 'Les 431 opérateurs de l’État : mission, statut, subventions pour charges de service public, taxes affectées',
     'secu.json': 'Sécurité sociale : comptes simplifiés des régimes de base par branche (« accounts », années 2009-2010 '
                  'seulement : dernier fichier publié sur data.gouv.fr, ne pas présenter comme actuel), dépenses '
@@ -212,6 +214,8 @@ FILES = {
     'insee-population.json': 'Population de la France au 1er janvier',
     'budgets-2025.json': 'Dépenses totales 2025 et par habitant de chaque commune, département et région',
     'aides/associations.json': 'Subventions de l’État aux associations par année et programme (jaunes 2010-2023)',
+    'aides/associations-communes.json': 'Subventions de l’État aux associations par commune de leur siège, année par '
+                                        'année, et principales associations. Chemin « communes.CODE_INSEE »',
     'aides/entreprises.json': 'Aides de minimis aux entreprises : par autorité, instrument, secteur, plus gros bénéficiaires',
     'aides/fonds-vert.json': 'Fonds vert : par année, mesure, département, plus gros projets',
     'aides/relance.json': 'Plan France Relance : indicateurs, montants, lauréats',
@@ -653,6 +657,25 @@ def _links(code: str, base: str = None) -> list:
     return places.links(c, S.SITE_URL if base is None else base) if c else []
 
 
+def _associations(code: str) -> Any:
+    """State grants to the associations whose seat is in this commune (jaune annexes, scripts/process_subsidies.py)."""
+    try:
+        d = _json('aides/associations-communes.json')
+    except (OSError, ValueError):
+        return None
+    e = d['communes'].get(code)
+    if not e:
+        return 'aucune subvention de l’État publiée pour une association dont le siège est dans cette commune'
+    years = e['annees']
+    return {'definition': 'subventions de l’État (annexes « jaunes » des lois de finances) aux associations dont le '
+                          'siège est dans la commune ; les subventions de la commune elle-même n’y sont pas',
+            'total_eur': sum(v[0] for v in years.values()), 'par_annee_eur': {y: v[0] for y, v in years.items()},
+            'lignes': sum(v[1] for v in years.values()), 'associations': e['beneficiaires'],
+            'principales': [{'siren': s, 'nom': n, 'total_eur': a} for s, n, a in e['principaux']],
+            'couverture': f"{d['couverture']['part_rattachee_pct']} % du montant national rattaché à une commune",
+            'source': d['source']}
+
+
 def dossier_commune(nom: str) -> dict:
     i, err = _find_commune(nom)
     if err:
@@ -671,6 +694,7 @@ def dossier_commune(nom: str) -> dict:
         'echelons': _echelons(i),
         'comptes': {k: accounts.get(k) for k in accounts if k not in ('entite',)},
         'projets_aides_etat': _projects(code),
+        'subventions_etat_associations_du_lieu': _associations(code),
         'elus_et_personnel': _elected(i),
         'signaux': signals or 'aucun signal relevé pour cette commune',
         'mentions_dans_les_depenses': mentions,

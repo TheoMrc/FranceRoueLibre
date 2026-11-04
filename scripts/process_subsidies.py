@@ -15,6 +15,7 @@ import glob
 import re
 import json
 import os
+import unicodedata
 
 import duckdb
 
@@ -23,7 +24,7 @@ OUT = 'dist/data/aides'
 
 # PLF year → (grant year, SQL expressions for each normalized column)
 JAUNES = {
-    2025: (2023, dict(programme='programme', siren='siren', name='denomination', amount='montant', object='objet_2023', dept="left(cog_code, CASE WHEN cog_code LIKE '97%' THEN 3 ELSE 2 END)", city='cog_libelle', status='etat_administratif', mission='NULL')),
+    2025: (2023, dict(programme='programme', siren='siren', name='denomination', amount='montant', object='objet_2023', dept="left(cog_code, CASE WHEN cog_code LIKE '97%' THEN 3 ELSE 2 END)", city='cog_libelle', status='etat_administratif', mission='NULL', commune='cog_code')),
     2020: (2018, dict(programme='programme', siren='siren', name='denomination', amount='montant', object='objet', dept='cog_code_departement_ou_pays', city='cog_ville_ou_pays', status='NULL', mission='NULL')),
     2018: (2016, dict(programme='programme_2016', siren='siren', name='denomination', amount='montant', object='objet', dept='cog_code_departement', city='cog_ville_ou_pays', status='situation_sirene', mission='NULL')),
     2017: (2015, dict(programme='programme', siren='siren', name='association', amount='subvention_2015', object='NULL', dept='departement', city='ville', status='NULL', mission='mission')),
@@ -78,6 +79,73 @@ def csv(path):
     return f"read_csv('{path}', delim=';', header=true, all_varchar=true, quote='\"', escape='\"', ignore_errors=true)"
 
 
+def norm(text):
+    t = unicodedata.normalize('NFD', fix_text(str(text or '')).lower())
+    t = ''.join(c for c in t if unicodedata.category(c) != 'Mn').replace('œ', 'oe').replace('æ', 'ae')
+    t = re.sub(r'\bcedex\b.*$', '', t)
+    words = [{'st': 'saint', 'ste': 'sainte'}.get(w, w) for w in re.findall(r'[a-z0-9]+', t)]
+    return ' '.join(words)
+
+
+def by_commune(con):
+    """The commune of each grant: the commune code of the annex when it gives one (PLF 2025), else the town of the
+    annex matched by name within its département (communes-lookup.json, current communes), else the commune found for
+    the same SIREN in another annex. A town merged since (old commune name) stays unmatched and is counted.
+    → associations-communes.json: by INSEE code, amount and lines by grant year and the main beneficiaries."""
+    lookup = json.load(open('dist/data/web/communes-lookup.json', encoding='utf-8'))
+    names = {}
+    for code, name, dep, *_ in lookup['rows']:
+        names.setdefault((dep, norm(name)), code)
+    known = {r[0] for r in lookup['rows']}
+    big = {'paris': ('75', '75056'), 'lyon': ('69', '69123'), 'marseille': ('13', '13055')}
+    rows = con.execute('SELECT rowid, year, siren, name, amount, dept, city, commune FROM j WHERE amount IS NOT NULL').fetchall()
+    found, by_siren = {}, {}
+    for rid, year, siren, name, amount, dept, city, commune in rows:
+        code = None
+        c = (commune or '').strip().upper()
+        if len(c) == 5 and c in known:
+            code = c
+        elif city:
+            n = norm(city)
+            dep = (dept or '').upper()
+            code = names.get((dep, n)) or names.get((dep, re.sub(r'^(le|la|les|l) ', '', n)))
+            m = re.match(r'^(paris|lyon|marseille)\b', n)
+            if not code and m and big[m.group(1)][0] == dep[:2]:
+                code = big[m.group(1)][1]
+        found[rid] = code
+        if code and siren:
+            prev = by_siren.get(siren)
+            if not prev or prev[0] < year:
+                by_siren[siren] = (year, code)
+    out, total, matched, via_siren = {}, 0.0, 0.0, 0.0
+    for rid, year, siren, name, amount, dept, city, commune in rows:
+        code = found[rid]
+        if not code and siren in by_siren:
+            code = by_siren[siren][1]
+            via_siren += amount or 0
+        total += amount or 0
+        if not code:
+            continue
+        matched += amount or 0
+        e = out.setdefault(code, {'y': {}, 'who': {}})
+        y = e['y'].setdefault(str(year), [0.0, 0])
+        y[0] += amount or 0; y[1] += 1
+        w = e['who'].setdefault(siren or name, [siren, fix_text(name), 0.0])
+        w[2] += amount or 0
+    communes = {}
+    for code, e in out.items():
+        top = sorted(e['who'].values(), key=lambda w: -w[2])[:8]
+        communes[code] = {'annees': {y: [round(v[0]), v[1]] for y, v in sorted(e['y'].items())},
+                          'beneficiaires': len(e['who']), 'principaux': [[s, n, round(a)] for s, n, a in top]}
+    write('associations-communes.json', {
+        'source': 'Annexes « jaunes » aux PLF 2012–2025, commune du siège de l’association telle que l’annexe la donne',
+        'champs': {'annees': 'année de versement : [montant en euros, nombre de lignes]', 'principaux': '[SIREN, nom, total en euros]'},
+        'couverture': {'montant_total': round(total), 'montant_rattache': round(matched), 'part_rattachee_pct': round(100 * matched / total, 1) if total else None,
+                       'rattache_par_siren': round(via_siren)},
+        'communes': communes})
+    print(f'✓ associations par commune : {len(communes)} communes, {100 * matched / total:.1f} % du montant rattaché')
+
+
 def main():
     con = duckdb.connect()
     parts = []
@@ -86,11 +154,12 @@ def main():
         if not os.path.exists(path):
             continue
         available = {row[0] for row in con.execute(f'DESCRIBE SELECT * FROM {csv(path)}').fetchall()}
-        expr = {k: (v if v == 'NULL' or v.strip('"') in available or '(' in v else 'NULL') for k, v in cols.items()}
+        expr = {k: (v if v == 'NULL' or v.strip('"') in available or '(' in v else 'NULL') for k, v in ({'commune': 'NULL'} | cols).items()}
         parts.append(f"""SELECT {year} AS year, {plf} AS plf, CAST({expr['programme']} AS VARCHAR) AS programme, CAST({expr['mission']} AS VARCHAR) AS mission,
             regexp_replace(CAST({expr['siren']} AS VARCHAR), '[^0-9]', '', 'g') AS siren, trim(regexp_replace(replace(CAST({expr['name']} AS VARCHAR), chr(160), ' '), '\\s+', ' ', 'g')) AS name,
             TRY_CAST(replace(CAST({expr['amount']} AS VARCHAR), ',', '.') AS DOUBLE) AS amount, CAST({expr['object']} AS VARCHAR) AS object,
-            lpad(CAST({expr['dept']} AS VARCHAR), 2, '0') AS dept, CAST({expr['city']} AS VARCHAR) AS city, CAST({expr['status']} AS VARCHAR) AS status
+            lpad(CAST({expr['dept']} AS VARCHAR), 2, '0') AS dept, CAST({expr['city']} AS VARCHAR) AS city, CAST({expr['status']} AS VARCHAR) AS status,
+            CAST({expr['commune']} AS VARCHAR) AS commune
             FROM {csv(path)}
             WHERE NOT (lower(coalesce(CAST({expr['siren']} AS VARCHAR), '')) LIKE 'total%' OR lower(coalesce(CAST({expr['name']} AS VARCHAR), '')) LIKE 'total%')""")  # drop subtotal rows
     if parts:
@@ -138,6 +207,7 @@ def main():
             SELECT siren, arg_max(name, year), round(sum(amount)), list(DISTINCT year ORDER BY year), any_value(dept)
             FROM j WHERE siren IS NOT NULL GROUP BY siren HAVING sum(amount) > 0 ORDER BY 3 DESC""").fetchall()]
         write('associations-index.json', {'fields': ['siren', 'name', 'total', 'years', 'dept'], 'rows': index})
+        by_commune(con)
         print(f'✓ associations: {sum(y["lines"] for y in per_year)} lignes, {len(index)} SIREN, années {years}')
 
     path = f'{RAW}/aides-minimis.csv.gz'

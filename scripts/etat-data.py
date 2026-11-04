@@ -22,6 +22,7 @@ import json
 import os
 import re
 import sys
+import unicodedata
 
 RAW = 'sources/raw'
 OUT = 'dist/data/etat.json'
@@ -257,6 +258,46 @@ def green():
     }
 
 
+# ---------------------------------------------------------------- PLF 2026 by programme (budget vert lines)
+def key(text):
+    t = unicodedata.normalize('NFD', (text or '').lower())
+    return ' '.join(re.findall(r'[a-z0-9]+', ''.join(c for c in t if unicodedata.category(c) != 'Mn')))
+
+
+def plf26(missions):
+    """The budget vert of the PLF 2026 rates every line of budget credits, so its sums by programme give the credits
+    of payment (CP) requested for 2026, voted for 2025 (LFI) and spent in 2024, the only per-programme figures of the
+    2026 bill published as open data (no « dépenses selon destination » file for 2026). Added to the PLF 2025 programmes
+    as cp26, cp25lfi, cp24exe (M€); a programme the budget vert does not name keeps its PLF 2025 figures only."""
+    cols = ['execution_2024_cp', 'lfi_2025_cp_ou_prevision_2025_si_depense_fiscale', 'plf_2026_cp_ou_prevision_2026_si_depense_fiscale']
+    sums = collections.defaultdict(lambda: [0.0, 0.0, 0.0])
+    for r in rows('plf26-budget-vert'):
+        if r['type_depense'].strip() != 'Crédits budgétaires':
+            continue
+        for i, c in enumerate(cols):
+            sums[(key(r['mission']), key(r['programme']))][i] += num(r[c])
+    used, matched = set(), 0
+    for mi in missions:
+        tot = [0.0, 0.0, 0.0]
+        hit = False
+        for pr in mi['progs']:
+            k = (key(mi['name']), key(pr['name']))
+            if k not in sums:  # a mission renamed between the two bills: the programme name alone, when unique
+                same = [x for x in sums if x[1] == k[1]]
+                k = same[0] if len(same) == 1 else k
+            if k in sums:
+                v = sums[k]
+                pr.update(cp24exe=m(v[0]), cp25lfi=m(v[1]), cp26=m(v[2]))
+                used.add(k); matched += 1; hit = True
+                tot = [a + b for a, b in zip(tot, v)]
+        if hit:
+            mi.update(cp24exe=m(tot[0]), cp25lfi=m(tot[1]), cp26=m(tot[2]))
+    rest = sorted(((mk, pk, v) for (mk, pk), v in sums.items() if (mk, pk) not in used and abs(v[2]) >= 1e6), key=lambda x: -abs(x[2][2]))
+    return {'source': 'plf26-budget-vert', 'programmes': matched,
+            'total26': m(sum(v[2] for v in sums.values())), 'total25lfi': m(sum(v[1] for v in sums.values())),
+            'non_rattaches': [{'mission': a, 'programme': b, 'cp26': m(v[2])} for a, b, v in rest[:40]]}
+
+
 # ---------------------------------------------------------------- Aide publique au développement
 def apd():
     years = collections.defaultdict(lambda: collections.defaultdict(float))
@@ -307,10 +348,12 @@ def main():
     src = manifest()
     ids = ['plf25-depenses-destination', 'plf25-depenses-nature', 'plf25-recettes', 'plf25-recettes-cas-ccf', 'etat-situations-mensuelles',
            'etat-situation-mensuelle', 'rap-2025-performance', 'plf26-budget-vert', 'aide-publique-developpement', 'etat-balances']
+    missions = plf_destination()
     data = {
         'sources': {i: src.get(i, {}) for i in ids},
         'titres': TITRES, 'budgets': BUDGETS,
-        'missions': plf_destination(),
+        'missions': missions,
+        'plf26': plf26(missions),
         'nature': plf_nature(),
         'recettes': plf_recettes(),
         'monthly': monthly(),
@@ -323,7 +366,7 @@ def main():
     with open(OUT, 'w', encoding='utf-8', newline='\n') as handle:
         json.dump(data, handle, ensure_ascii=False, separators=(',', ':'))
     print(f'{OUT}: {os.path.getsize(OUT) / 1e6:.2f} Mo, {len(data["missions"])} missions, {sum(len(x["progs"]) for x in data["missions"])} programmes, '
-          f'{len(data["rap"]["rows"])} indicateurs, {len(data["green"]["lines"])} lignes cotées du budget vert')
+          f'PLF 2026 pour {data["plf26"]["programmes"]} programmes ({len(data["plf26"]["non_rattaches"])} lignes non rattachées), {len(data["rap"]["rows"])} indicateurs, {len(data["green"]["lines"])} lignes cotées du budget vert')
 
 
 if __name__ == '__main__':

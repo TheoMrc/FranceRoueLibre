@@ -338,12 +338,15 @@ def _records(jeu: str) -> List[dict]:
     if jeu == 'etat':
         e = T._json('etat.json')
         out = []
+        # PLF 2025 credits, and the 2026 bill / 2025 law / 2024 spending from the budget vert when it names the programme
+        years = lambda x: {k: v for k, v in (('credits_paiement_plf2026_meur', x.get('cp26')), ('credits_paiement_lfi2025_meur', x.get('cp25lfi')),
+                                             ('credits_paiement_executes2024_meur', x.get('cp24exe'))) if v is not None}
         for m in e['missions']:
             out.append({'type': 'mission', 'budget': e['budgets'].get(m['type'], m['type']), 'mission': m['name'],
-                        'autorisations_engagement_meur': m['ae'], 'credits_paiement_meur': m['cp']})
+                        'autorisations_engagement_meur': m['ae'], 'credits_paiement_meur': m['cp'], 'annee': 'PLF 2025', **years(m)})
             for p in m.get('progs', []):
                 out.append({'type': 'programme', 'mission': m['name'], 'programme': f'{p["code"]} {p["name"]}', 'ministere': p.get('min'),
-                            'autorisations_engagement_meur': p['ae'], 'credits_paiement_meur': p['cp'],
+                            'autorisations_engagement_meur': p['ae'], 'credits_paiement_meur': p['cp'], 'annee': 'PLF 2025', **years(p),
                             'actions': [a.get('name') for a in p.get('actions', [])][:12]})
         return out
     if jeu == 'niches':
