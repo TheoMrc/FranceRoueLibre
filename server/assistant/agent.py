@@ -34,7 +34,8 @@ fraude.json d’abord (Cour des comptes 2025 et Commission européenne), le web 
   * part, évolution, montant par habitant, euros d’une autre année : calcul, toujours, jamais de tête ;
   * autre jeu du site : lire_donnees (lis d’abord la structure, sans chemin) ;
   * le lien exact vers la section du site : page_du_site ;
-  * document absent des données : jeux_ouverts (déjà publié ailleurs ?), recherche_web, puis suivi_demandes et \
+  * document absent des données : jeux_ouverts (déjà publié ailleurs ?), recherche_web, puis lire_page sur le \
+document officiel trouvé (comptes, rapport) quand la recherche ne donne pas le chiffre, puis suivi_demandes et \
 preparer_demande.
 - Pas de chiffre officiel : ne t’arrête pas à « je ne peux pas ». Donne au moins un ordre de grandeur, en le \
 disant clairement : « Estimation : … ». Construis-le à partir de chiffres sourcés (un montant d’un rapport \
@@ -143,6 +144,7 @@ TOOL_LABELS = {
     'suivi_demandes': 'Demandes déjà envoyées',
     'lire_donnees': 'Lecture de {fichier}',
     'recherche_web': 'Recherche sur le web : « {question} »',
+    'lire_page': 'Lecture de la page {url}',
     'preparer_demande': 'Préparation d’une demande à « {organisme} »',
 }
 
@@ -157,7 +159,7 @@ def system_prompt() -> str:
 def tool_label(name: str, args: dict) -> str:
     vals = {k: str(v)[:70] for k, v in (args or {}).items()}
     try:
-        return TOOL_LABELS.get(name, name).format_map({'requete': '', 'nom': '', 'fichier': '', 'question': '',
+        return TOOL_LABELS.get(name, name).format_map({'requete': '', 'nom': '', 'fichier': '', 'question': '', 'url': '',
                                                        'organisme': '', 'operation': '', 'mots': '', 'jeu': '', **vals})
     except (KeyError, ValueError):
         return name
@@ -197,6 +199,8 @@ def tool_summary(name: str, result: dict) -> tuple:
         return True, f'{c.get("nom", "")} ({c.get("code", "")}), {p.get("nombre", 0)} projet(s) aidé(s)'
     if name == 'recherche_web':
         return True, f'{len(result.get("sources", []))} source(s)'
+    if name == 'lire_page':
+        return bool(result.get('lue')), 'page lue' if result.get('lue') else 'page illisible'
     if name == 'preparer_demande':
         d = result.get('demande') or {}
         return True, d.get('email') or ('formulaire de contact' if d.get('formulaire') else 'sans adresse publiée')

@@ -152,6 +152,14 @@ class FakeClient:
                 'requetes': [question[:80]] if self.provider == 'gemini' else []}
 
 
+def _fake_read_page(self, url: str, question: str) -> dict:
+    self._wait(1.0, 2.0)
+    return {'answer': 'page simulée, rien n’a été lu.', 'lue': False, 'sources': []}
+
+
+FakeClient.read_page = _fake_read_page
+
+
 class FakeGemini(FakeClient):
     provider, label = 'gemini', 'Gemini'
 

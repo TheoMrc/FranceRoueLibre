@@ -160,6 +160,14 @@ DECLARATIONS: List[dict] = [
      'description': 'Les demandes de documents déjà envoyées par le site aux organismes publics, leur état et les '
                     'réponses publiées. Pour « la mairie a-t-elle répondu ? », et avant d’en préparer une nouvelle.',
      'parameters': {'type': 'OBJECT', 'properties': {'recherche': {'type': 'STRING', 'description': 'Organisme, objet ou référence FRL-…'}}}},
+    {'name': 'lire_page',
+     'description': 'Ouvre une page web précise trouvée par recherche_web (de préférence officielle : comptes, rapport, '
+                    'budget, sur senat.fr, assemblee-nationale.fr, ccomptes.fr, gouv.fr, insee.fr) et en extrait ce qui '
+                    'répond à la question, chiffres et intitulés exacts. À utiliser quand la recherche donne le bon '
+                    'document mais pas le chiffre. Deux pages au plus par question.',
+     'parameters': {'type': 'OBJECT', 'properties': {'url': {'type': 'STRING', 'description': 'Adresse https complète'},
+                                                     'question': {'type': 'STRING', 'description': 'Ce qu’il faut y trouver'}},
+                    'required': ['url', 'question']}},
     {'name': 'recherche_web',
      'description': 'Recherche sur le web (actualité, textes de loi, rapports, contexte absent des données du site). '
                     'Renvoie une synthèse et ses sources. Seulement pour une question sur l’argent public que les '
@@ -750,6 +758,7 @@ class Toolbox:
         self.demande: Optional[dict] = None  # the request draft shown under the answer (preparer_demande)
         self.liens: Optional[dict] = None    # the levels of the commune asked about, shown as buttons (places.links)
         self.web = 0                         # web searches made for this question (one at most: they cost the most)
+        self.pages = 0                       # pages read for this question (two at most)
 
     def call(self, name: str, args: dict) -> dict:
         args = args if isinstance(args, dict) else {}
@@ -794,6 +803,18 @@ class Toolbox:
             if name == 'lire_donnees':
                 return lire_donnees(args.get('fichier', ''), args.get('chemin') or '', args.get('filtre') or '',
                                     args.get('debut') or 0, args.get('limite') or 20)
+            if name == 'lire_page':
+                url = str(args.get('url') or '').strip()
+                if not re.fullmatch(r'https://[^\s/]+\.[a-z]{2,}(/\S*)?', url, re.I) or len(url) > 500:
+                    return {'error': 'adresse https complète attendue'}
+                if self.pages >= 2:
+                    return {'error': 'deux pages au plus par question : réponds avec ce que tu as'}
+                self.pages += 1
+                res = self.client.read_page(url, str(args.get('question') or self.question)[:400])
+                for src in res.get('sources', []):
+                    if src['url'] not in {x['url'] for x in self.sources}:
+                        self.sources.append(src)
+                return clip(res)
             if name == 'recherche_web':
                 question = str(args.get('question') or '').strip()[:400]
                 if not question:
