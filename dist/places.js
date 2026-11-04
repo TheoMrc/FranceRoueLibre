@@ -21,7 +21,7 @@
   const deptUrl = d => asset(`index.html?departement=${encodeURIComponent(d.code)}#explorer`);
   const people = n => n ? `${Number(n).toLocaleString('fr-FR')} hab.` : '';
   /* a match good enough for Enter to go straight to the commune (exact name, postal code, département) */
-  const sure = r => r && (r.type === 'nom' || r.type === 'code_postal' || r.type === 'departement' || (r.type === 'approchant' && r.communes.length === 1));
+  const sure = r => r && (r.type === 'nom' || r.type === 'code_postal' || r.type === 'departement' || ((r.type === 'approchant' || r.type === 'ancienne_commune' || r.type === 'arrondissement') && r.communes.length === 1));
   /* The links of a commune level by level (server/assistant/places.py links()), as a row of small buttons:
      the commune, its intercommunality, its département, its region, the State-aided projects, elected officials. */
   const ICONS = {

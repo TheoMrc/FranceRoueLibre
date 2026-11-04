@@ -691,8 +691,19 @@ def dossier_commune(nom: str) -> dict:
     except (OSError, sqlite3.Error) as exc:
         mentions = {'error': f'index de recherche indisponible : {exc}'}
     signals = _signals(code)
+    ident = {'code': code, 'nom': name, 'lieu': place}
+    try:  # a former commune asked by its old name: say which commune it belongs to now
+        from . import places
+        hit = places.find(nom)
+        if hit['type'] in ('ancienne_commune', 'arrondissement') and hit['communes']:
+            c = hit['communes'][0]
+            ident['note'] = (f'« {c["ancien_nom"]} » est une ancienne commune, rattachée à {name} en {c["ancienne_depuis"]} : '
+                             'ses comptes sont ceux de la commune actuelle' if c.get('ancien_nom') else
+                             f'les comptes sont publiés pour toute la ville de {name}, pas par arrondissement')
+    except (OSError, ValueError, KeyError, RuntimeError):
+        pass
     return clip({
-        'commune': {'code': code, 'nom': name, 'lieu': place},
+        'commune': ident,
         'echelons': _echelons(i),
         'comptes': {k: accounts.get(k) for k in accounts if k not in ('entite',)},
         'projets_aides_etat': _projects(code),

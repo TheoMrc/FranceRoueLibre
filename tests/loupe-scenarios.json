@@ -23,7 +23,9 @@
   {"q": "33980", "appels": [
     ["dossier_collectivite", {"nom": "33980"}, ["Audenge"]]]},
   {"q": "Paris 12", "appels": [
-    ["dossier_collectivite", {"nom": "Paris 12"}, ["75056"]]]},
+    ["dossier_collectivite", {"nom": "Paris 12"}, ["75056", "toute la ville"]]]},
+  {"q": "Champ sur Layon", "appels": [
+    ["dossier_collectivite", {"nom": "Champ sur Layon"}, ["Bellevigne-en-Layon", "ancienne commune"]]]},
   {"q": "Mairie Evian", "appels": [
     ["dossier_collectivite", {"nom": "Mairie Evian"}, ["74119"]]]},
   {"q": "Lien vers la page des impôts", "appels": [

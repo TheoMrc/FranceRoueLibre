@@ -75,7 +75,17 @@ def load(path: Path) -> None:
                 r['region'] = (meta.get(r['dep']) or ['', ''])[1]
         except (OSError, ValueError, KeyError):
             pass
-        _data.update(path=stamp, rows=rows, by_name=by_name, by_cp=by_cp, by_first=by_first, deps=deps)
+        # former communes (merged, absorbed or renamed): scripts/communes-anciennes.py
+        old: Dict[str, List[tuple]] = {}
+        index = {r['insee']: i for i, r in enumerate(rows)}
+        try:
+            for name, code, now, year in json.loads((Path(path).parent / 'communes-anciennes.json').read_text(encoding='utf-8'))['rows']:
+                n = norm(name)
+                if now in index and n != rows[index[now]]['_n']:
+                    old.setdefault(n, []).append((index[now], name, year))
+        except (OSError, ValueError, KeyError):
+            pass
+        _data.update(path=stamp, rows=rows, by_name=by_name, by_cp=by_cp, by_first=by_first, deps=deps, old=old)
 
 
 def _edits(a: str, b: str, limit: int) -> int:
@@ -127,9 +137,11 @@ def links(c: dict, base: str = '') -> list:
     return out
 
 
-def _view(i: int, match: str) -> dict:
+def _view(i: int, match: str, former: str = '', year: int = 0) -> dict:
     r = _data['rows'][i]
     v = {k: val for k, val in r.items() if not k.startswith('_')} | {'correspondance': match}
+    if former:  # « Champ-sur-Layon » is part of Bellevigne-en-Layon since 2019
+        v.update(ancien_nom=former, ancienne_depuis=year)
     v['liens'] = links(v)
     return v
 
@@ -142,7 +154,8 @@ def by_insee(code: str) -> Optional[dict]:
 
 def find(query: str, limit: int = 6) -> dict:
     """{'communes': [...], 'departement': {...} | None,
-        'type': 'code_postal' | 'departement' | 'nom' | 'debut' | 'approchant' | 'arrondissement' | 'dans_la_phrase' | ''}"""
+        'type': 'code_postal' | 'departement' | 'nom' | 'ancienne_commune' | 'debut' | 'approchant' | 'arrondissement' |
+                'dans_la_phrase' | ''}"""
     if not _data:
         raise RuntimeError('places.load() first')
     out = _find(norm(query), limit)
@@ -162,7 +175,7 @@ def find(query: str, limit: int = 6) -> dict:
     rank = lambda ids: sorted(set(ids), key=lambda i: -(rows[i]['population'] or 0))
     runs = [' '.join(words[a:a + n]) for n in range(len(words) - 1, 0, -1) for a in range(len(words) - n + 1)]
     runs = [r for r in runs if not all(w in FILLER for w in r.split()) and len(r.replace(' ', '')) >= 3
-            and r.split()[0] not in GENERIC - {'saint', 'sainte'} or r.startswith(('le ', 'la ', 'les ')) and len(r.split()) > 1]
+            and (r.split()[0] not in GENERIC - {'saint', 'sainte'} or (r.startswith(('le ', 'la ', 'les ')) and len(r.split()) > 1))]
     for r in runs:
         if r.split()[0] in FILLER - {'saint', 'sainte', 'le', 'la', 'les'}:
             continue
@@ -176,6 +189,27 @@ def find(query: str, limit: int = 6) -> dict:
         if ids:
             return out | {'type': 'dans_la_phrase', 'communes': [_view(i, 'dans_la_phrase') for i in rank(ids)[:limit]]}
     return out
+
+
+def _former(q: str, limit: int, fuzzy: bool = False) -> list:
+    """The commune of today for a former name: exact, then a name cut short (« Saint Félix de Reilhac et »), then one
+    or two typos (« Champ sur layons »)."""
+    old = _data.get('old') or {}
+    hits = old.get(q) or []
+    if fuzzy and not hits and len(q) >= 10:
+        hits = [h for n, hs in old.items() if n.startswith(q + ' ') for h in hs]
+    if fuzzy and not hits and len(q) >= 8:
+        tol = 1 if len(q) <= 10 else 2
+        near = [(d, h) for n, hs in old.items() if n[:1] == q[:1] and (d := _edits(n, q, tol)) <= tol for h in hs]
+        if near:
+            best = min(d for d, _ in near)
+            hits = [h for d, h in near if d == best]
+    seen, out = set(), []
+    for i, name, year in sorted(hits, key=lambda h: -(_data['rows'][h[0]]['population'] or 0)):
+        if i not in seen:
+            seen.add(i)
+            out.append(_view(i, 'ancienne_commune', name, year))
+    return out[:limit]
 
 
 def _find(q: str, limit: int) -> dict:
@@ -222,11 +256,16 @@ def _find(q: str, limit: int) -> dict:
             if ids:
                 out.update(type='nom', communes=[_view(i, 'nom') for i in rank(ids)[:limit]])
                 return out
-    if len(q) >= 3:
-        pre = [i for i in _data['by_first'].get(q[:1], []) if rows[i]['_n'].startswith(q)]
-        if pre:
-            out.update(type='debut', communes=[_view(i, 'debut') for i in rank(pre)[:limit]])
-            return out
+    former = _former(q, limit)
+    pre = [i for i in _data['by_first'].get(q[:1], []) if rows[i]['_n'].startswith(q)] if len(q) >= 3 else []
+    if pre:  # « Ivry » : Ivry-sur-Seine first, the former commune of that exact name after it
+        shown = [_view(i, 'debut') for i in rank(pre)[:limit]]
+        shown += [c for c in former if c['insee'] not in {x['insee'] for x in shown}]
+        out.update(type='debut', communes=shown[:limit])
+        return out
+    if former:
+        out.update(type='ancienne_commune', communes=former)
+        return out
     if len(q) >= 4:  # a typo: « Carcassone », « Le havrr », « Baumes les dames »
         tol = 1 if len(q) <= 6 else 2
         near = [(d, i) for i in _data['by_first'].get(q[:1], []) if (d := _edits(rows[i]['_n'], q, tol)) <= tol]
@@ -234,4 +273,15 @@ def _find(q: str, limit: int) -> dict:
             best = min(d for d, _ in near)
             ids = [i for d, i in near if d == best]
             out.update(type='approchant', communes=[_view(i, 'approchant') for i in rank(ids)[:limit]])
+            return out
+    if len(q) >= 12:  # cut short with a typo: « Saint Félix de reilhac et » (Saint-Félix-de-Reillac-et-Mortemart)
+        near = [(d, i) for i in _data['by_first'].get(q[:1], []) if len(rows[i]['_n']) > len(q)
+                and (d := _edits(rows[i]['_n'][:len(q)], q, 2)) <= 2]
+        if near:
+            best = min(d for d, _ in near)
+            out.update(type='approchant', communes=[_view(i, 'approchant') for i in rank([i for d, i in near if d == best])[:limit]])
+            return out
+    former = _former(q, limit, fuzzy=True)  # a former name cut short or misspelt
+    if former:
+        out.update(type='ancienne_commune', communes=former)
     return out

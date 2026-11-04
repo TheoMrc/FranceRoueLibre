@@ -129,7 +129,7 @@
       const place = [];
       if (where?.departement) place.push({ kind: 'place', url: lib.deptUrl(where.departement), title: `${where.departement.nom} (${where.departement.code})`, sub: 'Département · ses comptes et ses communes sur la carte', icon: ICON_PIN });
       for (const [k, c] of (where?.communes || []).slice(0, where?.departement ? 2 : 4).entries()) {
-        const fix = c.correspondance === 'approchant' ? 'Vouliez-vous dire ? · ' : '';
+        const fix = c.correspondance === 'approchant' ? 'Vouliez-vous dire ? · ' : c.ancien_nom ? `Anciennement « ${c.ancien_nom} » · ` : '';
         place.push({ kind: 'place', url: lib.mapUrl(c), title: c.nom, sub: `${fix}${c.dep_nom} (${c.dep})${c.population ? ` · ${lib.people(c.population)}` : ''}`, icon: ICON_PIN, links: k === 0 ? c.liens : null });
       }
       const placeTitle = where?.type === 'approchant' ? 'Commune (orthographe approchante)' : where?.type === 'dans_la_phrase' ? 'Commune citée'
