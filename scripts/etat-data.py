@@ -284,13 +284,13 @@ def plf26(missions):
             if k not in sums:  # a mission renamed between the two bills: the programme name alone, when unique
                 same = [x for x in sums if x[1] == k[1]]
                 k = same[0] if len(same) == 1 else k
-            if k in sums:
+            if k in sums and any(abs(x) >= 5e3 for x in sums[k][1:]):  # 0 in 2025 and 2026: moved out of this mission, not shown
                 v = sums[k]
                 pr.update(cp24exe=m(v[0]), cp25lfi=m(v[1]), cp26=m(v[2]))
                 used.add(k); matched += 1
                 mkeys.add(k[0])
-        if mkeys:  # the mission: every line of the budget vert under its name(s), programmes not matched included
-            tot = [sum(v[i] for (mk, _), v in sums.items() if mk in mkeys) for i in range(3)]
+        tot = [sum(v[i] for (mk, _), v in sums.items() if mk in mkeys) for i in range(3)]
+        if mkeys and any(abs(x) >= 5e3 for x in tot[1:]):  # the mission: every line of the budget vert under its name(s), programmes not matched included
             mi.update(cp24exe=m(tot[0]), cp25lfi=m(tot[1]), cp26=m(tot[2]))
     rest = sorted(((mk, pk, v) for (mk, pk), v in sums.items() if (mk, pk) not in used and abs(v[2]) >= 1e6), key=lambda x: -abs(x[2][2]))
     return {'source': 'plf26-budget-vert', 'programmes': matched,
