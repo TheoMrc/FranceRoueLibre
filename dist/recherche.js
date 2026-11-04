@@ -61,6 +61,32 @@
   /* A commune or a département typed (name, postal code, number): its accounts on the map and the projects the State
      funded there come first, above the spending lines that mention it (places.js, api/lieux). */
   const PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+  /* The Loupe's summary of a commune or of an organisation (SIREN): answered from the data, without a model, so it
+     costs nothing. Opened by itself on a wide screen (once per search), behind a button on a phone, where the
+     panel would cover the results. FRLLoupe.ask with free asks the server first and opens nothing otherwise. */
+  const waitLoupe = () => new Promise(resolve => {
+    let n = 0;
+    const t = setInterval(() => { if (window.FRLLoupe?.ready || ++n > 50) { clearInterval(t); resolve(window.FRLLoupe); } }, 120);
+  });
+  const loupeButton = (question, label) => `<button type="button" class="sr-loupe" data-loupe-free="${esc(question)}">${LOUPE_ICON}<span>${esc(label)}</span></button>`;
+  const LOUPE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"><path fill="currentColor" d="M9.5 3a6.5 6.5 0 0 1 5.2 10.4l5.4 5.4-1.4 1.4-5.4-5.4A6.5 6.5 0 1 1 9.5 3m0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9"/></svg>';
+  async function openLoupe(question, auto) {
+    const L = await waitLoupe();
+    if (!L) return false;
+    if (auto) {
+      const key = `frl-loupe-auto:${question}`;
+      try { if (sessionStorage.getItem(key)) return false; sessionStorage.setItem(key, '1'); } catch (e) { /* private mode */ }
+      if (!matchMedia('(min-width: 1000px)').matches || document.querySelector('.ai-panel:not([hidden])')) return false;
+    }
+    return L.ask(question, { free: true });
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-loupe-free]');
+    if (!b) return;
+    e.preventDefault();
+    openLoupe(b.dataset.loupeFree, false).then(ok => { if (!ok) b.querySelector('span').textContent = 'Pas de résumé automatique ici : posez votre question à la Loupe'; });
+  });
+
   async function showPlace(q, runId) {
     const box = $('srPlace');
     box.hidden = true; box.innerHTML = '';
@@ -81,8 +107,13 @@
       : where.type === 'arrondissement' ? `Arrondissement : les comptes sont publiés pour toute la ville` : where.type === 'code_postal' ? `Code postal ${esc(q.match(/\d{5}/)?.[0] || q)}` : where.type === 'departement' ? 'Département' : 'Commune';
     box.innerHTML = `<p class="sr-place__head">${head}</p><div class="sr-place__grid">${cards.join('')}</div>`
       + (where.type === 'nom' || where.type === 'approchant' ? '<p class="note">Plus bas : les lignes de dépenses publiées dont le libellé contient ce nom (subventions, marchés, projets), pas seulement celles de la commune.</p>' : '');
+    // one commune for sure (not a guess, not a sentence): its summary by the Loupe
+    const one = where.communes.length === 1 && ['nom', 'code_postal', 'ancienne_commune', 'arrondissement', 'debut'].includes(where.type)
+      && !where.departement ? where.communes[0] : null;
+    if (one) box.querySelector('.sr-place__grid').insertAdjacentHTML('afterend', loupeButton(one.nom, `Le résumé de la Loupe : ${one.nom}`));
     box.hidden = false;
     P.wire(box);
+    if (one) openLoupe(one.nom, true);
   }
   const COMMON = new Set('la le les l de des du d un une et en a au aux sur sous pour par avec'.split(' '));
 
@@ -344,6 +375,12 @@
     const whoTop = api ? apiTop(api.who, item => item.label) : groupTop(rows, 'whoKey', whoLabel);
     const extraTop = api ? apiTop(api.extra, item => item.label) : groupTop(rows, 'extraKey', extraLabel);
     $('srSummary').innerHTML = summaryText(t, whoTop, extraTop);
+    const siren = (state.q || '').replace(/[\s.]/g, '');
+    if (/^\d{9}$/.test(siren) && (t.lines || t.fwLines)) {   // an organisation: what it received, by the Loupe
+      const question = `Combien d'argent public reçoit ou dépense « ${siren} » ?`;
+      $('srSummary').insertAdjacentHTML('beforeend', loupeButton(question, 'Le résumé de cet organisme par la Loupe'));
+      openLoupe(question, true);
+    }
     if ($('srHints')) hints(state.q, state.run);
     const chips = Object.keys(t.all).map(Number).sort((a, b) => t.all[b] - t.all[a]);
     $('srSources').innerHTML = chips.length ? [`<button type="button" data-src="0" class="${state.src ? '' : 'active'}">Toutes (${count(Object.values(t.all).reduce((s, n) => s + n, 0))})</button>`,

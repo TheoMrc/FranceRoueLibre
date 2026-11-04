@@ -9,7 +9,7 @@ const { chromium } = require('playwright');
 const BASE = process.env.FRL_BASE || 'http://127.0.0.1:4173/';
 // pages with a query, as readers open them (search, a commune, a place in a sentence)
 const EXTRA = ['recherche.html?q=cantine', 'recherche.html?q=' + encodeURIComponent('Analyse les dépenses a Alès'),
-  'recherche.html?q=Paris%2012', 'index.html?commune=77284#explorer'];
+  'recherche.html?q=Paris%2012', 'recherche.html?q=382550184', 'index.html?commune=77284#explorer'];
 const pages = readdirSync('dist').filter(f => f.endsWith('.html')).sort().concat(EXTRA);
 const sizes = [['tel', { width: 390, height: 844 }], ['large', { width: 1366, height: 900 }]];
 

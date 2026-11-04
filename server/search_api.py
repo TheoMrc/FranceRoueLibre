@@ -188,7 +188,19 @@ def search(match):
     started = time.monotonic()
     db.set_progress_handler(lambda: 1 if time.monotonic() - started > TIME_LIMIT else 0, 20000)
     try:
-        if COLS is not None:
+        if match.startswith('siren:'):  # every line of one organisation (the SIREN is not in the full-text index)
+            who_ids = [r[0] for r in db.execute('SELECT id FROM who WHERE siren = ?', (match[6:],))]
+            if COLS is not None:
+                ids = np.nonzero(np.isin(COLS['who'], who_ids))[0].astype(np.int64) if who_ids else np.zeros(0, np.int64)
+                lines = len(ids)
+                stats, who_rows, extra_rows, dept_rows, top_ids = aggregate_numpy(ids)
+            else:
+                db.execute('CREATE TEMP TABLE IF NOT EXISTS m (id INTEGER PRIMARY KEY)')
+                db.execute('DELETE FROM m')
+                db.execute(f'INSERT INTO m SELECT id FROM agg WHERE who IN ({",".join(map(str, who_ids)) or "NULL"})')
+                lines = db.execute('SELECT count(*) FROM m').fetchone()[0]
+                stats, who_rows, extra_rows, dept_rows, top_ids = aggregate_sql(db)
+        elif COLS is not None:
             ids = np.fromiter((r[0] for r in db.execute('SELECT rowid FROM fts WHERE fts MATCH ?', (match,))), dtype=np.int64)
             lines = len(ids)
             stats, who_rows, extra_rows, dept_rows, top_ids = aggregate_numpy(ids)
@@ -246,7 +258,9 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(404, {'error': 'not found'})
         maybe_sweep()
         q = (params.get('q') or [''])[0][:MAX_QUERY]
-        match = fts_query(q, (params.get('prefix') or ['0'])[0] == '1' or q.rstrip().endswith('*'))
+        digits = re.sub(r'[\s.]', '', q)
+        match = f'siren:{digits}' if re.fullmatch(r'\d{9}', digits) else \
+            fts_query(q, (params.get('prefix') or ['0'])[0] == '1' or q.rstrip().endswith('*'))
         if not match:
             return self.send(400, {'error': 'empty query'})
         started = time.monotonic()

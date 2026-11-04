@@ -421,7 +421,7 @@
     send.innerHTML = on ? ICON.stop : ICON.send;
     modelBtn.disabled = on;
   }
-  async function ask(text) {
+  async function ask(text, pre) {   // pre: the reply of an ask already sent (FRLLoupe.ask with free)
     text = text.trim();
     if (!text || busy) return;
     const limit = status?.limits?.question_chars || 1500;
@@ -443,9 +443,9 @@
     busy = { job: null };
     setBusy(true);
     try {
-      const r = await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const r = pre ? { ok: true, status: 202 } : await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history.slice(-11), provider }) });
-      const data = await r.json().catch(() => ({}));
+      const data = pre || await r.json().catch(() => ({}));
       if (data.credits === false) { m.donate = data.donate; noCredits(data); }
       if (!r.ok || !data.job) throw new Error(data.error || (r.status === 503 || r.status === 502 || r.status === 504
         ? 'La Loupe est très demandée en ce moment : réessayez dans quelques minutes.' : `Erreur ${r.status}`));
@@ -628,7 +628,23 @@
     renderLog();
     if (status.credits === false) noCredits({ error: status.credits_message, donate: status.donate });
     /* other parts of the page (the site search box) can open the Loupe with a question already asked */
-    window.FRLLoupe = { ready: true, ask(text) { openPanel(true); const t = String(text || '').trim(); if (t && !busy) { store.current = null; showHistory(false); renderLog(); ask(t); } } };   // a new conversation, so a saved answer can match
+    window.FRLLoupe = { ready: true,
+      // a new conversation, so a saved answer can match. free: only when the answer costs nothing (a commune, a SIREN
+      // answered from the data): the server is asked first with auto, and the panel opens only if it has one
+      async ask(text, opts = {}) {
+        const t = String(text || '').trim();
+        if (!t || busy) { if (!opts.free) openPanel(true); return false; }
+        let pre = null;
+        if (opts.free) {
+          try {
+            const r = await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ messages: [{ role: 'user', text: t }], auto: true }) });
+            pre = await r.json();
+          } catch (e) { pre = null; }
+          if (!pre || !pre.job || busy) return false;
+        }
+        openPanel(true); store.current = null; showHistory(false); renderLog(); ask(t, pre); return true;
+      } };
     (window.FRLLoupeQueue || []).splice(0).forEach(t => window.FRLLoupe.ask(t));
     if (read(sessionStorage, UI, {}).open) openPanel(true);
     else { fab.hidden = false; fab.classList.add('is-intro'); setTimeout(() => fab.classList.remove('is-intro'), 4000); }

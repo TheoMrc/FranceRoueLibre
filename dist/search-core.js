@@ -70,6 +70,7 @@ window.FRLSearch = (() => {
   const shardKey = word => [...word.slice(0, 2)].map(c => c >= 'a' && c <= 'z' ? c : '_').join('');
   function shard(word) {
     const key = shardKey(word);
+    if (key === '__') return Promise.resolve([]);   // numbers (a SIREN, a year): no lexicon file, nothing near them
     if (!shards.has(key)) shards.set(key, fetch(new URL(`data/search/lexicon/${key}.json`, base)).then(r => r.ok ? r.json() : []).catch(() => [])
       .then(entries => entries.map(([norm, lines, amount, display]) => ({ norm, lines, amount, display: display || norm }))));
     return shards.get(key);

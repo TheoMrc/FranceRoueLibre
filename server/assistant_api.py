@@ -329,6 +329,8 @@ class Handler(BaseHTTPRequestHandler):
         place = fiche.answer(messages)
         if place:  # only a commune, a postal code or a département: answered from the data, no model call
             return self.send(202, {'job': saved_job(self.client_ip(), None, messages, place)})
+        if body.get('auto'):  # opened by the site itself (a commune, a SIREN): only the answers that cost nothing
+            return self.send(200, {'job': None, 'free': False})
         lack = credits_info()
         if lack:
             return self.send(402, lack)
