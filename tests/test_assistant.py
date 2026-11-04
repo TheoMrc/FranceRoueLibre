@@ -311,6 +311,20 @@ class SignatureTest(unittest.TestCase):
         self.assertIn('cid:', m.get_body(('html',)).get_content())
 
 
+class CompareShareTest(unittest.TestCase):
+    def test_share_against_same_size_communes(self):
+        """« 65,8 % de frais de personnel, est-ce beaucoup ? » (journal du 3 novembre) : la part, sa médiane, son rang."""
+        from assistant import outils as O
+        r = O.comparer('Meaux', 'frais-de-personnel', 'communes', 'depenses-de-fonctionnement')
+        self.assertIn('part_pct', r)
+        self.assertTrue(0 < r['mediane_pct'] < 100 and r['quartiles_pct'][0] <= r['mediane_pct'] <= r['quartiles_pct'][1])
+
+    def test_several_paths_in_one_read(self):
+        from assistant import tools as T
+        r = T.lire_donnees('fraude.json', 'recouvre, moyens')
+        self.assertEqual(sorted(r['parties']), ['moyens', 'recouvre'])
+
+
 class SavedAnswersTest(unittest.TestCase):
     """faq.json (scripts/loupe-faq.py): frequent questions answered without a model call."""
 

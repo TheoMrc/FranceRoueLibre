@@ -81,7 +81,10 @@ DECLARATIONS: List[dict] = [
      'parameters': {'type': 'OBJECT', 'properties': {
          'nom': {'type': 'STRING'}, 'niveau': {'type': 'STRING', 'enum': ['communes', 'gfp', 'departements', 'regions']},
          'agregat': {'type': 'STRING', 'description': 'Ex. depenses-totales, frais-de-personnel, encours-de-dette, '
-                                                      'depenses-d-equipement, impots-locaux (ou des mots du libellé)'}},
+                                                      'depenses-d-equipement, impots-locaux (ou des mots du libellé)'},
+         'rapport_a': {'type': 'STRING', 'description': 'Facultatif : compare la part de l’agrégat dans celui-ci, en % '
+                                                        '(ex. agregat frais-de-personnel, rapport_a depenses-de-fonctionnement '
+                                                        ': « 65 % est-ce beaucoup ? »)'}},
          'required': ['nom']}},
     {'name': 'indicateur',
      'description': 'Une série nationale clé, année par année, avec sa source : dépense publique totale ou par fonction '
@@ -128,7 +131,8 @@ DECLARATIONS: List[dict] = [
      'description': 'Lit un fichier JSON publié par le site (liste dans le prompt système). « chemin » descend dans le '
                     'fichier (clés et indices séparés par des points, ex. « measures » ou « totals.0 ») ; « filtre » '
                     'garde les éléments d’une liste qui contiennent ce texte (sans accents) ; « debut » et « limite » '
-                    'paginent (limite 40 au plus). Sans chemin : la structure du fichier. Jamais pour une commune, '
+                    'paginent (limite 40 au plus). Sans chemin : la structure du fichier. Plusieurs chemins séparés par des '
+                    'virgules sont lus en un seul appel (ex. « controle, recouvre, moyens »). Jamais pour une commune, '
                     'un code Insee ou un code postal : c’est dossier_collectivite.',
      'parameters': {'type': 'OBJECT', 'properties': {
          'fichier': {'type': 'STRING'}, 'chemin': {'type': 'STRING'}, 'filtre': {'type': 'STRING'},
@@ -705,6 +709,9 @@ def _by_year(node: Any, years: list) -> Any:
 
 
 def lire_donnees(fichier: str, chemin: str = '', filtre: str = '', debut: int = 0, limite: int = 20) -> dict:
+    paths = [c.strip() for c in str(chemin or '').split(',') if c.strip()]
+    if len(paths) > 1:  # several parts of one file in one call (« controle, recouvre, moyens »): fewer model turns
+        return clip({'fichier': fichier, 'parties': {c: lire_donnees(fichier, c, filtre, debut, limite) for c in paths[:6]}})
     rel = str(fichier or '').strip().replace('\\', '/').lstrip('/')
     if rel.startswith('data/'):
         rel = rel[5:]
@@ -782,7 +789,7 @@ class Toolbox:
                       'calcul': lambda: O.calcul(args.get('operation', ''), args.get('a'), args.get('b'), args.get('annee'),
                                                  args.get('vers'), args.get('expression') or ''),
                       'comparer': lambda: O.comparer(args.get('nom', ''), args.get('agregat') or 'depenses-totales',
-                                                     args.get('niveau') or 'communes'),
+                                                     args.get('niveau') or 'communes', args.get('rapport_a') or ''),
                       'dossier_beneficiaire': lambda: O.dossier_beneficiaire(args.get('nom', '')),
                       'chercher_fiche': lambda: O.chercher_fiche(args.get('jeu', ''), args.get('mots', ''), args.get('tri') or '',
                                                                  args.get('cible') or ''),

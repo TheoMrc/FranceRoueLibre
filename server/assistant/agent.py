@@ -20,16 +20,17 @@ Méthode :
 les données ne couvrent pas (actualité, lois, rapports, définitions officielles). Ne devine jamais un chiffre : \
 chaque montant vient d’un outil, avec son année et sa source. Avant d’écrire un pourcentage, une part (« 1 euro sur \
 5 ») ou une évolution, fais le calcul à partir des deux chiffres lus, de la même année et du même périmètre.
-- Quel outil, dans l’ordre (le moins d’appels possible) :
+- Quel outil, dans l’ordre (le moins d’appels possible ; jamais deux fois le même outil avec les mêmes arguments) :
   * chiffre national (dépense par fonction, retraites, dette, déficit, PIB, impôts en % du PIB, population, prix) : \
 indicateur ;
   * collectivité, simple nom de commune ou code postal : dossier_collectivite (homonymes : présente-les et demande \
-laquelle), puis comparer pour situer le montant par rapport aux collectivités de même taille ;
+laquelle), puis comparer pour situer le montant par rapport aux collectivités de même taille ; pour une part \
+(« les frais de personnel font 65 % du fonctionnement, est-ce beaucoup ? ») : comparer avec rapport_a ;
   * association, entreprise, acheteur ou SIREN : dossier_beneficiaire ;
   * mission ou programme du budget de l’État, niche fiscale, impôt, opérateur : chercher_fiche (tri=montant pour \
 « les principales », « les plus grosses » ; pour les niches, cible=entreprises ou menages donne aussi leur total) ;
   * fraude fiscale, évasion, écart fiscal, contrôle fiscal, redressements, « verrou de Bercy » : lire_donnees \
-fraude.json d’abord (Cour des comptes 2025 et Commission européenne), le web seulement pour ce qui n’y est pas ;
+fraude.json d’abord, en lisant les parties utiles en un seul appel (chemins séparés par des virgules) (Cour des comptes 2025 et Commission européenne), le web seulement pour ce qui n’y est pas ;
   * un sujet ou un mot dans les dépenses publiées : rechercher_depenses ; un calcul précis sur ces lignes : requete_sql ;
   * part, évolution, montant par habitant, euros d’une autre année : calcul, toujours, jamais de tête ;
   * autre jeu du site : lire_donnees (lis d’abord la structure, sans chemin) ;
@@ -184,8 +185,11 @@ def tool_summary(name: str, result: dict) -> tuple:
         v = {k: x for k, x in result.items() if k in ('resultat', 'part_pct', 'evolution_pct', 'par_habitant_par_an')}
         return True, ', '.join(f'{k} = {x}' for k, x in v.items())
     if name == 'comparer':
-        return True, (f'{result.get("par_habitant_eur")} €/hab., médiane {result.get("mediane_par_habitant_eur")} €'
-                      if not result.get('plusieurs') else f'{len(result["plusieurs"])} homonymes')
+        if result.get('plusieurs'):
+            return True, f'{len(result["plusieurs"])} homonymes'
+        if 'part_pct' in result:
+            return True, f'{result["part_pct"]} %, médiane {result.get("mediane_pct")} %'
+        return True, f'{result.get("par_habitant_eur")} €/hab., médiane {result.get("mediane_par_habitant_eur")} €'
     if name == 'dossier_beneficiaire':
         return True, f'{sum(s.get("lignes", 0) for s in (result.get("par_source") or {}).values())} ligne(s)'
     if name in ('chercher_fiche',):

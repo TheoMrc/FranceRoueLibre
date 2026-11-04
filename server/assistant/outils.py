@@ -201,7 +201,7 @@ def calcul(operation: str, a: float = None, b: float = None, annee: int = None, 
 BANDS = [0, 500, 2000, 3500, 5000, 10000, 20000, 50000, 100000, 10 ** 9]
 
 
-def comparer(nom: str, agregat: str = 'depenses-totales', niveau: str = 'communes') -> dict:
+def comparer(nom: str, agregat: str = 'depenses-totales', niveau: str = 'communes', rapport_a: str = '') -> dict:
     level = niveau if niveau in T.LEVELS else 'communes'
     ents = T._entities(level)
     q = T.norm(re.sub(r'(?i)^insee\s*:?\s*', '', str(nom or '').strip()))
@@ -213,27 +213,47 @@ def comparer(nom: str, agregat: str = 'depenses-totales', niveau: str = 'commune
         return {'plusieurs': [{'code': ents[i][0], 'nom': ents[i][1], 'lieu': ents[i][2]} for i in found[:15]]}
     i = found[0]
     index = T._json('local/index.json')['aggregates']
-    if agregat not in index:
-        hits = [k for k, v in index.items() if all(w in T.norm(v['label']) for w in T.words(agregat))]
-        if not hits:
-            return {'error': 'agrégat inconnu', 'agregats': {k: v['label'] for k, v in index.items()}}
-        agregat = hits[0]
+
+    def resolve(a):
+        if a in index:
+            return a
+        hits = [k for k, v in index.items() if all(w in T.norm(v['label']) for w in T.words(a))]
+        return hits[0] if hits else None
+    agregat = resolve(agregat)
+    den_key = resolve(rapport_a) if rapport_a else None
+    if not agregat or (rapport_a and not den_key):
+        return {'error': 'agrégat inconnu', 'agregats': {k: v['label'] for k, v in index.items()}}
     data = T._json(f'local/{level}/{agregat}.json')
     pop = T._json(f'local/{level}/_pop.json')
-    y = max(set(data['years']) & set(pop['years']))
+    den = T._json(f'local/{level}/{den_key}.json') if den_key else None
+    years = set(data['years']) & set(pop['years']) & (set(den['years']) if den else set(data['years']))
+    y = max(years)
     vals = data['values'][data['years'].index(y)]
     pops = pop['values'][pop['years'].index(y)]
+    dens = den['values'][den['years'].index(y)] if den else None
     me_pop, me_val = pops[i], vals[i]
-    if not me_pop or me_val is None:
+    if not me_pop or me_val is None or (dens and not dens[i]):
         return {'error': f'pas de valeur {y} pour cette entité'}
+    ok = lambda j: pops[j] and vals[j] is not None and (not dens or dens[j])
     if level == 'communes':
         lo = max(b for b in BANDS if b <= me_pop)
         hi = min(b for b in BANDS if b > me_pop)
-        peers = [j for j in range(len(ents)) if pops[j] and lo <= pops[j] < hi and vals[j] is not None]
+        peers = [j for j in range(len(ents)) if ok(j) and lo <= pops[j] < hi]
         group = f'communes de {lo:,} à {hi - 1:,} habitants'.replace(',', ' ') if hi < 10 ** 9 else f'communes de plus de {lo:,} habitants'.replace(',', ' ')
     else:
-        peers = [j for j in range(len(ents)) if pops[j] and vals[j] is not None]
+        peers = [j for j in range(len(ents)) if ok(j)]
         group = f'tous les {T.LEVELS[level].lower()}s'
+    if dens:  # a share (« frais de personnel / dépenses de fonctionnement ») compared with the same group
+        shares = sorted(100 * vals[j] / dens[j] for j in peers)
+        mine = 100 * me_val / dens[i]
+        q1, med, q3 = statistics.quantiles(shares, n=4) if len(shares) >= 4 else (min(shares), statistics.median(shares), max(shares))
+        return T.clip({'entite': {'code': ents[i][0], 'nom': ents[i][1], 'lieu': ents[i][2], 'population': me_pop},
+                       'rapport': f'{index[agregat]["label"]} / {index[den_key]["label"]}', 'annee': y,
+                       'numerateur_eur': round(me_val), 'denominateur_eur': round(dens[i]), 'part_pct': round(mine, 1),
+                       'groupe': group, 'nombre_dans_le_groupe': len(shares), 'mediane_pct': round(med, 1),
+                       'quartiles_pct': [round(q1, 1), round(q3, 1)],
+                       'rang': f'{sum(1 for v in shares if v > mine) + 1}e sur {len(shares)} (1er = la part la plus élevée)',
+                       'source': T._json('local/index.json').get('source')})
     per = sorted(vals[j] / pops[j] for j in peers)
     mine = me_val / me_pop
     rank = sum(1 for v in per if v > mine) + 1
