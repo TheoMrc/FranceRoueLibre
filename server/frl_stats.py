@@ -41,18 +41,31 @@ def page_of(path):
     return None
 
 
-def compute(since=None):
-    """Daily counts from the access logs still on disk (about 14 days), or only from those written since `since`."""
+MONTHS = {m: f'{i:02d}' for i, m in enumerate('Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(), 1)}
+
+
+def _day(stamp):  # '04/Nov/2026' -> '2026-11-04' (strptime on every line was most of the time)
+    return f'{stamp[7:11]}-{MONTHS[stamp[3:6]]}-{stamp[0:2]}'
+
+
+def compute(since=None, only=None):
+    """Daily counts from the access logs still on disk (about 14 days), or only from those written since `since`.
+    only: the days wanted (ISO dates); the other lines are skipped on their date alone, before any parsing."""
     days = collections.defaultdict(lambda: {'views': 0, 'visitors': set(), 'searches': 0, 'pages': collections.Counter(),
                                             'refs': collections.Counter()})
+    stamps = {dt.date.fromisoformat(d).strftime('%d/%b/%Y') for d in only} if only else None
     for line in read_logs(since):
+        if stamps:
+            i = line.find('[')
+            if line[i + 1:i + 12] not in stamps:
+                continue
         m = LINE.match(line)
         if not m:
             continue
         ip, when, method, path, status, ref, agent = m.groups()
         if method != 'GET' or BOT.search(agent) or not agent:
             continue
-        day = dt.datetime.strptime(when.split(':', 1)[0], '%d/%b/%Y').date().isoformat()
+        day = _day(when[:11])
         d = days[day]
         if path.startswith('/api/search') and status == '200':
             d['searches'] += 1
@@ -133,10 +146,11 @@ def main():
     history = load_history()
     today = dt.date.today()
     wanted = [(today - dt.timedelta(days=i)).isoformat() for i in range(2, min(args.days, 14))]
-    since = None
+    since = only = None
     if history and all(d in history for d in wanted if d >= min(history)):
         since = dt.datetime.combine(today - dt.timedelta(days=1), dt.time()).timestamp()
-    live = compute(since)
+        only = {today.isoformat()} | {(today - dt.timedelta(days=1)).isoformat()} - set(history)
+    live = compute(since, only)
     # a day already saved keeps its saved counts: the files read here may hold only part of it
     data = {**history, **{d: v for d, v in live.items() if since is None or d not in history or d == today.isoformat()}}
     if args.json:
