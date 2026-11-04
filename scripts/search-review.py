@@ -39,6 +39,8 @@ def lines(folder, since):
                 except ValueError:
                     continue
                 e['q'] = unquote_plus(e.get('q') or '')
+                if e['q'].strip().lower() == 'mise en place' and str(e.get('t', '')) < '2026-11-05':
+                    continue  # the deploy check of deploy/vps.sh (tagged and left out by nginx since then)
                 e['key'] = norm(e['q'])
                 try:
                     e['when'] = dt.datetime.fromisoformat(e['t'])
