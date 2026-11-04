@@ -247,8 +247,9 @@ def step_journal(accept: bool) -> None:
     if not (j / 'recherches.csv').is_file():
         say(True, 'journal', 'pas de _journal/ ici : étape sautée (elle tourne sur le PC)')
         return
-    from assistant import places, faq, fiche, settings as S
+    from assistant import places, faq, fiche, outils, settings as S
     places.load(S.DATA_DIR / 'web' / 'communes-lookup.json')
+    outils._company = lambda *a, **k: None   # the business directory is online: the photo stays offline and stable
 
     def rows(name):
         with open(j / name, newline='', encoding='utf-8-sig') as h:
