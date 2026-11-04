@@ -76,7 +76,9 @@
     if (auto) {
       const key = `frl-loupe-auto:${question}`;
       try { if (sessionStorage.getItem(key)) return false; sessionStorage.setItem(key, '1'); } catch (e) { /* private mode */ }
-      if (!matchMedia('(min-width: 1000px)').matches || document.querySelector('.ai-panel:not([hidden])')) return false;
+      if (document.querySelector('.ai-panel:not([hidden])')) return false;
+      // a phone: the panel would cover the results, so the answer is prepared closed and announced on the logo
+      if (!matchMedia('(min-width: 1000px)').matches) return L.ask(question, { free: true, background: true });
     }
     return L.ask(question, { free: true });
   }

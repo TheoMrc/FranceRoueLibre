@@ -66,6 +66,19 @@
 .ai-fab.is-busy .ai-fab__icon .l-lens { animation: ai-scan 1.6s ease-in-out infinite; }
 .ai-fab.has-news .ai-fab__icon { position: relative; }
 .ai-fab.has-news .ai-fab__icon::after { content: ""; position: absolute; top: 1px; right: 1px; width: 11px; height: 11px; border-radius: 50%; background: var(--ai-red); border: 2px solid #fff; animation: ai-spark-in .5s var(--ai-spring) both; }
+/* an answer ready while the panel was closed: a red « 1 » on the logo, like a notification, and the button opens
+   to say it (on a phone too, where it is otherwise only the logo) */
+/* the badge sits over the logo's corner: never clipped by the round button, compact or not, during its animations too */
+.ai-fab.has-news, .ai-fab.has-answer { overflow: visible; }
+.ai-fab.has-news::before, .ai-fab.has-answer::before { display: none; }   /* the hover sweep needs the clipping */
+.ai-fab.has-answer:not(.is-compact) { padding: 6px 18px 6px 6px; gap: .65rem; }
+.ai-fab.has-answer:not(.is-compact) .ai-fab__text { max-width: 230px; opacity: 1; }
+.ai-fab.has-answer .ai-fab__icon { position: relative; }
+.ai-fab.has-answer .ai-fab__icon::after { content: "1"; top: -5px; right: -6px; width: auto; min-width: 19px; height: 19px; padding: 0 5px;
+  box-sizing: border-box; border-radius: 10px; display: grid; place-items: center; color: #fff;
+  font: 700 11px/1 Inter, system-ui, sans-serif; animation: ai-spark-in .5s var(--ai-spring) both, ai-notif 1.8s 1s ease-in-out 3; }
+@keyframes ai-notif { 0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, .45); } 50% { box-shadow: 0 0 0 7px rgba(220, 38, 38, 0); } }
+@media (prefers-reduced-motion: reduce) { .ai-fab.has-answer .ai-fab__icon::after { animation: none; } }
 .ai-fab[hidden], .ai-panel[hidden], .ai-hist[hidden], .ai-think[hidden], .ai-steps[hidden], .ai-demo[hidden] { display: none; }
 
 /* ---------------------------------------------------------------------------------------------------- panel */

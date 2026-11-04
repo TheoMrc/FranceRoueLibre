@@ -498,6 +498,26 @@
     busy = null;
     setBusy(false);
     if (panel.hidden) fab.classList.add('has-news');
+    if (panel.hidden && quietAsk && !m.error) notifyAnswer();
+    quietAsk = false;
+  }
+
+  /* An answer prepared while the panel stays closed (a commune or a SIREN searched on a phone): a notification on
+     the Loupe's logo, a red « 1 », and the button says it, until the panel is opened. */
+  let quietAsk = false;
+  function notifyAnswer() {
+    fab.classList.add('has-answer');
+    fab.classList.remove('is-compact');
+    const t = fab.querySelector('.ai-fab__text');
+    if (t && !t.dataset.was) t.dataset.was = t.innerHTML;
+    if (t) t.innerHTML = '<strong>Réponse prête</strong><small>Touchez pour lire le résumé</small>';
+    fab.setAttribute('aria-label', 'La Loupe : une réponse à lire');
+  }
+  function clearAnswer() {
+    fab.classList.remove('has-answer');
+    const t = fab.querySelector('.ai-fab__text');
+    if (t && t.dataset.was) { t.innerHTML = t.dataset.was; delete t.dataset.was; }
+    fab.removeAttribute('aria-label');
   }
 
   // ------------------------------------------------------------------------------------------------ history
@@ -551,7 +571,7 @@
     if (open === !panel.hidden) return;
     write(sessionStorage, UI, { open });
     if (open) {
-      panel.hidden = false; fab.hidden = true; fab.classList.remove('has-news');
+      panel.hidden = false; fab.hidden = true; fab.classList.remove('has-news'); clearAnswer();
       panel.classList.remove('is-closing');
       headLogo.classList.remove('is-drawn'); void headLogo.offsetWidth; headLogo.classList.add('is-drawn');
       lockPage(true); fit();
@@ -643,7 +663,9 @@
           } catch (e) { pre = null; }
           if (!pre || !pre.job || busy) return false;
         }
-        openPanel(true); store.current = null; showHistory(false); renderLog(); ask(t, pre); return true;
+        // background: the answer is prepared with the panel closed, and announced on the logo (notifyAnswer)
+        if (opts.background) quietAsk = true; else openPanel(true);
+        store.current = null; showHistory(false); renderLog(); ask(t, pre); return true;
       } };
     (window.FRLLoupeQueue || []).splice(0).forEach(t => window.FRLLoupe.ask(t));
     if (read(sessionStorage, UI, {}).open) openPanel(true);
