@@ -268,12 +268,19 @@
         <h4 class="et-h4">Par nature (crédits de paiement)</h4>${titreBars(titres)}
         <p class="note">${scope === 'other' ? 'Ces comptes reçoivent une partie de leurs recettes du budget général (par exemple les contributions employeur au compte « Pensions ») : ne pas les additionner au budget général.' : 'Cliquez sur une mission pour voir ses programmes.'}</p>`;
     }
+    /* Spent in 2024, voted for 2025, asked for 2026 (budget vert of the PLF 2026, the only 2026 file by programme) */
+    function years3(x) {
+      if (x.cp26 == null) return '';
+      const d = x.cp25lfi ? 100 * (x.cp26 - x.cp25lfi) / x.cp25lfi : null;
+      return `<h4 class="et-h4">D’une année à l’autre</h4><dl><dt>Payé en 2024</dt><dd>${meur(x.cp24exe)}</dd><dt>Voté pour 2025 (loi de finances)</dt><dd>${meur(x.cp25lfi)}</dd><dt>Demandé pour 2026 (PLF)</dt><dd>${meur(x.cp26)}${d == null ? '' : ` <span class="muted">(${d >= 0 ? '+' : ''}${pct(d, 1)})</span>`}</dd></dl>
+        <p class="note">Crédits de paiement tirés du ${src('plf26-budget-vert', 'budget vert du PLF 2026')}, qui reprend chaque ligne de crédits du budget général.</p>`;
+    }
     function detailMission(m) {
       const list = m.type === 'BG' && m !== rd ? bgNet : m.type === 'BG' ? bg : others, tot = sum(list, x => x.cp);
       detail.innerHTML = `<span class="tx-pill">${esc(data.budgets[m.type])}</span><h3>${ico(m.code, m.name)}${esc(m.name)}</h3>
         <div class="tx-amount">${md(m.cp, 2)}</div><p class="note">crédits de paiement 2025 · ${pct(100 * m.cp / tot, 1)} du périmètre</p>
         <dl><dt>Autorisations d’engagement</dt><dd>${meur(m.ae)}</dd><dt>Écart AE − CP</dt><dd>${meur(m.ae - m.cp)}${Math.abs(m.ae - m.cp) > 0.05 * m.cp ? ' <span class="muted">(engagements pluriannuels)</span>' : ''}</dd><dt>Programmes</dt><dd>${m.progs.length}</dd><dt>Ministères</dt><dd>${esc([...new Set(m.progs.map(p => p.min))].join(', '))}</dd></dl>
-        <h4 class="et-h4">Par nature</h4>${titreBars(m.titres)}
+        ${years3(m)}<h4 class="et-h4">Par nature</h4>${titreBars(m.titres)}
         <h4 class="et-h4">Programmes</h4><ul class="et-list">${m.progs.map(p => `<li><button type="button" class="tx-rowlink" data-prog="${esc(p.code)}">${esc(p.code)} · ${esc(p.name)}</button><span>${meur(p.cp)}</span></li>`).join('')}</ul>
         ${perfLink(m)}`;
     }
@@ -281,7 +288,7 @@
       detail.innerHTML = `<span class="tx-pill">Programme ${esc(p.code)}</span><h3>${esc(p.name)}</h3>
         <div class="tx-amount">${md(p.cp, 2)}</div><p class="note">crédits de paiement 2025 · ${pct(100 * p.cp / m.cp, 1)} de la mission « ${esc(m.name)} »</p>
         <dl><dt>Autorisations d’engagement</dt><dd>${meur(p.ae)}</dd><dt>Ministère</dt><dd>${esc(p.min)}</dd><dt>Actions</dt><dd>${p.actions.length}</dd></dl>
-        <h4 class="et-h4">Par nature</h4>${titreBars(p.titres)}
+        ${years3(p)}<h4 class="et-h4">Par nature</h4>${titreBars(p.titres)}
         <h4 class="et-h4">Actions</h4><ul class="et-list">${p.actions.map(a => `<li><span>${esc(a.name)}</span><span>${meur(a.cp)}</span></li>`).join('')}</ul>${perfLink(m)}`;
     }
     function detailAction(m, p, a) {
