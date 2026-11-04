@@ -20,8 +20,11 @@ BOT = re.compile(r'bot|crawl|spider|slurp|curl|wget|python|httpx|go-http|java/|o
 SELF = ('francerouelibre.fr', 'www.francerouelibre.fr')
 
 
-def read_logs():
+def read_logs(since=None):
+    """since (a timestamp): only the files written since then; a rotated file is no longer written."""
     for path in sorted(glob.glob(LOGS)):
+        if since and os.path.getmtime(path) < since:
+            continue
         opener = gzip.open if path.endswith('.gz') else open
         try:
             with opener(path, 'rt', encoding='utf-8', errors='replace') as f:
@@ -38,11 +41,11 @@ def page_of(path):
     return None
 
 
-def compute():
-    """Daily counts from the access logs still on disk (about 14 days)."""
+def compute(since=None):
+    """Daily counts from the access logs still on disk (about 14 days), or only from those written since `since`."""
     days = collections.defaultdict(lambda: {'views': 0, 'visitors': set(), 'searches': 0, 'pages': collections.Counter(),
                                             'refs': collections.Counter()})
-    for line in read_logs():
+    for line in read_logs(since):
         m = LINE.match(line)
         if not m:
             continue
@@ -123,10 +126,19 @@ def main():
     ap.add_argument('--save', action='store_true', help='ajoute les jours terminés à l’historique')
     ap.add_argument('--json', action='store_true', help='sortie JSON (historique + journaux)')
     args = ap.parse_args()
-    live = compute()
     if args.save:
-        return save(live)
-    data = {**load_history(), **live}
+        return save(compute())
+    # finished days are in the history (saved every night): only the logs written since yesterday are read again,
+    # unless the history misses a day of the period, then all of them (a few seconds instead of half a minute)
+    history = load_history()
+    today = dt.date.today()
+    wanted = [(today - dt.timedelta(days=i)).isoformat() for i in range(2, min(args.days, 14))]
+    since = None
+    if history and all(d in history for d in wanted if d >= min(history)):
+        since = dt.datetime.combine(today - dt.timedelta(days=1), dt.time()).timestamp()
+    live = compute(since)
+    # a day already saved keeps its saved counts: the files read here may hold only part of it
+    data = {**history, **{d: v for d, v in live.items() if since is None or d not in history or d == today.isoformat()}}
     if args.json:
         return print(json.dumps(data, ensure_ascii=False, indent=1))
     show(data, args.days, args.top)

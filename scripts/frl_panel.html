@@ -37,6 +37,8 @@ h1 span { background: var(--grad); -webkit-background-clip: text; background-cli
 .seg button.on { background: var(--grad); color: #fff; }
 .tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .icon-btn { border: 1px solid var(--line); background: var(--card); color: var(--body); border-radius: 10px; padding: 7px 10px; cursor: pointer; font: 500 13px Inter, sans-serif; box-shadow: var(--shadow); }
+.icon-btn:disabled { opacity: .6; cursor: progress; }
+.notes button { margin-left: 8px; font: 600 13px Inter, sans-serif; border: 0; background: none; color: var(--c1, inherit); text-decoration: underline; cursor: pointer; }
 .notes { margin: 0 0 16px; padding: 10px 14px; border-radius: 10px; background: color-mix(in srgb, var(--c3) 12%, var(--card)); color: var(--ink); border: 1px solid color-mix(in srgb, var(--c3) 35%, var(--line)); font-size: 13px; }
 .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; box-shadow: var(--shadow); min-width: 0; }
@@ -138,6 +140,7 @@ tr.detail td { background: var(--soft); white-space: pre-wrap; font-size: 12.5px
     </div>
     <div class="tools">
       <div class="seg" id="period"></div>
+      <button class="icon-btn" id="refresh" title="Relire le VPS sans relancer frl_panel.bat" hidden>Actualiser</button>
       <button class="icon-btn" id="theme" title="Thème clair ou sombre">Thème</button>
     </div>
   </header>
@@ -512,6 +515,33 @@ addEventListener('beforeunload', e => { if (Object.keys(dmTimers).length) { e.pr
 dmRender();
 
 $('notes').innerHTML = (DATA.notes || []).map(n => `<div class="notes">${esc(n)}</div>`).join('');
+// ---------------------------------------------------------------- « Actualiser »: new data without closing the window
+if (live) {
+  const btn = $('refresh'), hdr = { 'X-Panel-Token': DATA.live };
+  btn.hidden = false;
+  // a reload would lose a letter being edited: then say the data is ready instead of reloading
+  const editing = () => Object.keys(dmTimers).length || (document.activeElement && document.activeElement.matches('textarea, input[type=text], input:not([type])'));
+  const ready = () => {
+    if (!editing()) { try { sessionStorage.setItem('frl-panel-scroll', String(scrollY)); } catch (x) {} return location.reload(); }
+    if (!$('fresh')) $('notes').insertAdjacentHTML('afterbegin', '<div class="notes" id="fresh">Nouvelles données prêtes.<button type="button" id="freshGo">Afficher</button></div>');
+    $('freshGo').onclick = () => location.reload();
+  };
+  const poll = async () => {
+    let st;
+    try { st = await (await fetch('/api/state', { headers: hdr })).json(); } catch (x) { btn.disabled = false; btn.textContent = 'Actualiser'; return; }
+    if (st.busy) { btn.disabled = true; btn.textContent = 'Mise à jour…'; return setTimeout(poll, 1200); }
+    btn.disabled = false; btn.textContent = 'Actualiser';
+    if (st.generated && st.generated !== DATA.generated) ready();
+    else if ((st.notes || []).length && !(DATA.notes || []).includes(st.notes[0])) $('notes').insertAdjacentHTML('afterbegin', `<div class="notes">${esc(st.notes[0])}</div>`);
+  };
+  btn.onclick = async () => {
+    btn.disabled = true; btn.textContent = 'Mise à jour…';
+    try { await fetch('/api/refresh', { method: 'POST', headers: hdr }); } catch (x) {}
+    poll();
+  };
+  poll();
+  try { const y = sessionStorage.getItem('frl-panel-scroll'); if (y) { sessionStorage.removeItem('frl-panel-scroll'); setTimeout(() => scrollTo(0, +y), 300); } } catch (x) {}
+}
 if (window.Chart) render(); else document.body.insertAdjacentHTML('afterbegin', '<div class="notes">Chart.js n’a pas pu être chargé (pas d’accès à Internet ?).</div>');
 </script>
 </body>

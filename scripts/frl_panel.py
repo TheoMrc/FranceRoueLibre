@@ -19,7 +19,10 @@ import re
 import secrets
 import subprocess
 import sys
+import threading
+import time
 import webbrowser
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -97,7 +100,32 @@ def frl_demandes(action: str, ref: str = '', text: str = '') -> dict:
         return {'error': f'VPS injoignable : {str(exc)[:200]}'}
 
 
-def serve(page: Path, token: str, port: int = 8765) -> None:
+STATE = {'busy': False, 'generated': '', 'notes': [], 'took': None}
+_lock = threading.Lock()
+
+
+def refresh_in_background(offline: bool, token: str) -> bool:
+    """Fetches the VPS again and rewrites panel.html, in a thread; False when a refresh already runs."""
+    with _lock:
+        if STATE['busy']:
+            return False
+        STATE['busy'] = True
+
+    def run():
+        t = time.time()
+        try:
+            data = build(offline, token, quick=False)
+            STATE.update(generated=data['generated'], notes=data['notes'], took=round(time.time() - t, 1))
+            print(f'  données à jour ({STATE["took"]} s) : {len(data["loupe"])} questions, {len(data["searches"])} recherches', flush=True)
+        except Exception as exc:  # noqa: BLE001 - the page keeps the data it has
+            STATE.update(notes=[f'Mise à jour impossible : {str(exc)[:200]}'])
+        finally:
+            STATE['busy'] = False
+    threading.Thread(target=run, daemon=True).start()
+    return True
+
+
+def serve(page: Path, token: str, port: int = 8765, offline: bool = False) -> None:
     """The panel and its request buttons, on 127.0.0.1 only, until the window is closed."""
     class Handler(http.server.SimpleHTTPRequestHandler):
         def __init__(self, *a, **k):
@@ -125,11 +153,15 @@ def serve(page: Path, token: str, port: int = 8765) -> None:
                 return
             if self.path == '/api/demandes':
                 return self.reply(200, frl_demandes('tout')) if self.allowed() else self.reply(403, {'error': 'refusé'})
+            if self.path == '/api/state':  # the page asks whether newer data is ready
+                return self.reply(200, STATE) if self.allowed() else self.reply(403, {'error': 'refusé'})
             if not (self.path.startswith('/_journal/panel.html') or self.path.startswith('/dist/vendor/fonts/') or self.path == '/dist/logo-512.png'):
                 return self.reply(404, {'error': 'introuvable'})
             return super().do_GET()
 
         def do_POST(self):
+            if self.path == '/api/refresh' and self.allowed():  # the « Actualiser » button
+                return self.reply(202, {'started': refresh_in_background(offline, token), **STATE, 'busy': True})
             if self.path != '/api/demandes' or not self.allowed():
                 return self.reply(403, {'error': 'refusé'})
             try:
@@ -167,7 +199,7 @@ def caps():
             'order': get(r"_str\('ASSISTANT_ORDER',\s*'([a-z,]+)'\)", '')}
 
 
-def payload(stats, loupe, searches, notes, requests=None):
+def payload(stats, loupe, searches, notes, requests=None, generated=None):
     q = []
     for r in loupe:
         tools = [m.group(1) for m in re.finditer(r'(?:^|\| )([a-z_]+) \(', r.get('tools') or '')]
@@ -180,8 +212,45 @@ def payload(stats, loupe, searches, notes, requests=None):
     s = [{'t': r.get('heure_paris') or J.local(r.get('t')), 'q': (r.get('q') or '')[:160],
           'n': None if r.get('lines') in (None, '') else int(num(r.get('lines')) or 0), 'c': r.get('cache') or '',
           'p': bool(r.get('prefix'))} for r in searches]
-    return {'generated': dt.datetime.now().strftime('%Y-%m-%d %H:%M'), 'visits': stats, 'loupe': q, 'searches': s,
+    return {'generated': generated or dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'visits': stats, 'loupe': q, 'searches': s,
             'caps': caps(), 'notes': [n for n in notes if n], 'demandes': requests or {'demandes': []}}
+
+
+DEMANDES_CACHE = OUT / 'demandes.json'
+
+
+def build(offline: bool, token: str, quick: bool = False) -> dict:
+    """Collects everything and writes _journal/panel.html. quick: only the copies saved by the last run (a second),
+    so the page opens at once; otherwise the three reads of the VPS run side by side, not one after the other."""
+    if quick:
+        stats, _ = visits(True)
+        loupe, searches, _ = journals(True)
+        try:
+            requests = json.loads(DEMANDES_CACHE.read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            requests = None
+        stamp = max((f.stat().st_mtime for f in (OUT / 'loupe.csv', OUT / 'stats.json') if f.is_file()), default=time.time())
+        generated = dt.datetime.fromtimestamp(stamp).strftime('%Y-%m-%d %H:%M:%S')
+        notes = [] if offline else ['Données du dernier passage : mise à jour en cours, la page se recharge toute seule.']
+    else:
+        with ThreadPoolExecutor(3) as pool:
+            fv = pool.submit(visits, offline)
+            fj = pool.submit(journals, offline)
+            fd = pool.submit(frl_demandes, 'tout') if not offline else None
+            (stats, n1), (loupe, searches, n2) = fv.result(), fj.result()
+            requests, n3 = (fd.result() if fd else None), None
+        if requests and requests.get('error'):
+            n3, requests = f'Demandes non lues : {requests["error"]}', None
+        elif requests:
+            OUT.mkdir(exist_ok=True)
+            DEMANDES_CACHE.write_text(json.dumps(requests, ensure_ascii=False), encoding='utf-8')
+        generated, notes = None, [n1, n2, n3]
+    data = payload(stats, loupe, searches, notes, requests, generated) | {'live': token}
+    html = TEMPLATE.read_text(encoding='utf-8').replace(
+        '/*__DATA__*/null', json.dumps(data, ensure_ascii=False).replace('</', '<\\/'))
+    OUT.mkdir(exist_ok=True)
+    (OUT / 'panel.html').write_text(html, encoding='utf-8')
+    return data
 
 
 def main():
@@ -191,34 +260,33 @@ def main():
     ap.add_argument('--no-serve', action='store_true')
     ap.add_argument('--port', type=int, default=8765)
     a = ap.parse_args()
-    print('Visites (frl-stats sur le VPS)...', flush=True)
-    stats, n1 = visits(a.offline)
-    print('Questions à la Loupe et recherches...', flush=True)
-    loupe, searches, n2 = journals(a.offline)
-    requests, n3 = None, None
-    if not a.offline:
-        print('Demandes aux administrations (frl-demandes)...', flush=True)
-        requests = frl_demandes('tout')
-        if requests.get('error'):
-            n3, requests = f'Demandes non lues : {requests["error"]}', None
     serving = not a.no_serve
     token = secrets.token_urlsafe(24) if serving else ''
-    data = payload(stats, loupe, searches, [n1, n2, n3], requests) | {'live': token}
-    html = TEMPLATE.read_text(encoding='utf-8').replace(
-        '/*__DATA__*/null', json.dumps(data, ensure_ascii=False).replace('</', '<\\/'))
-    OUT.mkdir(exist_ok=True)
     out = OUT / 'panel.html'
-    out.write_text(html, encoding='utf-8')
-    print(f'{out} : {len(stats)} jours de visites, {len(loupe)} questions, {len(searches)} recherches')
+    if serving and (OUT / 'loupe.csv').is_file():
+        # open at once on the last copies, then fetch the VPS in the background: the page reloads when it is done
+        data = build(a.offline, token, quick=True)
+        STATE.update(generated=data['generated'])
+        print(f'{out} : données du dernier passage ({data["generated"]}), mise à jour en arrière-plan...', flush=True)
+        if not a.no_open:
+            webbrowser.open(f'http://127.0.0.1:{a.port}/')
+        if not a.offline:
+            refresh_in_background(a.offline, token)
+        return serve(out, token, a.port, a.offline)
+    print('Visites, questions à la Loupe, recherches et demandes (VPS, en parallèle)...', flush=True)
+    t = time.time()
+    data = build(a.offline, token)
+    STATE.update(generated=data['generated'], took=round(time.time() - t, 1))
+    print(f'{out} : {len(data["visits"])} jours de visites, {len(data["loupe"])} questions, {len(data["searches"])} recherches ({STATE["took"]} s)')
     for n in data['notes']:
         print('  ' + n)
-    todo = sum(1 for d in (requests or {}).get('demandes', []) if d['status'] in ('a_valider', 'repondue'))
+    todo = sum(1 for d in (data.get('demandes') or {}).get('demandes', []) if d['status'] in ('a_valider', 'repondue'))
     if todo:
         print(f'  {todo} demande(s) à relire')
     if serving:
         if not a.no_open:
             webbrowser.open(f'http://127.0.0.1:{a.port}/')
-        serve(out, token, a.port)
+        serve(out, token, a.port, a.offline)
     elif not a.no_open:
         webbrowser.open(out.as_uri())
 
