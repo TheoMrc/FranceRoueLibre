@@ -1,0 +1,39 @@
+{"about": "Scénarios rejoués par scripts/check.py sans appeler de modèle : un faux modèle envoie ces appels d'outils, dans l'ordre, au vrai code de la Loupe (boucle de l'agent, format Claude et format Gemini, outils, données du site). « contient » : texte qui doit figurer dans le résultat de l'outil ; « erreur » : true si l'outil doit refuser. Questions tirées du journal de la Loupe.",
+ "scenarios": [
+  {"q": "Comment vont les finances de la ville de Meaux ?", "appels": [
+    ["dossier_collectivite", {"nom": "Meaux"}, ["77284", "echelons", "subventions_etat_associations_du_lieu"]],
+    ["comparer", {"nom": "insee:77284", "agregat": "encours-dette"}, ["mediane"]]]},
+  {"q": "Combien les associations de Meaux ont-elles reçu de subventions de l'État ?", "appels": [
+    ["dossier_collectivite", {"nom": "Meaux"}, ["SOS FEMMES 77", "total_eur"]]]},
+  {"q": "Quel est le budget du Sénat en 2026 ?", "appels": [
+    ["chercher_fiche", {"jeu": "etat", "mots": "Sénat"}, ["credits_paiement_plf2026_meur", "perimetre_2024_2026"]]]},
+  {"q": "Quelles sont les principales niches fiscales des entreprises ?", "appels": [
+    ["chercher_fiche", {"jeu": "niches", "mots": "", "tri": "montant", "cible": "entreprises"}, ["entreprises"]]]},
+  {"q": "Que dit la Cour des comptes sur la fraude fiscale ?", "appels": [
+    ["lire_donnees", {"fichier": "fraude.json", "chemin": "controle,estimations_ecart_global"}, ["parties"]]]},
+  {"q": "Combien coûte la vidéoprotection ?", "appels": [
+    ["rechercher_depenses", {"requete": "vidéoprotection"}, ["lignes"]],
+    ["requete_sql", {"sql": "SELECT src, count(*) n, sum(amount) m FROM doc WHERE src = 2 AND year = 2024 GROUP BY src"}, ["n"]]]},
+  {"q": "Combien d'argent public reçoit la Croix-Rouge française ?", "appels": [
+    ["dossier_beneficiaire", {"nom": "Croix-Rouge française"}, ["Croix"]]]},
+  {"q": "Que valent 1 000 € de 2010 en euros de 2025 ?", "appels": [
+    ["calcul", {"operation": "euros_constants", "a": 1000, "annee": 2010, "vers": 2025}, ["12"]]]},
+  {"q": "Quelle part de la dépense publique va à la défense ?", "appels": [
+    ["indicateur", {"nom": "défense"}, ["2024"]]]},
+  {"q": "33980", "appels": [
+    ["dossier_collectivite", {"nom": "33980"}, ["Audenge"]]]},
+  {"q": "Paris 12", "appels": [
+    ["dossier_collectivite", {"nom": "Paris 12"}, ["75056"]]]},
+  {"q": "Mairie Evian", "appels": [
+    ["dossier_collectivite", {"nom": "Mairie Evian"}, ["74119"]]]},
+  {"q": "Lien vers la page des impôts", "appels": [
+    ["page_du_site", {"mots": "impôts"}, ["impots.html"]]]},
+  {"q": "Lis cette page", "appels": [
+    ["lire_page", {"url": "pas une adresse", "question": "x"}, [], true],
+    ["lire_page", {"url": "https://www.senat.fr/rap/r25-628/r25-6284.html", "question": "subvention aux restaurants"}, ["answer"]]]},
+  {"q": "Deux recherches web", "appels": [
+    ["recherche_web", {"question": "cantine du Sénat subvention"}, ["answer"]],
+    ["recherche_web", {"question": "encore"}, [], true]]},
+  {"q": "Outil inconnu", "appels": [
+    ["outil_qui_n_existe_pas", {}, [], true]]}
+ ]}

@@ -1,0 +1,225 @@
+{
+"about": "Cas de places.find vérifiés par scripts/check.py : [saisie, type attendu, premier résultat attendu]. Ajouter ici chaque saisie réelle mal reconnue, avec le résultat voulu.",
+"cas": [
+[
+"33980",
+"code_postal",
+"Audenge"
+],
+[
+"33",
+"departement",
+"Gironde"
+],
+[
+"2A",
+"departement",
+"Corse"
+],
+[
+"974",
+"departement",
+"La Réunion"
+],
+[
+"L Arbresle",
+"nom",
+"L'Arbresle"
+],
+[
+"L' arbresle",
+"nom",
+"L'Arbresle"
+],
+[
+"Carcassone",
+"approchant",
+"Carcassonne"
+],
+[
+"Le havrr",
+"approchant",
+"Le Havre"
+],
+[
+"57700 Hayange",
+"code_postal",
+"Hayange"
+],
+[
+"Lignerolles allier",
+"nom",
+"Lignerolles"
+],
+[
+"75020",
+"code_postal",
+"Paris"
+],
+[
+"69280",
+"code_postal",
+"Marcy-l'Étoile"
+],
+[
+"Baumes les dames",
+"approchant",
+"Baume-les-Dames"
+],
+[
+"Bussy Saint Georges",
+"nom",
+"Bussy-Saint-Georges"
+],
+[
+"Pézenas",
+"nom",
+"Pézenas"
+],
+[
+"Crolles",
+"nom",
+"Crolles"
+],
+[
+"Rennes",
+"nom",
+"Rennes"
+],
+[
+"Paris",
+"departement",
+"Paris"
+],
+[
+"Lyon",
+"nom",
+"Lyon"
+],
+[
+"Nice",
+"nom",
+"Nice"
+],
+[
+"Montpellier",
+"nom",
+"Montpellier"
+],
+[
+"Ville d'avray",
+"nom",
+"Ville-d'Avray"
+],
+[
+"14360",
+"code_postal",
+"Trouville-sur-Mer"
+],
+[
+"Fleury les aubrac",
+"approchant",
+"Fleury-les-Aubrais"
+],
+[
+"saint priest 69",
+"nom",
+"Saint-Priest"
+],
+[
+"Mairie Evian",
+"dans_la_phrase",
+"Évian-les-Bains"
+],
+[
+"Analyse les dépenses a Alès",
+"dans_la_phrase",
+"Alès"
+],
+[
+"Zoo d'amneville",
+"dans_la_phrase",
+"Amnéville"
+],
+[
+"Le cap d agde",
+"dans_la_phrase",
+"Agde"
+],
+[
+"Vigneux de beer",
+"dans_la_phrase",
+"Vigneux-de-Bretagne"
+],
+[
+"Paris 12",
+"arrondissement",
+"Paris"
+],
+[
+"Lyon 3e",
+"arrondissement",
+"Lyon"
+],
+[
+"Marseille 1er arrondissement",
+"arrondissement",
+"Marseille"
+],
+[
+"dépenses culture Saint-Étienne",
+"dans_la_phrase",
+"Saint-Étienne"
+],
+[
+"La",
+"",
+null
+],
+[
+"mise en place",
+"",
+null
+],
+[
+"cantine scolaire",
+"",
+null
+],
+[
+"subventions associations",
+"",
+null
+],
+[
+"école maternelle",
+"",
+null
+],
+[
+"combien coute la police",
+"",
+null
+],
+[
+"eau potable",
+"",
+null
+],
+[
+"LVMH",
+"",
+null
+],
+[
+"Evasion fiscale",
+"",
+null
+],
+[
+"vidéoprotection",
+"",
+null
+]
+]
+}
