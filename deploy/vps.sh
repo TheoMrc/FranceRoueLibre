@@ -58,6 +58,7 @@ echo "limit_req_zone \$binary_remote_addr zone=frl_ai:10m rate=3r/s;"
     cat <<'NGX'
 map $http_referer $frl_referer { default $http_referer; "~^(?<frl_ref_base>[^?]*)\?" $frl_ref_base; }
 log_format frl '$remote_addr [$time_local] "$request_method $uri $server_protocol" $status $body_bytes_sent "$frl_referer" "$http_user_agent"';
+map $arg_check $frl_q_log { default 1; "deploy" 0; }   # the deploy test (vps.sh, end) is not a reader's search
 map $time_iso8601 $frl_day { "~^(?<frl_d>\d{4}-\d{2}-\d{2})" $frl_d; default "jour"; }
 log_format frl_q escape=json '{"t":"$time_iso8601","q":"$arg_q","prefix":"$arg_prefix","status":$status,"lines":"$sent_http_x_lines","cache":"$upstream_cache_status","s":"$upstream_response_time"}';
 NGX
@@ -128,7 +129,7 @@ NGX
         add_header X-Cache $upstream_cache_status always;
         add_header Strict-Transport-Security "max-age=31536000" always;
         access_log /var/log/nginx/francerouelibre.access.log frl;
-        access_log /var/lib/francerouelibre/recherches/$frl_day.jsonl frl_q;
+        access_log /var/lib/francerouelibre/recherches/$frl_day.jsonl frl_q if=$frl_q_log;
         proxy_pass http://127.0.0.1:8017; proxy_read_timeout 20s;
         proxy_set_header Host $host; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
@@ -367,7 +368,7 @@ echo "== live check"
 for u in http://francerouelibre.fr/ http://www.francerouelibre.fr/ https://www.francerouelibre.fr/ https://francerouelibre.fr/ https://francerouelibre.fr/data/search/meta.json; do
   printf '%s  %s\n' "$(curl -s -o /dev/null -w '%{http_code} %{size_download}B -> %{redirect_url}' --max-time 10 "$u")" "$u"
 done
-printf 'API: %s\n' "$(curl -s --max-time 20 'https://francerouelibre.fr/api/search?q=mise%20en%20place' | head -c 120)"
+printf 'API: %s\n' "$(curl -s --max-time 20 'https://francerouelibre.fr/api/search?q=mise%20en%20place&check=deploy' | head -c 120)"
 printf 'IPv4 %s · IPv6 %s · range request on the search index: %s\n' \
   "$(curl -4 -s -o /dev/null -w '%{http_code}' --max-time 10 https://francerouelibre.fr/)" \
   "$(curl -6 -s -o /dev/null -w '%{http_code}' --max-time 10 https://francerouelibre.fr/ || echo none)" \

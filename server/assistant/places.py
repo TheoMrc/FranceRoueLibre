@@ -21,6 +21,13 @@ DEPT = re.compile(r'^(?:\d{2}|2a|2b|97[1-6])$')
 POSTAL = re.compile(r'^\d{5}$')
 # Words that never name a commune alone: a query made only of them is not a place
 GENERIC = set('la le les l de des du d en et a au aux sur sous saint sainte mise place'.split())
+# Words around a place in a sentence (« Mairie Evian », « Analyse les dépenses à Alès »): never taken alone as a commune,
+# even when a commune bears that name (Ville, École, Bus...)
+FILLER = GENERIC | set('mairie mairies ville villes commune communes depense depenses budget budgets analyse analyser cout '
+                       'couts combien impot impots taxe region metropole departement agglomeration communaute ecole eau '
+                       'bus police culture sport zoo musee piscine stade gare port hopital lycee college marche marches'.split())
+# « Paris 12 », « Lyon 3e », « Marseille 1er arrondissement »: the arrondissement belongs to the commune's accounts
+ARROND = re.compile(r'^(paris|lyon|marseille) (\d{1,2})(?: ?(?:e|er|eme|ieme|em))?(?: arrondissement)?$')
 
 
 def norm(text: str) -> str:
@@ -134,10 +141,45 @@ def by_insee(code: str) -> Optional[dict]:
 
 
 def find(query: str, limit: int = 6) -> dict:
-    """{'communes': [...], 'departement': {...} | None, 'type': 'code_postal' | 'departement' | 'nom' | 'approchant' | ''}"""
+    """{'communes': [...], 'departement': {...} | None,
+        'type': 'code_postal' | 'departement' | 'nom' | 'debut' | 'approchant' | 'arrondissement' | 'dans_la_phrase' | ''}"""
     if not _data:
         raise RuntimeError('places.load() first')
+    out = _find(norm(query), limit)
+    if out['type']:
+        return out
     q = norm(query)
+    rows = _data['rows']
+    m = ARROND.match(q)
+    if m:  # the accounts are published for the whole city: the arrondissement leads to it
+        ids = [i for i in _data['by_name'].get(m.group(1), []) if rows[i]['dep'] in ('75', '69', '13')]
+        if ids:
+            return out | {'type': 'arrondissement', 'arrondissement': int(m.group(2)), 'communes': [_view(ids[0], 'arrondissement')]}
+    words = q.split()
+    if len(words) < 2:
+        return out
+    # a place inside a sentence: the longest run of words that names a commune exactly, else that starts a commune name
+    rank = lambda ids: sorted(set(ids), key=lambda i: -(rows[i]['population'] or 0))
+    runs = [' '.join(words[a:a + n]) for n in range(len(words) - 1, 0, -1) for a in range(len(words) - n + 1)]
+    runs = [r for r in runs if not all(w in FILLER for w in r.split()) and len(r.replace(' ', '')) >= 3
+            and r.split()[0] not in GENERIC - {'saint', 'sainte'} or r.startswith(('le ', 'la ', 'les ')) and len(r.split()) > 1]
+    for r in runs:
+        if r.split()[0] in FILLER - {'saint', 'sainte', 'le', 'la', 'les'}:
+            continue
+        ids = _data['by_name'].get(r, [])
+        if ids:
+            return out | {'type': 'dans_la_phrase', 'communes': [_view(i, 'dans_la_phrase') for i in rank(ids)[:limit]]}
+    for r in runs:
+        if r.split()[0] in FILLER - {'saint', 'sainte', 'le', 'la', 'les'} or len(r) < 5:
+            continue
+        ids = [i for i in _data['by_first'].get(r[:1], []) if rows[i]['_n'].startswith(r + ' ')]
+        if ids:
+            return out | {'type': 'dans_la_phrase', 'communes': [_view(i, 'dans_la_phrase') for i in rank(ids)[:limit]]}
+    return out
+
+
+def _find(q: str, limit: int) -> dict:
+    """The whole query read as one place."""
     words = q.split()
     out = {'communes': [], 'departement': None, 'type': ''}
     if not words:

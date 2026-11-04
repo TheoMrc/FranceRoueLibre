@@ -132,7 +132,8 @@
         const fix = c.correspondance === 'approchant' ? 'Vouliez-vous dire ? · ' : '';
         place.push({ kind: 'place', url: lib.mapUrl(c), title: c.nom, sub: `${fix}${c.dep_nom} (${c.dep})${c.population ? ` · ${lib.people(c.population)}` : ''}`, icon: ICON_PIN, links: k === 0 ? c.liens : null });
       }
-      const placeTitle = where?.type === 'approchant' ? 'Commune (orthographe approchante)' : where?.departement && !where.communes.length ? 'Département' : 'Communes';
+      const placeTitle = where?.type === 'approchant' ? 'Commune (orthographe approchante)' : where?.type === 'dans_la_phrase' ? 'Commune citée'
+        : where?.type === 'arrondissement' ? 'Commune (comptes publiés pour toute la ville)' : where?.departement && !where.communes.length ? 'Département' : 'Communes';
       const placeFirst = lib && lib.sure(where);
       const groups = isQuestion(q)
         ? [['Demander à la Loupe', loupe], ['Sur le site', site], ['Chercher dans les dépenses', spend]]

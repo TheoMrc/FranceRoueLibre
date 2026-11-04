@@ -155,6 +155,8 @@ def answer(messages: list) -> Optional[dict]:
         places.load(S.DATA_DIR / 'web' / 'communes-lookup.json')
         found = places.find(q)
         communes = found['communes']
+        if found['type'] == 'dans_la_phrase':  # a place inside a longer question: the model reads the rest
+            return None
         exact = [c for c in communes if c['correspondance'] in ('nom', 'code_postal')]
         if found['type'] == 'departement' and not (exact and len(exact) == 1 and places.norm(exact[0]['nom']) == places.norm(q)):
             res = _departement(found['departement']['code'], found['departement']['nom'])

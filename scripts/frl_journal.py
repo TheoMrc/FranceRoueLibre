@@ -60,8 +60,11 @@ def fetch():
               'tools': ' | '.join(f'{t.get("name")} ({t.get("summary") or ""})' for t in a.get('tools') or []),
               'demande': a.get('demande') or '', 'error': a.get('error') or '', 'vote': votes.get(a.get('id'), ''),
               'reply': a.get('reply'), 'sources': ' '.join(a.get('sources') or [])} for a in answers]
+    # the deploy test of vps.sh searched « mise en place » before it was tagged check=deploy (3 Nov 2026)
+    deploy_test = lambda e: unquote_plus(e.get('q') or '') == 'mise en place' and (e.get('t') or '') < '2026-11-05'
     searches = [{'t': e.get('t'), 'heure_paris': local(e.get('t')), 'q': unquote_plus(e.get('q') or ''), 'lines': e.get('lines'), 'cache': e.get('cache'),
-                 'status': e.get('status'), 's': e.get('s'), 'prefix': e.get('prefix')} for e in rows(search_raw)]
+                 'status': e.get('status'), 's': e.get('s'), 'prefix': e.get('prefix')} for e in rows(search_raw)
+                if not deploy_test(e)]
     return sorted(loupe, key=lambda r: r['t'] or ''), sorted(searches, key=lambda r: r['t'] or '')
 
 

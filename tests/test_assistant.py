@@ -620,8 +620,20 @@ class PlacesTest(unittest.TestCase):
         self.assertEqual(self.P.find('69280')['type'], 'code_postal')
         self.assertEqual(len(self.P.find('69280')['communes']), 2)
 
+    def test_place_in_a_sentence_and_arrondissements(self):
+        self.assertEqual(self.first('Mairie Evian'), 'Évian-les-Bains')
+        self.assertEqual(self.first('Analyse les dépenses a Alès'), 'Alès')
+        self.assertEqual(self.first("Zoo d'amneville"), 'Amnéville')
+        self.assertEqual(self.first('Le cap d agde'), 'Agde')
+        self.assertEqual(self.first('Vigneux de beer'), 'Vigneux-de-Bretagne')
+        self.assertEqual(self.P.find('Analyse les dépenses a Alès')['type'], 'dans_la_phrase')
+        for q in ('Paris 12', 'Lyon 3e', 'Marseille 1er arrondissement'):
+            self.assertEqual(self.P.find(q)['type'], 'arrondissement', q)
+        self.assertEqual(self.first('Paris 12'), 'Paris')
+
     def test_not_a_place(self):
-        for q in ('La', 'mise en place', 'cantine scolaire'):
+        for q in ('La', 'mise en place', 'cantine scolaire', 'subventions associations', 'école maternelle',
+                  'combien coute la police', 'eau potable'):
             self.assertEqual(self.P.find(q)['communes'], [], q)
 
 
