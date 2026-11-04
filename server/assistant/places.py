@@ -40,7 +40,8 @@ def norm(text: str) -> str:
 def load(path: Path) -> None:
     """Reads the lookup once (thread-safe); later calls are free."""
     with _lock:
-        stamp = f'{path}:{Path(path).stat().st_mtime_ns}'
+        former = Path(path).parent / 'communes-anciennes.json'   # read again when either file is published anew
+        stamp = f'{path}:{Path(path).stat().st_mtime_ns}:{former.stat().st_mtime_ns if former.is_file() else 0}'
         if _data.get('path') == stamp:
             return
         d = json.loads(Path(path).read_text(encoding='utf-8'))
