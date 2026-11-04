@@ -144,6 +144,39 @@ class DataFilesTest(unittest.TestCase):
 
 
 
+class SirenAnswerTest(unittest.TestCase):
+    """« Combien d'argent public reçoit ou dépense « SIREN » ? » is answered from the published lines, without a model."""
+
+    def ask(self, q):
+        from assistant import fiche
+        return fiche.answer([{'role': 'user', 'text': q}])
+
+    def test_patterns(self):
+        from assistant import fiche
+        for q in ("Combien d'argent public reçoit ou dépense « 433122397 » ?", '433122397', '433 122 397', 'SIREN 433122397',
+                  "Combien d’argent public reçoit « 433122397 » ?"):
+            self.assertEqual(fiche.siren_of(q), '433122397', q)
+        for q in ('Combien reçoit la Croix-Rouge ?', '4331223970', "Combien d'argent public reçoit ou dépense « LVMH » ?"):
+            self.assertIsNone(fiche.siren_of(q), q)
+
+    @unittest.skipUnless((S.DATA_DIR / 'search' / 'frl-search.sqlite3').is_file(), 'index de recherche absent')
+    def test_answer(self):
+        r = self.ask("Combien d'argent public reçoit ou dépense « 433122397 » ?")
+        self.assertEqual(r['provider'], 'faq')
+        self.assertIn('31\u202f156 €', r['reply'])
+        self.assertIn('2023 : 7\u202f164 €', r['reply'])
+        self.assertIn('2010 à 2016, 2018 et 2023', r['reply'])
+        self.assertIsNone(self.ask('999999999'))  # placeholder of bodies without a SIREN: the model explains
+        self.assertIsNone(self.ask('100000009'))  # nothing published: the model explains
+        self.assertIsNone(fiche_two_turns())
+
+
+def fiche_two_turns():
+    from assistant import fiche
+    return fiche.answer([{'role': 'user', 'text': 'Bonjour'}, {'role': 'assistant', 'text': 'Bonjour'},
+                         {'role': 'user', 'text': '433122397'}])
+
+
 class FakeAndFallbackTest(unittest.TestCase):
     """The fake models (assistant_api.py --fake) go through the real loop; in « Auto » a failing model hands over."""
     def setUp(self):

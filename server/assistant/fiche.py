@@ -144,10 +144,147 @@ def _postal(q: str, found: list) -> dict:
     return {'reply': '\n'.join(lines), 'sources': SOURCES[2:], 'liens': None}
 
 
+# ============================================================================== a SIREN: what it received, by source
+# « 433122397 », « SIREN 433 122 397 », or the question the search page proposes:
+# « Combien d'argent public reçoit ou dépense « 433122397 » ? »
+SIREN_Q = re.compile(r'^\s*(?:combien d[’\']argent public (?:re[çc]oit|touche|a re[çc]u)(?: ou d[ée]pense)?\s*[«"]?\s*|'
+                     r'(?:le )?siren\s*:?\s*)?(\d{3}\s?\d{3}\s?\d{3})\s*[»"]?\s*\??\s*$', re.I)
+SOURCE_TEXT = {1: 'Subventions de l’État', 2: 'Marchés publics', 3: 'Projets aidés par l’État (DGCL)', 4: 'Fonds vert',
+               5: 'Aides de minimis'}
+STATE_YEARS = 'les subventions de l’État aux associations ne sont publiées que pour 2010 à 2016, 2018 et 2023'
+
+
+def siren_of(text: str) -> Optional[str]:
+    m = SIREN_Q.match(str(text or ''))
+    return re.sub(r'\s', '', m.group(1)) if m else None
+
+
+def _years(amounts: dict) -> str:
+    ys = sorted(amounts)
+    if len(ys) <= 8:
+        return ' ; '.join(f'{y} : {money(amounts[y])}' for y in ys)
+    top = sorted(ys, key=lambda y: -amounts[y])[:4]
+    return f'de {ys[0]} à {ys[-1]}, surtout ' + ' ; '.join(f'{y} : {money(amounts[y])}' for y in sorted(top))
+
+
+def _beneficiary(siren: str) -> Optional[dict]:
+    """Every published line under this SIREN (search index), the organisation from the official directory when it
+    answers (recherche-entreprises, free and without a model). None when nothing is published: the model then
+    explains and looks further."""
+    if len(set(siren)) == 1:  # 999999999, 000000000: placeholders the annexes give to bodies without a SIREN
+        return None
+    with T._sql_lock:
+        db = T._sql_connection()
+        rows = db.execute('SELECT src, year, amount, fw, title, who, extra, dept FROM doc WHERE siren = ? ORDER BY year', [siren]).fetchall()
+    if not rows:
+        return None
+    try:
+        org = O._company(siren=siren) or {}
+    except Exception:  # noqa: BLE001 - the directory is a plus, the figures come from the site
+        org = {}
+    if org.get('siren') != siren:
+        org = {}
+    names = {}
+    for r in rows:
+        names[r[5]] = names.get(r[5], 0) + 1
+    name = org.get('nom') or max(names, key=names.get) or f'SIREN {siren}'
+    assoc = str(org.get('nature_juridique') or '').startswith('92') or (not org and {r[0] for r in rows} == {1})
+    by = {}
+    for src, year, amount, fw, title, who, extra, dept in rows:
+        b = by.setdefault(src, {'n': 0, 'total': 0.0, 'years': {}, 'prog': {}, 'fw': 0})
+        b['n'] += 1
+        if fw:  # framework agreements: a ceiling, not a payment
+            b['fw'] += 1
+            continue
+        b['total'] += amount or 0
+        b['years'][year] = b['years'].get(year, 0) + (amount or 0)
+        if extra:
+            b['prog'][extra] = b['prog'].get(extra, 0) + (amount or 0)
+    got = {k: b for k, b in by.items() if k != 2}          # received: grants, aid, Fonds vert, DGCL projects
+    total = sum(b['total'] for b in got.values())
+    bought = by.get(2)                                      # contracts are indexed under the buyer's SIREN: spent
+    who = f'l’association **{name}**' if assoc else f'**{name}**'
+    place = f', dont le siège est à {org["commune_du_siege"].title()}' if org.get('commune_du_siege') else ''
+    state = ''
+    if org.get('etat') == 'fermée':
+        state = f' Elle est fermée{" depuis le " + _date(org["fermeture"]) if org.get("fermeture") else ""} selon l’annuaire des entreprises.'
+    head = [f'Le SIREN {siren} correspond à {who}{place}.']
+    if got:
+        n = sum(b['n'] for b in got.values())
+        head.append(f'Le site publie **{money(total)}** d’argent public reçu, en {num(n)} ligne{"s" if n > 1 else ""}.')
+    if bought:
+        head.append(f'Comme acheteur public, ce SIREN a aussi passé des marchés pour **{money(bought["total"])}**.'
+                    if got else f'Comme acheteur public, ce SIREN a passé des marchés pour **{money(bought["total"])}** '
+                                f'({num(bought["n"] - bought["fw"])} ligne{"s" if bought["n"] - bought["fw"] > 1 else ""}).')
+    lines = [' '.join(head) + state, '']
+    for src in sorted(by, key=lambda k: (k == 2, -by[k]['total'])):
+        b = by[src]
+        label = 'Marchés publics passés comme acheteur' if src == 2 else SOURCE_TEXT.get(src, T.SRC.get(src, str(src)))
+        text = f'- **{label} : {money(b["total"])}**'
+        if b['years']:
+            text += f' ({_years(b["years"])})'
+        if b['fw']:
+            text += f', plus {num(b["fw"])} accord{"s" if b["fw"] > 1 else ""}-cadre{"s" if b["fw"] > 1 else ""} dont le montant est un plafond, non additionné'
+        progs = sorted(b['prog'].items(), key=lambda kv: -kv[1])[:3]
+        if progs and src in (1, 4, 5):
+            text += '. ' + ('Programme' if src == 1 else 'Dispositif') + (' : ' if len(progs) == 1 else 's : ') + \
+                    ' ; '.join(f'{k.replace("Programme ", "")} ({money(v)})' for k, v in progs)
+        lines.append(text + '.')
+    missing = [SOURCE_TEXT[k].replace('Fonds vert', 'Fonds vert').lower().replace('l’état', 'l’État').replace('fonds vert', 'Fonds vert')
+               for k in (1, 5, 4) if k not in by]
+    if missing:
+        lines.append(f'- **Rien de publié** pour ce SIREN : {", ".join(missing)}.')
+    limits = []
+    if 1 in by:
+        limits.append(STATE_YEARS)
+    limits.append('les subventions des communes, départements et régions ne figurent pas dans ces données')
+    if not assoc:
+        limits.append('les marchés remportés comme titulaire ne sont pas rattachés au SIREN dans ces données')
+    lines += ['', f'Limites : {" ; ".join(limits)}. L’argent public réellement reçu peut donc être plus élevé.']
+    more = ['Qu’est-ce que le FONJEP ?'] if any('FONJEP' in (r[4] or '').upper() for r in rows) else []
+    if org.get('commune_du_siege'):
+        more.insert(0, f'Quelles associations de {org["commune_du_siege"].title()} reçoivent le plus de subventions de l’État ?')
+    if more:
+        lines += ['', 'Pour aller plus loin :'] + [f'- {m}' for m in more[:2]]
+    sources = [{'title': f'Recherche du SIREN {siren} sur le site', 'url': f'{S.SITE_URL}/recherche.html?q={siren}'},
+               {'title': 'Aides et subventions', 'url': f'{S.SITE_URL}/aides.html'}]
+    if org.get('fiche'):
+        sources.append({'title': 'Annuaire des entreprises', 'url': org['fiche']})
+    lines += ['', 'Sources : ' + ' ; '.join(f'[{x["title"]}]({x["url"]})' for x in sources)]
+    return {'reply': '\n'.join(lines), 'sources': sources, 'beneficiaire': {'siren': siren, 'nom': name, 'total_eur': round(total)}}
+
+
+def money(v: float) -> str:
+    """31 156 € to the euro below a million (the published lines are exact), 1,76 M€ above."""
+    v = v or 0
+    if abs(v) < 1e6:
+        return f'{round(v):,} €'.replace(',', '\u202f')
+    return f'{v / 1e6:,.2f} M€'.replace('.', ',') if abs(v) < 1e9 else f'{v / 1e9:,.2f} Md€'.replace('.', ',')
+
+
+def _date(iso: str) -> str:
+    try:
+        y, m, d = str(iso)[:10].split('-')
+        return f'{int(d)} {"janvier février mars avril mai juin juillet août septembre octobre novembre décembre".split()[int(m) - 1]} {y}'
+    except (ValueError, IndexError):
+        return str(iso)
+
+
 def answer(messages: list) -> Optional[dict]:
     """The templated answer, or None (then the model answers)."""
     if len([m for m in messages if m.get('role') == 'user']) != 1:
         return None
+    siren = siren_of(messages[-1].get('text'))
+    if siren:
+        try:
+            res = _beneficiary(siren)
+        except Exception:  # noqa: BLE001 - any trouble: the model answers instead
+            return None
+        if not res:
+            return None
+        events = [{'type': 'tool_done', 'name': 'dossier_beneficiaire', 'label': f'Dossier du SIREN {siren}', 'ok': True,
+                   'summary': 'lignes publiées par source', 's': 0}]
+        return dict(res, searches=[], provider='faq', label='Réponse sourcée automatique', saved='siren', events=events)
     q = place_of(messages[-1].get('text'))
     if not q:
         return None
