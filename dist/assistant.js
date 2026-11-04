@@ -326,35 +326,49 @@
     eye: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
     ok: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
   };
+  /* The letter shown as a mail (À, Objet, start of the text) with a send bar: « Faire envoyer par nous » when the site
+     can send it, else copy it or open the reader's own mail app or the body's contact form. */
   function demandeHtml(m) {
     const d = m.demande;
     const fresh = Date.now() - (m.at || 0) < 55 * 60 * 1000;
-    const where = d.email || (d.formulaire ? 'formulaire de contact' : 'sans adresse publiée');
-    const siteBtn = d.envoyee ? `<span class="ai-req__sent">${REQ_ICON.ok}<span>${esc(d.envoyee)}</span></span>`
-      : d.envoi_par_le_site && fresh ? `<button type="button" class="ai-req__send" data-req="send" title="FranceRoueLibre l’envoie depuis stonks@francerouelibre.fr, après relecture">${REQ_ICON.send}<span>Faire envoyer</span></button>` : '';
+    const bySite = d.envoi_par_le_site && fresh && !d.envoyee;
     const own = d.email ? `<a class="ai-req__ico" href="mailto:${esc(d.email)}?subject=${encodeURIComponent(d.objet)}&body=${encodeURIComponent(d.texte)}" title="Ouvrir dans ma messagerie" aria-label="Ouvrir dans ma messagerie">${REQ_ICON.mail}</a>`
       : d.formulaire ? `<a class="ai-req__ico" href="${esc(d.formulaire)}" target="_blank" rel="noopener noreferrer" title="Ouvrir le formulaire de contact" aria-label="Ouvrir le formulaire de contact">${REQ_ICON.form}</a>` : '';
-    return `<div class="ai-req"><div class="ai-req__row"><span class="ai-req__badge">${REQ_ICON.letter}</span>`
-      + `<div class="ai-req__who"><strong>${esc(d.destinataire)}</strong><small>${esc(where)}</small></div>`
-      + `<div class="ai-req__actions">${siteBtn}<button type="button" class="ai-req__ico" data-req="read" title="Lire la lettre" aria-label="Lire la lettre" aria-expanded="false">${REQ_ICON.eye}</button>`
-      + `<button type="button" class="ai-req__ico" data-req="copy" title="Copier la lettre" aria-label="Copier la lettre">${REQ_ICON.copy}</button>${own}</div></div>`
-      + `<pre class="ai-req__text" hidden>${esc(d.objet)}\n\n${esc(d.texte)}</pre>`
-      + `<p class="ai-req__msg" role="status"></p>`
-      + `<p class="ai-req__note">Réponse sous un mois · <a href="demandes.html">suivi public</a>${d.fiche ? ` · <a href="${esc(d.fiche)}" target="_blank" rel="noopener noreferrer">fiche officielle</a>` : ''}</p></div>`;
+    const copyIco = `<button type="button" class="ai-req__ico" data-req="copy" title="Copier la lettre" aria-label="Copier la lettre">${REQ_ICON.copy}</button>`;
+    const links = `<a href="demandes.html">la page Demandes</a>${d.fiche ? ` · <a href="${esc(d.fiche)}" target="_blank" rel="noopener noreferrer">fiche officielle</a>` : ''}`;
+    let bar;
+    if (d.envoyee) bar = sentHtml(d.envoyee, links);
+    else if (bySite) bar = `<div class="ai-req__bar"><button type="button" class="ai-req__send" data-req="send">${REQ_ICON.send}<span>Faire envoyer<span class="ai-req__long"> par nous</span></span></button>${copyIco}${own}</div>`
+      + `<p class="ai-req__note">Envoyée par FranceRoueLibre après relecture, sans votre nom. Réponse sous un mois, publiée sur ${links}.</p>`;
+    else bar = `<div class="ai-req__bar"><button type="button" class="ai-req__send is-ghost" data-req="copy">${REQ_ICON.copy}<span>Copier la lettre</span></button>${own}</div>`
+      + `<p class="ai-req__note">À envoyer vous-même${d.email ? '' : d.formulaire ? ' par le formulaire de l’organisme' : ''} : remplacez « [Votre nom] ». Réponse sous un mois. Suivi : ${links}.</p>`;
+    return `<div class="ai-req"><div class="ai-req__hd"><span>À</span><span><b>${esc(d.destinataire)}</b><small>${esc(d.email || (d.formulaire ? 'formulaire de contact' : 'pas d’adresse publiée'))}</small></span>`
+      + `<span>Objet</span><span><b>${esc(d.objet)}</b></span></div>`
+      + `<div class="ai-req__paper">${esc(d.texte)}</div><button type="button" class="ai-req__more" data-req="read" aria-expanded="false">Lire toute la lettre</button>`
+      + `<p class="ai-req__msg" role="status"></p>${bar}</div>`;
+  }
+  function sentHtml(ref, links) {
+    return `<div class="ai-req__sent"><span class="ai-req__ok">${REQ_ICON.ok}</span><span><b>Demande ${esc(ref)} enregistrée</b>`
+      + `FranceRoueLibre la relit puis l’envoie. Réponse sous un mois, publiée sur ${links}.</span></div>`;
   }
   async function demandeClick(m, e, box) {
     const b = e.target.closest('button[data-req]');
     if (!b) return;
     const msg = box.querySelector('.ai-req__msg');
-    const pre = box.querySelector('.ai-req__text');
+    const paper = box.querySelector('.ai-req__paper');
     const d = m.demande;
     if (b.dataset.req === 'read') {
-      pre.hidden = !pre.hidden; b.setAttribute('aria-expanded', String(!pre.hidden)); b.classList.toggle('is-on', !pre.hidden);
+      const open = !box.classList.contains('is-open');
+      box.classList.toggle('is-open', open); b.setAttribute('aria-expanded', String(open));
+      b.textContent = open ? 'Réduire la lettre' : 'Lire toute la lettre';
       return;
     }
     if (b.dataset.req === 'copy') {
-      try { await navigator.clipboard.writeText(`${d.objet}\n\n${d.texte}`); msg.textContent = 'Copiée : remplacez « [Votre nom] » avant d’envoyer.'; b.innerHTML = REQ_ICON.ok; setTimeout(() => { b.innerHTML = REQ_ICON.copy; }, 1800); }
-      catch (err) { pre.hidden = false; getSelection().selectAllChildren(pre); msg.textContent = 'Lettre sélectionnée : copiez-la (Ctrl+C).'; }
+      try {
+        await navigator.clipboard.writeText(`${d.objet}\n\n${d.texte}`);
+        msg.textContent = 'Lettre copiée : remplacez « [Votre nom] » avant de l’envoyer.';
+        if (b.classList.contains('ai-req__ico')) { b.innerHTML = REQ_ICON.ok; setTimeout(() => { b.innerHTML = REQ_ICON.copy; }, 1800); }
+      } catch (err) { box.classList.add('is-open'); getSelection().selectAllChildren(paper); msg.textContent = 'Lettre sélectionnée : copiez-la (Ctrl+C).'; }
       return;
     }
     b.disabled = true; msg.textContent = 'Envoi…';
@@ -363,8 +377,10 @@
       const res = await r.json();
       if (!r.ok || !res.ok) { msg.textContent = res.error || 'Envoi impossible.'; b.disabled = false; return; }
       d.envoyee = res.ref; saveStore();
-      msg.textContent = res.message;
-      b.outerHTML = `<span class="ai-req__sent">${REQ_ICON.ok}<span>${esc(res.ref)}</span></span>`;
+      msg.textContent = '';
+      box.querySelector('.ai-req__bar')?.remove();
+      box.querySelector('.ai-req__note')?.remove();
+      box.insertAdjacentHTML('beforeend', sentHtml(res.ref, `<a href="demandes.html">la page Demandes</a>${d.fiche ? ` · <a href="${esc(d.fiche)}" target="_blank" rel="noopener noreferrer">fiche officielle</a>` : ''}`));
     } catch (err) { msg.textContent = 'Envoi impossible : réessayez.'; b.disabled = false; }
   }
   function staticBot(m) {
