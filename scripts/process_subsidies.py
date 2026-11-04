@@ -191,8 +191,8 @@ def main():
                       closed_on = CAST(try_strptime(nullif(regexp_extract(status, '(\\d{2}/\\d{2}/\\d{4})', 1), ''), '%d/%m/%Y') AS DATE)""")
         # Programme labels where the source spells them ("131 - Création"), before reducing codes to 3 digits.
         labels = dict(con.execute("""SELECT regexp_extract(programme, '(\\d{3})', 1), arg_max(trim(regexp_replace(programme, '^\\D*\\d{3}\\s*-?\\s*', '')), year)
-                                   FROM j WHERE regexp_matches(programme, '\\d{3}\\s*-\\s*\\S') GROUP BY 1""").fetchall())
-        missions = dict(con.execute("SELECT regexp_extract(programme, '(\\d{3})', 1), arg_max(mission, year) FROM j WHERE mission IS NOT NULL GROUP BY 1").fetchall())
+                                   FROM j WHERE regexp_matches(programme, '\\d{3}\\s*-\\s*\\S') GROUP BY 1 ORDER BY 1""").fetchall())
+        missions = dict(con.execute("SELECT regexp_extract(programme, '(\\d{3})', 1), arg_max(mission, year) FROM j WHERE mission IS NOT NULL GROUP BY 1 ORDER BY 1").fetchall())
         for code, label in KNOWN_PROGRAMMES.items():
             labels.setdefault(code, label)
         con.execute("UPDATE j SET programme = regexp_extract(programme, '(\\d{3})', 1) WHERE programme IS NOT NULL")
@@ -206,25 +206,25 @@ def main():
         for year, programme, amount, lines in con.execute('SELECT year, programme, sum(amount), count(*) FROM j GROUP BY 1, 2 ORDER BY 1, 3 DESC').fetchall():
             programmes.setdefault(str(year), []).append([programme or '?', round(amount or 0), lines])
         departments = {}
-        for year, dept, amount, lines in con.execute("SELECT year, dept, sum(amount), count(*) FROM j WHERE dept IS NOT NULL GROUP BY 1, 2").fetchall():
+        for year, dept, amount, lines in con.execute("SELECT year, dept, sum(amount), count(*) FROM j WHERE dept IS NOT NULL GROUP BY 1, 2 ORDER BY 1, 2").fetchall():
             departments.setdefault(str(year), {})[dept] = [round(amount or 0), lines]
         top = {}
         for year, siren, name, amount, lines, dept, city in con.execute("""
-            SELECT year, siren, any_value(name), sum(amount) AS total, count(*), any_value(dept), any_value(city) FROM j
-            GROUP BY year, coalesce(siren, name), siren QUALIFY row_number() OVER (PARTITION BY year ORDER BY total DESC) <= 250""").fetchall():
+            SELECT year, siren, min(name), sum(amount) AS total, count(*), min(dept), min(city) FROM j
+            GROUP BY year, coalesce(siren, name), siren QUALIFY row_number() OVER (PARTITION BY year ORDER BY total DESC, siren, min(name)) <= 250""").fetchall():
             top.setdefault(str(year), []).append([siren, fix_text(name), round(amount or 0), lines, dept, fix_text(city)])
         for rows in top.values():
             rows.sort(key=lambda row: -row[2])
         # Grants recorded for a year after the establishment's SIRENE closure date (or closed with no date).
         # Programme 232 (public funding of political parties, set by law from votes and seats) is left out: a party's registered office changing is not a lead.
         closed = [[r[0], r[1], fix_text(r[2]), r[3], str(r[4]) if r[4] else None, fix_text(r[5]), r[6]] for r in con.execute("""
-            SELECT year, siren, any_value(name), round(sum(amount)) AS total, min(closed_on), any_value(city), any_value(programme) FROM j
-            WHERE closed AND (closed_on IS NULL OR closed_on < make_date(year, 1, 1)) AND coalesce(programme, '') <> '232' GROUP BY 1, 2 ORDER BY total DESC LIMIT 500""").fetchall()]
+            SELECT year, siren, min(name), round(sum(amount)) AS total, min(closed_on), min(city), min(programme) FROM j
+            WHERE closed AND (closed_on IS NULL OR closed_on < make_date(year, 1, 1)) AND coalesce(programme, '') <> '232' GROUP BY 1, 2 ORDER BY total DESC, 2 LIMIT 500""").fetchall()]
         write('associations.json', {'source': 'Annexes « jaunes » aux PLF 2012–2025 (Effort financier de l’État en faveur des associations)', 'years': years, 'perYear': per_year,
                                     'programmes': programmes, 'programmeLabels': labels, 'programmeMissions': missions, 'departments': departments, 'top': top, 'closedBeneficiaries': closed})
         index = [[r[0], fix_text(r[1]), *r[2:]] for r in con.execute("""
-            SELECT siren, arg_max(name, year), round(sum(amount)), list(DISTINCT year ORDER BY year), any_value(dept)
-            FROM j WHERE siren IS NOT NULL GROUP BY siren HAVING sum(amount) > 0 ORDER BY 3 DESC""").fetchall()]
+            SELECT siren, arg_max(name, year), round(sum(amount)), list(DISTINCT year ORDER BY year), min(dept)
+            FROM j WHERE siren IS NOT NULL GROUP BY siren HAVING sum(amount) > 0 ORDER BY 3 DESC, 1""").fetchall()]
         write('associations-index.json', {'fields': ['siren', 'name', 'total', 'years', 'dept'], 'rows': index})
         by_commune(con)
         print(f'✓ associations: {sum(y["lines"] for y in per_year)} lignes, {len(index)} SIREN, années {years}')
@@ -236,10 +236,10 @@ def main():
         derived('minimis', con, 'SELECT year, id, name, amount, instrument, sector, city, autorite FROM m')
         summary = {
             'perYear': [list(r) for r in con.execute('SELECT year, count(*), sum(amount), count(DISTINCT id) FROM m GROUP BY 1 ORDER BY 1').fetchall()],
-            'byAuthority': [list(r) for r in con.execute('SELECT autorite, count(*), sum(amount) FROM m GROUP BY 1 ORDER BY 3 DESC LIMIT 40').fetchall()],
-            'byInstrument': [list(r) for r in con.execute('SELECT instrument, count(*), sum(amount) FROM m GROUP BY 1 ORDER BY 3 DESC').fetchall()],
-            'bySector': [list(r) for r in con.execute('SELECT left(sector, 1), count(*), sum(amount) FROM m GROUP BY 1 ORDER BY 3 DESC').fetchall()],
-            'top': [list(r) for r in con.execute('SELECT id, any_value(name), sum(amount) AS t, count(*), any_value(city) FROM m GROUP BY id ORDER BY t DESC LIMIT 300').fetchall()],
+            'byAuthority': [list(r) for r in con.execute('SELECT autorite, count(*), sum(amount) FROM m GROUP BY 1 ORDER BY 3 DESC, 1 LIMIT 40').fetchall()],
+            'byInstrument': [list(r) for r in con.execute('SELECT instrument, count(*), sum(amount) FROM m GROUP BY 1 ORDER BY 3 DESC, 1').fetchall()],
+            'bySector': [list(r) for r in con.execute('SELECT left(sector, 1), count(*), sum(amount) FROM m GROUP BY 1 ORDER BY 3 DESC, 1').fetchall()],
+            'top': [list(r) for r in con.execute('SELECT id, min(name), sum(amount) AS t, count(*), min(city) FROM m GROUP BY id ORDER BY t DESC, 1 LIMIT 300').fetchall()],
         }
         write('entreprises.json', {'source': 'Aides de minimis (data.economie.gouv.fr, aides_minimis)', **summary})
         print(f'✓ minimis: {con.execute("SELECT count(*), sum(amount) FROM m").fetchone()}')
@@ -272,9 +272,9 @@ def main():
             'source': 'Fonds vert : liste des projets subventionnés (data.gouv.fr)',
             'perYear': [list(r) for r in con.execute(f'SELECT year, count(*), sum(amount) FROM fv WHERE {main} GROUP BY 1 ORDER BY 1').fetchall()],
             'programme113': [list(r) for r in con.execute("SELECT year, count(*), sum(amount) FROM fv WHERE programme = '113' GROUP BY 1 ORDER BY 1").fetchall()],
-            'byMeasure': [list(r) for r in con.execute(f'SELECT measure, count(*), sum(amount) FROM fv WHERE {main} GROUP BY 1 ORDER BY 3 DESC LIMIT 40').fetchall()],
-            'byDepartment': {r[0]: [r[1], r[2]] for r in con.execute(f'SELECT dept, count(*), sum(amount) FROM fv WHERE {main} GROUP BY 1').fetchall() if r[0]},
-            'top': [list(r) for r in con.execute(f'SELECT siren, any_value(name), sum(amount) AS t, count(*), list(DISTINCT year) FROM fv WHERE {main} AND siren IS NOT NULL GROUP BY 1 ORDER BY t DESC LIMIT 200').fetchall()],
+            'byMeasure': [list(r) for r in con.execute(f'SELECT measure, count(*), sum(amount) FROM fv WHERE {main} GROUP BY 1 ORDER BY 3 DESC, 1 LIMIT 40').fetchall()],
+            'byDepartment': {r[0]: [r[1], r[2]] for r in con.execute(f'SELECT dept, count(*), sum(amount) FROM fv WHERE {main} GROUP BY 1 ORDER BY 1').fetchall() if r[0]},
+            'top': [list(r) for r in con.execute(f'SELECT siren, min(name), sum(amount) AS t, count(*), list(DISTINCT year) FROM fv WHERE {main} AND siren IS NOT NULL GROUP BY 1 ORDER BY t DESC, 1 LIMIT 200').fetchall()],
             'topProjects': [list(r) for r in con.execute(f'SELECT year, siren, name, left(project, 160), measure, amount FROM fv WHERE {main} ORDER BY amount DESC LIMIT 100').fetchall()],
         })
         print(f'✓ fonds vert : {con.execute("SELECT count(*), sum(amount) FROM fv").fetchone()}')
