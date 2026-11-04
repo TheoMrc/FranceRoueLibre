@@ -668,7 +668,9 @@ def _associations(code: str) -> Any:
         return 'aucune subvention de l’État publiée pour une association dont le siège est dans cette commune'
     years = e['annees']
     return {'definition': 'subventions de l’État (annexes « jaunes » des lois de finances) aux associations dont le '
-                          'siège est dans la commune ; les subventions de la commune elle-même n’y sont pas',
+                          'siège est dans la commune ; les subventions de la commune elle-même n’y sont pas ; une '
+                          'association nationale est comptée tout entière dans la commune de son siège ; années de '
+                          'versement publiées seulement (les annexes ne couvrent ni 2017 ni 2019 à 2022)',
             'total_eur': sum(v[0] for v in years.values()), 'par_annee_eur': {y: v[0] for y, v in years.items()},
             'lignes': sum(v[1] for v in years.values()), 'associations': e['beneficiaires'],
             'principales': [{'siren': s, 'nom': n, 'total_eur': a} for s, n, a in e['principaux']],
