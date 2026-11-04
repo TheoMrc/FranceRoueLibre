@@ -87,6 +87,11 @@ def save(path, cols, rows, key):
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):  # a Windows console without UTF-8 must not stop the run before the CSV
+        try:
+            stream.reconfigure(errors='replace')
+        except (AttributeError, ValueError):
+            pass
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--days', type=int, default=14)
     ap.add_argument('--last', type=int, default=15)
