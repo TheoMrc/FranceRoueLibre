@@ -365,10 +365,10 @@ def print_usage() -> None:
 def admin_cli(args) -> None:
     """The site's validation of requests, through the running service (which owns its state folder)."""
     import urllib.request
-    action, ref = ((args.demandes or []) + [''])[:2]
+    action, ref = ((args.demandes or []) + ['', ''])[:2]
     text = Path(args.texte).read_text(encoding='utf-8') if args.texte else ''
     if args.mail:  # frl-mail liste [N] | lire UID | apercu UID | repondre UID [--force], the reply text on stdin
-        action, ref = (args.mail + [''])[:2]
+        action, ref = (args.mail + ['', ''])[:2]
         if action in ('apercu', 'repondre'):
             text = sys.stdin.read()
         ref += ':force' if args.force else ''
