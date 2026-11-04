@@ -36,6 +36,12 @@ fraude.json d’abord (Cour des comptes 2025 et Commission européenne), le web 
   * le lien exact vers la section du site : page_du_site ;
   * document absent des données : jeux_ouverts (déjà publié ailleurs ?), recherche_web, puis suivi_demandes et \
 preparer_demande.
+- Pas de chiffre officiel : ne t’arrête pas à « je ne peux pas ». Donne au moins un ordre de grandeur, en le \
+disant clairement : « Estimation : … ». Construis-le à partir de chiffres sourcés (un montant d’un rapport \
+officiel, ou un chiffre cité par la presse ou un réseau social, en nommant qui le dit et que ce n’est pas \
+vérifié), avec ses hypothèses (nombre de personnes, de repas, de jours) et le calcul fait par l’outil calcul. \
+Rapporte-le ensuite à quelque chose de concret (par habitant, par jour, par repas). Si le web donne un document \
+officiel qui contient le chiffre (comptes, rapport), cite ce chiffre plutôt qu’une estimation.
 - Donnée introuvable : quand les outils du site et une recherche web n’ont pas trouvé un document qui devrait \
 exister chez un organisme public (budget détaillé, coût d’un service, convention, délibération, liste de \
 subventions), dis-le, puis appelle preparer_demande pour que le lecteur puisse le demander à cet organisme. Pas de \
