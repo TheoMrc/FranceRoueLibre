@@ -23,6 +23,7 @@ day, questions per day for everyone, questions answered at once, size of a reque
     python server/assistant_api.py [--port 8018]      serve (127.0.0.1 only)
     python server/assistant_api.py --usage            spending so far, by provider and by day
     python server/assistant_api.py --demandes liste|tout|voir|valider|refuser|modifier|destinataire|publier|cloturer [FRL-…] [--texte FICHIER]
+    python server/assistant_api.py --mail liste|lire|apercu|repondre [UID] [--force]   the site's mailbox (assistant/boite.py)
     python server/assistant_api.py --fake             fake models (assistant/fake.py): test the panel, no token spent
 """
 from __future__ import annotations
@@ -40,7 +41,7 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from assistant import demandes  # noqa: E402
+from assistant import boite, demandes  # noqa: E402
 from assistant import faq  # noqa: E402
 from assistant import fiche  # noqa: E402
 from assistant import journal  # noqa: E402
@@ -291,8 +292,9 @@ class Handler(BaseHTTPRequestHandler):
                 if not (local and S.MAIL_ADMIN_TOKEN and secrets.compare_digest(
                         str(self.headers.get('X-Admin-Token') or ''), S.MAIL_ADMIN_TOKEN)):
                     return self.send(403, {'error': 'refusé'})
-                return self.send(200, demandes.admin(str(body.get('action') or ''), str(body.get('ref') or ''),
-                                                     str(body.get('texte') or '')))
+                action = str(body.get('action') or '')
+                handler = boite.admin if action.startswith('mail_') else demandes.admin  # the mailbox, or the requests
+                return self.send(200, handler(action, str(body.get('ref') or ''), str(body.get('texte') or '')))
             job = JOBS.get(str(body.get('job') or ''))
             draft = ((job or {}).get('result') or {}).get('demande') or {}
             if not job or job['ip'] != self.client_ip() or not draft or draft.get('id') != body.get('id'):
@@ -365,6 +367,12 @@ def admin_cli(args) -> None:
     import urllib.request
     action, ref = (args.demandes + [''])[:2]
     text = Path(args.texte).read_text(encoding='utf-8') if args.texte else ''
+    if args.mail:  # frl-mail liste [N] | lire UID | apercu UID | repondre UID [--force], the reply text on stdin
+        action, ref = (args.mail + [''])[:2]
+        if action in ('apercu', 'repondre'):
+            text = sys.stdin.read()
+        ref += ':force' if args.force else ''
+        action = 'mail_' + action
     req = urllib.request.Request(f'http://127.0.0.1:{args.port}/api/assistant/admin', method='POST',
                                  data=json.dumps({'action': action, 'ref': ref, 'texte': text}).encode(),
                                  headers={'Content-Type': 'application/json', 'X-Admin-Token': S.MAIL_ADMIN_TOKEN})
@@ -381,12 +389,15 @@ def main():
     parser.add_argument('--usage', action='store_true')
     parser.add_argument('--demandes', nargs='+', metavar='ACTION', help='liste | tout | voir REF | valider REF | refuser REF | destinataire REF --texte F | '
                                                                        'publier REF [--texte F] | cloturer REF')
+    parser.add_argument('--mail', nargs='+', metavar='ACTION', help='boîte du site : liste [N] | lire UID | apercu UID | '
+                                                                   'repondre UID [--force] (texte de la réponse sur stdin)')
+    parser.add_argument('--force', action='store_true', help='--mail repondre : répondre à un message déjà répondu')
     parser.add_argument('--texte', help='texte publié de la réponse (sinon la réponse anonymisée automatiquement)')
     parser.add_argument('--fake', action='store_true', help='fake models, no network call, no token (tests)')
     args = parser.parse_args()
     if args.usage:
         return print_usage()
-    if args.demandes:
+    if args.demandes or args.mail:
         return admin_cli(args)
     if args.fake:
         from assistant import fake

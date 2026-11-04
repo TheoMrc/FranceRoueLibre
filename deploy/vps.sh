@@ -275,6 +275,9 @@ UNIT
   # frl-demandes liste | voir | valider | refuser | publier | cloturer | test : the site's validation of the requests
   printf '#!/bin/sh\nexec sudo -n env ASSISTANT_ENV_FILE=%s %s %s --demandes "$@"\n' "$AENV" "$APY" "$DIR/server/assistant_api.py" | sudo -n tee /usr/local/bin/frl-demandes > /dev/null
   sudo -n chmod 755 /usr/local/bin/frl-demandes
+  # frl-mail liste [N] | lire UID | apercu UID | repondre UID [--force] : the site's mailbox (reply text on stdin)
+  printf '#!/bin/sh\nexec sudo -n env ASSISTANT_ENV_FILE=%s %s %s --mail "$@"\n' "$AENV" "$APY" "$DIR/server/assistant_api.py" | sudo -n tee /usr/local/bin/frl-mail > /dev/null
+  sudo -n chmod 755 /usr/local/bin/frl-mail
 else
   echo "not installed ($AENV missing, see deploy/assistant.env.example)"
   if systemctl is-active --quiet francerouelibre-assistant 2>/dev/null; then sudo -n systemctl disable --now francerouelibre-assistant; fi
