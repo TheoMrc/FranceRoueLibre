@@ -46,7 +46,7 @@ a { color: var(--g2); }
   transform: translateX(6%) scale(.98); transition: opacity .55s var(--ease), transform .55s var(--ease), visibility 0s linear .55s; }
 .mm-scene.is-active { opacity: 1; visibility: visible; transform: none; transition: opacity .55s var(--ease), transform .55s var(--ease); }
 .mm-scene.is-before { transform: translateX(-6%) scale(.98); }
-.mm-scene > * { max-width: 1440px; margin-left: auto !important; margin-right: auto !important; }
+.mm-scene > * { max-width: min(100%, 1760px); margin-left: auto !important; margin-right: auto !important; }
 .mm-flip__txt { display: block; }
 @media (min-width: 1100px) { .mm-loupe-open .mm-scene { padding-right: calc(470px + var(--pad)); } }
 .mm-scene { transition: opacity .55s var(--ease), transform .55s var(--ease), visibility 0s linear .55s, padding .4s var(--ease); }
@@ -345,6 +345,27 @@ body.mm { font-size: clamp(14px, min(1.02vw, 1.95vh), 19px); }
 .mm-person b { font: 700 1.4em var(--font-display); }
 .mm-person span { color: var(--c-muted); }
 .mm-person .btn { margin-top: .4em; font-size: .9em; padding: .55em 1em; }
+
+/* ---------- responsive : les grands chiffres suivent la largeur de leur colonne (unités cqi), jamais coupés ---------- */
+.mm-kpis .kpi, .mm-split > div, .mm-city__grid > div, .mm-xray__grid > div, .mm-fraude__grid > div, .mm-sig__grid > div, .mm-volet { container-type: inline-size; }
+.mm-kpis .kpi strong { font-size: clamp(16px, min(1.75vw, 3.3vh, 12cqi), 30px); }
+.mm-kpis .mm-kpi--big strong { font-size: clamp(22px, min(3vw, 5.6vh, 15cqi), 56px); }
+.mm-big__v { white-space: nowrap; font-size: clamp(22px, min(3.6vw, 6.4vh, 10.5cqi), 62px); }
+.mm-sig__grid .mm-big__v { font-size: clamp(20px, min(2.6vw, 4.8vh, 9cqi), 44px); }
+.mm-city__name { font-size: clamp(22px, min(3vw, 9cqi), 44px); }
+.mm-tile__v { font-size: clamp(18px, min(2vw, 3.7vh, 14cqi), 34px); }
+.mm-pct { font: 700 1.9em/1 var(--font-display); letter-spacing: -.02em; vertical-align: -.1em; }
+.mm-stonks--hero { display: block; width: auto; height: clamp(90px, 21vh, 260px); border-radius: var(--r-md); margin-bottom: 1em; }
+.mm-intro__figures, .mm-intro__words { min-width: 0; }
+@media (max-width: 900px) {
+  .mm-intro { min-height: 0; }
+  .mm-ring { grid-template-columns: minmax(0, 1fr); }
+  .mm-ring .mm-vs { font-size: 18px; margin: -4px 0; }
+  .mm-person img { width: 96px; }
+  .mm-final { grid-template-columns: minmax(0, 1fr); }
+  .mm-tabs { display: flex; }
+  .mm-tabs button { flex: 1 1 auto; }
+}
 
 /* ---------- écrans étroits (téléphone 390 px) ---------- */
 @media (max-width: 900px) {

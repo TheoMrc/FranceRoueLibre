@@ -155,7 +155,7 @@
       const [d0, d1] = d.debt || [0, 0], [p0, p1] = d.pctGdp || [0, 0];
       punch = `<div class="mm-split"><div><div class="mm-big"><span class="mm-big__v">+<span class="mm-count" data-to="${Math.round(d1 - d0)}">0</span> Md€</span><span class="mm-big__l">de dette publique entre mai 2017 et septembre 2024</span></div>
         <div class="mm-big"><span class="mm-big__v">${nf(p0, 1)} % → ${nf(p1, 1)} %</span><span class="mm-big__l">du PIB</span></div>
-        <div class="mm-big"><span class="mm-big__v">${nf(d0)} Md€ → ${nf(d1)} Md€</span><span class="mm-big__l"><b class="mm-up">+${nf(100 * (d1 / d0 - 1), 0)} %</b> de dette</span></div>
+        <div class="mm-big"><span class="mm-big__v">${nf(d0)} → ${nf(d1)} Md€</span><span class="mm-big__l"><b class="mm-pct mm-up">+${nf(100 * (d1 / d0 - 1), 0)} %</b> de dette</span></div>
       </div>${person('lemaire.jpg', 'Bruno Le Maire', 'ministre de l’Économie de mai 2017 à septembre 2024', 'BrunoLeMaire')}</div>`;
     } else if (kind === 'cantine') {
       const per = d.amount / d.population;
