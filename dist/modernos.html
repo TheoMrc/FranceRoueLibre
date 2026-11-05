@@ -55,49 +55,51 @@
     <!-- ============================== SCÈNE 1 ============================== -->
     <section class="mm-scene" data-title="Le constat, le concept, les chiffres">
       <div class="mm-intro">
-        <div class="mm-block mm-block--constat">
-          <p class="mm-label">Le constat</p>
-          <blockquote class="mm-constat">Les services de l’État eux-mêmes sont dans l’incapacité de dire où part l’argent des Français. L’argent des Français est flambé à la légère, sans études d’impact a priori ni évaluation a posteriori des politiques financées, car les politiques ne sont pas armés intellectuellement : ils font des paris à l’aveugle et des politiques de communication avec de l’argent qui ne sort pas de leurs poches, mais des nôtres.</blockquote>
-        </div>
-        <div class="mm-block">
-          <p class="mm-label">Le concept</p>
+        <div class="mm-intro__words">
+          <span class="eyebrow">Le constat</span>
+          <figure class="hero__quote">
+            <blockquote>« Les services de l’État eux-mêmes sont dans l’incapacité de dire où part l’argent des Français. L’argent des Français est flambé à la légère, sans études d’impact a priori ni évaluation a posteriori des politiques financées, car les politiques ne sont pas armés intellectuellement : ils font des paris à l’aveugle et des politiques de communication avec de l’argent qui ne sort pas de leurs poches, mais des nôtres. »</blockquote>
+            <figcaption>Un data scientist avec trop de temps libre</figcaption>
+          </figure>
+          <span class="eyebrow">Le concept</span>
           <ul class="mm-concept">
             <li><b>Toutes les données publiques ouvertes</b> : État, Sécurité sociale, collectivités, subventions, marchés publics.</li>
             <li><b>Téléchargées par script, recoupées, sourcées</b> : aucun chiffre recopié à la main.</li>
             <li><b>La Loupe</b> : une IA branchée sur les <span data-k="macro.searchLines" data-fmt="int"></span> lignes du site, qui n’a pas le droit d’inventer un chiffre.</li>
           </ul>
         </div>
-        <div class="mm-block mm-block--stats">
-          <p class="mm-label">Les chiffres</p>
-          <div class="mm-stats">
-            <div class="mm-stat mm-stat--big"><span class="mm-stat__l">Dépenses publiques <span data-k="macro.year"></span></span><span class="mm-stat__v"><span class="mm-count" data-k="macro.spending_md">0</span> Md€</span><img class="mm-stonks" src="img/modernos/stonks.gif" alt="Stonks" width="96" height="72"></div>
-            <div class="mm-stat mm-stat--big mm-stat--red"><span class="mm-stat__l">Dette publique <span data-k="macro.debtYear"></span></span><span class="mm-stat__v"><span class="mm-count" data-k="macro.debt_md">0</span> Md€</span></div>
-            <div class="mm-stat"><span class="mm-stat__l">Lignes de dépenses indexées</span><span class="mm-stat__v"><span class="mm-count" data-k="macro.searchLines">0</span></span></div>
-            <div class="mm-stat"><span class="mm-stat__l">Marchés publics</span><span class="mm-stat__v"><span class="mm-count" data-k="macro.contracts">0</span></span></div>
-            <div class="mm-stat" id="mmViewsStat" hidden><span class="mm-stat__l" id="mmViewsLabel">Pages vues</span><span class="mm-stat__v"><span class="mm-count" id="mmViews">0</span></span></div>
+        <div class="mm-intro__figures">
+          <span class="eyebrow">Les chiffres</span>
+          <div class="mm-kpis">
+            <div class="kpi mm-kpi--big"><span>Dépenses publiques <span data-k="macro.year"></span></span><strong><span class="mm-count" data-k="macro.spending_md">0</span> Md€<img class="mm-stonks" src="img/modernos/stonks.gif" alt="Stonks" width="640" height="480"></strong></div>
+            <div class="kpi kpi--debt mm-kpi--big is-alert"><span>Dette publique <span data-k="macro.debtYear"></span></span><strong><span class="mm-count" data-k="macro.debt_md">0</span> Md€</strong></div>
+            <div class="kpi"><span>Lignes de dépenses indexées</span><strong><span class="mm-count" data-k="macro.searchLines">0</span></strong></div>
+            <div class="kpi"><span>Marchés publics</span><strong><span class="mm-count" data-k="macro.contracts">0</span></strong></div>
+            <div class="kpi" id="mmViewsStat" hidden><span id="mmViewsLabel">Pages vues</span><strong><span class="mm-count" id="mmViews">0</span></strong></div>
           </div>
-          <p class="mm-src">Insee, comptes nationaux des administrations publiques (tableaux 3.201 et 3.101) ; index de recherche et DECP du site</p>
-        </div>
-        <div class="mm-block mm-block--links">
-          <p class="mm-label">Les liens</p>
-          <a class="mm-link mm-link--site" href="https://francerouelibre.fr" target="_blank" rel="noopener">francerouelibre.fr</a>
-          <a class="mm-link" href="https://x.com/FranceRoueLibre" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg>@FranceRoueLibre</a>
-          <a class="mm-link" href="https://fr.tipeee.com/francerouelibre/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.5 8.2 3.4 4.8 6.8 4.6c2-.1 3.6 1 5.2 3 1.6-2 3.2-3.1 5.2-3 3.4.2 5.3 3.6 4.1 6.7-1.8 4.6-9.3 9.2-9.3 9.2z" fill="#e11d48"/></svg>fr.tipeee.com/francerouelibre</a>
+          <p class="mm-src">Insee, comptes nationaux des administrations publiques (tableaux 3.201 et 3.101) ; index de recherche et marchés publics (DECP) du site ; pages vues du site</p>
+          <span class="eyebrow">Les liens</span>
+          <div class="mm-links">
+            <a class="btn btn--primary" href="https://francerouelibre.fr" target="_blank" rel="noopener">francerouelibre.fr</a>
+          <a class="btn btn--ghost" href="https://x.com/FranceRoueLibre" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg>@FranceRoueLibre</a>
+          <a class="btn btn--ghost" href="https://fr.tipeee.com/francerouelibre/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.5 8.2 3.4 4.8 6.8 4.6c2-.1 3.6 1 5.2 3 1.6-2 3.2-3.1 5.2-3 3.4.2 5.3 3.6 4.1 6.7-1.8 4.6-9.3 9.2-9.3 9.2z" fill="#e11d48"/></svg>fr.tipeee.com/francerouelibre</a>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ============================== SCÈNE 2 ============================== -->
-    <section class="mm-scene" data-title="Le détecteur de bullshit">
+    <section class="mm-scene" data-title="Où vont nos thunes ?">
       <div class="mm-head">
-        <h2 class="mm-h2">Le détecteur de <span class="mm-grad">bullshit</span></h2>
+        <h2 class="mm-h2">OÙ VONT <span class="mm-grad">NOS THUNES</span> ?</h2>
         <p class="mm-lead">La Loupe : une IA branchée sur <b><span data-k="macro.searchLines" data-fmt="int"></span> lignes officielles</b>, avec interdiction d’inventer le moindre chiffre.</p>
       </div>
       <div class="mm-ring">
-        <button type="button" class="mm-shot mm-shot--blue" data-loupe="lemaire"><small id="mmLeMaireCount">La question n°1 des visiteurs</small>Combien nous a coûté <b>Bruno Le Maire</b> ?</button>
+        <button type="button" class="mm-shot mm-shot--blue" data-loupe="lemaire"><small id="mmLeMaireCount">La question n°1 des visiteurs</small><b>Bruno Le Maire</b></button>
         <span class="mm-vs">VS</span>
-        <button type="button" class="mm-shot mm-shot--red" data-loupe="cantine"><small>« Scandale ! »</small>Combien coûte <b>la cantine du Sénat</b> ?</button>
-        <button type="button" class="mm-shot mm-shot--gold" data-loupe="audiovisuel"><small>Les vrais milliards</small>Mission <b>Audiovisuel public</b></button>
+        <button type="button" class="mm-shot mm-shot--red" data-loupe="cantine"><small>Budget du Sénat</small><b>La cantine du Sénat</b></button>
+        <span class="mm-vs">VS</span>
+        <button type="button" class="mm-shot mm-shot--gold" data-loupe="audiovisuel"><small>Projet de loi de finances 2025</small><b>L’audiovisuel public</b></button>
       </div>
       <div class="mm-answer" id="mmAnswer" aria-live="polite"></div>
       <form class="mm-ask" id="mmAskLoupe" autocomplete="off">
@@ -176,10 +178,6 @@
           <div class="mm-reports" id="mmReports"><p class="mm-note">Chargement des remontées…</p></div>
         </div>
       </div>
-      <form class="mm-ask mm-ask--final" id="mmFinal" autocomplete="off">
-        <label for="mmFinalInput">En direct : une ville, un SIREN, une question</label>
-        <div><input id="mmFinalInput" type="text" name="q" placeholder="Une ville, un SIREN, une question…"><button type="submit">Lancer</button></div>
-      </form>
     </section>
   </main>
 
