@@ -232,9 +232,9 @@
         av.classList.remove('is-flip'); void av.offsetWidth; av.classList.add('is-flip');
       },
       text(html) { q('.ai-text').innerHTML = html; },
-      async type(text) {
+      async type(text, instant) {   // instant: an answer built without a model, or one prepared with the panel closed
         const box = q('.ai-text');
-        if (reduce.matches || !text) { box.innerHTML = markdown(text); return; }
+        if (reduce.matches || !text || instant) { box.innerHTML = markdown(text); return; }
         el.classList.add('is-writing');
         const total = text.length, dur = Math.min(4200, Math.max(700, total * 10)), t0 = performance.now();
         await new Promise(done => {
@@ -450,9 +450,11 @@
       if (!r.ok || !data.job) throw new Error(data.error || (r.status === 503 || r.status === 502 || r.status === 504
         ? 'La Loupe est très demandée en ce moment : réessayez dans quelques minutes.' : `Erreur ${r.status}`));
       busy.job = data.job; m.job = data.job; m.at = Date.now();
-      let after = 0, fails = 0, queued = '';
+      let after = 0, fails = 0, queued = '', first = true;
       for (;;) {
-        await sleep(650);
+        // the first look is at once: a saved or templated answer (faq.py, fiche.py) is already done on the server
+        if (!first) await sleep(650);
+        first = false;
         let j;
         try {
           const res = await fetch(`${API}job/${data.job}?after=${after}`);
@@ -489,7 +491,7 @@
     m.running = false;
     m.steps.forEach(s => { if (!s.done) Object.assign(s, { done: true, ok: false }); });
     v.think(null);
-    if (!m.error) await v.type(m.text);
+    if (!m.error) await v.type(m.text, m.provider === 'faq' || panel.hidden);
     v.finish();
     if (m.error) v.el.classList.add('has-error');
     live.textContent = m.error ? `Erreur : ${m.error}` : `Réponse : ${m.text.replace(/[*#[\]]/g, '').slice(0, 600)}`;

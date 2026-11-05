@@ -66,7 +66,7 @@
      panel would cover the results. FRLLoupe.ask with free asks the server first and opens nothing otherwise. */
   const waitLoupe = () => new Promise(resolve => {
     let n = 0;
-    const t = setInterval(() => { if (window.FRLLoupe?.ready || ++n > 50) { clearInterval(t); resolve(window.FRLLoupe); } }, 120);
+    const t = setInterval(() => { if (window.FRLLoupe?.ready || ++n > 150) { clearInterval(t); resolve(window.FRLLoupe); } }, 40);
   });
   const loupeButton = (question, label) => `<button type="button" class="sr-loupe" data-loupe-free="${esc(question)}">${LOUPE_ICON}<span>${esc(label)}</span></button>`;
   const LOUPE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"><path fill="currentColor" d="M9.5 3a6.5 6.5 0 0 1 5.2 10.4l5.4 5.4-1.4 1.4-5.4-5.4A6.5 6.5 0 1 1 9.5 3m0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9"/></svg>';

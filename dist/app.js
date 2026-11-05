@@ -1590,11 +1590,12 @@ function loupeQuestion() {
 function openLoupeSummary() {
   const question = loupeQuestion();
   if (!question) return;
+  if (window.FRLLoupe?.auto) { window.FRLLoupe.auto(question); return; }
   let n = 0;
   const t = setInterval(() => {
     if (window.FRLLoupe?.auto) { clearInterval(t); window.FRLLoupe.auto(question); }
-    else if (++n > 60) clearInterval(t);
-  }, 150);
+    else if (++n > 150) clearInterval(t);
+  }, 40);
 }
 
 function clearSelection() {
@@ -1837,11 +1838,11 @@ async function init() {
     const loupeAsked = new URLSearchParams(location.search).get('loupe') === '1';   // a place chosen in a search box
     const linked = await applyUrl();
     render();
+    if (linked && loupeAsked) openLoupeSummary();   // without waiting for the map: the answer does not need it
     await initMap();
     render();
     dom.mapLoading.classList.add('is-done');
     if (linked) { updateCamera(true); document.getElementById('explorer')?.scrollIntoView({ block: 'start' }); }
-    if (linked && loupeAsked) openLoupeSummary();
   } catch (error) {
     console.error(error);
     setText(dom.dataStatus, 'Données indisponibles');
