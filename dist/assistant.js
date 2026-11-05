@@ -666,6 +666,14 @@
         // background: the answer is prepared with the panel closed, and announced on the logo (notifyAnswer)
         if (opts.background) quietAsk = true; else openPanel(true);
         store.current = null; showHistory(false); renderLog(); ask(t, pre); return true;
+      },
+      /* the summary a page opens by itself (a commune, a département, a SIREN searched): once per question and tab,
+         never over a conversation already open; on a phone it is prepared closed and announced by the badge */
+      auto(text) {
+        const key = `frl-loupe-auto:${text}`;
+        try { if (sessionStorage.getItem(key)) return Promise.resolve(false); sessionStorage.setItem(key, '1'); } catch (e) { /* private mode */ }
+        if (!panel.hidden) return Promise.resolve(false);
+        return this.ask(text, { free: true, background: !matchMedia('(min-width: 1000px)').matches });
       } };
     (window.FRLLoupeQueue || []).splice(0).forEach(t => window.FRLLoupe.ask(t));
     if (read(sessionStorage, UI, {}).open) openPanel(true);

@@ -117,7 +117,7 @@ def step_lieux() -> None:
     bad = []
     for q, want_type, want in cases:
         r = places.find(q)
-        got = (r['communes'][0]['nom'] if r['communes'] else (r['departement'] or {}).get('nom')) or None
+        got = ((r.get('region') or {}).get('nom') or (r['communes'][0]['nom'] if r['communes'] else (r['departement'] or {}).get('nom'))) or None
         if (want_type and r['type'] != want_type) or got != want:
             bad.append(f'« {q} » : {r["type"] or "rien"} {got!r}, attendu {want_type or "?"} {want!r}')
     say(not bad, 'lieux', f'{len(cases) - len(bad)}/{len(cases)} cas')

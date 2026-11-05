@@ -54,6 +54,11 @@
 
   /* « de Lyon », « d’Audenge », « du Havre », « des Mureaux » */
   const ofName = n => /^Le /.test(n) ? `du ${n.slice(3)}` : /^Les /.test(n) ? `des ${n.slice(4)}` : /^[aeiouyhâàéèêëîïôöûüAEIOUYHÂÀÉÈÊËÎÏÔÖÛÜ]/.test(n) ? `d’${n}` : `de ${n}`;
+  /* a place chosen in a search box: the map opens the Loupe's summary of it (app.js, loupe=1, no model, no cost) */
+  const withLoupe = url => {
+    try { const u = new URL(url, location.href); if (!/index\.html$|\/$/.test(u.pathname)) return url; u.searchParams.set('loupe', '1'); return u.href; }
+    catch (e) { return url; }
+  };
   const isQuestion = q => QUESTION.test(q) && norm(q).split(' ').length >= 3;
   /* pages and sections that match the words typed; the last word may be unfinished */
   function matchSite(entries, q) {
@@ -97,7 +102,7 @@
 
     const go = item => {
       if (!item) return;
-      if (item.kind === 'site' || item.kind === 'place') { close(); location.href = item.url; }
+      if (item.kind === 'site' || item.kind === 'place') { close(); location.href = item.kind === 'place' ? withLoupe(item.url) : item.url; }
       else if (item.kind === 'loupe') {
         close(); input.blur();
         if (window.FRLLoupe) window.FRLLoupe.ask(item.q);
@@ -122,18 +127,20 @@
       const site = matchSite(entries, q).map(e => ({ kind: 'site', url: e.url, title: e.title, page: e.section ? e.page : '', sub: e.eyebrow || '' }));
       const spend = [{ kind: 'lines', q }, ...words.map(w => ({ kind: 'lines', q: w.text, count: w.count, amount: w.amount }))];
       /* a commune or a département typed: the Loupe is offered the question a reader means by it */
-      const placeQ = !where || !lib?.sure(where) ? '' : where.communes.length === 1 || (where.communes.length && where.type !== 'departement')
+      const placeQ = !where || !lib?.sure(where) ? '' : where.region ? `Quelles sont les informations disponibles sur les dépenses de la région ${where.region.nom} ?`
+        : where.communes.length === 1 || (where.communes.length && where.type !== 'departement')
         ? `Quelles sont les informations disponibles sur les dépenses ${ofName(where.communes[0].nom)} (${where.communes[0].dep}) ?`
         : where.departement ? `Quelles sont les informations disponibles sur les dépenses du département ${where.departement.nom} (${where.departement.code}) ?` : '';
       const loupe = [{ kind: 'loupe', q: placeQ || q }];
       const place = [];
+      if (where?.region) place.push({ kind: 'place', url: lib.regionUrl(where.region), title: where.region.nom, sub: 'Région · ses comptes sur la carte', icon: ICON_PIN });
       if (where?.departement) place.push({ kind: 'place', url: lib.deptUrl(where.departement), title: `${where.departement.nom} (${where.departement.code})`, sub: 'Département · ses comptes et ses communes sur la carte', icon: ICON_PIN });
-      for (const [k, c] of (where?.communes || []).slice(0, where?.departement ? 2 : 4).entries()) {
+      for (const [k, c] of (where?.communes || []).slice(0, where?.departement || where?.region ? 2 : 4).entries()) {
         const fix = c.correspondance === 'approchant' ? 'Vouliez-vous dire ? · ' : c.ancien_nom ? `Anciennement « ${c.ancien_nom} » · ` : '';
         place.push({ kind: 'place', url: lib.mapUrl(c), title: c.nom, sub: `${fix}${c.dep_nom} (${c.dep})${c.population ? ` · ${lib.people(c.population)}` : ''}`, icon: ICON_PIN, links: k === 0 ? c.liens : null });
       }
       const placeTitle = where?.type === 'approchant' ? 'Commune (orthographe approchante)' : where?.type === 'dans_la_phrase' ? 'Commune citée'
-        : where?.type === 'arrondissement' ? 'Commune (comptes publiés pour toute la ville)' : where?.departement && !where.communes.length ? 'Département' : 'Communes';
+        : where?.type === 'arrondissement' ? 'Commune (comptes publiés pour toute la ville)' : where?.region ? 'Région' : where?.departement && !where.communes.length ? 'Département' : 'Communes';
       const placeFirst = lib && lib.sure(where);
       const groups = isQuestion(q)
         ? [['Demander à la Loupe', loupe], ['Sur le site', site], ['Chercher dans les dépenses', spend]]
@@ -176,7 +183,7 @@
     panel.addEventListener('mousedown', event => event.preventDefault());   // keep the focus in the input
     panel.addEventListener('click', event => {
       const side = event.target.closest('[data-side]');
-      if (side) { event.preventDefault(); close(); location.href = side.href; return; }   // a level of the commune
+      if (side) { event.preventDefault(); close(); location.href = withLoupe(side.href); return; }   // a level of the commune
       const a = event.target.closest('[data-i]'); if (!a) return;
       event.preventDefault(); go(items[+a.dataset.i]);
     });

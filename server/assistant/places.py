@@ -86,7 +86,8 @@ def load(path: Path) -> None:
                     old.setdefault(n, []).append((index[now], name, year))
         except (OSError, ValueError, KeyError):
             pass
-        _data.update(path=stamp, rows=rows, by_name=by_name, by_cp=by_cp, by_first=by_first, deps=deps, old=old)
+        regions = {norm(r['region']): r['region'] for r in rows if r.get('region')}
+        _data.update(path=stamp, rows=rows, by_name=by_name, by_cp=by_cp, by_first=by_first, deps=deps, old=old, regions=regions)
 
 
 def _edits(a: str, b: str, limit: int) -> int:
@@ -153,13 +154,22 @@ def by_insee(code: str) -> Optional[dict]:
     return None if i is None else _view(i, 'code')
 
 
+REGION_SHORT = {'paca': "provence alpes cote d azur", 'idf': 'ile de france', 'aura': 'auvergne rhone alpes',
+                'bfc': 'bourgogne franche comte', 'reunion': 'la reunion'}
+
+
 def find(query: str, limit: int = 6) -> dict:
     """{'communes': [...], 'departement': {...} | None,
-        'type': 'code_postal' | 'departement' | 'nom' | 'ancienne_commune' | 'debut' | 'approchant' | 'arrondissement' |
+        'type': 'code_postal' | 'departement' | 'region' | 'nom' | 'ancienne_commune' | 'debut' | 'approchant' | 'arrondissement' |
                 'dans_la_phrase' | ''}"""
     if not _data:
         raise RuntimeError('places.load() first')
     out = _find(norm(query), limit)
+    # a region named in full (« Occitanie », « région Bretagne »): it comes first, the communes of that name stay listed
+    key = re.sub(r'^(?:la )?region ', '', norm(query))
+    region = _data.get('regions', {}).get(REGION_SHORT.get(key, key))
+    if region:
+        return out | {'type': 'region', 'region': {'nom': region}}
     if out['type']:
         return out
     q = norm(query)

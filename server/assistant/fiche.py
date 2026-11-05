@@ -1,6 +1,7 @@
 """Answers without a model when the question is only a place: a commune name (« Audenge », « Carcassone »), a postal
 code (« 33980 », « 57700 Hayange »), a département (« 33 », « Gironde »), or the question the search boxes propose
-(« Quelles sont les informations disponibles sur les dépenses d’Audenge (33) ? »). The text is built from the same
+(« Quelles sont les informations disponibles sur les dépenses d’Audenge (33) ? »), and the same question about a
+département, a region or an intercommunality (« … du département Gironde (33) ? », « … de la région Occitanie ? »). The text is built from the same
 tools as the Loupe's (tools.dossier_commune, outils.comparer), so it costs nothing and comes at once. Anything else,
 or any error, returns None and the question goes to the model as usual.
 """
@@ -98,34 +99,70 @@ def _commune(code: str) -> Optional[dict]:
             'liens': {'commune': c['nom'], 'liens': T._links(c['code'], '')}}
 
 
-def _departement(code: str, name: str) -> Optional[dict]:
-    r = T.comptes_collectivite(code, 'departements')
+LEVEL_Q = re.compile(r'^\s*quelles sont les informations disponibles sur les d[ée]penses\s+'
+                     r'(du d[ée]partement|de la r[ée]gion|de l[’\']intercommunalit[ée])\s+(.+?)\s*(?:\((\w{2,9})\))?\s*\?\s*$', re.I)
+LEVEL_WORDS = {'departements': ('département', 'départements', 'departement'), 'regions': ('région', 'régions', 'region'),
+               'gfp': ('intercommunalité', 'intercommunalités', 'intercommunalite')}
+
+
+def level_of(text: str) -> Optional[tuple]:
+    """(level, code or name) for the question the map and the search boxes ask about a département, a region or an
+    intercommunality, else None."""
+    m = LEVEL_Q.match(str(text or ''))
+    if not m:
+        return None
+    word = places.norm(m.group(1))
+    level = 'departements' if 'depart' in word else 'regions' if 'region' in word else 'gfp'
+    return level, (m.group(3) if level != 'regions' and m.group(3) else m.group(2)).strip()
+
+
+def _level(level: str, key: str) -> Optional[dict]:
+    """A département, a region or an intercommunality: what it spent, over ten years, against its peers, its debt."""
+    r = T.comptes_collectivite(key, level)
     if not r.get('entite'):
         return None
+    code, name = r['entite']['code'], r['entite']['nom']
+    one, many, role = LEVEL_WORDS[level]
     spend = r['montants_eur'].get('Dépenses totales') or {}
     pop = r['population']
+    if not spend:
+        return None
     last = max(spend)
     first = max(y for y in spend if y <= last - 10) if any(y <= last - 10 for y in spend) else min(spend)
-    cmp_ = O.comparer(code, niveau='departements')
-    meta = T._json('web/communes-meta.json')['departments'].get(code, ['', ''])
-    lines = [f'**{name}** ({code}{", " + meta[1] if meta[1] else ""}) : le département a dépensé **{eur(spend[last])}** en {last}, '
-             f'soit {num(spend[last] / pop[last])} € par habitant ({T.ROLES["departement"]}).', '']
-    if spend.get(first):
+    cmp_ = O.comparer(code, niveau=level)
+    meta = T._json('web/communes-meta.json')['departments'].get(code, ['', '']) if level == 'departements' else ['', '']
+    label = {'departements': f'**{name}** ({code}{", " + meta[1] if meta[1] else ""}) : le département',
+             'regions': f'**{name}** : la région', 'gfp': f'**{name}** : l’intercommunalité'}[level]
+    head = f'soit {num(spend[last] / pop[last])} € par habitant ' if pop.get(last) else ''
+    lines = [f'{label} a dépensé **{eur(spend[last])}** en {last}, {head}({T.ROLES[role]}).', '']
+    if spend.get(first) and first != last:
         change = 100 * (spend[last] / spend[first] - 1)
         lines.append(f'- En {last - first} ans : {eur(spend[first])} en {first}, {eur(spend[last])} en {last} '
                      f'({"+" if change >= 0 else ""}{change:.0f} %), quand les prix ont augmenté de {prices(first, last):.0f} %.')
     if cmp_.get('mediane_par_habitant_eur'):
-        lines.append(f'- Par habitant : {rank(cmp_["rang"])} départements (médiane {num(cmp_["mediane_par_habitant_eur"])} €).')
+        lines.append(f'- Par habitant : {rank(cmp_["rang"])} {many} (médiane {num(cmp_["mediane_par_habitant_eur"])} €).')
     debt = r['montants_eur'].get('Encours de dette') or {}
-    if debt.get(last) is not None:
+    if debt.get(last) is not None and pop.get(last):
         lines.append(f'- Dette : {eur(debt[last])} fin {last}, soit {num(debt[last] / pop[last])} € par habitant.')
-    lines += ['', 'Pour une commune du département, tapez son nom ou son code postal.']
+    if level == 'gfp':
+        lines += ['', 'Une communauté de communes et une métropole n’exercent pas les mêmes compétences : la comparaison '
+                  'avec toutes les intercommunalités n’est qu’un repère.']
+    lines += ['', {'departements': 'Pour une commune du département, tapez son nom ou son code postal.',
+                   'regions': 'Pour un département ou une commune de la région, tapez son nom.',
+                   'gfp': 'Pour une commune de l’intercommunalité, tapez son nom.'}[level],
+              'Pour une question précise (une dépense, un service, une comparaison), posez-la à la suite.']
     q = lambda v: re.sub(r'\s', '%20', v)
-    links = [{'cle': 'departement', 'libelle': 'Dépenses du département', 'url': f'index.html?departement={code}&vue=departements#explorer'},
-             {'cle': 'commune', 'libelle': 'Ses communes sur la carte', 'url': f'index.html?departement={code}#explorer'}]
+    links = {'departements': [{'cle': 'departement', 'libelle': 'Dépenses du département', 'url': f'index.html?departement={code}&vue=departements#explorer'},
+                              {'cle': 'commune', 'libelle': 'Ses communes sur la carte', 'url': f'index.html?departement={code}#explorer'}],
+             'regions': [{'cle': 'region', 'libelle': 'Dépenses de la région', 'url': f'index.html?region={q(name)}&vue=regions#explorer'}],
+             'gfp': [{'cle': 'interco', 'libelle': 'L’intercommunalité sur la carte', 'url': f'index.html?interco={code}#explorer'}]}[level]
     if meta[1]:
         links.append({'cle': 'region', 'libelle': meta[1], 'url': f'index.html?region={q(meta[1])}&vue=regions#explorer'})
     return {'reply': '\n'.join(lines), 'sources': SOURCES[:1], 'liens': {'commune': name, 'liens': links}}
+
+
+def _departement(code: str, name: str) -> Optional[dict]:
+    return _level('departements', code)
 
 
 def _homonyms(found: list) -> dict:
@@ -285,6 +322,20 @@ def answer(messages: list) -> Optional[dict]:
         events = [{'type': 'tool_done', 'name': 'dossier_beneficiaire', 'label': f'Dossier du SIREN {siren}', 'ok': True,
                    'summary': 'lignes publiées par source', 's': 0}]
         return dict(res, searches=[], provider='faq', label='Réponse sourcée automatique', saved='siren', events=events)
+    lv = level_of(messages[-1].get('text'))
+    if lv:
+        try:
+            res = _level(*lv)
+        except Exception:  # noqa: BLE001 - any trouble: the model answers instead
+            return None
+        if not res:
+            return None
+        name = res['liens']['commune']
+        events = [{'type': 'tool_done', 'name': 'comptes_collectivite', 'label': f'Comptes de « {name} »', 'ok': True,
+                   'summary': 'dépenses, dette, population', 's': 0},
+                  {'type': 'tool_done', 'name': 'comparer', 'label': f'Comparaison de « {name} »', 'ok': True,
+                   'summary': 'médiane et rang', 's': 0}]
+        return dict(res, searches=[], provider='faq', label='Réponse sourcée automatique', saved='lieu', events=events)
     q = place_of(messages[-1].get('text'))
     if not q:
         return None
@@ -295,7 +346,9 @@ def answer(messages: list) -> Optional[dict]:
         if found['type'] == 'dans_la_phrase':  # a place inside a longer question: the model reads the rest
             return None
         exact = [c for c in communes if c['correspondance'] in ('nom', 'code_postal')]
-        if found['type'] == 'departement' and not (exact and len(exact) == 1 and places.norm(exact[0]['nom']) == places.norm(q)):
+        if found['type'] == 'region':
+            res = _level('regions', found['region']['nom'])
+        elif found['type'] == 'departement' and not (exact and len(exact) == 1 and places.norm(exact[0]['nom']) == places.norm(q)):
             res = _departement(found['departement']['code'], found['departement']['nom'])
         elif found['type'] in ('nom', 'code_postal') and len(communes) > 1 and len({c['nom'] for c in communes}) == 1:
             res = _homonyms(communes)

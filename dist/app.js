@@ -1571,6 +1571,32 @@ async function applyUrl() {
   return true;
 }
 
+/* The Loupe's summary of the place the map opened on (server/assistant/fiche.py: built from the data, no model), asked
+   with the same question as the search boxes; the panel opens only when the server has such an answer. */
+const ofPlace = n => /^Le /.test(n) ? `du ${n.slice(3)}` : /^Les /.test(n) ? `des ${n.slice(4)}` : /^[aeiouyhâàéèêëîïôöûüAEIOUYHÂÀÉÈÊËÎÏÔÖÛÜ]/.test(n) ? `d’${n}` : `de ${n}`;
+function loupeQuestion() {
+  const ask = what => `Quelles sont les informations disponibles sur les dépenses ${what} ?`;
+  if (state.mode === 'gfp' && state.selectedGfp) {
+    const g = (data.gfp || []).find(row => row.code === state.selectedGfp);
+    return g ? ask(`de l’intercommunalité ${g.name} (${g.code})`) : '';
+  }
+  if (state.mode === 'regions' && state.region) return ask(`de la région ${state.region}`);
+  const c = state.selectedCommune && data.communeMetadata.get(state.selectedCommune);
+  if (c) return ask(`${ofPlace(c.name)} (${c.department})`);
+  const d = state.selectedDepartment;
+  const name = d && (data.deptByCode.get(d)?.name || data.featureByCode.get(d)?.properties?.nom);
+  return name ? ask(`du département ${name} (${d})`) : '';
+}
+function openLoupeSummary() {
+  const question = loupeQuestion();
+  if (!question) return;
+  let n = 0;
+  const t = setInterval(() => {
+    if (window.FRLLoupe?.auto) { clearInterval(t); window.FRLLoupe.auto(question); }
+    else if (++n > 60) clearInterval(t);
+  }, 150);
+}
+
 function clearSelection() {
   state.selectedDepartment = ''; state.selectedCommune = ''; state.region = ''; state.selectedGfp = ''; state.anchorCommune = ''; dom.region.value = '';
   render(); syncUrl();
@@ -1808,12 +1834,14 @@ async function init() {
     const projectTotal = Object.values(projectIndex.counts || {}).reduce((a, b) => a + b, 0) || data.projects.length;
     setText(dom.dataStatus, `${formatCount(projectTotal)} projets · ${formatCount(data.communes.length)} communes`);
     setText(dom.scopeText, 'DGCL · OFGL · contours Etalab · 2012–2025');
+    const loupeAsked = new URLSearchParams(location.search).get('loupe') === '1';   // a place chosen in a search box
     const linked = await applyUrl();
     render();
     await initMap();
     render();
     dom.mapLoading.classList.add('is-done');
     if (linked) { updateCamera(true); document.getElementById('explorer')?.scrollIntoView({ block: 'start' }); }
+    if (linked && loupeAsked) openLoupeSummary();
   } catch (error) {
     console.error(error);
     setText(dom.dataStatus, 'Données indisponibles');
