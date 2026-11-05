@@ -1441,7 +1441,7 @@ async function renderAssociations(context) {
   box.innerHTML = `<div class="inspector-divider"><span>Associations du lieu aidées par l’État</span><span>${formatCount(e.beneficiaires)} association${e.beneficiaires > 1 ? 's' : ''}</span></div>
     <p class="detail-summary"><strong>${formatCompact(total)}</strong> de subventions de l’État ${first === last ? `en ${first}` : `de ${first} à ${last}`} aux associations dont le siège est à ${esc(context.name)}, dont ${formatCompact(e.annees[last][0])} en ${last}.</p>
     <div class="project-list">${e.principaux.slice(0, 3).map(([siren, name, amount]) => `<a class="project-item clickable assoc-item" href="recherche.html?q=${encodeURIComponent(siren || name)}"><div><p class="project-name">${esc(name)}</p><p class="project-meta">${siren ? `SIREN ${esc(siren)}` : 'sans SIREN'}</p></div><div class="project-amount">${formatCompact(amount)}</div></a>`).join('')}</div>
-    <p class="stat-context">Années publiées seulement (aucune annexe pour 2017 ni 2019 à 2022). Une association nationale est comptée en entier dans la commune de son siège. Les subventions de la commune elle-même n’y sont pas. Source : annexes « jaunes » des lois de finances, <a href="aides.html">page Subventions</a>.</p>`;
+    <p class="stat-context">Années publiées seulement (aucune annexe exploitable pour 2022). Une association nationale est comptée en entier dans la commune de son siège. Les subventions de la commune elle-même n’y sont pas. Source : annexes « jaunes » des lois de finances, <a href="aides.html">page Subventions</a>.</p>`;
   box.hidden = false;
 }
 

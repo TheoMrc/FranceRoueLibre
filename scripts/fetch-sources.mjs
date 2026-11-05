@@ -68,6 +68,20 @@ const SOURCES = [
     ['jaune-associations-2013', 'plf2013-jaune-donnees-associations-subventionnees'],
     ['jaune-associations-2012', 'plf2012-jaune-donnees-associations-subventionnees']
   ].map(([id, dataset]) => ({ id, kind: 'ods', host: ECO, dataset, note: 'Subventions de l’État aux associations (annexe jaune)' })),
+  // Annexes whose list of grants is published only as an attached file (their datasets hold no rows). The PLF 2024 annex
+  // (grants of 2022) has no such file: its dataset holds a single column of numbers without names, so 2022 stays missing.
+  { id: 'jaune-associations-2023', kind: 'files', note: 'Subventions de l’État aux associations en 2021 (annexe jaune au PLF 2023, fichier joint)', files: [
+    { path: 'credits-attribues-2021.xlsx', url: 'https://data.economie.gouv.fr/api/v2/catalog/datasets/plf-2023-effort-financier-de-l-etat-en-faveur-des-associations-liste-des-credits/attachments/plf_2023_effort_financier_de_l_etat_en_faveur_des_associations_liste_des_credits_attribues_xlsx' },
+  ] },
+  { id: 'jaune-associations-2022', kind: 'files', note: 'Subventions de l’État aux associations en 2020 (annexe jaune au PLF 2022, fichier joint)', files: [
+    { path: 'PLF_2022-jaune_associations.csv', url: 'https://data.economie.gouv.fr/api/v2/catalog/datasets/projet-de-loi-de-finances-pour-2022-plf-2022-donnees-de-lannexe-jaune-effort-fin/attachments/plf_2022_jaune_associations_csv' },
+  ] },
+  { id: 'jaune-associations-2021', kind: 'files', note: 'Subventions de l’État aux associations en 2019 (annexe jaune au PLF 2021, fichier joint)', files: [
+    { path: 'credits-attribues-2019.xlsx', url: 'https://data.economie.gouv.fr/api/v2/catalog/datasets/projet-de-loi-de-finances-pour-2021-plf-2021-donnees-de-lannexe-jaune-effort-fin/attachments/plf_2021_credits_attribues_au_monde_associatif_2019_xlsx' },
+  ] },
+  { id: 'jaune-associations-2019', kind: 'files', note: 'Subventions de l’État aux associations en 2017 (annexe jaune au PLF 2019, fichier joint)', files: [
+    { path: 'liste-associations-2017.xlsx', url: 'https://data.economie.gouv.fr/api/v2/catalog/datasets/projet-de-loi-de-finances-pour-2019-plf-2019-donnees-de-lannexe-jaune-effort-fin/attachments/plf2019_jaune_asso_liste_associations2017_xlsx' },
+  ] },
   { id: 'aides-minimis', kind: 'ods', host: ECO, dataset: 'aides_minimis', note: 'Aides de minimis aux entreprises' },
   { id: 'france-relance', kind: 'ods', host: ECO, dataset: 'france-relance-donnees-agregees' },
   { id: 'plan-de-relance', kind: 'ods', host: ECO, dataset: 'plan-de-relance' },
@@ -97,6 +111,10 @@ const SOURCES = [
 
   { id: 'dette-trimestrielle', kind: 'files', note: 'Insee, dette des administrations publiques au sens de Maastricht, données trimestrielles (réponses enregistrées de la Loupe)', files: [
     { path: 'dette-trimestrielle/econ-gen-dette-trim-adm-pub-2.xlsx', url: 'https://www.insee.fr/fr/statistiques/fichier/2830301/econ-gen-dette-trim-adm-pub-2.xlsx' },
+  ] },
+
+  { id: 'senat-comptes', kind: 'files', note: 'Sénat, comptes de l’exercice 2025 (rapport n° 628, 2025-2026), restaurants : réponses enregistrées de la Loupe', files: [
+    { path: 'r25-628-chapitre-4.html', url: 'https://www.senat.fr/rap/r25-628/r25-6284.html' },
   ] },
 
   { id: 'resultats', kind: 'files', note: 'Inflation (Insee), Eurostat et OCDE (comparaisons UE), commerce extérieur, PISA, personnel hospitalier (DREES)', files: [

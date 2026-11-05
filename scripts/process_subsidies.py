@@ -28,7 +28,11 @@ OUT = 'dist/data/aides'
 # PLF year → (grant year, SQL expressions for each normalized column)
 JAUNES = {
     2025: (2023, dict(programme='programme', siren='siren', name='denomination', amount='montant', object='objet_2023', dept="left(cog_code, CASE WHEN cog_code LIKE '97%' THEN 3 ELSE 2 END)", city='cog_libelle', status='etat_administratif', mission='NULL', commune='cog_code')),
+    2023: (2021, dict(programme='programme', siren='siren', name='denomination', amount='montant', object='objet', dept='departement', city='ville', status='statut', mission='NULL', commune='cog_code')),
+    2022: (2020, dict(programme='programme', siren='siren', name='denomination', amount='montant', object='objet', dept='departement', city='ville', status='statut', mission='NULL', commune='cog_code')),
+    2021: (2019, dict(programme='programme', siren='siren', name='denomination', amount='montant', object='objet', dept='departement', city='ville', status='statut', mission='NULL', commune='cog_code')),
     2020: (2018, dict(programme='programme', siren='siren', name='denomination', amount='montant', object='objet', dept='cog_code_departement_ou_pays', city='cog_ville_ou_pays', status='NULL', mission='NULL')),
+    2019: (2017, dict(programme='programme', siren='siren', name='denomination', amount='montant', object='objet', dept='departement', city='ville', status='statut', mission='NULL', commune='cog_code')),
     2018: (2016, dict(programme='programme_2016', siren='siren', name='denomination', amount='montant', object='objet', dept='cog_code_departement', city='cog_ville_ou_pays', status='situation_sirene', mission='NULL')),
     2017: (2015, dict(programme='programme', siren='siren', name='association', amount='subvention_2015', object='NULL', dept='departement', city='ville', status='NULL', mission='mission')),
     2016: (2014, dict(programme='programme', siren='siren', name='association', amount='"2014"', object='objet', dept='departement', city='ville', status='NULL', mission='mission')),
@@ -76,6 +80,78 @@ def write(name, value):
     os.makedirs(OUT, exist_ok=True)
     with open(f'{OUT}/{name}', 'w', encoding='utf-8') as handle:
         json.dump(value, handle, ensure_ascii=False, separators=(',', ':'))
+
+
+# Annexes published as attached files (fetch-sources.mjs, kind "files"): one per PLF, header row found by its labels.
+ATTACHED = {
+    2019: 'jaune-associations-2019/liste-associations-2017.xlsx',
+    2021: 'jaune-associations-2021/credits-attribues-2019.xlsx',
+    2022: 'jaune-associations-2022/PLF_2022-jaune_associations.csv',
+    2023: 'jaune-associations-2023/credits-attribues-2021.xlsx',
+}
+STD = ['programme', 'siren', 'denomination', 'montant', 'objet', 'departement', 'cog_code', 'ville', 'statut']
+
+
+def _label(cell):
+    return unicodedata.normalize('NFD', str(cell or '')).encode('ascii', 'ignore').decode().lower().strip()
+
+
+def _rows(path):
+    """Every row of every sheet of an xlsx, or of a ;-separated csv (cp1252 or utf-8), as lists of strings."""
+    if path.endswith('.xlsx'):
+        import openpyxl
+        book = openpyxl.load_workbook(path, read_only=True, data_only=True)
+        for sheet in book.worksheets:
+            for row in sheet.iter_rows(values_only=True):
+                yield ['' if v is None else str(v) for v in row]
+    else:
+        import csv as csv_mod
+        raw = open(path, 'rb').read()
+        try:
+            text = raw.decode('utf-8-sig')
+        except UnicodeDecodeError:
+            text = raw.decode('cp1252')
+        yield from csv_mod.reader(text.splitlines(), delimiter=';')
+
+
+def stage_attached():
+    """Each attached annex → sources/raw/jaune-associations-<PLF>.csv.gz with the columns of STD, so that main() reads
+    it like the others. Amounts lose their thousands spaces (also non-breaking) and take a decimal point."""
+    import csv as csv_mod, gzip, io
+    for plf, rel in ATTACHED.items():
+        src = os.path.join(RAW, rel)
+        if not os.path.exists(src):
+            continue
+        out_path = f'{RAW}/jaune-associations-{plf}.csv.gz'
+        header, n, total = None, 0, 0.0
+        buf = io.StringIO()
+        w = csv_mod.writer(buf, delimiter=';', quoting=csv_mod.QUOTE_MINIMAL)
+        w.writerow(STD)
+        for row in _rows(src):
+            labels = [_label(c) for c in row]
+            if 'siren' in labels and 'montant' in labels:   # the header (repeated on each sheet, or only on the first)
+                header = labels
+                continue
+            if header is None or not any(c.strip() for c in row):
+                continue
+            get = lambda *names: next((row[i] for x in names for i, h in enumerate(header) if i < len(row) and h.startswith(x)), '')  # first name wins
+            amount = re.sub(r'[\s\u00a0\u202f]', '', get('montant')).replace(',', '.')
+            try:
+                value = float(amount)
+            except ValueError:
+                continue
+            code = get('cog : code commune', 'cog : code').strip()
+            dept = get('cog : code departement').strip() or (code[:3] if code.startswith('97') else code[:2])
+            status = get('etat administratif', 'etablissement existe au 31')
+            if status.strip().lower() == 'non':
+                status = 'Etablissement fermé'
+            w.writerow([get('programme').strip(), re.sub(r'\D', '', get('siren')), get('denomination').strip(), repr(value),
+                        get('objet').strip(), dept, code, get('cog : ville', 'cog : libelle').strip(), status.strip()])
+            n += 1
+            total += value
+        with gzip.open(out_path, 'wt', encoding='utf-8', newline='') as h:
+            h.write(buf.getvalue())
+        print(f'✓ annexe PLF {plf} (fichier joint) : {n} lignes, {total / 1e9:.2f} Md€ → {out_path}')
 
 
 def csv(path):
@@ -166,6 +242,7 @@ def split_communes():
 
 
 def main():
+    stage_attached()
     con = duckdb.connect()
     parts = []
     for plf, (year, cols) in JAUNES.items():
@@ -184,6 +261,13 @@ def main():
     if parts:
         con.execute('CREATE TABLE j AS ' + ' UNION ALL '.join(parts))
         con.execute("UPDATE j SET siren = NULL WHERE length(siren) <> 9")
+        # PLF 2013 (grants of 2011): amounts published with one decimal digit read as an integer ("7107,0" → 71070.0), so ten
+        # times the same grants in 2010 and 2012 (median ratio 10.0 over the SIRENs present in both years): divided by 10, checked.
+        ratio = con.execute("""SELECT median(a.v / b.v) FROM (SELECT siren, sum(amount) v FROM j WHERE year = 2011 AND siren IS NOT NULL GROUP BY 1) a
+            JOIN (SELECT siren, sum(amount) / count(DISTINCT year) v FROM j WHERE year IN (2010, 2012) AND siren IS NOT NULL GROUP BY 1) b USING (siren) WHERE b.v > 0""").fetchone()[0]
+        if ratio and ratio > 5:
+            con.execute("UPDATE j SET amount = amount / 10 WHERE plf = 2013")
+            print(f'✓ PLF 2013 : montants divisés par 10 (rapport médian 2011 / 2010-2012 avant correction : {ratio:.2f})')
         # SIRENE status of the establishment at extraction: "Etablissement cessé 01/01/2008", "Fermé …".
         con.execute("ALTER TABLE j ADD COLUMN closed BOOLEAN")
         con.execute("ALTER TABLE j ADD COLUMN closed_on DATE")
@@ -220,7 +304,7 @@ def main():
         closed = [[r[0], r[1], fix_text(r[2]), r[3], str(r[4]) if r[4] else None, fix_text(r[5]), r[6]] for r in con.execute("""
             SELECT year, siren, min(name), round(sum(amount)) AS total, min(closed_on), min(city), min(programme) FROM j
             WHERE closed AND (closed_on IS NULL OR closed_on < make_date(year, 1, 1)) AND coalesce(programme, '') <> '232' GROUP BY 1, 2 ORDER BY total DESC, 2 LIMIT 500""").fetchall()]
-        write('associations.json', {'source': 'Annexes « jaunes » aux PLF 2012–2025 (Effort financier de l’État en faveur des associations)', 'years': years, 'perYear': per_year,
+        write('associations.json', {'source': 'Annexes « jaunes » aux PLF 2012–2025 (Effort financier de l’État en faveur des associations) ; 2022 non publiée sous forme exploitable', 'years': years, 'perYear': per_year,
                                     'programmes': programmes, 'programmeLabels': labels, 'programmeMissions': missions, 'departments': departments, 'top': top, 'closedBeneficiaries': closed})
         index = [[r[0], fix_text(r[1]), *r[2:]] for r in con.execute("""
             SELECT siren, arg_max(name, year), round(sum(amount)), list(DISTINCT year ORDER BY year), min(dept)

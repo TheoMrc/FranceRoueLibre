@@ -34,7 +34,7 @@ import unicodedata
 from rawfiles import csv as raw_csv
 
 OUT_DIR = 'dist/data/search'
-DB = f'{OUT_DIR}/frl-search.sqlite3'
+DB = os.environ.get('FRL_SEARCH_DB') or f'{OUT_DIR}/frl-search.sqlite3'  # another file while the local search API holds this one open
 DERIVED = 'sources/derived'
 SOURCES = {1: 'Subventions aux associations', 2: 'Marchés publics', 3: 'Projets aidés par l’État (DGCL)', 4: 'Fonds vert', 5: 'Aides aux entreprises (de minimis)', 6: 'Budget de l’État (PLF 2026)'}
 FREQUENT = 500          # words found in more lines than this get precomputed totals and top lines
@@ -142,6 +142,18 @@ def add_dgcl(add):
             add(3, year, amount, 0, clip(title, 300), clip(beneficiary, 120), None, schemes[scheme] if isinstance(scheme, int) and 0 <= scheme < len(schemes) else None, dept)
 
 
+def add_associations(duck, add):
+    """State grants to associations (src 1), from the parquet written by process_subsidies.py."""
+    labels = {}
+    if os.path.exists('dist/data/aides/associations.json'):
+        labels = json.load(open('dist/data/aides/associations.json', encoding='utf-8')).get('programmeLabels', {})
+    path = f'{DERIVED}/associations.parquet'
+    if os.path.exists(path):
+        for year, siren, name, amount, obj, programme, dept, city in duck.execute(f"SELECT year, siren, name, amount, object, programme, dept, city FROM '{path}'").fetchall():
+            extra = f'Programme {programme} · {labels[programme]}' if programme in labels else (f'Programme {programme}' if programme else None)
+            add(1, year, amount, 0, clip(obj, 300) or clip(name, 200), clip(name, 160), siren, extra, dept)
+
+
 def main():
     probe = sqlite3.connect(':memory:')
     try:
@@ -168,15 +180,8 @@ def main():
             flush()
 
     # 1. Associations
-    labels = {}
-    if os.path.exists('dist/data/aides/associations.json'):
-        labels = json.load(open('dist/data/aides/associations.json', encoding='utf-8')).get('programmeLabels', {})
-    path = f'{DERIVED}/associations.parquet'
-    if os.path.exists(path):
-        for year, siren, name, amount, obj, programme, dept, city in duck.execute(f"SELECT year, siren, name, amount, object, programme, dept, city FROM '{path}'").fetchall():
-            extra = f'Programme {programme} · {labels[programme]}' if programme in labels else (f'Programme {programme}' if programme else None)
-            add(1, year, amount, 0, clip(obj, 300) or clip(name, 200), clip(name, 160), siren, extra, dept)
-        flush()
+    add_associations(duck, add)
+    flush()
     # 2. Contracts
     path = f'{DERIVED}/decp.parquet'
     if os.path.exists(path):
@@ -284,6 +289,26 @@ if __name__ == '__main__':
         add_dgcl(lambda *row: batch.append(row))
         connection.executemany('INSERT INTO doc (src, year, amount, fw, title, who, siren, extra, dept) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', batch)
         print(f'· DGCL : {before} lignes remplacées par {len(batch)}')
+        finish(connection, connection.execute('SELECT count(*) FROM doc').fetchone()[0])
+    elif '--associations-only' in sys.argv:
+        # Replace only the grants to associations (src 1) of an existing index, from sources/derived/associations.parquet,
+        # without the raw files of the other sources (contracts…); then everything derived from the lines is rebuilt.
+        # The index is the one that is online: put back together from its 45 MiB files, or copied from --from=<file>.
+        source = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--from=')), None)
+        with open(DB, 'wb') as out:
+            for part in ([source] if source else sorted(glob.glob(f'{OUT_DIR}/db/frl-search.sqlite3.[0-9][0-9][0-9]'))):
+                with open(part, 'rb') as handle:
+                    while block := handle.read(64 * 1048576):
+                        out.write(block)
+        connection = sqlite3.connect(DB)
+        connection.executescript('PRAGMA journal_mode = OFF; PRAGMA synchronous = OFF;')
+        before = connection.execute('SELECT count(*) FROM doc WHERE src = 1').fetchone()[0]
+        connection.execute('DELETE FROM doc WHERE src = 1')
+        import duckdb
+        batch = []
+        add_associations(duckdb.connect(), lambda *row: batch.append(row))
+        connection.executemany('INSERT INTO doc (src, year, amount, fw, title, who, siren, extra, dept) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', batch)
+        print(f'· associations : {before} lignes remplacées par {len(batch)}')
         finish(connection, connection.execute('SELECT count(*) FROM doc').fetchone()[0])
     elif '--lexicon-only' in sys.argv:
         # Rebuild only the word lists next to the index (the index itself is left untouched).

@@ -454,6 +454,114 @@
      16451.0
     ]
    }
+  },
+  {
+   "id": "cantine-senat",
+   "question": "Combien coûte la cantine du Sénat ?",
+   "match_any": [
+    [
+     [
+      "cantine",
+      "restaurant",
+      "restauration",
+      "buvette",
+      "repas"
+     ],
+     [
+      "senat",
+      "senateur"
+     ]
+    ]
+   ],
+   "reply": "**Environ 1,4 centime par Français et par an.** En 2025, la subvention versée aux restaurants du Sénat s’élève à **987 160 €**, en hausse de 26,19 % sur un an, selon les comptes du Sénat. C’est la part payée par le Sénat, au-delà de ce que règlent les convives.\n\n- Rapportée aux 68 851 996 habitants (Insee, 1er janvier 2025) : 0,014 € par personne et par an.\n- Le budget total du Sénat dans le projet de loi de finances 2025 est de **359,5 M€**, soit 5,22 € par habitant et par an : la restauration n’en est qu’une ligne.\n- Le coût complet des repas et leur nombre ne sont pas publiés dans ces comptes.\n\nSources : [Sénat, les comptes de l’exercice 2025](https://www.senat.fr/rap/r25-628/r25-6284.html), [Budget de l’État, mission Pouvoirs publics](etat.html), [Insee, population](https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001641586).",
+   "sources": [
+    {
+     "title": "Sénat, les comptes de l’exercice 2025 (rapport n° 628)",
+     "url": "https://www.senat.fr/rap/r25-628/r25-6284.html"
+    },
+    {
+     "title": "Insee, population au 1er janvier",
+     "url": "https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001641586"
+    }
+   ],
+   "data": {
+    "year": 2025,
+    "amount": 987160,
+    "changePct": 26.19,
+    "population": 68851996,
+    "senatMeur": 359.48
+   }
+  },
+  {
+   "id": "audiovisuel-public",
+   "question": "Combien coûte l’audiovisuel public ?",
+   "match_any": [
+    [
+     [
+      "audiovisuel public",
+      "service public audiovisuel",
+      "france televisions",
+      "radio france"
+     ],
+     [
+      "cout",
+      "coute",
+      "combien",
+      "budget",
+      "depens",
+      "argent",
+      "prix",
+      "paie",
+      "paye",
+      "finance"
+     ]
+    ]
+   ],
+   "reply": "La mission **« Audiovisuel public »** du projet de loi de finances 2025 représente **4 029,2 M€** de crédits de paiement, soit **58,52 € par Français et par an** (68 851 996 habitants au 1er janvier 2025, Insee).\n\n- France Télévisions : 2 548,8 M€\n- Radio France : 660,1 M€\n- France Médias Monde : 302,9 M€\n- ARTE France : 298,1 M€\n- Institut national de l'audiovisuel : 105,0 M€\n- TV5 Monde : 84,2 M€\n- Programme de transformation : 30,0 M€\n\nDepuis la suppression de la redevance, ces sommes sont payées par l’impôt. Ce sont des crédits votés, pas les comptes des sociétés : leurs autres recettes (publicité, ventes) ne sont pas comptées ici.\n\nSources : [Budget de l’État, PLF 2025](https://data.economie.gouv.fr/explore/dataset/plf25-depenses-2025-selon-destination/), [la mission sur le site](etat.html), [Insee, population](https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001641586).",
+   "sources": [
+    {
+     "title": "data.economie.gouv.fr, PLF 2025, dépenses selon destination",
+     "url": "https://data.economie.gouv.fr/explore/dataset/plf25-depenses-2025-selon-destination/"
+    },
+    {
+     "title": "Insee, population au 1er janvier",
+     "url": "https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/001641586"
+    }
+   ],
+   "data": {
+    "meur": 4029.16,
+    "population": 68851996,
+    "progs": [
+     [
+      "France Télévisions",
+      2548.83
+     ],
+     [
+      "Radio France",
+      660.13
+     ],
+     [
+      "France Médias Monde",
+      302.88
+     ],
+     [
+      "ARTE France",
+      298.11
+     ],
+     [
+      "Institut national de l'audiovisuel",
+      104.96
+     ],
+     [
+      "TV5 Monde",
+      84.24
+     ],
+     [
+      "Programme de transformation",
+      30.0
+     ]
+    ]
+   }
   }
  ]
 }

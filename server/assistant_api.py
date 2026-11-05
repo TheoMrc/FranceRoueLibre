@@ -9,6 +9,11 @@ POST /api/assistant/demande      {"job": id, "id": draft}  the reader asks the s
 GET  /api/assistant/demandes     -> the published requests and their replies (page demandes.html)
 POST /api/assistant/admin        {"action": "liste"|"voir"|"valider"|"refuser"|"publier"|"cloturer", "ref", "texte"}
                                   127.0.0.1 only, never through nginx, with MAIL_ADMIN_TOKEN (--demandes below)
+GET  /api/assistant/signalement/defi  -> a challenge for the « human » check of signalements.html
+POST /api/assistant/signalement  {"titre", "description", "siren", "lieu", "montant", "liens", "email", "charte", "preuve"}
+                                  -> {"ok", "ref"} shown to all at once (« non relu »), unless "prive" (assistant/signalements.py)
+POST /api/assistant/signalement/abus  {"ref", "motif"}  a reader flags a shown report
+GET  /api/assistant/signalements -> every report shown to all
 GET  /api/assistant/status       -> which models can answer now (no amount of money is published), whether the site
                                     still has credits (else a message and the donation link), length of the queue
 
@@ -24,6 +29,7 @@ day, questions per day for everyone, questions answered at once, size of a reque
     python server/assistant_api.py --usage            spending so far, by provider and by day
     python server/assistant_api.py --demandes liste|tout|voir|valider|refuser|modifier|destinataire|publier|cloturer [FRL-…] [--texte FICHIER]
     python server/assistant_api.py --mail liste|lire|apercu|repondre [UID] [--force]   the site's mailbox (assistant/boite.py)
+    python server/assistant_api.py --signalements liste|voir|relu|masquer|afficher [S-…] [--texte FICHIER]   citizen reports
     python server/assistant_api.py --fake             fake models (assistant/fake.py): test the panel, no token spent
 """
 from __future__ import annotations
@@ -41,7 +47,7 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from assistant import boite, demandes  # noqa: E402
+from assistant import boite, demandes, signalements  # noqa: E402
 from assistant import faq  # noqa: E402
 from assistant import fiche  # noqa: E402
 from assistant import journal  # noqa: E402
@@ -238,6 +244,10 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == '/api/assistant/demandes':
             return self.send(200, {'demandes': demandes.published(), 'delai_jours': demandes.DELAY_DAYS,
                                    'envoi': S.MAIL_CONFIGURED})
+        if url.path == '/api/assistant/signalements':
+            return self.send(200, {'signalements': signalements.published()})
+        if url.path == '/api/assistant/signalement/defi':
+            return self.send(200, signalements.challenge())
         if url.path.startswith('/api/assistant/job/'):
             jid = url.path.rsplit('/', 1)[-1]
             job = JOBS.get(jid)
@@ -281,6 +291,24 @@ class Handler(BaseHTTPRequestHandler):
                 job['voted'] = vote
                 journal.write(S.STATE_DIR, journal.vote_entry(job['id'], journal.reader(job['ip']), vote, body.get('note')))
             return self.send(200, {'ok': True})
+        if url.path == '/api/assistant/signalement/abus':
+            try:
+                size = int(self.headers.get('Content-Length') or 0)
+                body = json.loads(self.rfile.read(size)) if 0 < size <= 2000 else {}
+            except (ValueError, AttributeError):
+                body = {}
+            res = signalements.flag(body if isinstance(body, dict) else {}, journal.reader(self.client_ip()))
+            return self.send(200 if res.get('ok') else 400, res)
+        if url.path == '/api/assistant/signalement':
+            try:
+                size = int(self.headers.get('Content-Length') or 0)
+                body = json.loads(self.rfile.read(size)) if 0 < size <= 60000 else {}
+            except (ValueError, AttributeError):
+                body = {}
+            if not isinstance(body, dict) or not body:
+                return self.send(400, {'error': 'signalement illisible'})
+            res = signalements.submit(body, journal.reader(self.client_ip()))
+            return self.send(200 if res.get('ok') else 400, res)
         if url.path in ('/api/assistant/demande', '/api/assistant/admin'):
             try:
                 size = int(self.headers.get('Content-Length') or 0)
@@ -293,7 +321,7 @@ class Handler(BaseHTTPRequestHandler):
                         str(self.headers.get('X-Admin-Token') or ''), S.MAIL_ADMIN_TOKEN)):
                     return self.send(403, {'error': 'refusé'})
                 action = str(body.get('action') or '')
-                handler = boite.admin if action.startswith('mail_') else demandes.admin  # the mailbox, or the requests
+                handler = boite.admin if action.startswith('mail_') else signalements.admin if action.startswith('sig_') else demandes.admin
                 return self.send(200, handler(action, str(body.get('ref') or ''), str(body.get('texte') or '')))
             job = JOBS.get(str(body.get('job') or ''))
             draft = ((job or {}).get('result') or {}).get('demande') or {}
@@ -369,6 +397,8 @@ def admin_cli(args) -> None:
     import urllib.request
     action, ref = ((args.demandes or []) + ['', ''])[:2]
     text = Path(args.texte).read_text(encoding='utf-8') if args.texte else ''
+    if args.signalements:  # liste | voir REF | relu REF [--texte F] | masquer REF | afficher REF
+        action, ref = ('sig_' + args.signalements[0], (args.signalements + [''])[1])
     if args.mail:  # frl-mail liste [N] | lire UID | apercu UID | repondre UID [--force], the reply text on stdin
         action, ref = (args.mail + ['', ''])[:2]
         if action in ('apercu', 'repondre'):
@@ -393,13 +423,15 @@ def main():
                                                                        'publier REF [--texte F] | cloturer REF')
     parser.add_argument('--mail', nargs='+', metavar='ACTION', help='boîte du site : liste [N] | lire UID | apercu UID | '
                                                                    'repondre UID [--force] (texte de la réponse sur stdin)')
+    parser.add_argument('--signalements', nargs='+', metavar='ACTION', help='signalements citoyens : liste | voir REF | '
+                                                                           'relu REF [--texte F] | masquer REF | afficher REF')
     parser.add_argument('--force', action='store_true', help='--mail repondre : répondre à un message déjà répondu')
     parser.add_argument('--texte', help='texte publié de la réponse (sinon la réponse anonymisée automatiquement)')
     parser.add_argument('--fake', action='store_true', help='fake models, no network call, no token (tests)')
     args = parser.parse_args()
     if args.usage:
         return print_usage()
-    if args.demandes or args.mail:
+    if args.demandes or args.mail or args.signalements:
         return admin_cli(args)
     if args.fake:
         from assistant import fake

@@ -83,18 +83,36 @@ def annuaire(code_insee: str = '', nom: str = '') -> list:
         if not words:
             return []
         where = ' and '.join(f'search(nom, "{w}")' for w in words[:6])
-    url = ANNUAIRE + '?' + urllib.parse.urlencode({'where': where, 'limit': 8, 'select': 'nom,adresse_courriel,'
-                                                   'formulaire_contact,site_internet,url_service_public,siret,pivot'})
+    # 100 records: « Métropole de Lyon » matches 71 offices (each « Maison de la Métropole de Lyon - … ») and the
+    # body itself, « Métropole de Lyon - Rhône », comes last in the API's order
+    url = ANNUAIRE + '?' + urllib.parse.urlencode({'where': where, 'limit': 8 if code_insee else 100, 'select': 'nom,'
+                                                   'adresse_courriel,formulaire_contact,site_internet,url_service_public,'
+                                                   'siret,pivot'})
     status, res, _ = get_json(url, timeout=15)
     if status != 200:
         raise NetworkError(f'annuaire : HTTP {status}')
-    out = [_record(r) for r in res.get('results', [])]
+    rows = res.get('results', [])
     if not code_insee:  # the closest name first: « Conseil départemental de la Gironde » before « Conseil départemental
-        asked = set(words)   # d'accès au droit de Gironde », which holds the same words and others
-        extra = lambda c: len([w for w in re.findall(r'[a-z0-9]+', norm(c['nom'])) if len(w) > 2 and w not in asked
-                               and w not in ('les', 'des', 'aux', 'pour')])
-        out.sort(key=extra)
-    return out
+        asked = set(words)   # d'accès au droit de Gironde », which holds the same words and others; then the body
+        extra = lambda r: len([w for w in re.findall(r'[a-z0-9]+', norm(r.get('nom') or '')) if len(w) > 2  # itself
+                               and w not in asked and w not in ('les', 'des', 'aux', 'pour')])  # before its local offices
+        wanted = {k for w, k in WANTED.items() if w in asked}   # « Région … » asks the regional council, not the
+        rows.sort(key=lambda r: (0 if _kind(r) in wanted else 1 if _kind(r) in INSTITUTIONS else 2, extra(r)))  # prefecture
+    return [_record(r) for r in rows[:8]]
+
+
+# the bodies themselves in the directory (« type_service_local »), before their local offices and branches
+INSTITUTIONS = {'mairie', 'epci', 'cg', 'cr', 'prefecture', 'prefecture_region', 'rectorat', 'ars', 'drfip', 'ddfip',
+                'dreal', 'dreets', 'drac', 'sous_pref', 'caf', 'cpam', 'urssaf', 'crc'}
+
+WANTED = {'region': 'cr', 'regional': 'cr', 'departement': 'cg', 'departemental': 'cg', 'metropole': 'epci',
+          'communaute': 'epci', 'agglomeration': 'epci', 'rectorat': 'rectorat', 'academie': 'rectorat',
+          'prefecture': 'prefecture', 'mairie': 'mairie', 'ville': 'mairie', 'commune': 'mairie'}
+
+
+def _kind(r: dict) -> str:
+    pivot = _json_field(r.get('pivot')) or []
+    return (pivot[0].get('type_service_local') or '') if pivot and isinstance(pivot[0], dict) else ''
 
 
 # ------------------------------------------------------------------------------------------------------- letter
@@ -214,7 +232,10 @@ def prepare(organisme: str, code_insee: str = '', objet: str = '', documents: st
     if not contacts:
         return {'error': f'« {organisme} » introuvable dans l’annuaire de l’administration ; donner le code Insee pour '
                          'une mairie ou le nom exact de l’organisme (ex. « Conseil départemental du Nord »)'}
-    to = next((c for c in contacts if c['email']), contacts[0])
+    # a town hall: the first record with an address (annexes come without); a named body: the closest match even
+    # without an address (its contact form then), never another office that merely publishes one (FRL Vaulx-en-Velin:
+    # « Maison de la Métropole de Lyon - Limonest » instead of the Métropole)
+    to = next((c for c in contacts if c['email']), contacts[0]) if re.fullmatch(r'\d[\dAB]\d{3}', code) else contacts[0]
     sweep_drafts()
     draft_id = 'B-' + secrets.token_urlsafe(12)
     subject, body = letter(to['nom'], fields, by_site=False)

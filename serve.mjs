@@ -27,6 +27,7 @@ http.createServer((req, res) => {
   let pathname;
   try { pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname); } catch { res.writeHead(400).end(); return; }
   if (pathname.startsWith('/api/')) { proxy(req, res, pathname.startsWith('/api/assistant/') ? 8018 : 8017); return; }
+  if (pathname === '/modernos' || pathname === '/magicaltutorial') pathname = '/modernos.html';  // the live demo page
   const file = path.resolve(root, `.${pathname === '/' ? '/index.html' : pathname}`);
   if (!file.startsWith(root + path.sep)) { res.writeHead(403).end(); return; }
   fs.stat(file, (error, stat) => {

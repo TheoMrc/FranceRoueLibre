@@ -165,7 +165,7 @@ class SirenAnswerTest(unittest.TestCase):
         self.assertEqual(r['provider'], 'faq')
         self.assertIn('31\u202f156 €', r['reply'])
         self.assertIn('2023 : 7\u202f164 €', r['reply'])
-        self.assertIn('2010 à 2016, 2018 et 2023', r['reply'])
+        self.assertIn('2010 à 2021 et 2023', r['reply'])
         self.assertIsNone(self.ask('999999999'))  # placeholder of bodies without a SIREN: the model explains
         self.assertIsNone(self.ask('100000009'))  # nothing published: the model explains
         self.assertIsNone(fiche_two_turns())
@@ -328,6 +328,23 @@ class DirectoryTest(unittest.TestCase):
             {'nom': 'Conseil départemental de la Gironde', 'adresse_courriel': 'b@example.org'}]}, None)
         try:
             self.assertEqual(D.annuaire(nom='Conseil départemental de Gironde')[0]['nom'], 'Conseil départemental de la Gironde')
+        finally:
+            D.get_json = keep
+
+    def test_body_before_its_local_offices(self):
+        """The Vaulx-en-Velin canteen request went to « Maison de la Métropole de Lyon - Limonest », a local office."""
+        from assistant import demandes as D
+        keep = D.get_json
+        office = lambda town: {'nom': f'Maison de la Métropole de Lyon - {town}', 'adresse_courriel': 'mdm@example.org',
+                               'pivot': '[{"type_service_local": "mda"}]'}
+        D.get_json = lambda url, timeout=15: (200, {'results': [office('Limonest'), office('Bron'), {
+            'nom': 'Métropole de Lyon - Rhône', 'formulaire_contact': 'https://example.org/contact',
+            'pivot': '[{"type_service_local": "epci"}]'}]}, None)
+        try:
+            self.assertEqual(D.annuaire(nom='Métropole de Lyon')[0]['nom'], 'Métropole de Lyon - Rhône')
+            r = D.prepare('Métropole de Lyon', objet='coût de la restauration des collèges', documents='budget')
+            self.assertEqual(r['demande']['destinataire'], 'Métropole de Lyon - Rhône', 'not an office that has an e-mail')
+            self.assertEqual(r['demande']['formulaire'], 'https://example.org/contact')
         finally:
             D.get_json = keep
 
@@ -698,3 +715,61 @@ class PlaceAnswerTest(unittest.TestCase):
             self.assertIsNone(self.ask(q), q)
         self.assertIsNone(self.F.answer([{'role': 'user', 'text': 'Audenge'}, {'role': 'assistant', 'text': '…'},
                                          {'role': 'user', 'text': 'Audenge'}]), 'a follow-up goes to the model')
+
+
+class SignalementsTest(unittest.TestCase):
+    """Citizen reports (assistant/signalements.py): the human check, the refusals before showing, the abuse flags."""
+
+    def setUp(self):
+        import hashlib, math
+        self.dir = tempfile.TemporaryDirectory()
+        self.old_state = S.STATE_DIR
+        S.STATE_DIR = Path(self.dir.name)
+        from assistant import signalements as G
+        self.G = G
+        self.min = G.CHALLENGE_MIN
+        G.CHALLENGE_MIN = 0
+
+        def proof(trace=None):
+            c = G.challenge()
+            n = 0
+            while G._leading_zero_bits(hashlib.sha256(f"{c['nonce']}:{n}".encode()).digest()) < G.DIFFICULTY:
+                n += 1
+            if trace is None:
+                trace = [[500 + 300 * math.cos(i / 10) + (i * 7919 % 11), 500 + 250 * math.sin(i / 7), i * 16 + (i * 104729 % 7)] for i in range(120)]
+            return {**c, 'counter': n, 'trace': trace}
+        self.proof = proof
+        self.base = {'titre': 'Une piscine à 500 M€', 'description': '500 000 000 € pour une piscine municipale, ça fait beaucoup non ? Voici le marché.',
+                     'liens': ['https://francerouelibre.fr/marches.html'], 'charte': True}
+
+    def tearDown(self):
+        S.STATE_DIR = self.old_state
+        self.G.CHALLENGE_MIN = self.min
+        self.dir.cleanup()
+
+    def test_shown_to_all_or_private(self):
+        shown = self.G.submit(dict(self.base, preuve=self.proof()), 'r1')
+        private = self.G.submit(dict(self.base, prive=True, preuve=self.proof()), 'r2')
+        self.assertTrue(shown['ok'] and shown['visible'])
+        self.assertTrue(private['ok'] and not private['visible'])
+        self.assertEqual([s['ref'] for s in self.G.published()], [shown['ref']])
+        self.assertNotIn('email', self.G.published()[0])
+
+    def test_refusals(self):
+        self.assertIn('insulte', self.G.submit(dict(self.base, description='Ce maire est un connard qui vole tout le monde depuis des années.', preuve=self.proof()), 'r')['error'])
+        self.assertIn('coordonnées', self.G.submit(dict(self.base, description='Appelez le 06 12 34 56 78 pour comprendre le prix de cette piscine municipale.', preuve=self.proof()), 'r')['error'])
+        straight = [[i * 8, 100, i * 16] for i in range(120)]
+        self.assertIn('tracé', self.G.submit(dict(self.base, preuve=self.proof(straight)), 'r')['error'])
+        self.assertIn('charte', self.G.submit(dict(self.base, charte=False, preuve=self.proof()), 'r')['error'])
+        p = self.proof()
+        self.assertTrue(self.G.submit(dict(self.base, preuve=p), 'r')['ok'])
+        self.assertIn('déjà utilisée', self.G.submit(dict(self.base, preuve=p), 'r')['error'])
+
+    def test_abuse_flags_hide_until_read(self):
+        ref = self.G.submit(dict(self.base, preuve=self.proof()), 'r1')['ref']
+        for reader in ('a', 'b', 'a', 'c'):
+            self.G.flag({'ref': ref, 'motif': 'accusation sans preuve'}, reader)
+        self.assertEqual(self.G.published(), [])
+        self.G.admin('sig_afficher', ref, '')
+        self.G.admin('sig_relu', ref, '')
+        self.assertTrue(self.G.published()[0]['relu'])

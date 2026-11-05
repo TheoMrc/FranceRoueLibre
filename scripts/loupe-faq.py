@@ -1,9 +1,9 @@
 """Saved answers of la Loupe (server/assistant/faq.json): questions many readers ask, answered once from data downloaded
 by fetch-sources.mjs, then served without calling a model (no credits spent). Every figure is read from a file downloaded by
 script; the wording around it is fixed here. Questions: the debt under Bruno Le Maire, inflation and the debt, where
-100 € of taxes go, the associations that receive most from the State. Re-run after a new download:
+100 € of taxes go, the associations that receive most from the State, the Senate's restaurants, the public broadcasting. Re-run after a new download:
 
-  node scripts/fetch-sources.mjs --only=dette-trimestrielle
+  node scripts/fetch-sources.mjs --only=dette-trimestrielle,senat-comptes
   python3 scripts/loupe-faq.py
 
 Also writes the tidy series sources/dette-trimestrielle/dette-maastricht-trimestrielle.csv (versioned)."""
@@ -407,6 +407,75 @@ def fraud():
     }
 
 
+SENAT = ROOT / 'sources' / 'raw' / 'senat-comptes' / 'r25-628-chapitre-4.html'
+SENAT_URL = 'https://www.senat.fr/rap/r25-628/r25-6284.html'
+ETAT = ROOT / 'dist' / 'data' / 'etat.json'
+
+
+def senate_restaurant():
+    """« Combien coûte la cantine du Sénat ? »: the subsidy to the Senate's restaurants, read in the Senate's own
+    accounts (downloaded page), per inhabitant, next to the Senate's whole budget line."""
+    import html as html_lib
+    text = html_lib.unescape(re.sub(r'<[^>]+>', ' ', SENAT.read_text(encoding='utf-8', errors='replace')))
+    text = re.sub(r'\s+', ' ', text.replace('\xa0', ' ').replace('\u202f', ' '))
+    hits = [m for m in re.finditer(r'([+-]?\d+(?:,\d+)?) ?% pour s.établir à ((?:\d{1,3} ?)+) euros', text)
+            if re.search(r'restaura|repas|subvention', text[max(0, m.start() - 700):m.start()], re.I)]
+    assert len(hits) == 1, f'subvention des restaurants : {len(hits)} montant(s) trouvé(s) dans la page du Sénat au lieu de 1'
+    m = hits[0]
+    change, amount = float(m.group(1).replace(',', '.')), int(m.group(2).replace(' ', ''))
+    year = 2025
+    popd = json.loads(POP.read_text(encoding='utf-8'))
+    pop = next(r['population'] for r in popd['january1'] if r['year'] == year)
+    etat = json.loads(ETAT.read_text(encoding='utf-8'))
+    senat = next(p for m_ in etat['missions'] if m_['name'] == 'Pouvoirs publics' for p in m_['progs'] if p['name'] == 'Sénat')
+    per = amount / pop
+    reply = (
+        f'**Environ {fr(100 * per, 1)} centime par Français et par an.** En {year}, la subvention versée aux restaurants du Sénat '
+        f's’élève à **{fr(amount)} €**, en hausse de {fr(change, 2)} % sur un an, selon les comptes du Sénat. C’est la part '
+        f'payée par le Sénat, au-delà de ce que règlent les convives.\n\n'
+        f'- Rapportée aux {fr(pop)} habitants (Insee, 1er janvier {year}) : {fr(per, 3)} € par personne et par an.\n'
+        f'- Le budget total du Sénat dans le projet de loi de finances 2025 est de **{fr(senat["cp"], 1)} M€**, soit '
+        f'{fr(senat["cp"] * 1e6 / pop, 2)} € par habitant et par an : la restauration n’en est qu’une ligne.\n'
+        f'- Le coût complet des repas et leur nombre ne sont pas publiés dans ces comptes.\n\n'
+        f'Sources : [Sénat, les comptes de l’exercice {year}]({SENAT_URL}), [Budget de l’État, mission Pouvoirs publics](etat.html), '
+        f'[Insee, population]({popd["url"]}).')
+    return {
+        'id': 'cantine-senat', 'question': 'Combien coûte la cantine du Sénat ?',
+        'match_any': [[['cantine', 'restaurant', 'restauration', 'buvette', 'repas'], ['senat', 'senateur']]],
+        'reply': reply,
+        'sources': [{'title': f'Sénat, les comptes de l’exercice {year} (rapport n° 628)', 'url': SENAT_URL},
+                    {'title': 'Insee, population au 1er janvier', 'url': popd['url']}],
+        'data': {'year': year, 'amount': amount, 'changePct': change, 'population': pop, 'senatMeur': senat['cp']},
+    }
+
+
+def public_broadcasting():
+    """« Combien coûte l’audiovisuel public ? »: the mission of the 2025 budget bill, by company, per inhabitant."""
+    etat = json.loads(ETAT.read_text(encoding='utf-8'))
+    mission = next(m for m in etat['missions'] if m['code'] == 'AQ')
+    popd = json.loads(POP.read_text(encoding='utf-8'))
+    pop = next(r['population'] for r in popd['january1'] if r['year'] == 2025)
+    progs = sorted(mission['progs'], key=lambda p: -p['cp'])
+    lines_ = '\n'.join(f'- {p["name"]} : {fr(p["cp"], 1)} M€' for p in progs)
+    page = etat['sources']['plf25-depenses-destination']['page']
+    reply = (
+        f'La mission **« {mission["name"]} »** du projet de loi de finances 2025 représente **{fr(mission["cp"], 1)} M€** de crédits '
+        f'de paiement, soit **{fr(mission["cp"] * 1e6 / pop, 2)} € par Français et par an** ({fr(pop)} habitants au 1er janvier 2025, Insee).\n\n'
+        f'{lines_}\n\n'
+        f'Depuis la suppression de la redevance, ces sommes sont payées par l’impôt. Ce sont des crédits votés, pas les comptes '
+        f'des sociétés : leurs autres recettes (publicité, ventes) ne sont pas comptées ici.\n\n'
+        f'Sources : [Budget de l’État, PLF 2025]({page}), [la mission sur le site](etat.html), [Insee, population]({popd["url"]}).')
+    return {
+        'id': 'audiovisuel-public', 'question': 'Combien coûte l’audiovisuel public ?',
+        'match_any': [[['audiovisuel public', 'service public audiovisuel', 'france televisions', 'radio france'],
+                       ['cout', 'coute', 'combien', 'budget', 'depens', 'argent', 'prix', 'paie', 'paye', 'finance']]],
+        'reply': reply,
+        'sources': [{'title': 'data.economie.gouv.fr, PLF 2025, dépenses selon destination', 'url': page},
+                    {'title': 'Insee, population au 1er janvier', 'url': popd['url']}],
+        'data': {'meur': mission['cp'], 'population': pop, 'progs': [[p['name'], p['cp']] for p in progs]},
+    }
+
+
 def main():
     q = quarterly()
     TIDY.parent.mkdir(parents=True, exist_ok=True)
@@ -420,7 +489,7 @@ def main():
     for y in (2017, 2020, 2024):
         a = next(r['debt'] for r in annual['years'] if r['year'] == y)
         assert abs(q[f'{y}-T4'][0] - a) < 1, f'dette fin {y} : trimestrielle {q[f"{y}-T4"][0]} vs annuelle {a}'
-    entries = [debt_le_maire(q, annual), debt_per_person(q), inflation_debt(q, annual), hundred_euros(annual), associations(), pensions(), fraud()]
+    entries = [debt_le_maire(q, annual), debt_per_person(q), inflation_debt(q, annual), hundred_euros(annual), associations(), pensions(), fraud(), senate_restaurant(), public_broadcasting()]
     OUT.write_text(json.dumps({'generated': 'python3 scripts/loupe-faq.py', 'entries': entries}, ensure_ascii=False, indent=1) + '\n',
                    encoding='utf-8')
     print(f'{TIDY.relative_to(ROOT)}: {len(q)} trimestres ; {OUT.relative_to(ROOT)}: {len(entries)} réponse(s)')

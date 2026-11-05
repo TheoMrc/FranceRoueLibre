@@ -46,7 +46,7 @@
   }
 
   /* Long sections (content pages only, not the home page): past FOLD screens, a section is cut to one screen and a half
-     with a fade and a button; it opens by itself when a link leads into it. */
+     with a fade and a button; it opens by itself when a link leads into it. A section marked data-full (a form) is never cut. */
   const FOLD = 1.6;
   const contentPage = !!document.querySelector('.hero--page');
   const unfolded = new WeakSet();
@@ -86,7 +86,7 @@
     setText(btn, open ? 'Replier la section' : `Voir toute la section${title ? ` « ${title.length > 48 ? `${title.slice(0, 46)}…` : title} »` : ''}`);
     btn.setAttribute('aria-expanded', String(open));
   }
-  const sections = () => contentPage ? [...document.querySelectorAll('main > section.section:not(.related)')] : [];
+  const sections = () => contentPage ? [...document.querySelectorAll('main > section.section:not(.related):not([data-full])')] : [];
   function openFor(target) {
     const section = target?.closest?.('main > section.section');
     if (section?.classList.contains('is-folded')) { unfolded.add(section); fold(section); label(section); }

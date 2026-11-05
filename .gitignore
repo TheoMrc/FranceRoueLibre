@@ -16,3 +16,6 @@ ugap/raw_samples/
 .assistant
 dist/**/*.gz
 deploy/*.env
+
+note.md
+dist/data/search/frl-search.new.sqlite3

@@ -1,5 +1,5 @@
 """One menu for every page. The structure lives here; this script rewrites the <ul class="nav__links"> block of every
-page in dist/ (and adds dist/nav.js, dist/collapse.js, dist/assistant.js, dist/scroll-hint.js, dist/touch-hover.js, dist/smooth-scroll.js et dist/vendor/lenis.min.js), so that adding a page means adding one line below and running:
+page in dist/ (and adds dist/nav.js, dist/collapse.js, dist/assistant.js, dist/scroll-hint.js, dist/touch-hover.js, dist/loupe-signal.js, dist/smooth-scroll.js et dist/vendor/lenis.min.js), so that adding a page means adding one line below and running:
     python scripts/sync_nav.py
 On the home page, the map, circuit and accounts links stay in-page anchors."""
 import json
@@ -32,6 +32,7 @@ NAV = [
     ]),
     ('Contrôle', [
         ('Demandes aux instances publiques', 'demandes.html', 'Les documents demandés aux administrations, et leurs réponses'),
+        ('Remontées citoyennes', 'signalements.html', 'Documenter un cas suspect, sources à l’appui, visible par tous'),
         ('Signaux', 'signaux.html', 'Règles simples appliquées à toutes les données'),
         ('Probité', 'probite.html', 'Corruption, favoritisme : les affaires jugées'),
         ('Données et angles morts', 'donnees.html', 'Les sources, et ce qui n’est pas publié'),
@@ -165,7 +166,7 @@ def sync(path):
         text = text.replace('<script defer src="./nav.js"></script>', '<script defer src="./nav.js"></script>\n  <script defer src="./assistant.js"></script>', 1)
     if 'src="./smooth-scroll.js"' not in text:  # défilement doux à la molette (Lenis, comme zebrafish-research.com)
         text = text.replace('<script defer src="./nav.js"></script>', '<script defer src="./nav.js"></script>\n  <script defer src="./vendor/lenis.min.js"></script>\n  <script defer src="./smooth-scroll.js"></script>', 1)
-    for extra in ('scroll-hint.js', 'touch-hover.js'):  # sideways scrollers made visible; chart tooltips by touch
+    for extra in ('scroll-hint.js', 'touch-hover.js', 'loupe-signal.js'):  # sideways scrollers; chart tooltips by touch; « Faire remonter » under the Loupe's answers
         if f'src="./{extra}"' not in text:
             text = text.replace('<script defer src="./nav.js"></script>', f'<script defer src="./nav.js"></script>\n  <script defer src="./{extra}"></script>', 1)
     # Header: « Soutenir » and X before the GitHub link (rewritten each time). search-bar.js puts its form first.

@@ -83,7 +83,8 @@ def set_home_head(page):
 
 
 def main():
-    pages = sorted(DIST.glob('*.html'))
+    # pages marked noindex (the live demo /modernos) get no structured data and stay out of the sitemap
+    pages = [p for p in sorted(DIST.glob('*.html')) if 'name="robots" content="noindex' not in p.read_text(encoding='utf-8')]
     for path in pages:
         page = path.read_text(encoding='utf-8')
         page = re.sub(r'\n?\s*%s.*?%s' % (re.escape(BEGIN), re.escape(END)), '', page, flags=re.S)

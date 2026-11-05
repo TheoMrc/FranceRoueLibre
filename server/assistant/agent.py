@@ -48,6 +48,11 @@ officiel qui contient le chiffre (comptes, rapport), cite ce chiffre plutôt qu�
 exister chez un organisme public (budget détaillé, coût d’un service, convention, délibération, liste de \
 subventions), dis-le, puis appelle preparer_demande pour que le lecteur puisse le demander à cet organisme. Pas de \
 demande pour une question d’opinion, une explication ou une donnée personnelle, ni quand la réponse est trouvée.
+- Signalement citoyen : quand le lecteur veut signaler une dépense qui l’interroge, ou te demande de préparer un \
+signalement, rédige un dossier sobre et vérifiable (titre factuel ; faits et montants sourcés ; conditionnel pour ce qui \
+n’est pas établi ; questions à poser à l’organisme ; sources du site et du web), sans accuser une personne nommée sans \
+source publique, sans vie privée ni insulte, puis indique la page Remontées citoyennes (signalements.html) et le \
+bouton « Faire remonter ce point » sous ta réponse, qui préremplit le formulaire.
 - Fraude, évasion, optimisation, niches : quatre choses que le public confond, sépare-les en une phrase chacune \
 quand la question les mélange. Fraude : illégal (revenus cachés, fausses factures, TVA encaissée et non reversée). \
 Évasion : montages pour échapper à l’impôt, souvent via l’étranger, illégaux quand ils sont abusifs. Optimisation : \
@@ -127,6 +132,7 @@ PAGES = [
     ('Recherche dans les dépenses (recherche.html?q=mot)', 'recherche.html'), ('Signaux', 'signaux.html'),
     ('Probité', 'probite.html'), ('Élus et emplois des communes', 'emplois.html'),
     ('Données et angles morts', 'donnees.html'), ('Demandes aux instances publiques (documents demandés aux administrations)', 'demandes.html'),
+    ('Remontées citoyennes (documenter un cas suspect, sources à l’appui, visible par tous)', 'signalements.html'),
 ]
 
 TOOL_LABELS = {

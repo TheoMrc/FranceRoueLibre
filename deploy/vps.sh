@@ -133,6 +133,9 @@ NGX
     gzip_static on;
     open_file_cache max=20000 inactive=120s; open_file_cache_valid 60s; open_file_cache_errors on;
     location / { try_files $uri $uri/ =404; expires 10m; }
+    # The live demo page (Le Monde Moderne), also under its alias
+    location = /modernos { try_files /modernos.html =404; }
+    location = /magicaltutorial { try_files /modernos.html =404; }
     # Let's Encrypt (^~ wins over the dotfile rule below)
     location ^~ /.well-known/acme-challenge/ { root /var/www/francerouelibre/dist; default_type text/plain; }
     # Search index: read by HTTP range requests (nginx serves ranges natively); never gzip these
@@ -306,6 +309,9 @@ UNIT
   # frl-mail liste [N] | lire UID | apercu UID | repondre UID [--force] : the site's mailbox (reply text on stdin)
   printf '#!/bin/sh\nexec sudo -n env ASSISTANT_ENV_FILE=%s %s %s --mail "$@"\n' "$AENV" "$APY" "$DIR/server/assistant_api.py" | sudo -n tee /usr/local/bin/frl-mail > /dev/null
   sudo -n chmod 755 /usr/local/bin/frl-mail
+  # frl-signalements liste | voir REF | relu REF [--texte F] | masquer REF | afficher REF : citizen reports
+  printf '#!/bin/sh\nexec sudo -n env ASSISTANT_ENV_FILE=%s %s %s --signalements "$@"\n' "$AENV" "$APY" "$DIR/server/assistant_api.py" | sudo -n tee /usr/local/bin/frl-signalements > /dev/null
+  sudo -n chmod 755 /usr/local/bin/frl-signalements
 else
   echo "not installed ($AENV missing, see deploy/assistant.env.example)"
   if systemctl is-active --quiet francerouelibre-assistant 2>/dev/null; then sudo -n systemctl disable --now francerouelibre-assistant; fi

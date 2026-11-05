@@ -188,7 +188,7 @@ SIREN_Q = re.compile(r'^\s*(?:combien d[’\']argent public (?:re[çc]oit|touche
                      r'(?:le )?siren\s*:?\s*)?(\d{3}\s?\d{3}\s?\d{3})\s*[»"]?\s*\??\s*$', re.I)
 SOURCE_TEXT = {1: 'Subventions de l’État', 2: 'Marchés publics', 3: 'Projets aidés par l’État (DGCL)', 4: 'Fonds vert',
                5: 'Aides de minimis'}
-STATE_YEARS = 'les subventions de l’État aux associations ne sont publiées que pour 2010 à 2016, 2018 et 2023'
+STATE_YEARS = 'les subventions de l’État aux associations sont publiées pour 2010 à 2021 et 2023 (l’annexe de 2022 n’a pas de liste exploitable)'
 
 
 def siren_of(text: str) -> Optional[str]:
