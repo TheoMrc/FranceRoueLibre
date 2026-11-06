@@ -441,3 +441,5 @@ body.mm { font-size: clamp(14px, min(1.02vw, 1.95vh), 19px); }
 .mm-shot b { display: block; font: 700 1.25em/1.2 var(--font-display); }
 @media (max-width: 900px) { .mm-final { grid-template-areas: "a" "b"; } }
 .mm-loupe-open .mm-tile { padding: .6em .9em; }
+.mm-links--big .btn { font-size: 1.05em; padding: .7em 1.3em; }
+.mm-links__logo { width: 1.4em; height: 1.4em; background: #fff; border-radius: 6px; padding: 2px; }
