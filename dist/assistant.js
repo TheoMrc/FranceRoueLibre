@@ -442,7 +442,7 @@
     send.classList.add('is-sent');
     setTimeout(() => send.classList.remove('is-sent'), 450);
     input.value = ''; autosize();
-    const m = { role: 'assistant', text: '', steps: [], notes: [], running: true, provider: null };
+    const m = { role: 'assistant', text: '', steps: [], notes: [], running: true, provider: null }, started = performance.now();
     const v = botView(m);
     v.setRunning(true); v.think('Réflexion');
     log.appendChild(v.el); log.scrollTop = log.scrollHeight;
@@ -507,7 +507,10 @@
     m.steps.forEach(s => { if (!s.done) Object.assign(s, { done: true, ok: false }); });
     v.think(null);
     try { hooks?.onDone?.(m); } catch (e) { /* the page's own problem */ }
-    if (!m.error) await v.type(m.text, m.provider === 'faq' || panel.hidden);
+    // a live demo (FRLLoupe.ask with typing): even a saved answer waits half a second, dots moving, then writes itself
+    if (theatre && !m.error) { const wait = 500 - (performance.now() - started); v.think('Réflexion'); if (wait > 0) await sleep(wait); v.think(null); }
+    if (!m.error) await v.type(m.text, !theatre && (m.provider === 'faq' || panel.hidden));
+    theatre = false;
     v.finish();
     if (m.error) v.el.classList.add('has-error');
     live.textContent = m.error ? `Erreur : ${m.error}` : `Réponse : ${m.text.replace(/[*#[\]]/g, '').slice(0, 600)}`;
@@ -522,7 +525,7 @@
 
   /* An answer prepared while the panel stays closed (a commune or a SIREN searched on a phone): a notification on
      the Loupe's logo, a red « 1 », and the button says it, until the panel is opened. */
-  let quietAsk = false;
+  let quietAsk = false, theatre = false;
   function notifyAnswer() {
     fab.classList.add('has-answer');
     fab.classList.remove('is-compact');
@@ -683,6 +686,7 @@
         }
         // background: the answer is prepared with the panel closed, and announced on the logo (notifyAnswer)
         if (opts.background) quietAsk = true; else openPanel(true);
+        theatre = !!opts.typing;
         store.current = null; showHistory(false); renderLog(); ask(t, pre, opts.hooks || null); return true;
       },
       busy: () => !!busy,

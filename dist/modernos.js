@@ -177,7 +177,7 @@
     box.innerHTML = `<div class="mm-card mm-punch">${punch}</div>${live ? '' : loupeCard(L.question, `<div class="mm-md">${md(L.reply)}</div>`, '<span class="mm-off">Loupe hors ligne : même réponse, servie par la page</span>')}`;
     if (kind === 'audiovisuel') drawDots($('#mmDotsGrid'), Math.round(ratio(d)));
     reveal(box);
-    if (live) window.FRLLoupe.ask(L.question);
+    if (live) window.FRLLoupe.ask(L.question, { typing: true });
   }
   const ratio = d => d.meur * 1e6 / D.loupe.cantine.data.amount;
   function drawDots(cv, n) {
