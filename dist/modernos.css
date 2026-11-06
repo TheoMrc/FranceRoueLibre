@@ -397,6 +397,20 @@ body.mm { font-size: clamp(14px, min(1.02vw, 1.95vh), 19px); }
 }
 @media (max-width: 480px) { .mm-allpages__grid { grid-template-columns: minmax(0, 1fr); } }
 
+/* communes : chiffres mis en avant (fond teinté et liseré à gauche, sans cadre), carte « ??? » à retourner au clic */
+.mm-tile--hl { background: color-mix(in srgb, var(--g2) 9%, var(--c-surface)); box-shadow: inset 4px 0 0 var(--g2); }
+.mm-tile--hl .mm-tile__v { color: var(--g2); font-size: clamp(22px, min(2.6vw, 4.6vh, 16cqi), 44px); }
+.mm-tile--etat .mm-tile__v { color: var(--red); }
+.mm-tile--etat { background: color-mix(in srgb, var(--red) 7%, var(--c-surface)); box-shadow: inset 4px 0 0 var(--red); }
+.mm-stonks--md { height: 1.6em; width: auto; border-radius: 8px; margin-left: .4em; }
+.mm-qcard { display: grid; justify-items: start; gap: 2px; border: 0; text-align: left; cursor: pointer; font: inherit; color: inherit;
+  background: repeating-linear-gradient(135deg, var(--c-surface), var(--c-surface) 12px, var(--c-surface-2) 12px, var(--c-surface-2) 24px); transition: transform .2s var(--ease); }
+.mm-qcard:hover { transform: translateY(-2px); }
+.mm-qcard__q { font: 700 clamp(26px, min(3vw, 5vh), 48px)/1 var(--font-display); letter-spacing: .12em; color: var(--muted); }
+.mm-tile.is-revealed { animation: mm-flipin .6s var(--ease) both; }
+.mm-tile--debt.is-revealed .mm-tile__v { font-size: clamp(24px, min(3vw, 5vh, 16cqi), 50px); }
+@keyframes mm-flipin { from { transform: rotateX(90deg); opacity: 0; } }
+
 /* ---------- écrans étroits (téléphone 390 px) ---------- */
 @media (max-width: 900px) {
   body.mm { overflow: auto; }
@@ -425,3 +439,4 @@ body.mm { font-size: clamp(14px, min(1.02vw, 1.95vh), 19px); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
 .mm-shot b { display: block; font: 700 1.25em/1.2 var(--font-display); }
 @media (max-width: 900px) { .mm-final { grid-template-areas: "a" "b"; } }
+.mm-loupe-open .mm-tile { padding: .6em .9em; }

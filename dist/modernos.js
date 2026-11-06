@@ -231,13 +231,21 @@
     const signed = p => `<b class="${p > 0 ? 'mm-up' : 'mm-down'}">${p > 0 ? '+' : ''}${p} %</b>`;
     const etatPct = pct(row[COL.etat], med.etat), depPct = pct(row[COL.dep_hab], med.dep), dettePct = pct(row[COL.dette], med.dette);
     const video = row[COL.insee] === '34172' ? xPlayer('img/modernos/montpellier-seuil.mp4', 'Montpellier, juste sous le seuil : 8 ans de marchés publics de la Ville et de la Métropole') : '';
-    const tilesHtml = `<div class="mm-tiles">
-          <div class="mm-tile mm-tile--wide"><div class="mm-tile__v">${nf(row[COL.dep_hab] ?? 0)} €</div><div class="mm-tile__l">dépensés par la commune elle-même par habitant${depPct != null ? `, ${signed(depPct)} vs la médiane (${nf(med.dep)} €)` : ''}</div></div>
-          <div class="mm-tile mm-tile--wide mm-tile--debt"><div class="mm-tile__v">${nf(row[COL.dette] ?? 0)} €</div><div class="mm-tile__l">de dette par habitant${dettePct != null ? `, ${signed(dettePct)} vs la médiane (${nf(med.dette)} €)` : ''}</div></div>
-          <div class="mm-tile mm-tile--wide"><div class="mm-tile__v">${nf(row[COL.etat] ?? 0)} €${etatPct > 100 ? STONKS : ''}</div><div class="mm-tile__l">de dotations de l’État par habitant${etatPct != null ? `, ${signed(etatPct)} vs la médiane` : ''}</div></div>
-          <div class="mm-tile"><div class="mm-tile__v">${nf(row[COL.assos])}</div><div class="mm-tile__l">associations du coin aidées par l’État${row[COL.assos23] ? `, dont <b>${eur(row[COL.assos23])}</b> en 2023` : ''}</div></div>
-          <div class="mm-tile"><div class="mm-tile__v">${nf(row[COL.nproj])}</div><div class="mm-tile__l">projets aidés par l’État 2018-2025${row[COL.aproj] ? ` : <b>${eur(row[COL.aproj])}</b>` : ''}</div></div>
-        </div>`;
+    const T = {
+      dep: hl => `<div class="mm-tile mm-tile--wide${hl ? ' mm-tile--hl' : ''}"><div class="mm-tile__v">${nf(row[COL.dep_hab] ?? 0)} €</div><div class="mm-tile__l">dépensés par la commune elle-même par habitant${depPct != null ? `, ${signed(depPct)} vs la médiane (${nf(med.dep)} €)` : ''}</div></div>`,
+      total: hl => `<div class="mm-tile mm-tile--wide${hl ? ' mm-tile--hl' : ''}"><div class="mm-tile__v">${nf(total)} €</div><div class="mm-tile__l">par habitant et par an pour les 4 couches (commune, intercommunalité, département, région), hors État et Sécu</div></div>`,
+      debt: () => `<div class="mm-tile mm-tile--wide mm-tile--debt"><div class="mm-tile__v">${nf(row[COL.dette] ?? 0)} €</div><div class="mm-tile__l">de dette par habitant${dettePct != null ? `, ${signed(dettePct)} vs la médiane (${nf(med.dette)} €)` : ''}</div></div>`,
+      etat: hl => `<div class="mm-tile mm-tile--wide${hl ? ' mm-tile--hl mm-tile--etat' : ''}"><div class="mm-tile__v">${nf(row[COL.etat] ?? 0)} €${etatPct > 100 ? (hl ? STONKS.replace('mm-stonks--sm', 'mm-stonks--md') : STONKS) : ''}</div><div class="mm-tile__l">de dotations de l’État par habitant${etatPct != null ? `, ${signed(etatPct)} vs la médiane` : ''}</div></div>`,
+      assos: hl => `<div class="mm-tile${hl ? ' mm-tile--hl' : ''}"><div class="mm-tile__v">${nf(row[COL.assos])}</div><div class="mm-tile__l">associations du coin aidées par l’État${row[COL.assos23] ? `, dont <b>${eur(row[COL.assos23])}</b> en 2023` : ''}</div></div>`,
+      proj: hl => `<div class="mm-tile${hl ? ' mm-tile--hl' : ''}"><div class="mm-tile__v">${nf(row[COL.nproj])}</div><div class="mm-tile__l">projets aidés par l’État 2018-2025${row[COL.aproj] ? ` : <b>${eur(row[COL.aproj])}</b>` : ''}</div></div>`,
+      // a card that keeps its figure until it is clicked: the question is asked out loud first
+      ask: (label, inner) => `<button type="button" class="mm-tile mm-tile--wide mm-qcard" data-reveal="${esc(encodeURIComponent(inner))}"><span class="mm-qcard__q">???</span><span class="mm-tile__l">${esc(label)}</span></button>`
+    };
+    const PLAN = {
+      '59350': () => [T.dep(true), T.total(true), T.ask('Et la dette par habitant ?', T.debt())],
+      '93014': () => [T.dep(), T.etat(true), T.assos(true), T.proj(true), T.ask('Et la dette par habitant ?', T.debt())]
+    };
+    const tilesHtml = `<div class="mm-tiles">${(PLAN[row[COL.insee]] ? PLAN[row[COL.insee]]() : [T.dep(), T.debt(), T.etat(), T.assos(), T.proj()]).join('')}</div>`;
     box.innerHTML = `<div class="mm-card${video ? ' mm-city--video' : ''}"><div class="mm-city__grid"><div>
         <p class="mm-city__name">${esc(row[COL.nom])}</p>
         <p class="mm-muted">${nf(row[COL.pop])} habitants · ${esc(L.departement?.[0] || row[COL.dep])} · comptes ${C?.year || 2025} · comparée aux ${nf(n)} ${esc(bandLabel(b))}</p>
@@ -255,6 +263,10 @@
         </div>
       </div></div><div id="mmPers"></div></div>`;
     if (video) wirePlayer(box.querySelector('.xp'));
+    $$('.mm-qcard', box).forEach(q => q.addEventListener('click', () => {
+      const t = document.createElement('template'); t.innerHTML = decodeURIComponent(q.dataset.reveal);
+      const el = t.content.firstElementChild; el.classList.add('is-revealed'); q.replaceWith(el);
+    }));
     $('#mmPersBtn').addEventListener('click', () => {
       const ranks = row[COL.ranks] || [];
       const rows = [['Frais de personnel', row[COL.pers], med.pers, ranks[0]], ['Dette', row[COL.dette], med.dette, ranks[1]], ['Dotations de l’État', row[COL.etat], med.etat, ranks[2]]];
