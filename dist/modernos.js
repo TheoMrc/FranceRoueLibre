@@ -470,9 +470,9 @@
       const d = await getJSON('api/assistant/signalements', 5000);
       const rows = (d.signalements || []).slice(0, 3);
       box.innerHTML = rows.length ? rows.map(r => `<a class="mm-report" href="signalements.html#${esc(r.ref)}" target="_blank" rel="noopener"><span class="mm-report__tag${r.relu ? ' is-read' : ''}">${r.relu ? 'Relu' : 'Non relu'}</span><b>${esc(r.titre)}</b><small>${esc((r.description || '').slice(0, 140))}${(r.description || '').length > 140 ? '…' : ''}</small></a>`).join('')
-        : '<p class="mm-note">Aucune remontée pour l’instant : la page vient d’ouvrir.</p>';
+        : '';
     } catch (e) {
-      box.innerHTML = '<p class="mm-note">Les remontées en direct ne sont pas joignables d’ici : bouton « Tableau de bord ».</p>';
+      box.innerHTML = '';
     }
   }
 
