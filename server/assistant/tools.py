@@ -250,8 +250,13 @@ FILES = {
 }
 
 
-def norm(text: str) -> str:
+@functools.lru_cache(maxsize=262_144)  # the ~35 000 commune names are normalised again at each lookup: once is enough
+def _norm(text: str) -> str:
     return ''.join(c for c in unicodedata.normalize('NFD', str(text).lower()) if unicodedata.category(c) != 'Mn')
+
+
+def norm(text: str) -> str:
+    return _norm(str(text))
 
 
 def words(text: str) -> List[str]:
@@ -435,14 +440,20 @@ def _entities(level: str) -> List[tuple]:
     return [(c, n, '') for c, n in zip(e['codes'], e['names'])]
 
 
+@functools.lru_cache(maxsize=4)
+def _normed(level: str) -> List[tuple]:
+    """(code, name) of _entities(level), normalised once."""
+    return [(norm(c), norm(n)) for c, n, _ in _entities(level)]
+
+
 def comptes_collectivite(nom: str, niveau: str = 'communes', agregats: str = '') -> dict:
     level = niveau if niveau in LEVELS else 'communes'
     q = norm(str(nom or '').strip())
     if not q:
         return {'error': 'nom vide'}
     ents = _entities(level)
-    exact = [i for i, (c, n, _) in enumerate(ents) if norm(c) == q or norm(n) == q]
-    found = exact or [i for i, (c, n, _) in enumerate(ents) if q in norm(n)]
+    exact = [i for i, (c, n) in enumerate(_normed(level)) if c == q or n == q]
+    found = exact or [i for i, (_, n) in enumerate(_normed(level)) if q in n]
     if not found:
         return {'error': f'aucune entité « {nom} » parmi les {LEVELS[level].lower()}s ; essayer un autre niveau ou le code'}
     if len(found) > 1:
