@@ -13,6 +13,9 @@
     const extra = msg.querySelector('.ai-extra'), text = msg.querySelector('.ai-text');
     if (!extra || !text || extra.querySelector('.ai-signal') || msg.querySelector('.ai-error')) return;
     if (!msg.querySelector('.ai-foot')?.textContent.trim()) return;   // still writing
+    let ask = msg.previousElementSibling;
+    while (ask && !ask.classList.contains('ai-msg--user')) ask = ask.previousElementSibling;
+    if (/^Préparer un signalement/.test(ask?.textContent.trim() || '')) return;   // already written into the form of signalements.html
     const a = document.createElement('a');
     a.className = 'ai-signal'; a.href = target;
     a.innerHTML = `${FLAG}Faire remonter ce point`;

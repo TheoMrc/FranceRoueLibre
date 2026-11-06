@@ -9,6 +9,7 @@ local authorities, published JSON files), with delays like a real model, but nev
 * « long »    : a long answer with lists and links (scrolling, writing animation)
 * « commune », « ville » or « département » : the accounts tool on Rennes, or on the named place
 * « web »     : a web search only
+* « signalement » : the report form of signalements.html filled live (remplir_signalement), a search between
 * anything else: a search in the published spending lines, a web search, then an answer built from the real figures
 """
 from __future__ import annotations
@@ -98,6 +99,8 @@ class FakeClient:
             return {'role': 'model', 'parts': [{'text': LONG}]}
         call = lambda name, args: {'role': 'model', 'parts': [{'functionCall': {'name': name, 'args': args,
                                                                                'id': f'toolu_demo{self.step}'}}]}
+        if 'signalement' in low:
+            return self._report(contents, q)
         if any(w in low for w in ('commune', 'ville', 'département', 'departement')):
             res = _last_result(contents, 'comptes_collectivite')
             if res is None:
@@ -143,6 +146,41 @@ class FakeClient:
         parts.append('*Réponse de démonstration : les chiffres viennent des vraies données du site, le texte et la '
                      'recherche web sont simulés.*')
         return {'role': 'model', 'parts': [{'text': '\n\n'.join(parts)}]}
+
+    def _report(self, contents: List[dict], q: str) -> dict:
+        """The report form filled in three times: what the idea says, a search, then the whole draft."""
+        idea = (re.search(r'«\s*(.+?)\s*»', q, re.S) or re.search(r'(.+)', q)).group(1)[:300]
+        place = next((w for w in re.findall(r'\b(?:à|de|sur)\s+([A-ZÉÈ][\wéèêëàâîïôöûüç\-]{3,})', idea)), '')
+        amount = (re.search(r'\d[\d\s.,]*\s*(?:€|M€|Md€|millions?|milliards?)', idea) or [''])[0].strip()
+        call = lambda *calls: {'role': 'model', 'parts': [{'functionCall': {'name': n, 'args': a, 'id': f'toolu_demo{self.step}_{i}'}}
+                                                         for i, (n, a) in enumerate(calls)]}
+        if _last_result(contents, 'remplir_signalement') is None:
+            first = {'titre': idea.rstrip(' ?!.')[:120]}
+            if place:
+                first['lieu'] = place
+            if amount:
+                first['montant'] = amount
+            words = [w for w in _words(idea) if w.lower() not in ('beaucoup', 'combien', 'pourquoi', 'subventionnee', 'cette')]
+            return call(('remplir_signalement', first), ('rechercher_depenses', {'requete': max(words, key=len) if words else 'piscine'}))
+        if _last_result(contents, 'recherche_web') is None:
+            return call(('recherche_web', {'question': idea}))
+        search = _last_result(contents, 'rechercher_depenses') or {}
+        done = sum(1 for c in contents for p in c.get('parts') or []
+                   if (p.get('functionCall') or {}).get('name') == 'remplir_signalement')
+        if done < 2:
+            lines = search.get('lignes', 0)
+            return call(('remplir_signalement', {
+                'description': (f'Point de départ : « {idea} ».\n\nDans les dépenses publiées, {lines:_} ligne(s) contiennent '
+                                'ce mot (démonstration : chiffres réels du site, texte simulé). Le montant cité n’est pas '
+                                'vérifié à ce stade : il faudrait le rapprocher de la délibération et du budget '
+                                'de la collectivité.').replace('_', ' '),
+                'questions': 'Quel est le coût total prévu, études et frais financiers compris ?\nQui finance, et à quelle hauteur ?\n'
+                             'Une étude de besoin a-t-elle été publiée ?',
+                'liens': '\n'.join([search.get('page') or 'https://francerouelibre.fr/recherche.html',
+                                    'https://www.ccomptes.fr/', 'https://www.insee.fr/'])}))
+        return {'role': 'model', 'parts': [{'text': 'Le dossier est prérempli : titre, lieu, faits, questions et sources. '
+                                                   'Relisez-le, corrigez ce qui doit l’être, puis envoyez-le.\n\n'
+                                                   '*Démonstration : aucun modèle n’a été appelé.*'}]}
 
     def web_search(self, question: str) -> dict:
         self._wait(1.5, 2.8)

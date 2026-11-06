@@ -8,7 +8,7 @@ from typing import Callable, List, Optional
 from . import settings as S
 from .budget import BudgetError, budget
 from .providers import CLIENTS, ModelError
-from .tools import DECLARATIONS, FILES, Toolbox
+from .tools import DECLARATIONS, FILES, Toolbox, signalement_fields
 
 SYSTEM = """Tu es la Loupe, l’agent IA de FranceRoueLibre ({site}), un site indépendant qui ouvre le capot des comptes publics \
 français à partir de données ouvertes (Insee, OFGL, DGFiP, DGCL, data.gouv.fr, Cour des comptes...). Tu réponds aux \
@@ -51,8 +51,11 @@ demande pour une question d’opinion, une explication ou une donnée personnell
 - Signalement citoyen : quand le lecteur veut signaler une dépense qui l’interroge, ou te demande de préparer un \
 signalement, rédige un dossier sobre et vérifiable (titre factuel ; faits et montants sourcés ; conditionnel pour ce qui \
 n’est pas établi ; questions à poser à l’organisme ; sources du site et du web), sans accuser une personne nommée sans \
-source publique, sans vie privée ni insulte, puis indique la page Remontées citoyennes (signalements.html) et le \
-bouton « Faire remonter ce point » sous ta réponse, qui préremplit le formulaire.
+source publique, sans vie privée ni insulte. Sur la page Remontées citoyennes (le message le dit), remplis le \
+formulaire avec remplir_signalement : un premier appel dès ta première étape, en même temps que ta première \
+recherche (titre, lieu et montant tirés de la piste), un dernier avec le dossier complet, puis réponds en deux \
+phrases (ce que tu as trouvé, ce qu’il reste à vérifier). Ailleurs, rédige le dossier dans ta réponse et indique la \
+page Remontées citoyennes (signalements.html) et le bouton « Faire remonter ce point » sous ta réponse.
 - Fraude, évasion, optimisation, niches : quatre choses que le public confond, sépare-les en une phrase chacune \
 quand la question les mélange. Fraude : illégal (revenus cachés, fausses factures, TVA encaissée et non reversée). \
 Évasion : montages pour échapper à l’impôt, souvent via l’étranger, illégaux quand ils sont abusifs. Optimisation : \
@@ -153,6 +156,7 @@ TOOL_LABELS = {
     'recherche_web': 'Recherche sur le web : « {question} »',
     'lire_page': 'Lecture de la page {url}',
     'preparer_demande': 'Préparation d’une demande à « {organisme} »',
+    'remplir_signalement': 'Remplit le dossier de signalement',
 }
 
 
@@ -289,6 +293,8 @@ def _run(chosen: str, contents: List[dict], on_event: Callable[[dict], None], ca
                 on_event({'type': 'tool_start', 'name': name, 'label': label})
                 t0 = time.time()
                 result = box.call(name, args)
+                if name == 'remplir_signalement' and result.get('ok'):  # the page writes them in its form at once
+                    on_event({'type': 'signalement', 'champs': signalement_fields(args)})
                 ok, summary = tool_summary(name, result)
                 on_event({'type': 'tool_done', 'name': name, 'label': label, 'ok': ok, 'summary': summary,
                           's': round(time.time() - t0, 1)})
@@ -305,6 +311,7 @@ def _run(chosen: str, contents: List[dict], on_event: Callable[[dict], None], ca
     return {'reply': reply or 'Je n’ai pas trouvé de réponse fiable ; essayez de reformuler la question.',
             'provider': chosen, 'label': client.label, 'model': client.model, 'sources': box.sources,
             'searches': box.queries, 'demande': box.demande, 'liens': box.liens,
+            'signalement': box.signalement or None,
             'calls': client.calls, 'cost_eur': round(client.eur, 4), 's': round(time.time() - started, 1)}
 
 

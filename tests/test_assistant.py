@@ -773,3 +773,30 @@ class SignalementsTest(unittest.TestCase):
         self.G.admin('sig_afficher', ref, '')
         self.G.admin('sig_relu', ref, '')
         self.assertTrue(self.G.published()[0]['relu'])
+
+
+class RemplirSignalementTest(unittest.TestCase):
+    """The Loupe fills the form of signalements.html live (remplir_signalement): cleaned fields, one event per call."""
+
+    def test_fields_are_cleaned(self):
+        f = T.signalement_fields({'titre': '**Une piscine à 500 M€**\nsuite', 'siren': '123 456 789', 'montant': '',
+                                  'liens': 'voir https://a.fr/x. et https://a.fr/x puis https://b.fr/y)', 'autre': 'x'})
+        self.assertEqual(f['titre'], 'Une piscine à 500 M€')
+        self.assertEqual(f['siren'], '123456789')
+        self.assertEqual(f['liens'], 'https://a.fr/x\nhttps://b.fr/y')
+        self.assertNotIn('montant', f)
+        self.assertNotIn('autre', f)
+
+    def test_fake_report_fills_in_two_calls(self):
+        from assistant import fake
+        from assistant.agent import answer
+        fake.install()
+        fake.FakeClient._wait = lambda self, lo=0, hi=0: None
+        events = []
+        res = answer([{'role': 'user', 'text': 'Prépare un signalement citoyen à partir de ma piste : « 500 000 000 € pour '
+                                                  'une piscine à Rennes, ça fait beaucoup non ? »'}], 'gemini', events.append)
+        fills = [e['champs'] for e in events if e['type'] == 'signalement']
+        self.assertEqual(len(fills), 2)
+        self.assertEqual(fills[0].get('lieu'), 'Rennes')
+        self.assertIn('description', fills[1])
+        self.assertEqual(set(res['signalement']), {'titre', 'lieu', 'montant', 'description', 'questions', 'liens'})

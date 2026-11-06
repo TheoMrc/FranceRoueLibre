@@ -84,37 +84,42 @@
   </header>
 
   <main id="top">
-    <section class="hero hero--page">
+    <section class="hero hero--page sg-hero">
       <div class="hero__bg" aria-hidden="true"></div>
       <div class="container"><div class="hero__inner">
         <span class="eyebrow">Contrôle citoyen</span>
         <h1>Un truc qui cloche ? <span class="gradient-text">Faites-le remonter.</span></h1>
-        <p class="hero__lead">Une association très subventionnée, une piscine à 500 millions, un marché qui n’a pas de sens : décrivez-le, sources à l’appui. Tout ce qui remonte est visible par tous, marqué « non relu » jusqu’à notre relecture. Le but : surveiller ensemble <strong>notre</strong> argent, de plus près que ceux qui le dépensent.</p>
-        <div class="sg-hero-actions"><a class="btn btn--primary" href="#signaler">Documenter un cas suspect</a><a class="btn btn--ghost" href="#sgListTitle">Tableau de bord des remontées</a><a class="btn btn--ghost" href="#charte">Lire les règles du jeu</a></div>
+        <figure class="hero__quote sg-quote">
+          <blockquote>« Le but unique de cette page est de permettre un effort collectif de remontée de l'information — pas une délation généralisée, mais une gestion mieux contrôlée et supervisée de <strong>notre argent</strong>, car les politiques en sont incapables. »</blockquote>
+          <figcaption>Un data scientist avec trop de temps libre</figcaption>
+        </figure>
+        <p class="hero__search-hint sg-jump">Directement : <a href="#signaler">documenter un cas suspect</a> · <a href="#sgListTitle">le tableau de bord des remontées</a> · <a href="#charte">les règles du jeu</a></p>
       </div></div>
     </section>
 
     <section class="section" id="charte" aria-labelledby="sgCharteTitle">
       <div class="container">
-        <div class="section__head"><span class="eyebrow">Les règles du jeu</span><h2 id="sgCharteTitle">Des faits, pas des cibles.</h2><p class="lead">Cette page sert une seule chose : faire remonter, ensemble, l’information sur l’argent public, pour qu’il soit mieux contrôlé et mieux suivi, puisque les responsables politiques n’y arrivent pas seuls. Ce n’est pas un tribunal, ni une machine à délation.</p></div>
-        <div class="sg-rules">
-          <div class="sg-rule"><span class="sg-rule__ico" data-ico="paper" aria-hidden="true"></span><h3>Une dépense, des sources</h3><p>Visez une dépense, un marché, une subvention, un organisme. Donnez le lien du site, du journal officiel, de la délibération : sans source, un signalement reste une rumeur.</p></div>
-          <div class="sg-rule"><span class="sg-rule__ico" data-ico="heart" aria-hidden="true"></span><h3>Zéro insulte</h3><p>Un message injurieux est refusé d’office. La colère se comprend, mais les chiffres frappent plus fort que les gros mots.</p></div>
-          <div class="sg-rule"><span class="sg-rule__ico" data-ico="justice" aria-hidden="true"></span><h3>Attention à la diffamation</h3><p>Accuser une personne nommée d’un fait précis sans pouvoir le prouver est un délit (loi du 29 juillet 1881 sur la liberté de la presse). Restez au conditionnel, décrivez ce que montrent les documents, posez des questions.</p></div>
-          <div class="sg-rule"><span class="sg-rule__ico" data-ico="people" aria-hidden="true"></span><h3>Pas de vie privée</h3><p>Pas d’adresse, de téléphone, de santé, de famille : seuls comptent l’argent public et les fonctions publiques. Ce qui touche à la vie privée est retiré à la relecture.</p></div>
-          <div class="sg-rule"><span class="sg-rule__ico" data-ico="search" aria-hidden="true"></span><h3>Visible par tous, puis relu</h3><p>Votre signalement est en ligne dès l’envoi, marqué « non relu ». Le site le relit, peut le raccourcir, l’anonymiser ou le masquer, et peut écrire à l’organisme concerné (page <a href="demandes.html">Demandes aux instances publiques</a>). Chacun peut signaler un abus : trois alertes le masquent jusqu’à la relecture.</p></div>
-          <div class="sg-rule"><span class="sg-rule__ico" data-ico="police" aria-hidden="true"></span><h3>Un fait grave ? La justice</h3><p>Corruption, favoritisme, détournement : un signalement ici ne remplace pas une plainte. Le procureur de la République et l’Agence française anticorruption sont là pour ça.</p></div>
-        </div>
+        <div class="section__head"><span class="eyebrow">Avant d’écrire</span><h2 id="sgCharteTitle">Les règles du jeu : <span class="gradient-text">traquer les faits « étranges », pas les personnes.</span></h2></div>
+        <ol class="sg-rules">
+          <li><h3>Un fait « étrange », des sources</h3><p>Vous tombez sur une dépense disproportionnée, un marché public bizarre, une subvention curieuse ou un organisme (SIREN) qui soulève des questions ? Appuyez chaque remontée par des pièces vérifiables : lien interne FranceRoueLibre, délibération municipale, Journal Officiel, rapport de la Chambre régionale des comptes ou article de presse sourcé. Sans source, un signalement reste une rumeur.</p></li>
+          <li><h3>Zéro insulte, les chiffres parlent d'eux-mêmes</h3><p>Tout message contenant des insultes est refusé d'office. La colère est légitime quand il s'agit de nos impôts, mais démontrer par A + B qu'il se passe quelque chose d'« étrange » avec nos thunes est infiniment plus efficace qu'une invective.</p></li>
+          <li><h3>Attention à la diffamation</h3><p>Accuser frontalement une personne physique ou morale d'un délit sans preuve judiciaire constitue de la diffamation (loi du 29 juillet 1881). Pointez les faits « étranges » qui ressortent des documents publics, restez au conditionnel et posez les questions qui fâchent (<em>ex : « 500 000 000 € pour une piscine, ça fait beaucoup non ? »</em>).</p></li>
+          <li><h3>Strict respect de la vie privée</h3><p>Aucune donnée personnelle (adresse privée, numéro de téléphone, vie familiale, état de santé) n'a sa place ici. Seuls l'argent public, les structures subventionnées et l'exercice des fonctions publiques nous intéressent. Tout élément touchant à la vie privée est supprimé.</p></li>
+          <li><h3>Visible par tous, relu et vérifié</h3><p>Votre remontée s'affiche dès l'envoi avec la mention <strong>« Non relu »</strong>. Elle est ensuite vérifiée pour contrôler les sources, couper d'éventuels dérapages et, si le cas est solide, envoyer une demande officielle à l'administration concernée (via la page <a href="demandes.html"><em>Demandes aux instances publiques</em></a>). Tout lecteur peut signaler un abus : trois alertes masquent la publication jusqu'à relecture.</p></li>
+          <li><h3>Face à un délit caractérisé : la justice</h3><p>Cette page sert à documenter des faits « étranges » dans les comptes publics, ce n'est pas un tribunal. Pour des faits avérés de corruption, de prise illégale d'intérêts, de favoritisme ou de détournement de fonds publics, la voie légale reste le signalement au Procureur de la République (art. 40) ou au Parquet National Financier (PNF).</p></li>
+        </ol>
       </div>
     </section>
 
     <section class="section section--alt" id="signaler" aria-labelledby="sgFormTitle" data-full>
       <div class="container">
-        <div class="section__head"><span class="eyebrow">Documenter un cas suspect</span><h2 id="sgFormTitle">Ce qui interroge, en quelques lignes</h2><p class="lead">Écrivez vous-même, ou laissez la Loupe préparer le dossier : elle cherche dans les données du site et sur le web, puis remplit le formulaire. Vous relisez, corrigez, envoyez : c’est visible par tous, sauf si vous choisissez de ne l’envoyer qu’à FranceRoueLibre.</p></div>
-        <div class="sg-loupe">
-          <label for="sgIdea"><strong>Votre piste, en une ou deux phrases</strong><span>Exemple : « 500 000 000 € pour une piscine, ça fait beaucoup non ? » ou « Ce SIREN reçoit beaucoup de subventions, qui le dirige ? »</span></label>
+        <div class="section__head"><span class="eyebrow">Documenter un cas suspect</span><h2 id="sgFormTitle">Ce qui interroge, en quelques lignes</h2><p class="lead">Écrivez vous-même, ou laissez la Loupe pré-écrire et sourcer le dossier. Vous relisez, corrigez et envoyez : c’est visible par tous, sauf si vous choisissez de ne l’envoyer qu’à FranceRoueLibre.</p></div>
+        <div class="sg-loupe" id="sgLoupe">
+          <div class="sg-loupe__head"><svg class="sg-logo" viewBox="0 0 48 48" fill="none" aria-hidden="true"><defs><linearGradient id="sgLoupeGrad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#0e7490"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><path class="l-bubble" d="M24 4L41 14V34L24 44L16.5 39.6L6 45.5L10.8 36.2L7 34V14Z"/><g class="l-lens"><circle cx="22" cy="21" r="8.5"/><path d="M28.3 27.3L33.3 32.3"/></g><path class="l-spark" d="M22 15.6Q22.8 20.2 27.4 21Q22.8 21.8 22 26.4Q21.2 21.8 16.6 21Q21.2 20.2 22 15.6Z"/></svg><label for="sgIdea"><strong>Votre piste, en une ou deux phrases</strong><span>La Loupe fouille les données du site et le web, puis remplit le dossier sous vos yeux.</span></label></div>
+          <div class="sg-examples" aria-label="Exemples de pistes"><button type="button" data-idea="Ce SIREN est une asso tenue par un proche du pouvoir et est très subventionnée...">Exemple 1 : « Ce SIREN est une asso tenue par un proche du pouvoir et est très subventionnée... »</button><button type="button" data-idea="500 000 000 € pour une piscine ça fait beaucoup non ?">Exemple 2 : « 500 000 000 € pour une piscine ça fait beaucoup non ? »</button></div>
           <textarea id="sgIdea" rows="2" maxlength="600" placeholder="Ce qui vous a fait tiquer…"></textarea>
-          <div class="sg-loupe__row"><button type="button" class="btn btn--primary" id="sgDraft">Préparer le dossier avec la Loupe</button><span class="sg-loupe__state" id="sgDraftState" aria-live="polite"></span></div>
+          <div class="sg-loupe__row"><button type="button" class="btn btn--primary" id="sgDraft">Pré-écrire et sourcer le dossier avec La Loupe</button><span class="sg-loupe__state" id="sgDraftState" aria-live="polite"></span></div>
+          <div class="sg-live" id="sgLive" hidden><div class="sg-live__now"><span class="sg-dots" aria-hidden="true"><i></i><i></i><i></i></span><span id="sgLiveNow">La Loupe réfléchit</span><button type="button" class="sg-live__stop" id="sgStop">Arrêter</button></div><ol class="sg-live__steps" id="sgLiveSteps"></ol></div>
         </div>
         <form class="sg-form" id="sgForm" novalidate>
           <div class="sg-grid">
@@ -123,7 +128,7 @@
             <label class="sg-field"><span>SIREN ou SIRET <em>facultatif</em></span><input name="siren" inputmode="numeric" maxlength="20" placeholder="9 ou 14 chiffres"></label>
             <label class="sg-field"><span>Commune ou territoire <em>facultatif</em></span><input name="lieu" maxlength="120"></label>
             <label class="sg-field"><span>Montant <em>facultatif</em></span><input name="montant" maxlength="40" placeholder="500 000 000 €"></label>
-            <label class="sg-field"><span>Votre e-mail <em>facultatif, jamais publié</em></span><input name="email" type="email" maxlength="160" autocomplete="email"></label>
+            <label class="sg-field sg-field--free"><span>Votre e-mail <em>facultatif, jamais publié</em></span><input name="email" type="email" maxlength="160" autocomplete="email"></label>
             <label class="sg-field sg-field--wide"><span>Sources <em>un lien par ligne : pages du site, documents officiels, articles</em></span><textarea name="liens" rows="4" placeholder="https://francerouelibre.fr/recherche.html?q=…"></textarea></label>
             <label class="sg-hp" aria-hidden="true">Ne pas remplir<input name="site" tabindex="-1" autocomplete="off"></label>
           </div>

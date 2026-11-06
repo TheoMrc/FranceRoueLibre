@@ -172,6 +172,25 @@ DECLARATIONS: List[dict] = [
      'parameters': {'type': 'OBJECT', 'properties': {'url': {'type': 'STRING', 'description': 'Adresse https complète'},
                                                      'question': {'type': 'STRING', 'description': 'Ce qu’il faut y trouver'}},
                     'required': ['url', 'question']}},
+    {'name': 'remplir_signalement',
+     'description': 'Remplit, en direct sous les yeux du lecteur, le formulaire de la page Remontées citoyennes '
+                    '(signalements.html), seulement quand il demande de préparer un signalement. Appelle-le une première '
+                    'fois dès le début, en même temps que ta première recherche, avec le titre et le lieu que tu peux '
+                    'déjà déduire de sa piste (et le montant s’il le donne) ; puis une dernière fois, après les '
+                    'recherches, avec le dossier complet. Chaque appel ne remplace que les champs donnés. Ton sobre et '
+                    'vérifiable : faits et montants sourcés, conditionnel pour ce qui n’est pas établi, aucune '
+                    'accusation contre une personne nommée sans source publique, ni vie privée ni insulte.',
+     'parameters': {'type': 'OBJECT', 'properties': {
+         'titre': {'type': 'STRING', 'description': 'Une ligne factuelle, sans accusation (140 caractères au plus), '
+                                                    'ex. « Un centre aquatique à 500 M€ à Exempleville »'},
+         'lieu': {'type': 'STRING', 'description': 'Commune ou territoire concerné, ex. « Rennes (Ille-et-Vilaine) »'},
+         'montant': {'type': 'STRING', 'description': 'Montant en jeu, ex. « 500 000 000 € »'},
+         'siren': {'type': 'STRING', 'description': 'SIREN (9 chiffres) ou SIRET de l’organisme, s’il est identifié'},
+         'description': {'type': 'STRING', 'description': 'Ce qui interroge : les faits et montants trouvés, avec leur '
+                                                          'année et leur source, en paragraphes courts'},
+         'questions': {'type': 'STRING', 'description': 'Les questions à poser à l’organisme, une par ligne'},
+         'liens': {'type': 'STRING', 'description': 'Les sources, une adresse https par ligne : pages du site d’abord, '
+                                                    'puis documents officiels et articles trouvés sur le web'}}}},
     {'name': 'recherche_web',
      'description': 'Recherche sur le web (actualité, textes de loi, rapports, contexte absent des données du site). '
                     'Renvoie une synthèse et ses sources. Seulement pour une question sur l’argent public que les '
@@ -792,6 +811,33 @@ def lire_donnees(fichier: str, chemin: str = '', filtre: str = '', debut: int = 
     return clip({'fichier': rel, 'chemin': '.'.join(walked), 'valeur': node})
 
 
+SIGNAL_LIMITS = {'titre': 140, 'lieu': 120, 'montant': 40, 'siren': 20, 'description': 5000, 'questions': 1500,
+                 'liens': 3000}
+
+
+def signalement_fields(args: dict) -> dict:
+    """The fields of remplir_signalement, cleaned and bounded (what the page writes into its form)."""
+    out = {}
+    for key, limit in SIGNAL_LIMITS.items():
+        value = args.get(key)
+        if isinstance(value, list):
+            value = '\n'.join(str(v) for v in value)
+        value = str(value or '').strip()
+        if not value:
+            continue
+        if key == 'liens':
+            urls = re.findall(r'https?://[^\s<>"\])]+', value)
+            value = '\n'.join(dict.fromkeys(u.rstrip('.,;') for u in urls))
+        elif key == 'siren':
+            m = re.search(r'\d{9}(\d{5})?', value.replace(' ', ''))
+            value = m.group(0) if m else ''
+        elif key in ('titre', 'lieu', 'montant'):
+            value = value.splitlines()[0].strip(' *#-')
+        if value:
+            out[key] = value[:limit]
+    return out
+
+
 # =========================================================================================== dispatch
 class Toolbox:
     def __init__(self, client):
@@ -803,6 +849,7 @@ class Toolbox:
         self.liens: Optional[dict] = None    # the levels of the commune asked about, shown as buttons (places.links)
         self.web = 0                         # web searches made for this question (one at most: they cost the most)
         self.pages = 0                       # pages read for this question (two at most)
+        self.signalement: dict = {}          # the report form filled by remplir_signalement (signalements.html)
 
     def call(self, name: str, args: dict) -> dict:
         args = args if isinstance(args, dict) else {}
@@ -844,6 +891,13 @@ class Toolbox:
                 if res.get('demande'):
                     self.demande = res['demande']
                 return res
+            if name == 'remplir_signalement':
+                fields = signalement_fields(args)
+                if not fields:
+                    return {'error': 'aucun champ rempli'}
+                self.signalement.update(fields)
+                return {'ok': True, 'champs_remplis': sorted(self.signalement),
+                        'suite': 'continue tes recherches, ou, si le dossier est complet, réponds en deux phrases au lecteur'}
             if name == 'lire_donnees':
                 return lire_donnees(args.get('fichier', ''), args.get('chemin') or '', args.get('filtre') or '',
                                     args.get('debut') or 0, args.get('limite') or 20)

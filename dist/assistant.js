@@ -180,7 +180,7 @@
   function userEl(m) {
     const el = document.createElement('div');
     el.className = 'ai-msg ai-msg--user';
-    el.innerHTML = `<div class="ai-bubble">${esc(m.text).replace(/\n/g, '<br>')}</div>`;
+    el.innerHTML = `<div class="ai-bubble">${esc(m.shown || m.text).replace(/\n/g, '<br>')}</div>`;
     return el;
   }
   /* One answer. Built once, then updated piece by piece while it runs, so the animations are not restarted. */
@@ -421,7 +421,9 @@
     send.innerHTML = on ? ICON.stop : ICON.send;
     modelBtn.disabled = on;
   }
-  async function ask(text, pre) {   // pre: the reply of an ask already sent (FRLLoupe.ask with free)
+  /* hooks (FRLLoupe.ask from a page, e.g. signalements.js): shown, the text shown instead of the question sent;
+     onEvent(ev) for each event of the job, onDone(message) once it is over (also on an error) */
+  async function ask(text, pre, hooks = null) {   // pre: the reply of an ask already sent (FRLLoupe.ask with free)
     text = text.trim();
     if (!text || busy) return;
     const limit = status?.limits?.question_chars || 1500;
@@ -431,8 +433,9 @@
     if (intro) intro.remove();
     const history = c.messages.filter(m => !m.error && m.text).map(m => ({ role: m.role, text: m.text }));
     history.push({ role: 'user', text });
-    c.messages.push({ role: 'user', text }); c.updated = Date.now(); saveStore();
-    log.appendChild(userEl({ text }));
+    const shown = hooks?.shown ? String(hooks.shown) : undefined;
+    c.messages.push({ role: 'user', text, shown }); c.updated = Date.now(); saveStore();
+    log.appendChild(userEl({ text, shown }));
     send.classList.add('is-sent');
     setTimeout(() => send.classList.remove('is-sent'), 450);
     input.value = ''; autosize();
@@ -466,7 +469,9 @@
         const line = j.queue ? (j.queue === 1 ? 'Vous êtes le prochain dans la file' : `File d’attente : ${j.queue - 1} question${j.queue > 2 ? 's' : ''} avant la vôtre`) : '';
         if (line !== queued) { if (line || queued) v.think(line || 'Réflexion'); queued = line; }
         const was = nearBottom();
+        if (j.queue) hooks?.onEvent?.({ type: 'queue', place: j.queue });
         for (const ev of j.events) {
+          try { hooks?.onEvent?.(ev); } catch (e) { /* the page's own problem */ }
           if (ev.type === 'model') { m.provider = ev.provider; m.label = ev.label; v.provider(ev.provider); }
           if (ev.type === 'think') v.think(m.steps.length ? 'Analyse des résultats' : 'Réflexion');
           if (ev.type === 'tool_start') { const s = { label: ev.label }; m.steps.push(s); v.think(null); v.step(s, true); }
@@ -480,7 +485,7 @@
         if (j.done) {
           const res = j.result || {};
           if (res.credits === false) { m.donate = res.donate; noCredits(res); }
-          Object.assign(m, { text: res.reply || '', error: res.error || '', sources: res.sources || [], searches: res.searches || [], demande: res.demande || null, liens: res.liens || null,
+          Object.assign(m, { text: res.reply || '', error: res.error || '', sources: res.sources || [], searches: res.searches || [], demande: res.demande || null, liens: res.liens || null, signalement: res.signalement || null,
             label: res.label || m.label, provider: res.provider || m.provider, s: res.s });
           break;
         }
@@ -491,6 +496,7 @@
     m.running = false;
     m.steps.forEach(s => { if (!s.done) Object.assign(s, { done: true, ok: false }); });
     v.think(null);
+    try { hooks?.onDone?.(m); } catch (e) { /* the page's own problem */ }
     if (!m.error) await v.type(m.text, m.provider === 'faq' || panel.hidden);
     v.finish();
     if (m.error) v.el.classList.add('has-error');
@@ -667,8 +673,10 @@
         }
         // background: the answer is prepared with the panel closed, and announced on the logo (notifyAnswer)
         if (opts.background) quietAsk = true; else openPanel(true);
-        store.current = null; showHistory(false); renderLog(); ask(t, pre); return true;
+        store.current = null; showHistory(false); renderLog(); ask(t, pre, opts.hooks || null); return true;
       },
+      busy: () => !!busy,
+      stop() { if (busy?.job) fetch(`${API}job/${busy.job}/cancel`, { method: 'POST' }).catch(() => {}); },
       /* the summary a page opens by itself (a commune, a département, a SIREN searched): once per question and tab,
          never over a conversation already open; on a phone it is prepared closed and announced by the badge */
       auto(text) {

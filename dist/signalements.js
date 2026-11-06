@@ -144,79 +144,211 @@
   }
 
   /* ------------------------------------------------------------------ filling the form */
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const flash = el => { const box = el.closest('.sg-field'); if (box) { box.classList.remove('is-filled'); void box.offsetWidth; box.classList.add('is-filled'); } };
   function fill(fields) {
     for (const [k, v] of Object.entries(fields)) {
       if (!v || !form[k]) continue;
       form[k].value = Array.isArray(v) ? v.join('\n') : v;
-      const box = form[k].closest('.sg-field');
-      if (box) { box.classList.remove('is-filled'); void box.offsetWidth; box.classList.add('is-filled'); }
+      flash(form[k]);
     }
     count();
   }
-  /* The Loupe's draft: « ### Titre », « ### Ce qui interroge », « ### Sources sur le site », « ### Sources web »,
-     « ### Questions à poser », « ### SIREN », « ### Lieu », « ### Montant » (only what it found). */
-  function parseDraft(text, sources) {
+  /* The Loupe writes into the form as it goes (remplir_signalement, one event per call): one field after the other,
+     typed, so the reader sees the dossier take shape. */
+  const typing = { queue: [], running: null };
+  function typeInto(name, text) {
+    typing.queue.push([name, String(text)]);
+    if (!typing.running) typing.running = drain();
+    return typing.running;
+  }
+  async function drain() {
+    while (typing.queue.length) {
+      const [name, text] = typing.queue.shift();
+      const el = form[name];
+      if (!el) continue;
+      const box = el.closest('.sg-field');
+      const from = text.startsWith(el.value) ? el.value.length : 0;
+      if (!from) el.value = '';
+      box?.classList.add('is-typing');
+      box?.scrollIntoView?.({ block: 'nearest', behavior: reduce.matches ? 'auto' : 'smooth' });
+      const rest = text.length - from, steps = reduce.matches ? 1 : Math.min(60, Math.max(8, Math.ceil(rest / 6)));
+      for (let i = 1; i <= steps; i++) {
+        el.value = text.slice(0, from + Math.round(rest * i / steps));
+        if (el.tagName === 'TEXTAREA') el.scrollTop = el.scrollHeight;
+        if (name === 'description') count();
+        await new Promise(ok => setTimeout(ok, reduce.matches ? 0 : 18));
+      }
+      box?.classList.remove('is-typing');
+      flash(el);
+    }
+    typing.running = null;
+  }
+  const draftState = {};
+  const descOf = d => [d.description, d.questions && `Questions à poser :\n${d.questions}`].filter(Boolean).join('\n\n');
+  function applyDraft(champs, sources) {
+    const before = descOf(draftState);
+    Object.assign(draftState, champs || {});
+    for (const k of ['titre', 'lieu', 'montant', 'siren']) if (champs?.[k]) typeInto(k, champs[k]);
+    const desc = descOf(draftState);
+    if (desc && desc !== before) typeInto('description', desc);
+    const links = [...new Set([...String(draftState.liens || '').split('\n'), ...(sources || []).map(s => s?.url)].map(u => (u || '').trim()).filter(u => /^https?:\/\//.test(u)))];
+    if (links.length && links.join('\n') !== form.liens.value) typeInto('liens', links.slice(0, 12).join('\n'));
+  }
+  /* A Loupe that answered in text without filling the form: « ### Titre », « ### Ce qui interroge »… (or « **Titre :** … ») */
+  function parseDraft(text) {
     const parts = {};
     let key = null;
     for (const line of String(text || '').split('\n')) {
-      const h = line.match(/^#{2,4}\s*(.+?)\s*:?\s*$/) || line.match(/^\*\*(.+?)\*\*\s*:?\s*$/);
-      if (h) { key = h[1].toLowerCase(); parts[key] = []; continue; }
+      const h = line.match(/^\s*(?:#{2,4}\s*|\*\*)([^*:#]{2,40}?)\s*(?:\*\*)?\s*:?\s*(?:\*\*)?\s*:?\s*(.*)$/);
+      if (h && /titre|interroge|constat|faits|questions?|siren|lieu|commune|territoire|montant|sources?/i.test(h[1]) && (line.trim().startsWith('#') || line.trim().startsWith('**'))) {
+        key = h[1].toLowerCase(); parts[key] = h[2] ? [h[2].replace(/\*\*/g, '')] : []; continue;
+      }
       if (key) parts[key].push(line);
     }
     const get = re => { const k = Object.keys(parts).find(x => re.test(x)); return k ? parts[k].join('\n').trim() : ''; };
-    const links = new Set();
-    const addLinks = s => (s.match(/https?:\/\/[^\s)\]>"]+/g) || []).forEach(u => links.add(u.replace(/[.,;]+$/, '')));
-    const site = new URL('.', location.href).href;
-    addLinks(get(/sources?/));
-    String(get(/sources? sur le site/)).replace(/\]\(([^)]+)\)/g, (m, u) => { links.add(new URL(u, site).href); return m; });
-    (sources || []).forEach(s => s?.url && links.add(s.url));
     const strip = s => s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)').replace(/\*\*/g, '');
-    const desc = [get(/interroge|constat|faits|description/), get(/questions?/) && `Questions à poser :\n${get(/questions?/)}`].filter(Boolean).map(strip).join('\n\n');
-    return { titre: strip(get(/^titre/)).split('\n')[0].replace(/^[-•]\s*/, ''), description: desc, siren: (get(/siren/).match(/\d{9}(\d{5})?/) || [''])[0],
-      lieu: strip(get(/lieu|commune|territoire/)).split('\n')[0], montant: strip(get(/montant/)).split('\n')[0], liens: [...links].slice(0, 12) };
+    const first = s => strip(s).split('\n').map(x => x.replace(/^[-•\s]+/, '').trim()).find(Boolean) || '';
+    const site = new URL('.', location.href).href, links = [];
+    for (const k of Object.keys(parts).filter(x => /sources?/.test(x))) {
+      const t = parts[k].join('\n');
+      t.replace(/\]\(([^)]+)\)/g, (m, u) => { try { links.push(new URL(u, site).href); } catch (e) { /* not a link */ } return m; });
+      (t.match(/https?:\/\/[^\s)\]>"]+/g) || []).forEach(u => links.push(u.replace(/[.,;]+$/, '')));
+    }
+    return { titre: first(get(/^titre/)), description: strip(get(/interroge|constat|faits/)), questions: strip(get(/questions?/)),
+      siren: (get(/siren/).match(/\d{9}(\d{5})?/) || [''])[0], lieu: first(get(/lieu|commune|territoire/)), montant: first(get(/montant/)),
+      liens: [...new Set(links)].join('\n') };
   }
-  const PROMPT = idea => `Aide-moi à préparer un signalement citoyen sur une dépense publique, sobre et vérifiable, à partir de ma piste : « ${idea} ».
-Cherche dans les données du site et, si utile, sur le web. Réponds uniquement avec ces rubriques, dans cet ordre, en titres « ### » :
-### Titre (une ligne factuelle, sans accusation)
-### Ce qui interroge (les faits et montants trouvés, sourcés ; le conditionnel pour ce qui n'est pas établi ; aucune accusation contre une personne nommée sans source publique ; pas de vie privée)
-### Questions à poser (à l'organisme concerné)
-### SIREN (si un organisme est identifié)
-### Lieu (commune ou territoire, si pertinent)
-### Montant (si pertinent)
-### Sources sur le site (liens)
-### Sources web (liens)`;
-  async function draft() {
-    const idea = $('sgIdea').value.trim();
-    const st = $('sgDraftState');
-    if (idea.length < 8) { st.className = 'sg-loupe__state is-error'; st.textContent = 'Décrivez votre piste en une phrase.'; return; }
-    $('sgDraft').disabled = true;
-    st.className = 'sg-loupe__state'; st.textContent = 'La Loupe cherche dans les données…';
+
+  /* ------------------------------------------------------------------ the Loupe at work */
+  const PROMPT = idea => `Je suis sur la page Remontées citoyennes. Prépare un signalement citoyen à partir de ma piste : « ${idea} ». `
+    + 'Remplis le formulaire avec remplir_signalement : le titre, le lieu et le montant dès ta première étape, puis le dossier complet '
+    + '(faits sourcés, questions à poser, sources du site et du web), en cherchant dans les données du site et, si utile, sur le web.';
+  const card = $('sgLoupe'), live = $('sgLive'), liveNow = $('sgLiveNow'), liveSteps = $('sgLiveSteps'), st = $('sgDraftState');
+  const lockable = () => [...form.querySelectorAll('input, textarea, button')].filter(el => el.name !== 'email' && el.name !== 'site');
+  function lock(on) {
+    form.classList.toggle('is-locked', on);
+    form.setAttribute('aria-busy', String(on));
+    for (const el of lockable()) {
+      if (el.type === 'checkbox' || el.tagName === 'BUTTON') el.disabled = on || (el === send && !(state.human && form.charte.checked));
+      else el.readOnly = on;
+    }
+    card.classList.toggle('is-working', on);
+    $('sgIdea').readOnly = on;
+    card.querySelectorAll('.sg-examples button').forEach(b => { b.disabled = on; });
+    $('sgDraft').disabled = on;
+    if (!on) update();
+  }
+  function now(text) { liveNow.textContent = text; }
+  function stepEl(label, fill) {
+    const li = document.createElement('li');
+    li.textContent = label;
+    if (fill) li.classList.add('is-fill');
+    liveSteps.appendChild(li);
+    return li;
+  }
+  const NAMES = { titre: 'titre', lieu: 'lieu', montant: 'montant', siren: 'SIREN', description: 'faits', questions: 'questions', liens: 'sources' };
+  function hooks(idea, done) {
+    let lastStep = null, tools = 0;
+    return {
+      shown: `Préparer un signalement : « ${idea} »`,
+      onEvent(ev) {
+        if (ev.type === 'queue') now(ev.place === 1 ? 'Vous êtes le prochain dans la file' : `File d’attente : ${ev.place - 1} question(s) avant la vôtre`);
+        if (ev.type === 'model') now(`La Loupe se met au travail${ev.label ? ` (${ev.label})` : ''}`);
+        if (ev.type === 'think') now(tools ? 'La Loupe analyse les résultats' : 'La Loupe réfléchit');
+        if (ev.type === 'tool_start') { tools++; lastStep = stepEl(ev.label || 'Recherche', ev.name === 'remplir_signalement'); now(ev.name === 'remplir_signalement' ? 'La Loupe écrit le dossier' : `La Loupe cherche : ${ev.label || 'données'}`); }
+        if (ev.type === 'tool_done' && lastStep) {
+          lastStep.classList.add(ev.ok === false ? 'is-fail' : 'is-done');
+          if (ev.summary) lastStep.insertAdjacentHTML('beforeend', `<small>${esc(ev.summary)}</small>`);
+        }
+        if (ev.type === 'signalement') {
+          const names = Object.keys(ev.champs || {}).map(k => NAMES[k]).filter(Boolean);
+          if (lastStep && names.length) lastStep.firstChild.textContent = `Remplit le dossier : ${names.join(', ')}`;
+          card.classList.add('is-writing');
+          applyDraft(ev.champs);
+        }
+        if (ev.type === 'switch') stepEl(`Relais : ${ev.to === 'claude' ? 'Claude' : 'Gemini'} reprend la question`);
+      },
+      async onDone(m) {
+        card.classList.remove('is-writing');
+        if (!m.error) {
+          if (!Object.keys(draftState).length) applyDraft(Object.fromEntries(Object.entries(m.signalement || parseDraft(m.text)).filter(([, v]) => v)), m.sources);
+          else applyDraft({}, m.sources);
+        }
+        await (typing.running || Promise.resolve());
+        done(m);
+      },
+    };
+  }
+  /* Without the Loupe's panel on the page (its script not loaded yet): the same job, polled here. */
+  async function direct(prompt, h) {
+    const m = { text: '', error: '', sources: [], signalement: null };
     try {
-      const r = await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', text: PROMPT(idea) }] }) });
-      const d = await r.json();
+      const r = await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', text: prompt }] }) });
+      const d = await r.json().catch(() => ({}));
       if (!d.job) throw new Error(d.error || 'La Loupe ne peut pas répondre pour l’instant.');
-      let after = 0, steps = 0;
-      for (;;) {
-        await new Promise(ok => setTimeout(ok, 1200));
+      direct.job = d.job;
+      for (let after = 0; ;) {
+        await new Promise(ok => setTimeout(ok, 800));
         const j = await (await fetch(`${API}job/${d.job}?after=${after}`, { cache: 'no-store' })).json();
         after = j.next ?? after;
-        for (const ev of j.events || []) if (ev.type === 'tool_start') { steps++; st.textContent = `La Loupe cherche : ${ev.label || 'données'}… (${steps})`; }
-        if (j.queue) st.textContent = `La Loupe est très demandée : vous êtes ${j.queue}e dans la file…`;
-        if (j.done) {
-          if (j.result?.error) throw new Error(j.result.error);
-          fill(parseDraft(j.result?.reply, j.result?.sources));
-          state.loupe = true;
-          st.textContent = 'Dossier prérempli : relisez, corrigez, puis envoyez.';
-          form.titre.focus();
-          break;
-        }
+        if (j.queue) h.onEvent({ type: 'queue', place: j.queue });
+        (j.events || []).forEach(ev => h.onEvent(ev));
+        if (j.done) { Object.assign(m, { text: j.result?.reply || '', error: j.result?.error || '', sources: j.result?.sources || [], signalement: j.result?.signalement || null }); break; }
       }
-    } catch (e) {
+    } catch (e) { m.error = e.message || 'La Loupe ne répond pas.'; }
+    direct.job = null;
+    await h.onDone(m);
+  }
+  /* Wide screens: the Loupe's panel opens on the right, the form moves aside so both stay visible. */
+  const wide = matchMedia('(min-width: 1000px)');
+  function sideBySide() {
+    const panel = document.querySelector('.ai-panel');
+    if (!wide.matches || !panel) return;
+    document.body.classList.add('sg-side');
+    const off = new MutationObserver(() => { if (panel.hidden) { document.body.classList.remove('sg-side'); off.disconnect(); } });
+    off.observe(panel, { attributes: true, attributeFilter: ['hidden'] });
+  }
+  async function draft() {
+    const idea = $('sgIdea').value.trim();
+    if (idea.length < 8) { st.className = 'sg-loupe__state is-error'; st.textContent = 'Décrivez votre piste en une phrase.'; $('sgIdea').focus(); return; }
+    if (window.FRLLoupe?.busy?.()) { st.className = 'sg-loupe__state is-error'; st.textContent = 'La Loupe répond déjà à une question : attendez la fin, ou arrêtez-la.'; return; }
+    for (const k of Object.keys(draftState)) delete draftState[k];
+    st.className = 'sg-loupe__state'; st.textContent = '';
+    liveSteps.innerHTML = ''; live.hidden = false; live.classList.remove('is-done');
+    now('La Loupe réfléchit');
+    lock(true);
+    card.scrollIntoView({ behavior: reduce.matches ? 'auto' : 'smooth', block: 'start' });
+    const finished = new Promise(ok => {
+      const h = hooks(idea, ok);
+      const opened = window.FRLLoupe?.ask && window.FRLLoupe.ask(PROMPT(idea), { hooks: h, background: !wide.matches });
+      Promise.resolve(opened).then(started => { if (started) sideBySide(); else direct(PROMPT(idea), h); });
+    });
+    const m = await finished;
+    lock(false);
+    live.classList.add('is-done');
+    if (m.error) {
+      now('La Loupe s’est arrêtée');
       st.className = 'sg-loupe__state is-error';
-      st.textContent = e.message || 'La Loupe ne répond pas pour l’instant : remplissez le formulaire vous-même.';
-    } finally { $('sgDraft').disabled = false; }
+      st.textContent = `${m.error} Ce qui est déjà écrit reste dans le formulaire : complétez-le vous-même.`;
+    } else {
+      state.loupe = true;
+      now('Dossier prérempli : relisez, corrigez, puis envoyez');
+      form.titre.focus({ preventScroll: true });
+    }
   }
   $('sgDraft').addEventListener('click', draft);
+  $('sgStop').addEventListener('click', () => {
+    if (direct.job) fetch(`${API}job/${direct.job}/cancel`, { method: 'POST' }).catch(() => {});
+    else window.FRLLoupe?.stop?.();
+    now('Arrêt demandé…');
+  });
+  card.querySelector('.sg-examples').addEventListener('click', e => {
+    const b = e.target.closest('[data-idea]');
+    if (!b || b.disabled) return;
+    $('sgIdea').value = b.dataset.idea; $('sgIdea').focus();
+  });
+  $('sgIdea').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); draft(); } });
 
   /* a report started from an answer of the Loupe panel (loupe-signal.js) */
   try {
@@ -226,7 +358,7 @@ Cherche dans les données du site et, si utile, sur le web. Réponds uniquement 
       const links = (from.sources || []).map(s => s.url).filter(Boolean);
       fill({ titre: String(from.question || '').slice(0, 140), description: `${String(from.reponse || '').slice(0, 5500)}`, liens: links });
       state.loupe = true;
-      $('sgDraftState').textContent = 'Repris de la réponse de la Loupe : reformulez en signalement, gardez les sources.';
+      st.textContent = 'Repris de la réponse de la Loupe : reformulez en signalement, gardez les sources.';
       if (location.hash !== '#signaler') document.getElementById('signaler').scrollIntoView();
     }
   } catch (_) { /* private mode */ }
