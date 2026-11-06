@@ -108,6 +108,11 @@
   form.addEventListener('submit', async e => {
     e.preventDefault();
     if (!state.human) return;
+    if (state.demoTitle && form.titre.value === state.demoTitle) {
+      result.className = 'sg-result is-error';
+      result.textContent = 'C’est le dossier de démonstration : écrivez votre propre piste, ou corrigez au moins le titre et les faits, avant d’envoyer.';
+      return;
+    }
     send.disabled = true;
     result.className = 'sg-result'; result.textContent = 'Envoi…';
     const liens = form.liens.value.split(/\s+/).map(s => s.trim()).filter(s => /^https?:\/\//i.test(s));
@@ -180,6 +185,7 @@
         await new Promise(ok => setTimeout(ok, reduce.matches ? 0 : 18));
       }
       box?.classList.remove('is-typing');
+      if (el.tagName === 'TEXTAREA' && !typing.queue.some(q => q[0] === name)) el.scrollTop = 0;
       flash(el);
     }
     typing.running = null;
@@ -218,6 +224,79 @@
     return { titre: first(get(/^titre/)), description: strip(get(/interroge|constat|faits/)), questions: strip(get(/questions?/)),
       siren: (get(/siren/).match(/\d{9}(\d{5})?/) || [''])[0], lieu: first(get(/lieu|commune|territoire/)), montant: first(get(/montant/)),
       liens: [...new Set(links)].join('\n') };
+  }
+
+  /* ------------------------------------------------------------------ the two examples: a demonstration
+     A click on « Exemple 1 » or « Exemple 2 » plays a scripted job: the same panel, the same steps, tools and live
+     filling as a real dossier, but nothing is sent to the Loupe and nothing is searched (no token, no request).
+     The dossier says so in its first line, its place is fictitious, and it cannot be sent as it is. */
+  const SITE = 'https://francerouelibre.fr/';
+  const NOTE = 'Démonstration : aucun appel à la Loupe, rien n’a été cherché pour de vrai. Écrivez votre propre piste pour obtenir un vrai dossier, sourcé.';
+  const t = (name, label, summary, ms = 1300) => [[260, { type: 'tool_start', name, label }], [ms, { type: 'tool_done', name, label, ok: true, summary }]];
+  const fillStep = (champs, summary, ms = 500) => [[260, { type: 'tool_start', name: 'remplir_signalement', label: 'Remplit le dossier de signalement' }],
+    [120, { type: 'signalement', champs }], [ms, { type: 'tool_done', name: 'remplir_signalement', label: 'Remplit le dossier de signalement', ok: true, summary }]];
+  const DEMOS = {
+    piscine: () => ({
+      steps: [
+        [350, { type: 'model', provider: 'demo', label: 'Démonstration' }],
+        [900, { type: 'think', step: 1 }],
+        ...fillStep({ titre: 'Exemple : un centre aquatique à 500 M€ à Exempleville', lieu: 'Exempleville (commune fictive)', montant: '500 000 000 €' }, 'titre, lieu, montant'),
+        ...t('dossier_collectivite', 'Dossier de « Exempleville »', 'comptes, échelons, projets aidés, signaux', 1600),
+        [700, { type: 'think', step: 2 }],
+        ...t('rechercher_depenses', 'Recherche « piscine » dans les dépenses publiées', 'marchés et subventions qui citent le mot', 1500),
+        ...t('comparer', 'Comparaison de « Exempleville » avec les collectivités de même taille', 'dépenses d’équipement par habitant'),
+        [800, { type: 'think', step: 3 }],
+        ...t('recherche_web', 'Recherche sur le web : « coût de construction d’un centre aquatique public »', 'sources officielles et presse', 1900),
+        [700, { type: 'think', step: 4 }],
+        ...fillStep({
+          description: `${NOTE}\n\nLa piste : un centre aquatique annoncé à 500 000 000 € à Exempleville.\n\n`
+            + 'Ce qu’un vrai dossier vérifierait dans les documents publics :\n- le montant voté en conseil municipal (délibération) et sa part dans le budget d’investissement de la commune ;\n'
+            + '- le coût d’équipements comparables dans des communes de même taille ;\n- les subventions de l’État (DETR, DSIL) et des autres échelons qui financeraient le projet.\n\n'
+            + 'Tant que ces pièces ne sont pas réunies, rien n’est établi : le dossier pose la question, il n’affirme rien.',
+          questions: 'Quel est le coût total voté, études et frais financiers compris ?\nQui finance, et à quelle hauteur (commune, intercommunalité, département, région, État) ?\n'
+            + 'Une étude de besoin et de fréquentation a-t-elle été publiée ?\nQuel coût de fonctionnement annuel est prévu ?',
+          liens: [`${SITE}recherche.html?q=piscine`, `${SITE}index.html#explorer`, `${SITE}aides.html`, 'https://www.collectivites-locales.gouv.fr/'].join('\n'),
+        }, 'faits, questions, sources', 700),
+      ],
+      result: { reply: 'Le dossier est prérempli : un titre factuel, les faits à vérifier, les questions à poser à la mairie et les sources, du site d’abord, puis du web.\n\n'
+        + `*${NOTE}*`, provider: 'demo', label: 'Démonstration', sources: [{ title: 'collectivites-locales.gouv.fr', url: 'https://www.collectivites-locales.gouv.fr/' }] },
+    }),
+    asso: () => ({
+      steps: [
+        [350, { type: 'model', provider: 'demo', label: 'Démonstration' }],
+        [900, { type: 'think', step: 1 }],
+        ...fillStep({ titre: 'Exemple : les subventions publiques d’une association (SIREN à préciser)' }, 'titre'),
+        ...t('dossier_beneficiaire', 'Argent public reçu par « l’association de l’exemple »', 'subventions de l’État, aides, marchés', 1700),
+        [700, { type: 'think', step: 2 }],
+        ...t('chercher_fiche', 'Recherche « subventions associations » (aides)', 'programmes qui financent ce type d’association'),
+        ...t('page_du_site', 'Section du site sur « subventions aux associations »', 'Aides et subventions', 900),
+        [800, { type: 'think', step: 3 }],
+        ...t('recherche_web', 'Recherche sur le web : « dirigeants déclarés de l’association, Journal officiel »', 'annonces du Journal officiel', 1900),
+        [700, { type: 'think', step: 4 }],
+        ...fillStep({
+          description: `${NOTE}\n\nLa piste : une association qui recevrait beaucoup de subventions et serait dirigée par une personne proche d’un responsable public.\n\n`
+            + 'Ce qu’un vrai dossier vérifierait :\n- les subventions de l’État publiées pour ce SIREN (annexes « jaunes » des lois de finances) et celles des collectivités ;\n'
+            + '- les dirigeants déclarés (Journal officiel des associations, annuaire des entreprises) ;\n- les comptes annuels, que l’association doit publier au-delà de 153 000 € de subventions par an.\n\n'
+            + 'La proximité avec un responsable public n’est pas un fait tant qu’aucune source publique ne l’établit : le dossier pose la question, au conditionnel, sans nommer d’accusé.',
+          questions: 'Quelles subventions l’association a-t-elle reçues, de qui et pour quels projets ?\nLes conventions d’objectifs et les comptes annuels sont-ils publiés ?\n'
+            + 'Un élu ou un agent ayant voté ou instruit ces subventions a-t-il un lien avec l’association, et s’est-il déporté ?',
+          liens: [`${SITE}aides.html`, `${SITE}recherche.html`, 'https://annuaire-entreprises.data.gouv.fr/', 'https://www.journal-officiel.gouv.fr/'].join('\n'),
+        }, 'faits, questions, sources', 700),
+      ],
+      result: { reply: 'Le dossier est prérempli. Ajoutez le SIREN de l’association : la Loupe y lirait alors l’argent public réellement publié pour cet organisme.\n\n'
+        + `*${NOTE}*`, provider: 'demo', label: 'Démonstration', sources: [{ title: 'annuaire-entreprises.data.gouv.fr', url: 'https://annuaire-entreprises.data.gouv.fr/' }] },
+    }),
+  };
+  /* Without the Loupe's panel (its API not reachable), the demonstration plays in the card alone. */
+  async function play(script, h) {
+    for (const [ms, ev] of script.steps) {
+      if (play.stopped) break;
+      await new Promise(ok => setTimeout(ok, reduce.matches ? Math.min(ms, 150) : ms));
+      h.onEvent(ev);
+    }
+    const r = play.stopped ? { reply: 'Arrêté à votre demande.' } : script.result;
+    play.stopped = false;
+    await h.onDone({ text: r.reply, error: '', sources: r.sources || [], signalement: null });
   }
 
   /* ------------------------------------------------------------------ the Loupe at work */
@@ -259,7 +338,7 @@
         if (ev.type === 'tool_start') { tools++; lastStep = stepEl(ev.label || 'Recherche', ev.name === 'remplir_signalement'); now(ev.name === 'remplir_signalement' ? 'La Loupe écrit le dossier' : `La Loupe cherche : ${ev.label || 'données'}`); }
         if (ev.type === 'tool_done' && lastStep) {
           lastStep.classList.add(ev.ok === false ? 'is-fail' : 'is-done');
-          if (ev.summary) lastStep.insertAdjacentHTML('beforeend', `<small>${esc(ev.summary)}</small>`);
+          if (ev.summary && ev.name !== 'remplir_signalement') lastStep.insertAdjacentHTML('beforeend', `<small>${esc(ev.summary)}</small>`);
         }
         if (ev.type === 'signalement') {
           const names = Object.keys(ev.champs || {}).map(k => NAMES[k]).filter(Boolean);
@@ -309,8 +388,9 @@
     const off = new MutationObserver(() => { if (panel.hidden) { document.body.classList.remove('sg-side'); off.disconnect(); } });
     off.observe(panel, { attributes: true, attributeFilter: ['hidden'] });
   }
-  async function draft() {
+  async function draft(demoKey) {
     const idea = $('sgIdea').value.trim();
+    const demo = typeof demoKey === 'string' && DEMOS[demoKey] ? DEMOS[demoKey]() : null;
     if (idea.length < 8) { st.className = 'sg-loupe__state is-error'; st.textContent = 'Décrivez votre piste en une phrase.'; $('sgIdea').focus(); return; }
     if (window.FRLLoupe?.busy?.()) { st.className = 'sg-loupe__state is-error'; st.textContent = 'La Loupe répond déjà à une question : attendez la fin, ou arrêtez-la.'; return; }
     for (const k of Object.keys(draftState)) delete draftState[k];
@@ -321,8 +401,9 @@
     card.scrollIntoView({ behavior: reduce.matches ? 'auto' : 'smooth', block: 'start' });
     const finished = new Promise(ok => {
       const h = hooks(idea, ok);
-      const opened = window.FRLLoupe?.ask && window.FRLLoupe.ask(PROMPT(idea), { hooks: h, background: !wide.matches });
-      Promise.resolve(opened).then(started => { if (started) sideBySide(); else direct(PROMPT(idea), h); });
+      if (demo) { h.shown = `Préparer un signalement (exemple) : « ${idea} »`; h.script = demo; }
+      const opened = window.FRLLoupe?.ask && window.FRLLoupe.ask(demo ? `[démonstration] ${idea}` : PROMPT(idea), { hooks: h, background: !wide.matches });
+      Promise.resolve(opened).then(started => { if (started) sideBySide(); else if (demo) play(demo, h); else direct(PROMPT(idea), h); });
     });
     const m = await finished;
     lock(false);
@@ -331,14 +412,19 @@
       now('La Loupe s’est arrêtée');
       st.className = 'sg-loupe__state is-error';
       st.textContent = `${m.error} Ce qui est déjà écrit reste dans le formulaire : complétez-le vous-même.`;
+    } else if (demo) {
+      state.demoTitle = form.titre.value;
+      now('Démonstration terminée : à vous d’écrire votre propre piste');
+      st.className = 'sg-loupe__state'; st.textContent = 'Ce dossier d’exemple ne peut pas être envoyé tel quel.';
     } else {
       state.loupe = true;
       now('Dossier prérempli : relisez, corrigez, puis envoyez');
       form.titre.focus({ preventScroll: true });
     }
   }
-  $('sgDraft').addEventListener('click', draft);
+  $('sgDraft').addEventListener('click', () => draft());
   $('sgStop').addEventListener('click', () => {
+    play.stopped = true;
     if (direct.job) fetch(`${API}job/${direct.job}/cancel`, { method: 'POST' }).catch(() => {});
     else window.FRLLoupe?.stop?.();
     now('Arrêt demandé…');
@@ -346,7 +432,8 @@
   card.querySelector('.sg-examples').addEventListener('click', e => {
     const b = e.target.closest('[data-idea]');
     if (!b || b.disabled) return;
-    $('sgIdea').value = b.dataset.idea; $('sgIdea').focus();
+    $('sgIdea').value = b.dataset.idea;
+    draft(b.dataset.demo);
   });
   $('sgIdea').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); draft(); } });
 

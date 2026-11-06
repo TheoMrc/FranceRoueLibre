@@ -205,8 +205,8 @@ def comparer(nom: str, agregat: str = 'depenses-totales', niveau: str = 'commune
     level = niveau if niveau in T.LEVELS else 'communes'
     ents = T._entities(level)
     q = T.norm(re.sub(r'(?i)^insee\s*:?\s*', '', str(nom or '').strip()))
-    found = [i for i, (c, n, _) in enumerate(ents) if T.norm(c) == q or T.norm(n) == q] or \
-            [i for i, (c, n, _) in enumerate(ents) if q and q in T.norm(n)]
+    found = [i for i, (c, n) in enumerate(T._normed(level)) if c == q or n == q] or \
+            [i for i, (_, n) in enumerate(T._normed(level)) if q and q in n]
     if not found:
         return {'error': f'« {nom} » introuvable parmi les {T.LEVELS[level].lower()}s'}
     if len(found) > 1:

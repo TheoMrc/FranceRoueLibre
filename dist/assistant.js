@@ -50,7 +50,7 @@
   };
   /* answers built without a model (saved answers, places): the Loupe's lens alone, without its bubble */
   const LENS = '<svg class="ai-prov__lens" viewBox="12 10.5 23 23" width="15" height="15" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="22" cy="21" r="8.5"/><path d="M28.3 27.3L33.3 32.3"/><path class="ai-prov__spark" d="M22 15.6Q22.8 20.2 27.4 21Q22.8 21.8 22 26.4Q21.2 21.8 16.6 21Q21.2 20.2 22 15.6Z"/></svg>';
-  const provBadge = (p, text = label(p)) => p ? `<span class="ai-prov ai-prov--${esc(p)}">${p === 'faq' ? LENS : logoOK[p] ? `<img src="${PROVIDERS[p].img}" alt="">` : '<i aria-hidden="true"></i>'}<span>${esc(text)}</span></span>` : '';
+  const provBadge = (p, text = label(p)) => p ? `<span class="ai-prov ai-prov--${esc(p)}">${p === 'faq' || p === 'demo' ? LENS : logoOK[p] ? `<img src="${PROVIDERS[p].img}" alt="">` : '<i aria-hidden="true"></i>'}<span>${esc(text)}</span></span>` : '';
 
   /* Answers use a small subset of Markdown: paragraphs, lists, **bold**, *italic*, [links](https://…). Everything is
      escaped first, and only http(s) or site-relative links become anchors. */
@@ -422,7 +422,8 @@
     modelBtn.disabled = on;
   }
   /* hooks (FRLLoupe.ask from a page, e.g. signalements.js): shown, the text shown instead of the question sent;
-     onEvent(ev) for each event of the job, onDone(message) once it is over (also on an error) */
+     onEvent(ev) for each event of the job, onDone(message) once it is over (also on an error); script: a scripted
+     job played here, never sent to the server ({ steps: [[ms, event], …], result }), for a demonstration */
   async function ask(text, pre, hooks = null) {   // pre: the reply of an ask already sent (FRLLoupe.ask with free)
     text = text.trim();
     if (!text || busy) return;
@@ -446,20 +447,27 @@
     busy = { job: null };
     setBusy(true);
     try {
-      const r = pre ? { ok: true, status: 202 } : await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const script = hooks?.script || null;
+      const r = pre || script ? { ok: true, status: 202 } : await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history.slice(-11), provider }) });
-      const data = pre || await r.json().catch(() => ({}));
+      const data = script ? { job: 'demo' } : pre || await r.json().catch(() => ({}));
       if (data.credits === false) { m.donate = data.donate; noCredits(data); }
       if (!r.ok || !data.job) throw new Error(data.error || (r.status === 503 || r.status === 502 || r.status === 504
         ? 'La Loupe est très demandée en ce moment : réessayez dans quelques minutes.' : `Erreur ${r.status}`));
-      busy.job = data.job; m.job = data.job; m.at = Date.now();
+      busy.job = script ? null : data.job; m.job = script ? null : data.job; m.at = Date.now();
       let after = 0, fails = 0, queued = '', first = true;
       for (;;) {
         // the first look is at once: a saved or templated answer (faq.py, fiche.py) is already done on the server
-        if (!first) await sleep(650);
+        if (!first && !script) await sleep(650);
         first = false;
         let j;
-        try {
+        if (script) {   // a demonstration: the next scripted event after its delay, nothing asked to the server
+          const step = script.steps[after];
+          if (step) await sleep(reduce.matches ? Math.min(step[0], 150) : step[0]);
+          const over = after + 1 >= script.steps.length || busy.stopped;
+          j = { events: step && !busy.stopped ? [step[1]] : [], next: after + 1, done: over, queue: 0,
+                result: over ? (busy.stopped ? { reply: 'Arrêté à votre demande.', provider: 'demo', label: script.result?.label } : script.result) : null };
+        } else try {
           const res = await fetch(`${API}job/${data.job}?after=${after}`);
           j = await res.json();
           if (!res.ok) throw new Error(j.error || `Erreur ${res.status}`);
@@ -596,7 +604,7 @@
 
   form.addEventListener('submit', e => {
     e.preventDefault();
-    if (busy) { if (busy.job) fetch(`${API}job/${busy.job}/cancel`, { method: 'POST' }).catch(() => {}); return; }
+    if (busy) { busy.stopped = true; if (busy.job) fetch(`${API}job/${busy.job}/cancel`, { method: 'POST' }).catch(() => {}); return; }
     ask(input.value);
   });
   input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); form.requestSubmit(); } });
@@ -676,7 +684,7 @@
         store.current = null; showHistory(false); renderLog(); ask(t, pre, opts.hooks || null); return true;
       },
       busy: () => !!busy,
-      stop() { if (busy?.job) fetch(`${API}job/${busy.job}/cancel`, { method: 'POST' }).catch(() => {}); },
+      stop() { if (busy) busy.stopped = true; if (busy?.job) fetch(`${API}job/${busy.job}/cancel`, { method: 'POST' }).catch(() => {}); },
       /* the summary a page opens by itself (a commune, a département, a SIREN searched): once per question and tab,
          never over a conversation already open; on a phone it is prepared closed and announced by the badge */
       auto(text) {
