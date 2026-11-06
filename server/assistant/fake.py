@@ -10,6 +10,7 @@ local authorities, published JSON files), with delays like a real model, but nev
 * « commune », « ville » or « département » : the accounts tool on Rennes, or on the named place
 * « web »     : a web search only
 * « signalement » : the report form of signalements.html filled live (remplir_signalement), a search between
+* any other question asked on signalements.html (its form sent): lire_formulaire, a web search, modifier_champ
 * anything else: a search in the published spending lines, a web search, then an answer built from the real figures
 """
 from __future__ import annotations
@@ -99,6 +100,8 @@ class FakeClient:
             return {'role': 'model', 'parts': [{'text': LONG}]}
         call = lambda name, args: {'role': 'model', 'parts': [{'functionCall': {'name': name, 'args': args,
                                                                                'id': f'toolu_demo{self.step}'}}]}
+        if any(t.get('name') == 'lire_formulaire' for t in tools) and 'Prépare un signalement' not in q and 'signalement' not in low:
+            return self._amend(contents, q)
         if 'signalement' in low:
             return self._report(contents, q)
         if any(w in low for w in ('commune', 'ville', 'département', 'departement')):
@@ -146,6 +149,18 @@ class FakeClient:
         parts.append('*Réponse de démonstration : les chiffres viennent des vraies données du site, le texte et la '
                      'recherche web sont simulés.*')
         return {'role': 'model', 'parts': [{'text': '\n\n'.join(parts)}]}
+
+    def _amend(self, contents: List[dict], ask: str) -> dict:
+        """A request on the dossier on screen (signalements.html): read the form, a web search, then an addition."""
+        call = lambda n, a: {'role': 'model', 'parts': [{'functionCall': {'name': n, 'args': a, 'id': f'toolu_demo{self.step}'}}]}
+        if _last_result(contents, 'lire_formulaire') is None:
+            return call('lire_formulaire', {})
+        if _last_result(contents, 'recherche_web') is None:
+            return call('recherche_web', {'question': ask[:200]})
+        if _last_result(contents, 'modifier_champ') is None:
+            return call('modifier_champ', {'champ': 'description', 'ajouter': f'Ajout demandé (démo) : {ask}'})
+        return {'role': 'model', 'parts': [{'text': f'J’ai ajouté au dossier ce que vous demandiez (« {ask[:80]} »). '
+                                                   '*Démonstration : rien n’a été cherché pour de vrai.*'}]}
 
     def _report(self, contents: List[dict], q: str) -> dict:
         """The report form filled in three times: what the idea says, a search, then the whole draft."""

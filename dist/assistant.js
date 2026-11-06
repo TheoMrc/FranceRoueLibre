@@ -427,6 +427,8 @@
   async function ask(text, pre, hooks = null) {   // pre: the reply of an ask already sent (FRLLoupe.ask with free)
     text = text.trim();
     if (!text || busy) return;
+    // a page can follow every question asked in the panel (signalements.html: the dossier on screen goes with it)
+    if (!hooks && !pre) try { hooks = window.FRLLoupePage?.wrap?.(text) || null; } catch (e) { hooks = null; }
     const limit = status?.limits?.question_chars || 1500;
     if (text.length > limit) text = text.slice(0, limit);
     const c = current() || startConv(text);
@@ -449,7 +451,7 @@
     try {
       const script = hooks?.script || null;
       const r = pre || script ? { ok: true, status: 202 } : await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history.slice(-11), provider }) });
+        body: JSON.stringify({ messages: history.slice(-11), provider, ...(hooks?.form ? { signalement: hooks.form } : {}) }) });
       const data = script ? { job: 'demo' } : pre || await r.json().catch(() => ({}));
       if (data.credits === false) { m.donate = data.donate; noCredits(data); }
       if (!r.ok || !data.job) throw new Error(data.error || (r.status === 503 || r.status === 502 || r.status === 504

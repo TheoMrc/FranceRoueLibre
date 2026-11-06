@@ -190,16 +190,23 @@
     }
     typing.running = null;
   }
+  /* What the Loupe wrote (one event per remplir_signalement or modifier_champ call): whole fields, as plain text. They
+     are only ever written with .value, so nothing in them can run on the page. */
+  const KEYS = ['titre', 'lieu', 'montant', 'siren', 'description', 'liens'];
+  const QMARK = /\n*Questions à poser :\n[\s\S]*$/;   // the questions end the description
   const draftState = {};
-  const descOf = d => [d.description, d.questions && `Questions à poser :\n${d.questions}`].filter(Boolean).join('\n\n');
   function applyDraft(champs, sources) {
-    const before = descOf(draftState);
-    Object.assign(draftState, champs || {});
-    for (const k of ['titre', 'lieu', 'montant', 'siren']) if (champs?.[k]) typeInto(k, champs[k]);
-    const desc = descOf(draftState);
-    if (desc && desc !== before) typeInto('description', desc);
+    champs = { ...(champs || {}) };
+    if (champs.questions) {   // only from a text answer read by parseDraft (the server joins them itself)
+      champs.description = [String(champs.description ?? draftState.description ?? '').replace(QMARK, ''), `Questions à poser :\n${champs.questions}`].filter(Boolean).join('\n\n');
+    }
+    for (const k of KEYS) {
+      if (!(k in champs) || typeof champs[k] !== 'string' || champs[k] === draftState[k]) continue;
+      draftState[k] = champs[k];
+      typeInto(k, champs[k]);
+    }
     const links = [...new Set([...String(draftState.liens || '').split('\n'), ...(sources || []).map(s => s?.url)].map(u => (u || '').trim()).filter(u => /^https?:\/\//.test(u)))];
-    if (links.length && links.join('\n') !== form.liens.value) typeInto('liens', links.slice(0, 12).join('\n'));
+    if (links.length && links.join('\n') !== (draftState.liens || '')) { draftState.liens = links.slice(0, 12).join('\n'); typeInto('liens', draftState.liens); }
   }
   /* A Loupe that answered in text without filling the form: « ### Titre », « ### Ce qui interroge »… (or « **Titre :** … ») */
   function parseDraft(text) {
@@ -363,7 +370,7 @@
   async function direct(prompt, h) {
     const m = { text: '', error: '', sources: [], signalement: null };
     try {
-      const r = await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', text: prompt }] }) });
+      const r = await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', text: prompt }], signalement: h.form || {} }) });
       const d = await r.json().catch(() => ({}));
       if (!d.job) throw new Error(d.error || 'La Loupe ne peut pas répondre pour l’instant.');
       direct.job = d.job;
@@ -394,18 +401,23 @@
     if (idea.length < 8) { st.className = 'sg-loupe__state is-error'; st.textContent = 'Décrivez votre piste en une phrase.'; $('sgIdea').focus(); return; }
     if (window.FRLLoupe?.busy?.()) { st.className = 'sg-loupe__state is-error'; st.textContent = 'La Loupe répond déjà à une question : attendez la fin, ou arrêtez-la.'; return; }
     for (const k of Object.keys(draftState)) delete draftState[k];
+    begin();
+    card.scrollIntoView({ behavior: reduce.matches ? 'auto' : 'smooth', block: 'start' });
+    const finished = new Promise(ok => {
+      const h = hooks(idea, ok);
+      if (demo) { h.shown = `Préparer un signalement (exemple) : « ${idea} »`; h.script = demo; } else h.form = fields();
+      const opened = window.FRLLoupe?.ask && window.FRLLoupe.ask(demo ? `[démonstration] ${idea}` : PROMPT(idea), { hooks: h, background: !wide.matches });
+      Promise.resolve(opened).then(started => { if (started) sideBySide(); else if (demo) play(demo, h); else direct(PROMPT(idea), h); });
+    });
+    end(await finished, demo);
+  }
+  function begin() {
     st.className = 'sg-loupe__state'; st.textContent = '';
     liveSteps.innerHTML = ''; live.hidden = false; live.classList.remove('is-done');
     now('La Loupe réfléchit');
     lock(true);
-    card.scrollIntoView({ behavior: reduce.matches ? 'auto' : 'smooth', block: 'start' });
-    const finished = new Promise(ok => {
-      const h = hooks(idea, ok);
-      if (demo) { h.shown = `Préparer un signalement (exemple) : « ${idea} »`; h.script = demo; }
-      const opened = window.FRLLoupe?.ask && window.FRLLoupe.ask(demo ? `[démonstration] ${idea}` : PROMPT(idea), { hooks: h, background: !wide.matches });
-      Promise.resolve(opened).then(started => { if (started) sideBySide(); else if (demo) play(demo, h); else direct(PROMPT(idea), h); });
-    });
-    const m = await finished;
+  }
+  function end(m, demo) {
     lock(false);
     live.classList.add('is-done');
     if (m.error) {
@@ -418,10 +430,29 @@
       st.className = 'sg-loupe__state'; st.textContent = 'Ce dossier d’exemple ne peut pas être envoyé tel quel.';
     } else {
       state.loupe = true;
-      now('Dossier prérempli : relisez, corrigez, puis envoyez');
-      form.titre.focus({ preventScroll: true });
+      now('Dossier prérempli : relisez, corrigez, puis envoyez, ou demandez une modification à la Loupe');
+      if (!wide.matches || !document.querySelector('.ai-panel:not([hidden])')) form.titre.focus({ preventScroll: true });
     }
   }
+  /* Every question asked in the Loupe's panel on this page (« ajoute… », « va chercher le maire… », « raccourcis… »):
+     the form goes with it (assistant.js sends it), the server gives the Loupe three tools on it (lire_formulaire,
+     remplir_signalement, modifier_champ), and her changes are written into the form live, like the first draft.
+     The e-mail never leaves the page. */
+  const fields = () => Object.fromEntries(KEYS.map(k => [k, form[k].value.trim()]));
+  window.FRLLoupePage = {
+    wrap(text) {
+      if (form.classList.contains('is-locked')) return null;
+      for (const k of Object.keys(draftState)) delete draftState[k];
+      const cur = fields();
+      Object.assign(draftState, cur);
+      const h = hooks(text, m => end(m, false));
+      h.shown = undefined;
+      h.form = cur;
+      begin();
+      card.scrollIntoView({ behavior: reduce.matches ? 'auto' : 'smooth', block: 'nearest' });
+      return h;
+    },
+  };
   $('sgDraft').addEventListener('click', () => draft());
   $('sgStop').addEventListener('click', () => {
     play.stopped = true;

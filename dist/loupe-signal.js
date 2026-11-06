@@ -9,7 +9,9 @@
     .ai-signal:hover{border-color:#e11d48;transform:translateY(-1px)}.ai-signal svg{width:14px;height:14px;color:#e11d48}`;
   document.head.appendChild(css);
   const FLAG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>';
+  const onPage = /signalements\.html$/.test(location.pathname);   // there, the Loupe writes into the form itself
   function add(msg) {
+    if (onPage) return;
     const extra = msg.querySelector('.ai-extra'), text = msg.querySelector('.ai-text');
     if (!extra || !text || extra.querySelector('.ai-signal') || msg.querySelector('.ai-error')) return;
     if (!msg.querySelector('.ai-foot')?.textContent.trim()) return;   // still writing

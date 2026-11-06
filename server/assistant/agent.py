@@ -8,7 +8,7 @@ from typing import Callable, List, Optional
 from . import settings as S
 from .budget import BudgetError, budget
 from .providers import CLIENTS, ModelError
-from .tools import DECLARATIONS, FILES, Toolbox, signalement_fields
+from .tools import DECLARATIONS, FILES, PAGE_DECLARATIONS, Toolbox
 
 SYSTEM = """Tu es la Loupe, l’agent IA de FranceRoueLibre ({site}), un site indépendant qui ouvre le capot des comptes publics \
 français à partir de données ouvertes (Insee, OFGL, DGFiP, DGCL, data.gouv.fr, Cour des comptes...). Tu réponds aux \
@@ -51,11 +51,14 @@ demande pour une question d’opinion, une explication ou une donnée personnell
 - Signalement citoyen : quand le lecteur veut signaler une dépense qui l’interroge, ou te demande de préparer un \
 signalement, rédige un dossier sobre et vérifiable (titre factuel ; faits et montants sourcés ; conditionnel pour ce qui \
 n’est pas établi ; questions à poser à l’organisme ; sources du site et du web), sans accuser une personne nommée sans \
-source publique, sans vie privée ni insulte. Sur la page Remontées citoyennes (le message le dit), remplis le \
-formulaire avec remplir_signalement : un premier appel dès ta première étape, en même temps que ta première \
-recherche (titre, lieu et montant tirés de la piste), un dernier avec le dossier complet, puis réponds en deux \
-phrases (ce que tu as trouvé, ce qu’il reste à vérifier). Ailleurs, rédige le dossier dans ta réponse et indique la \
-page Remontées citoyennes (signalements.html) et le bouton « Faire remonter ce point » sous ta réponse.
+source publique, sans vie privée ni insulte. Si tu as les outils du formulaire (lire_formulaire, remplir_signalement, \
+modifier_champ), le lecteur est sur la page Remontées citoyennes, son dossier sous les yeux : un nouveau dossier se \
+remplit avec remplir_signalement (un premier appel dès ta première étape, avec ta première recherche ; un dernier avec \
+le dossier complet) ; une demande sur le dossier (« ajoute… », « va chercher le maire… », « raccourcis… ») se fait en \
+lisant le formulaire, en cherchant ce qui manque, puis avec modifier_champ (un passage, un ajout) ou \
+remplir_signalement (un champ réécrit en entier), sans toucher à ce qu’il n’a pas demandé. Réponds ensuite en une ou \
+deux phrases sur ce que tu as écrit et ce qui reste à vérifier. Sans ces outils, rédige le dossier dans ta réponse et \
+indique la page Remontées citoyennes (signalements.html) et le bouton « Faire remonter ce point » sous ta réponse.
 - Fraude, évasion, optimisation, niches : quatre choses que le public confond, sépare-les en une phrase chacune \
 quand la question les mélange. Fraude : illégal (revenus cachés, fausses factures, TVA encaissée et non reversée). \
 Évasion : montages pour échapper à l’impôt, souvent via l’étranger, illégaux quand ils sont abusifs. Optimisation : \
@@ -157,6 +160,8 @@ TOOL_LABELS = {
     'lire_page': 'Lecture de la page {url}',
     'preparer_demande': 'Préparation d’une demande à « {organisme} »',
     'remplir_signalement': 'Remplit le dossier de signalement',
+    'lire_formulaire': 'Lit le formulaire à l’écran',
+    'modifier_champ': 'Modifie le champ « {champ} »',
 }
 
 
@@ -170,7 +175,7 @@ def system_prompt() -> str:
 def tool_label(name: str, args: dict) -> str:
     vals = {k: str(v)[:70] for k, v in (args or {}).items()}
     try:
-        return TOOL_LABELS.get(name, name).format_map({'requete': '', 'nom': '', 'fichier': '', 'question': '', 'url': '',
+        return TOOL_LABELS.get(name, name).format_map({'requete': '', 'nom': '', 'fichier': '', 'question': '', 'url': '', 'champ': '',
                                                        'organisme': '', 'operation': '', 'mots': '', 'jeu': '', **vals})
     except (KeyError, ValueError):
         return name
@@ -254,10 +259,12 @@ def history_to_contents(messages: List[dict]) -> List[dict]:
     return contents
 
 
-def _run(chosen: str, contents: List[dict], on_event: Callable[[dict], None], cancelled: Callable[[], bool]) -> dict:
-    """The tool loop with one provider."""
+def _run(chosen: str, contents: List[dict], on_event: Callable[[dict], None], cancelled: Callable[[], bool],
+         form: Optional[dict] = None) -> dict:
+    """The tool loop with one provider. form: the report form of signalements.html, which adds its three tools."""
     client = CLIENTS[chosen]()
-    box = Toolbox(client)
+    box = Toolbox(client, form)
+    declarations = DECLARATIONS + (PAGE_DECLARATIONS if form is not None else [])
     box.question = next((p.get('text', '') for c in reversed(contents) if c['role'] == 'user'
                          for p in c['parts'] if p.get('text')), '')[:500]
     on_event({'type': 'model', 'provider': chosen, 'label': client.label, 'model': client.model})
@@ -271,7 +278,7 @@ def _run(chosen: str, contents: List[dict], on_event: Callable[[dict], None], ca
             on_event({'type': 'think', 'step': step})
             if contents[-1]['role'] != 'user':  # Gemini refuses a request that ends with a model turn
                 contents.append({'role': 'user', 'parts': [{'text': 'Continue, puis réponds.'}]})
-            content = client.generate(contents, system, DECLARATIONS)
+            content = client.generate(contents, system, declarations)
             if not (content.get('parts') or []):  # empty turn: not kept (it would end the next request)
                 reply = ''
                 break
@@ -293,8 +300,9 @@ def _run(chosen: str, contents: List[dict], on_event: Callable[[dict], None], ca
                 on_event({'type': 'tool_start', 'name': name, 'label': label})
                 t0 = time.time()
                 result = box.call(name, args)
-                if name == 'remplir_signalement' and result.get('ok'):  # the page writes them in its form at once
-                    on_event({'type': 'signalement', 'champs': signalement_fields(args)})
+                if box.changed:  # remplir_signalement, modifier_champ: the page writes them in its form at once
+                    on_event({'type': 'signalement', 'champs': dict(box.changed)})
+                    box.changed = {}
                 ok, summary = tool_summary(name, result)
                 on_event({'type': 'tool_done', 'name': name, 'label': label, 'ok': ok, 'summary': summary,
                           's': round(time.time() - t0, 1)})
@@ -316,7 +324,7 @@ def _run(chosen: str, contents: List[dict], on_event: Callable[[dict], None], ca
 
 
 def answer(messages: List[dict], provider: Optional[str] = None, on_event: Callable[[dict], None] = lambda e: None,
-           cancelled: Callable[[], bool] = lambda: False) -> dict:
+           cancelled: Callable[[], bool] = lambda: False, form: Optional[dict] = None) -> dict:
     """A model chosen by the reader answers alone; in « Auto », when one fails (error, cap, end date), the next one
     in ASSISTANT_ORDER takes the question over from the start."""
     contents = history_to_contents(messages)
@@ -334,7 +342,7 @@ def answer(messages: List[dict], provider: Optional[str] = None, on_event: Calla
             continue
         if previous:
             on_event({'type': 'switch', 'from': previous['provider'], 'to': p, 'reason': previous['error']})
-        result = _run(p, [dict(c, parts=list(c['parts'])) for c in contents], on_event, cancelled)
+        result = _run(p, [dict(c, parts=list(c['parts'])) for c in contents], on_event, cancelled, form)
         if not result.get('retry') or cancelled():
             break
         previous = result

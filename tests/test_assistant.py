@@ -236,7 +236,7 @@ class QueueTest(unittest.TestCase):
         self.gate = __import__('threading').Event()
         self.ran = []
 
-        def fake_run(job, messages, provider):
+        def fake_run(job, messages, provider, form=None):
             self.ran.append(messages[-1]['text'])
             self.gate.wait(5)
             job.update(result={'reply': 'ok'}, done=True)
@@ -794,9 +794,26 @@ class RemplirSignalementTest(unittest.TestCase):
         fake.FakeClient._wait = lambda self, lo=0, hi=0: None
         events = []
         res = answer([{'role': 'user', 'text': 'Prépare un signalement citoyen à partir de ma piste : « 500 000 000 € pour '
-                                                  'une piscine à Rennes, ça fait beaucoup non ? »'}], 'gemini', events.append)
+                                                  'une piscine à Rennes, ça fait beaucoup non ? »'}], 'gemini', events.append, form={})
         fills = [e['champs'] for e in events if e['type'] == 'signalement']
         self.assertEqual(len(fills), 2)
         self.assertEqual(fills[0].get('lieu'), 'Rennes')
         self.assertIn('description', fills[1])
-        self.assertEqual(set(res['signalement']), {'titre', 'lieu', 'montant', 'description', 'questions', 'liens'})
+        self.assertEqual(set(res['signalement']), {'titre', 'lieu', 'montant', 'description', 'liens'})
+        self.assertIn('Questions à poser :\n', res['signalement']['description'])
+
+    def test_form_tools_only_on_the_page(self):
+        box = T.Toolbox(None)
+        self.assertIn('error', box.call('lire_formulaire', {}))
+        box = T.Toolbox(None, {'titre': 'Une piscine', 'description': 'Les faits.\n\nQuestions à poser :\nCombien ?'})
+        self.assertEqual(box.call('lire_formulaire', {})['formulaire']['titre'], 'Une piscine')
+        box.call('modifier_champ', {'champ': 'titre', 'chercher': 'piscine', 'remplacer': 'piscine à 500 M€'})
+        self.assertEqual(box.changed, {'titre': 'Une piscine à 500 M€'})
+        self.assertIn('error', box.call('modifier_champ', {'champ': 'titre', 'chercher': 'absent', 'remplacer': 'x'}))
+        box.call('modifier_champ', {'champ': 'liens', 'ajouter': 'voir https://a.fr/x et javascript:alert(1)'})
+        self.assertEqual(box.form['liens'], 'https://a.fr/x')
+        box.call('remplir_signalement', {'questions': 'Qui paie ?'})
+        self.assertEqual(box.form['description'], 'Les faits.\n\nQuestions à poser :\nQui paie ?')
+        box.call('modifier_champ', {'champ': 'lieu', 'nouveau_texte': 'Rennes\u202e<script>'})
+        self.assertEqual(box.form['lieu'], 'Rennes<script>')   # plain text: the page writes it with .value, never as HTML
+        self.assertIn('error', box.call('modifier_champ', {'champ': 'email', 'nouveau_texte': 'x'}))

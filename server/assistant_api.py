@@ -1,6 +1,8 @@
 """AI assistant API of francerouelibre.fr (server/assistant/), behind nginx like search_api.py.
 
-POST /api/assistant/ask          {"messages": [{"role": "user"|"assistant", "text": …}], "provider": "auto"|"gemini"|"claude"}
+POST /api/assistant/ask          {"messages": [{"role": "user"|"assistant", "text": …}], "provider": "auto"|"gemini"|"claude",
+                                  "signalement": {titre, lieu, …}}  (signalements.html: the form on screen, read and
+                                  edited by the Loupe with lire_formulaire, remplir_signalement, modifier_champ)
                                   -> {"job": id}   the question is answered in the background
 GET  /api/assistant/job/<id>?after=N  -> {"events": [...], "next": N, "done": bool, "result": {...}}
 POST /api/assistant/job/<id>/cancel
@@ -55,6 +57,7 @@ from assistant import settings as S  # noqa: E402
 from assistant.agent import answer, pick_provider  # noqa: E402
 from assistant.budget import budget  # noqa: E402
 from assistant.providers import CLIENTS  # noqa: E402
+from assistant.tools import signalement_fields  # noqa: E402
 
 MAX_BODY = 48_000
 DEMO = {'on': False}
@@ -137,12 +140,12 @@ def status() -> dict:
             'limits': {'per_hour': S.PER_IP_HOUR, 'per_day': S.PER_IP_DAY, 'question_chars': S.MAX_QUESTION_CHARS}}
 
 
-def run_job(job: dict, messages: list, provider: str | None) -> None:
+def run_job(job: dict, messages: list, provider: str | None, form: dict | None = None) -> None:
     def emit(event: dict) -> None:
         job['events'].append(event)
     started = time.time()
     try:
-        job['result'] = answer(messages, provider, on_event=emit, cancelled=lambda: job['cancel'])
+        job['result'] = answer(messages, provider, on_event=emit, cancelled=lambda: job['cancel'], form=form)
     except Exception as exc:  # noqa: BLE001 - never a stack trace to the reader
         print(f'job failed: {type(exc).__name__}: {exc}', file=sys.stderr, flush=True)
         job['result'] = {'error': 'Erreur interne de l’assistant.'}
@@ -171,7 +174,7 @@ def worker() -> None:
         elif now - job['t'] > S.QUEUE_WAIT:
             job.update(result={'error': BUSY, 'busy': True}, done=True)
         else:
-            run_job(job, job.pop('messages'), job['provider'])
+            run_job(job, job.pop('messages'), job['provider'], job.pop('form', None))
 
 
 def start_workers() -> None:
@@ -182,12 +185,12 @@ def start_workers() -> None:
             WORKERS.append(t)
 
 
-def enqueue(ip: str, messages: list, provider: str | None) -> str:
+def enqueue(ip: str, messages: list, provider: str | None, form: dict | None = None) -> str:
     start_workers()
     jid = secrets.token_urlsafe(18)
     now = time.time()
     job = {'id': jid, 't': now, 'seen': now, 'ip': ip, 'events': [], 'done': False, 'result': None, 'cancel': False,
-           'state': 'queued', 'messages': messages, 'provider': provider}
+           'state': 'queued', 'messages': messages, 'provider': provider, 'form': form}
     with WORK:
         JOBS[jid] = job
         QUEUE.append(jid)
@@ -351,10 +354,14 @@ class Handler(BaseHTTPRequestHandler):
         if len(question) > S.MAX_QUESTION_CHARS:
             return self.send(400, {'error': f'question trop longue ({S.MAX_QUESTION_CHARS} caractères au plus)'})
         provider = body.get('provider') if body.get('provider') in CLIENTS else None
-        saved = faq.find(messages)
+        # signalements.html: the report form on screen, for « ajoute… », « va chercher… » (always the model)
+        form = signalement_fields(body['signalement']) if isinstance(body.get('signalement'), dict) else None
+        if form is not None:
+            form.pop('questions', None)
+        saved = None if form else faq.find(messages)
         if saved:  # a question many readers ask: answered from faq.json, no model call, no credits
             return self.send(202, {'job': saved_job(self.client_ip(), saved, messages)})
-        place = fiche.answer(messages)
+        place = None if form else fiche.answer(messages)
         if place:  # only a commune, a postal code or a département: answered from the data, no model call
             return self.send(202, {'job': saved_job(self.client_ip(), None, messages, place)})
         if body.get('auto'):  # opened by the site itself (a commune, a SIREN): only the answers that cost nothing
@@ -366,7 +373,7 @@ class Handler(BaseHTTPRequestHandler):
         refused = admit(ip)
         if refused:
             return self.send(429 if refused != BUSY else 503, {'error': refused, 'busy': refused == BUSY})
-        return self.send(202, {'job': enqueue(ip, messages, provider)})
+        return self.send(202, {'job': enqueue(ip, messages, provider, form)})
 
     def log_message(self, *args):  # nginx logs the requests (without query strings)
         pass
