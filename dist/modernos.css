@@ -375,7 +375,7 @@ body.mm { font-size: clamp(14px, min(1.02vw, 1.95vh), 19px); }
 .mm-harry img { display: block; width: 100%; height: auto; max-height: 60vh; object-fit: contain; border-radius: var(--r-md); }
 .mm-volet--2.is-hidden { display: none; }
 .mm-final:has(.mm-volet--2:not(.is-hidden)) .mm-harry { display: none; }
-.mm-fry { display: block; align-self: flex-start; height: clamp(120px, 30vh, 320px); width: auto; max-width: 100%; aspect-ratio: 682 / 500; object-fit: contain; border-radius: var(--r-md); margin-top: 14px; }
+.mm-fry { display: block; align-self: flex-start; height: clamp(160px, 44vh, 480px); width: auto; max-width: 100%; aspect-ratio: 682 / 500; object-fit: contain; border-radius: var(--r-md); margin-top: 14px; }
 .mm-reports:empty { display: none; }
 .mm-volet--2 .mm-report:nth-child(n+3) { display: none; }
 .mm-scene > .mm-allpages { max-width: none; }
