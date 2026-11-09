@@ -484,10 +484,10 @@
           fails = 0;
         } catch (e) { if (++fails > 6) throw e; continue; }
         after = j.next;
-        const line = j.queue ? (j.queue === 1 ? 'Vous êtes le prochain dans la file' : `File d’attente : ${j.queue - 1} question${j.queue > 2 ? 's' : ''} avant la vôtre`) : '';
+        const line = j.queue ? `File d’attente : vous êtes ${j.queue}${j.queue === 1 ? 'er' : 'e'} sur ${Math.max(j.queue, j.queue_total || 0)}` : '';
         if (line !== queued) { if (line || queued) v.think(line || 'Réflexion'); queued = line; }
         const was = nearBottom();
-        if (j.queue) hooks?.onEvent?.({ type: 'queue', place: j.queue });
+        if (j.queue) hooks?.onEvent?.({ type: 'queue', place: j.queue, total: j.queue_total });
         for (const ev of j.events) {
           try { hooks?.onEvent?.(ev); } catch (e) { /* the page's own problem */ }
           if (ev.type === 'model') { m.provider = ev.provider; m.label = ev.label; v.provider(ev.provider); }

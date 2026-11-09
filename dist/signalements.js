@@ -465,7 +465,7 @@
     return {
       shown: `Préparer un signalement : « ${idea.length > 240 ? `${idea.slice(0, 220).trim()}… » (${idea.length.toLocaleString('fr-FR')} caractères joints)` : `${idea} »`}`,
       onEvent(ev) {
-        if (ev.type === 'queue') now(ev.place === 1 ? 'Vous êtes le prochain dans la file' : `File d’attente : ${ev.place - 1} question(s) avant la vôtre`);
+        if (ev.type === 'queue') now(`File d’attente : vous êtes ${ev.place}${ev.place === 1 ? 'er' : 'e'} sur ${Math.max(ev.place, ev.total || 0)}`);
         if (ev.type === 'model') now(`La Loupe se met au travail${ev.label ? ` (${ev.label})` : ''}`);
         if (ev.type === 'think') now(tools ? 'La Loupe analyse les résultats' : 'La Loupe réfléchit');
         if (ev.type === 'tool_start') { tools++; lastStep = stepEl(ev.label || 'Recherche', ev.name === 'remplir_signalement'); now(ev.name === 'remplir_signalement' ? 'La Loupe écrit le dossier' : `La Loupe cherche : ${ev.label || 'données'}`); }
@@ -504,7 +504,7 @@
         await new Promise(ok => setTimeout(ok, 800));
         const j = await (await fetch(`${API}job/${d.job}?after=${after}`, { cache: 'no-store' })).json();
         after = j.next ?? after;
-        if (j.queue) h.onEvent({ type: 'queue', place: j.queue });
+        if (j.queue) h.onEvent({ type: 'queue', place: j.queue, total: j.queue_total });
         (j.events || []).forEach(ev => h.onEvent(ev));
         if (j.done) { Object.assign(m, { text: j.result?.reply || '', error: j.result?.error || '', sources: j.result?.sources || [], signalement: j.result?.signalement || null }); break; }
       }

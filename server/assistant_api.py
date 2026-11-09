@@ -275,6 +275,7 @@ class Handler(BaseHTTPRequestHandler):
             done = job['done']
             waiting = place(jid) if job['state'] == 'queued' and not done else 0
             return self.send(200, {'events': events, 'next': after + len(events), 'done': done, 'queue': waiting,
+                                   'queue_total': len(QUEUE) if waiting else 0,
                                    'result': job['result'] if done else None})
         return self.send(404, {'error': 'not found'})
 
