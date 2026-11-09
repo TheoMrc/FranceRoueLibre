@@ -194,6 +194,7 @@ class FakeClient:
                                 'de la collectivité.').replace('_', ' '),
                 'questions': 'Quel est le coût total prévu, études et frais financiers compris ?\nQui finance, et à quelle hauteur ?\n'
                              'Une étude de besoin a-t-elle été publiée ?',
+                'resume': f'{idea[:200]} : un montant à rapprocher de la délibération et du budget de la collectivité (démonstration).',
                 'categories': 'commune, projet-aide, cout-disproportionne', 'mots': ', '.join([place or 'commune', *_words(idea)[:3]]),
                 'liens': '\n'.join([search.get('page') or 'https://francerouelibre.fr/recherche.html',
                                     'https://www.ccomptes.fr/', 'https://www.insee.fr/'])}))

@@ -201,7 +201,7 @@ PAGE_DECLARATIONS: List[dict] = [
      'description': 'Remplit, en direct sous les yeux du lecteur, le formulaire de la page Remontées citoyennes. '
                     'Pour un nouveau dossier : un premier appel dès le début, en même temps que ta première recherche, '
                     'avec le titre et le lieu déduits de sa piste (et le montant s’il le donne) ; puis un dernier '
-                    'appel, après les recherches, avec le dossier complet, ses catégories et ses mots-clés. Chaque '
+                    'appel, après les recherches, avec le dossier complet, son résumé, ses catégories et ses mots-clés. Chaque '
                     'champ donné remplace tout le champ '
                     '(pour changer un passage ou ajouter une phrase : modifier_champ). Ton sobre et '
                     'vérifiable : faits et montants sourcés, conditionnel pour ce qui n’est pas établi, aucune '
@@ -218,6 +218,9 @@ PAGE_DECLARATIONS: List[dict] = [
                                                         'remplacent la partie « Questions à poser » à la fin de la description'},
          'liens': {'type': 'STRING', 'description': 'Les sources, une adresse https par ligne : pages du site d’abord, '
                                                     'puis documents officiels et articles trouvés sur le web'},
+         'resume': {'type': 'STRING', 'description': 'Au dernier appel : « En résumé », une ou deux phrases (300 '
+                                                     'caractères au plus) affichées dans la liste des remontées à la place du '
+                                                     'dossier : le fait, le montant, ce qui interroge, au conditionnel'},
          'categories': {'type': 'STRING', 'description': 'Au dernier appel : les catégories qui s’appliquent, clés '
                                                          'séparées par des virgules (2 à 5 en général : l’échelon, la nature de la '
                                                          'dépense, ce qui interroge), parmi ' + ', '.join(CATEGORIES)},
@@ -230,7 +233,7 @@ PAGE_DECLARATIONS: List[dict] = [
                     'pour les sources), ou réécrire tout le champ (nouveau_texte ; vide pour l’effacer). Lis d’abord le '
                     'formulaire (lire_formulaire) pour citer le passage exact.',
      'parameters': {'type': 'OBJECT', 'properties': {
-         'champ': {'type': 'STRING', 'enum': ['titre', 'lieu', 'montant', 'siren', 'description', 'liens', 'categories', 'mots']},
+         'champ': {'type': 'STRING', 'enum': ['titre', 'resume', 'lieu', 'montant', 'siren', 'description', 'liens', 'categories', 'mots']},
          'chercher': {'type': 'STRING', 'description': 'Passage exact du champ à remplacer'},
          'remplacer': {'type': 'STRING', 'description': 'Texte qui le remplace (vide pour le supprimer)'},
          'ajouter': {'type': 'STRING', 'description': 'Texte ajouté à la fin du champ'},
@@ -861,11 +864,11 @@ def lire_donnees(fichier: str, chemin: str = '', filtre: str = '', debut: int = 
     return clip({'fichier': rel, 'chemin': '.'.join(walked), 'valeur': node})
 
 
-SIGNAL_LIMITS = {'titre': 140, 'lieu': 120, 'montant': 40, 'siren': 20, 'description': 6000, 'questions': 1500,
+SIGNAL_LIMITS = {'titre': 140, 'resume': 300, 'lieu': 120, 'montant': 40, 'siren': 20, 'description': 6000, 'questions': 1500,
                  'liens': 3000, 'categories': 400, 'mots': 400}
 
 
-FORM_KEYS = ('titre', 'lieu', 'montant', 'siren', 'description', 'liens', 'categories', 'mots')
+FORM_KEYS = ('titre', 'resume', 'lieu', 'montant', 'siren', 'description', 'liens', 'categories', 'mots')
 _CONTROL = re.compile(r'[\x00-\x08\x0b-\x1f\x7f\u200b-\u200f\u202a-\u202e\u2066-\u2069]')
 QUESTIONS_MARK = re.compile(r'\n*Questions à poser :\n[\s\S]*$')
 

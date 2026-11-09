@@ -150,6 +150,7 @@
         <form class="sg-form" id="sgForm" novalidate>
           <div class="sg-grid">
             <label class="sg-field sg-field--wide"><span>Titre <em>obligatoire</em></span><input name="titre" maxlength="140" required placeholder="Une piscine à 500 M€ à Exempleville"></label>
+            <label class="sg-field sg-field--wide"><span>En résumé <em>une ou deux phrases, affichées dans la liste à la place du dossier ; la Loupe l’écrit à la fin</em></span><textarea name="resume" rows="2" maxlength="300" placeholder="Le fait, le montant, ce qui interroge."></textarea></label>
             <label class="sg-field sg-field--wide"><span>Ce qui interroge <em>obligatoire, 40 caractères au moins</em></span><textarea name="description" rows="8" maxlength="6000" required placeholder="Les faits, les montants, ce que montrent les documents, les questions à poser."></textarea><small class="sg-count" id="sgCount">0 / 6 000</small></label>
             <label class="sg-field"><span>SIREN ou SIRET <em>facultatif</em></span><input name="siren" inputmode="numeric" maxlength="20" placeholder="9 ou 14 chiffres"></label>
             <label class="sg-field"><span>Commune ou territoire <em>facultatif</em></span><input name="lieu" maxlength="120"></label>
@@ -169,7 +170,7 @@
           <label class="sg-check"><input type="checkbox" name="charte"><span>J’ai lu les règles du jeu : des faits sourcés, pas d’insulte, pas d’accusation que je ne peux pas étayer, pas de vie privée. Mon signalement sera visible par tous et relu ensuite.</span></label>
           <label class="sg-check sg-check--soft"><input type="checkbox" name="prive"><span><strong>Ne pas montrer à tous</strong> : seulement à FranceRoueLibre (par exemple si vous n’êtes pas sûr, ou pour transmettre un document).</span></label>
           <div class="sg-submit"><button type="submit" class="btn btn--primary" id="sgSend" disabled>Envoyer le signalement</button><span class="sg-result" id="sgResult" aria-live="polite"></span></div>
-          <p class="note">Ce que nous gardons : le signalement lui-même et, si vous la donnez, votre adresse e-mail, jamais affichée et effacée dès la relecture. Votre adresse IP n’est pas enregistrée (pour les votes, seule une empreinte calculée avec une clé secrète évite qu’une même personne vote deux fois). Détails dans les <a href="mentions.html">mentions légales</a>.</p>
+          <p class="note">Ce que nous gardons : le signalement lui-même et, si vous la donnez, votre adresse e-mail, jamais affichée et effacée dès la relecture. Votre adresse IP n’est pas enregistrée : pour les votes et le nombre de lecteurs, seule une empreinte calculée avec une clé secrète évite de compter deux fois la même personne, effacée au bout de 12 mois. Détails dans les <a href="mentions.html">mentions légales</a>.</p>
         </form>
       </div>
     </section>
@@ -181,7 +182,8 @@
         <div class="section__head"><span class="eyebrow">Tout ce qui remonte <span id="sgListCount"></span></span><h2 id="sgListTitle">Tableau de bord des remontées</h2><p class="lead">Des pistes à vérifier, jamais des verdicts : chacune avec ses sources, son état de relecture, les notes et les votes de la communauté, et la réponse de l’organisme quand il y en a une.</p></div>
         <div class="sg-filters">
           <label class="sg-filter-q"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><span class="sr-only">Chercher dans les remontées</span><input id="sgFilterQ" type="search" placeholder="Chercher : Macron, piscine, une commune, un SIREN…" autocomplete="off"></label>
-          <label class="sg-sort">Trier <select id="sgSort"><option value="recent">les plus récentes</option><option value="note">les mieux notées</option><option value="notes">les plus discutées</option></select></label>
+          <div class="sg-modes" id="sgModes" role="group" aria-label="Affichage"><button type="button" data-mode-set="compact" aria-pressed="false">Compact</button><button type="button" data-mode-set="resume" aria-pressed="true">Résumé</button><button type="button" data-mode-set="complet" aria-pressed="false">Complet</button></div>
+          <label class="sg-sort">Trier <select id="sgSort"><option value="recent">les plus récentes</option><option value="note">les mieux notées</option><option value="notes">les plus discutées</option><option value="vues">les plus vues</option><option value="clics">les plus cliquées</option></select></label>
         </div>
         <div class="sg-facets" id="sgFacets"></div>
         <p class="sg-filter-state" id="sgFilterState" aria-live="polite"></p>

@@ -57,7 +57,7 @@ n’est pas établi ; questions à poser à l’organisme ; sources du site et d
 source publique, sans vie privée ni insulte. Si tu as les outils du formulaire (lire_formulaire, remplir_signalement, \
 modifier_champ), le lecteur est sur la page Remontées citoyennes, son dossier sous les yeux : un nouveau dossier se \
 remplit avec remplir_signalement (un premier appel dès ta première étape, avec ta première recherche ; un dernier avec \
-le dossier complet, ses catégories et ses mots-clés) ; une demande sur le dossier (« ajoute… », « va chercher le maire… », « raccourcis… ») se fait en \
+le dossier complet, son résumé, ses catégories et ses mots-clés) ; une demande sur le dossier (« ajoute… », « va chercher le maire… », « raccourcis… ») se fait en \
 lisant le formulaire, en cherchant ce qui manque, puis avec modifier_champ (un passage, un ajout) ou \
 remplir_signalement (un champ réécrit en entier), sans toucher à ce qu’il n’a pas demandé. Réponds ensuite en une ou \
 deux phrases sur ce que tu as écrit et ce qui reste à vérifier. Sans ces outils, rédige le dossier dans ta réponse et \

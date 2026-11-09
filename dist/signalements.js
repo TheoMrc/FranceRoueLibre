@@ -197,7 +197,7 @@
     send.disabled = true;
     result.className = 'sg-result'; result.textContent = 'Envoi…';
     const liens = form.liens.value.split(/\s+/).map(s => s.trim()).filter(s => /^https?:\/\//i.test(s));
-    const body = { titre: form.titre.value, description: form.description.value, siren: form.siren.value, lieu: form.lieu.value,
+    const body = { titre: form.titre.value, resume: form.resume.value, description: form.description.value, siren: form.siren.value, lieu: form.lieu.value,
       montant: form.montant.value, email: form.email.value, liens, site: form.site.value, categories: catsOf(form.categories.value), mots: tagsOf(form.mots.value), charte: form.charte.checked, prive: form.prive.checked, loupe: state.loupe,
       preuve: { ...state.challenge, counter: state.counter, trace: state.trace } };
     try {
@@ -281,7 +281,7 @@
   }
   /* What the Loupe wrote (one event per remplir_signalement or modifier_champ call): whole fields, as plain text. They
      are only ever written with .value, so nothing in them can run on the page. */
-  const KEYS = ['titre', 'lieu', 'montant', 'siren', 'description', 'liens', 'categories', 'mots'];
+  const KEYS = ['titre', 'resume', 'lieu', 'montant', 'siren', 'description', 'liens', 'categories', 'mots'];
   const QMARK = /\n*Questions à poser :\n[\s\S]*$/;   // the questions end the description
   const draftState = {};
   function applyDraft(champs, sources) {
@@ -352,6 +352,7 @@
           questions: 'Quel est le coût total voté, études et frais financiers compris ?\nQui finance, et à quelle hauteur (commune, intercommunalité, département, région, État) ?\n'
             + 'Une étude de besoin et de fréquentation a-t-elle été publiée ?\nQuel coût de fonctionnement annuel est prévu ?',
           liens: [`${SITE}recherche.html?q=piscine`, `${SITE}index.html#explorer`, `${SITE}aides.html`, 'https://www.collectivites-locales.gouv.fr/'].join('\n'),
+          resume: 'Exemple : un centre aquatique annoncé à 500 M€ dans une commune fictive ; un vrai dossier vérifierait le montant voté, son financement et le coût d’équipements comparables.',
           categories: 'commune, projet-aide, marche-public, cout-disproportionne', mots: 'centre aquatique, piscine, Exempleville, équipement sportif',
         }, 'faits, questions, sources, catégories, mots-clés', 700),
       ],
@@ -378,6 +379,7 @@
           questions: 'Quelles subventions l’association a-t-elle reçues, de qui et pour quels projets ?\nLes conventions d’objectifs et les comptes annuels sont-ils publiés ?\n'
             + 'Un élu ou un agent ayant voté ou instruit ces subventions a-t-il un lien avec l’association, et s’est-il déporté ?',
           liens: [`${SITE}aides.html`, `${SITE}recherche.html`, 'https://annuaire-entreprises.data.gouv.fr/', 'https://www.journal-officiel.gouv.fr/'].join('\n'),
+          resume: 'Exemple : une association qui recevrait beaucoup de subventions ; un vrai dossier vérifierait les montants publiés pour son SIREN, ses dirigeants déclarés et ses comptes.',
           categories: 'association, subvention, conflit-interets, opacite', mots: 'association, subventions, dirigeants, comptes annuels',
         }, 'faits, questions, sources, catégories, mots-clés', 700),
       ],
@@ -427,7 +429,7 @@
     liveSteps.appendChild(li);
     return li;
   }
-  const NAMES = { titre: 'titre', lieu: 'lieu', montant: 'montant', siren: 'SIREN', description: 'faits', questions: 'questions', liens: 'sources', categories: 'catégories', mots: 'mots-clés' };
+  const NAMES = { resume: 'résumé', titre: 'titre', lieu: 'lieu', montant: 'montant', siren: 'SIREN', description: 'faits', questions: 'questions', liens: 'sources', categories: 'catégories', mots: 'mots-clés' };
   function hooks(idea, done) {
     let lastStep = null, tools = 0;
     return {
@@ -663,21 +665,32 @@
       + `${n.liens?.length ? `<ul>${n.liens.map(u => `<li><a href="${esc(u)}" target="_blank" rel="noopener noreferrer nofollow ugc">${esc(u)}</a></li>`).join('')}</ul>` : ''}`
       + `<p class="sg-note__date">${day(n.recu)}</p>${thumbs(ref, n.id, n.votes, Q_NOTE)}</div>`;
   }
+  /* A report in the list: its « En résumé » first (or the start of its text), the whole dossier one click away.
+     Three ways to show the list (#sgList[data-mode], kept in the browser): compact (one line per report: title,
+     themes, votes, readers), résumé (the default) and complet (every dossier open). A click on a title opens or
+     closes that report alone, whatever the mode. */
+  const cut = (t, n) => { t = String(t || '').replace(/\s+/g, ' ').trim(); if (t.length <= n) return t; const c = t.slice(0, n); return `${c.slice(0, Math.max(c.lastIndexOf(' '), n - 30)).replace(/[\s,;:.]+$/, '')}…`; };
+  const scoreLine = (v, n) => `${THUMB}${v.up} · <i class="sg-down">${THUMB}</i>${v.down}${n ? ` · ${NOTE_ICO}${n}` : ''}`;
+  const NOTE_ICO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H7l-3 3V4z"/></svg>';
   function item(s) {
     const meta = [s.siren && `SIREN ${esc(s.siren)}`, s.lieu && esc(s.lieu), s.montant && esc(s.montant)].filter(Boolean);
     const notes = [...(s.notes || [])].sort((a, b) => net(b.votes) - net(a.votes));
     const lead = notes.find(retained), others = notes.filter(n => n !== lead);
-    const long = (s.description || '').length > 700;
+    const v = s.votes || { up: 0, down: 0 };
+    const resume = s.resume ? `<p class="sg-item__resume"><strong>En résumé</strong>${esc(s.resume)}</p>` : `<p class="sg-item__resume is-start">${esc(cut(s.description, 260))}</p>`;
     return `<article class="sg-item${s.relu ? ' is-read' : ''}" id="${esc(s.ref)}"><header><span class="sg-tag${s.relu ? ' sg-tag--read' : ''}">${s.relu ? 'Relu par FranceRoueLibre' : 'Non relu'}</span>`
-      + `<span>${esc(s.ref)}</span><span>${day(s.publie)}</span>${s.loupe ? '<span>préparé avec la Loupe</span>' : ''}</header>`
-      + `<h3>${esc(s.titre)}</h3>`
+      + `<span>${esc(s.ref)}</span><span>${day(s.publie)}</span>${s.loupe ? '<span class="sg-item__loupe">préparé avec la Loupe</span>' : ''}${audience(s)}</header>`
+      + `<h3><button type="button" class="sg-open" aria-expanded="false">${esc(s.titre)}</button></h3>`
+      + `<p class="sg-item__line">${(s.categories || []).slice(0, 3).map(c => `<span>${esc(CAT_LABEL[c] || c)}</span>`).join('')}<span class="sg-item__score">${scoreLine(v, notes.length)}</span>${meta.length ? `<span>${meta.slice(-2).join(' · ')}</span>` : ''}</p>`
       + `${(s.categories || []).length || (s.mots || []).length ? `<div class="sg-item__tags">${(s.categories || []).map(c => `<button type="button" class="sg-pill" data-fcat="${esc(c)}">${esc(CAT_LABEL[c] || c)}</button>`).join('')}${(s.mots || []).map(m => `<button type="button" class="sg-kw" data-ftag="${esc(m)}">#${esc(m)}</button>`).join('')}</div>` : ''}`
-      + `<div class="sg-item__text${long ? ' is-long' : ''}"><p>${esc(s.description)}</p>${long ? '<button type="button" class="sg-more">Lire la suite</button>' : ''}</div>`
+      + resume
+      + `<div class="sg-item__full"><p class="sg-item__text">${esc(s.description)}</p>`
       + `${meta.length ? `<p class="note">${meta.join(' · ')}</p>` : ''}`
       + `${(s.liens || []).length ? `<ul>${s.liens.map(u => `<li><a href="${esc(u)}" target="_blank" rel="noopener noreferrer nofollow ugc">${esc(u)}</a></li>`).join('')}</ul>` : ''}`
-      + `${s.reponse ? `<div class="sg-reply"><strong>Réponse</strong><p>${esc(s.reponse)}</p></div>` : ''}`
+      + `${s.reponse ? `<div class="sg-reply"><strong>Réponse</strong><p>${esc(s.reponse)}</p></div>` : ''}</div>`
+      + `<button type="button" class="sg-more" aria-expanded="false"><span class="sg-more__open">Lire le dossier complet${(s.liens || []).length === 1 ? ' et sa source' : (s.liens || []).length ? ` et ses ${s.liens.length} sources` : ''}</span><span class="sg-more__close">Replier le dossier</span></button>`
       + `${lead ? noteHtml(s.ref, lead, true) : ''}`
-      + thumbs(s.ref, null, s.votes || { up: 0, down: 0 }, Q_REPORT)
+      + thumbs(s.ref, null, v, Q_REPORT)
       + `<details class="sg-notes"><summary>${others.length ? `Notes de la communauté (${others.length})` : 'Ajouter une note de la communauté'}</summary>`
       + `${others.map(n => noteHtml(s.ref, n, false)).join('')}`
       + `<form class="sg-noteform" data-ref="${esc(s.ref)}" novalidate><label><span>Votre note : un contexte, une correction, une source qui manque</span><textarea name="texte" rows="3" maxlength="1000" placeholder="Les faits, avec leurs sources. Pas d’insulte, pas d’accusation."></textarea></label>`
@@ -685,6 +698,48 @@
       + `<div class="sg-noteform__row"><button type="submit" class="btn btn--ghost">Proposer la note</button><span class="sg-noteform__state" aria-live="polite"></span></div></form></details>`
       + `<footer><span>Une piste à vérifier, pas un verdict.</span><button type="button" class="sg-abuse" data-ref="${esc(s.ref)}">Signaler un abus</button></footer></article>`;
   }
+  function setOpen(el, open) {
+    el.classList.toggle('is-open', open);
+    el.querySelectorAll('.sg-open, .sg-more').forEach(b => b.setAttribute('aria-expanded', String(open)));
+  }
+  const MODES = ['compact', 'resume', 'complet'];
+  let mode = 'resume';
+  try { mode = MODES.includes(localStorage.getItem('frl-sg-mode')) ? localStorage.getItem('frl-sg-mode') : 'resume'; } catch (_) { /* private mode */ }
+  function setMode(m) {
+    mode = m;
+    $('sgList').dataset.mode = m;
+    document.querySelectorAll('[data-mode-set]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.modeSet === m)));
+    $('sgList').querySelectorAll('.sg-item').forEach(el => setOpen(el, m === 'complet'));
+    try { localStorage.setItem('frl-sg-mode', m); } catch (_) { /* private mode */ }
+  }
+  document.getElementById('sgModes')?.addEventListener('click', e => { const b = e.target.closest('[data-mode-set]'); if (b) setMode(b.dataset.modeSet); });
+  const EYE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C6.5 5 2.7 9.4 1.5 12c1.2 2.6 5 7 10.5 7s9.3-4.4 10.5-7C21.3 9.4 17.5 5 12 5zm0 11.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9zm0-2.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>';
+  const CLICK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v5H8V2h2zm-6.4 2.2 3.5 3.5-1.4 1.4-3.5-3.5 1.4-1.4zM2 11h5v2H2v-2zm8 0 11 4-4.6 1.6L20 20.2 18.2 22l-3.6-3.6L13 23l-3-12z"/></svg>';
+  const plural = (n, one, many) => `${n.toLocaleString('fr-FR')} ${n > 1 ? many : one}`;
+  function audience(s) {
+    const a = s.audience || { vues: 0, clics: 0 };
+    return `<span class="sg-aud" title="Lecteurs différents qui l’ont vue à l’écran, et qui ont ouvert une source, la suite du texte ou les notes">${EYE}${plural(a.vues, 'lecteur', 'lecteurs')}${a.clics ? ` · ${CLICK}${plural(a.clics, 'clic', 'clics')}` : ''}</span>`;
+  }
+  /* The audience: a report counts a reader when it stays half on screen for a second and a half, and a click when the
+     reader opens one of its sources, the rest of its text or its notes. Once per report and per page; the server
+     counts each reader once (api/assistant/signalement/vue). */
+  const counted = new Set();
+  function tally(ref, type) {
+    const key = `${type}:${ref}`;
+    if (counted.has(key)) return;
+    counted.add(key);
+    if (type === 'clic') counted.add(`vue:${ref}`);
+    fetch(API + 'signalement/vue', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ref, type }), keepalive: true }).catch(() => {});
+  }
+  const timers = new Map();
+  const watch = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+    for (const e of entries) {
+      const ref = e.target.id;
+      if (e.isIntersecting && !timers.has(ref)) timers.set(ref, setTimeout(() => { timers.delete(ref); if (!document.hidden) tally(ref, 'vue'); }, 1500));
+      else if (!e.isIntersecting && timers.has(ref)) { clearTimeout(timers.get(ref)); timers.delete(ref); }
+    }
+  }, { threshold: .5 }) : null;
+  const observe = () => { if (!watch) return; watch.disconnect(); $('sgList').querySelectorAll('.sg-item').forEach(el => watch.observe(el)); };
   function matches(s) {
     if (reports.cats.size && ![...reports.cats].every(c => (s.categories || []).includes(c))) return false;
     if (reports.tags.size && ![...reports.tags].every(t => (s.mots || []).some(m => nrm(m) === nrm(t)))) return false;
@@ -706,17 +761,24 @@
   }
   function render() {
     const rows = reports.all.filter(matches);
-    const by = { recent: (a, b) => String(b.publie).localeCompare(String(a.publie)), note: (a, b) => net(b.votes) - net(a.votes) || String(b.publie).localeCompare(String(a.publie)),
-      notes: (a, b) => (b.notes || []).length - (a.notes || []).length || String(b.publie).localeCompare(String(a.publie)) }[reports.sort];
+    const newer = (a, b) => String(b.publie).localeCompare(String(a.publie));
+    const aud = (s, k) => s.audience?.[k] || 0;
+    const by = { recent: newer, note: (a, b) => net(b.votes) - net(a.votes) || newer(a, b),
+      notes: (a, b) => (b.notes || []).length - (a.notes || []).length || newer(a, b),
+      vues: (a, b) => aud(b, 'vues') - aud(a, 'vues') || newer(a, b), clics: (a, b) => aud(b, 'clics') - aud(a, 'clics') || newer(a, b) }[reports.sort] || newer;
     rows.sort(by);
     facets(reports.all);
     const filtered = reports.q || reports.cats.size || reports.tags.size;
     $('sgFilterState').innerHTML = filtered ? `${rows.length.toLocaleString('fr-FR')} remontée${rows.length > 1 ? 's' : ''} sur ${reports.all.length.toLocaleString('fr-FR')} <button type="button" class="sg-clear">Tout afficher</button>` : '';
     $('sgList').innerHTML = rows.length ? rows.map(item).join('') : reports.all.length ? '<p class="note">Aucune remontée ne correspond : essayez un autre mot.</p>' : '<p class="note">Aucune remontée pour l’instant : soyez le premier.</p>';
+    $('sgList').dataset.mode = mode;
+    if (mode === 'complet') $('sgList').querySelectorAll('.sg-item').forEach(el => setOpen(el, true));
+    observe();
   }
   function focusItem(ref) {
     const el = document.getElementById(ref);
     if (!el) return;
+    setOpen(el, true);
     el.classList.add('is-focus');
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setTimeout(() => el.classList.remove('is-focus'), 2400);
@@ -798,8 +860,15 @@
   });
   $('sgList').addEventListener('click', async e => {
     if (toggleFilter(e.target)) return;
-    const more = e.target.closest('.sg-more');
-    if (more) { more.parentElement.classList.remove('is-long'); more.remove(); return; }
+    const opened = e.target.closest('.sg-item a[href^="http"], .sg-more, .sg-open, .sg-notes > summary');
+    if (opened && !e.target.closest('.sg-note')) tally(opened.closest('.sg-item').id, 'clic');
+    const toggle = e.target.closest('.sg-more, .sg-open');
+    if (toggle) {
+      const el = toggle.closest('.sg-item'), open = !el.classList.contains('is-open');
+      setOpen(el, open);
+      if (!open && el.getBoundingClientRect().top < 0) el.scrollIntoView({ block: 'start' });
+      return;
+    }
     const t = e.target.closest('.sg-thumb');
     if (t) {
       const box = t.closest('.sg-vote'), ref = box.dataset.ref, note = box.dataset.note || null, key = note ? `${ref}:${note}` : ref;
@@ -815,6 +884,8 @@
         const target = note ? s?.notes.find(n => n.id === note) : s;
         if (target) target.votes = d.votes;
         box.outerHTML = thumbs(ref, note, d.votes, note ? Q_NOTE : Q_REPORT);
+        if (!note) { const line = document.getElementById(ref)?.querySelector('.sg-item__score'); if (line) line.innerHTML = scoreLine(d.votes, (s?.notes || []).length); }
+        observe();
       } catch (err) {
         box.querySelectorAll('.sg-thumb').forEach(b => { b.disabled = false; });
         box.querySelector('small').textContent = err.message || 'Vote non pris en compte';
@@ -834,5 +905,5 @@
   const q0 = new URLSearchParams(location.search).get('q');
   if (q0) { reports.q = q0; $('sgFilterQ').value = q0; }
   document.querySelectorAll('[data-ico]').forEach(el => { if (window.FRL_ICONS) el.innerHTML = FRL_ICONS.icon(el.dataset.ico); });
-  route(true); getChallenge(); list(); count(); update(); showCats(); showTags();
+  route(true); setMode(mode); getChallenge(); list(); count(); update(); showCats(); showTags();
 })();

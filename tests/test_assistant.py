@@ -840,6 +840,30 @@ class SignalementsTest(unittest.TestCase):
         self.G.admin('sig_note_masquer', ref, ok['id'])
         self.assertEqual(self.G.published()[0]['notes'], [])
 
+    def test_reader_key_ipv6_network(self):
+        self.assertEqual(self.G.voter('2a01:cb00:1:2:aaaa::1'), self.G.voter('2a01:cb00:1:2:bbbb:cccc::9'))   # same /64
+        self.assertNotEqual(self.G.voter('2a01:cb00:1:3::1'), self.G.voter('2a01:cb00:1:2::1'))
+        self.assertEqual(self.G.voter('::ffff:192.0.2.7'), self.G.voter('192.0.2.7'))
+        self.assertNotIn('192.0.2.7', self.G.voter('192.0.2.7'))
+
+    def test_audience_and_purge(self):
+        ref = self.G.submit(dict(self.base, preuve=self.proof()), 'r1')['ref']
+        self.G.seen({'ref': ref, 'type': 'vue'}, 'a')
+        self.G.seen({'ref': ref, 'type': 'vue'}, 'a')                    # a reader counts once
+        out = self.G.seen({'ref': ref, 'type': 'clic'}, 'b')               # a click is a view too
+        self.assertEqual(out['audience'], {'vues': 2, 'clics': 1})
+        self.assertFalse(self.G.seen({'ref': ref, 'type': 'autre'}, 'a')['ok'])
+        self.G.vote({'ref': ref, 'sens': 1}, 'a')
+        d = self.G.load(ref)
+        d['votes']['up'] = ['old@2020-01', 'undated'] + d['votes']['up']   # past the retention, and from before the months
+        d['audience']['vues'][0] = d['audience']['vues'][0].split('@')[0] + '@2020-01'
+        self.assertTrue(self.G.purge(d))
+        self.assertEqual(self.G._counts(d['votes']), {'up': 3, 'down': 0})   # the counts stay
+        self.assertNotIn('old@2020-01', d['votes']['up'])
+        self.assertTrue(all('@' in e for e in d['votes']['up']))
+        self.assertEqual(self.G._counts(d['audience'], ('vues', 'clics')), {'vues': 2, 'clics': 1})
+        self.assertFalse(self.G.purge(d))
+
     def test_categories_match_the_page(self):
         js = (Path(__file__).resolve().parents[1] / 'dist' / 'signalements.js').read_text(encoding='utf-8')
         page = re.findall(r"\['([a-z-]+)', '[^']+'\]", js[js.index('const CATEGORIES'):js.index('const CAT_LABEL')])
@@ -870,7 +894,7 @@ class RemplirSignalementTest(unittest.TestCase):
         self.assertEqual(len(fills), 2)
         self.assertEqual(fills[0].get('lieu'), 'Rennes')
         self.assertIn('description', fills[1])
-        self.assertEqual(set(res['signalement']), {'titre', 'lieu', 'montant', 'description', 'liens', 'categories', 'mots'})
+        self.assertEqual(set(res['signalement']), {'titre', 'resume', 'lieu', 'montant', 'description', 'liens', 'categories', 'mots'})
         self.assertIn('Questions à poser :\n', res['signalement']['description'])
 
     def test_form_tools_only_on_the_page(self):

@@ -11,6 +11,7 @@ reads it), and the site can mark it read, shorten or anonymise it, or hide it.
 * GET  /api/assistant/signalements      -> every report shown to all
 * POST /api/assistant/signalement/vote  {"ref", "note"?, "sens"}  a thumb up or down (or taken back) on a report or a note
 * POST /api/assistant/signalement/note  {"ref", "texte", "liens", "preuve"}  a note of the community under a report
+* POST /api/assistant/signalement/vue   {"ref", "type": "vue" | "clic"}  a distinct reader saw it, or opened something in it
 * GET  /api/assistant/signalements/recherche?q=…  the published reports matching q (search box, recherche.html, Loupe)
 * admin (127.0.0.1, MAIL_ADMIN_TOKEN): sig_liste | sig_voir REF | sig_relu REF [texte] | sig_masquer REF | sig_afficher REF
   | sig_mots REF {"mots", "categories"} | sig_note_masquer REF ID (REF may be a word of the title naming one report)
@@ -44,7 +45,7 @@ DIFFICULTY = 16          # leading zero bits of sha256(nonce:counter): about 65 
 CHALLENGE_MIN, CHALLENGE_MAX = 3, 20 * 60
 PER_READER_HOUR, PER_READER_DAY, PER_DAY = 3, 6, 300
 ABUSE_HIDE = 3           # distinct readers flagging a shown report hide it until the site has read it
-LIMITS = {'titre': (8, 140), 'description': (40, 6000), 'lien': (0, 400), 'siren': (0, 20), 'lieu': (0, 120),
+LIMITS = {'titre': (8, 140), 'resume': (0, 300), 'description': (40, 6000), 'lien': (0, 400), 'siren': (0, 20), 'lieu': (0, 120),
           'montant': (0, 40), 'email': (0, 160)}
 MAX_LINKS = 12
 
@@ -268,7 +269,7 @@ def check(fields: dict) -> Optional[str]:
     for link in fields['liens']:
         if not re.fullmatch(r'https?://[^\s<>"]{3,400}', link):
             return f'lien invalide : {link[:80]}'
-    problem = wording_problem(' '.join([fields['titre'], fields['description'], *fields.get('mots', [])]))
+    problem = wording_problem(' '.join([fields['titre'], fields.get('resume', ''), fields['description'], *fields.get('mots', [])]))
     if problem:
         return problem
     if not fields['charte']:
@@ -299,7 +300,7 @@ def submit(body: dict, reader: str) -> dict:
     d = {'ref': ref, 'recu': now.isoformat(timespec='seconds'), 'statut': 'prive' if fields['prive'] else 'publie',
          'relu': False, 'abus': [], 'lecteur': reader,
          'votes': {'up': [], 'down': []}, 'notes': [],
-         **{k: fields[k] for k in ('titre', 'description', 'siren', 'lieu', 'montant', 'email', 'liens', 'loupe', 'categories', 'mots')}}
+         **{k: fields[k] for k in ('titre', 'resume', 'description', 'siren', 'lieu', 'montant', 'email', 'liens', 'loupe', 'categories', 'mots')}}
     if not fields['prive']:
         d['publie'] = d['recu']
     save(d)
@@ -337,10 +338,11 @@ def flag(body: dict, reader: str) -> dict:
 
 
 def public_view(d: dict) -> dict:
-    out = {k: d.get(k) for k in ('ref', 'titre', 'description', 'siren', 'lieu', 'montant', 'liens', 'loupe', 'publie', 'relu', 'reponse')}
+    out = {k: d.get(k) for k in ('ref', 'titre', 'resume', 'description', 'siren', 'lieu', 'montant', 'liens', 'loupe', 'publie', 'relu', 'reponse')}
     out['categories'] = [c for c in d.get('categories') or [] if c in CATEGORIES]
     out['mots'] = list(d.get('mots') or [])
     out['votes'] = _counts(d.get('votes'))
+    out['audience'] = _counts(d.get('audience'), ('vues', 'clics'))
     out['notes'] = [{'id': n['id'], 'texte': n['texte'], 'liens': n.get('liens') or [], 'recu': n['recu'], 'votes': _counts(n.get('votes'))}
                     for n in d.get('notes') or [] if n.get('statut', 'publie') == 'publie']
     return out
@@ -348,6 +350,8 @@ def public_view(d: dict) -> dict:
 
 def published() -> list:
     """Every report shown to all, newest first."""
+    _ensure_index()   # the first time: SEED applied, the index built
+    purge_all()
     return [public_view(d) for d in sorted(all_reports(), key=lambda d: d.get('publie') or '', reverse=True)
             if d.get('statut') == 'publie']
 
@@ -373,6 +377,10 @@ def admin(action: str, ref: str, text: str) -> dict:
         return {'error': 'signalement introuvable'}
     if action == 'sig_voir':
         return d
+    if action == 'sig_resume':   # text: the « En résumé » shown in the list
+        d['resume'] = clean(text, LIMITS['resume'][1])
+        save(d)
+        return {'ok': True, 'ref': d['ref'], 'resume': d['resume']}
     if action == 'sig_mots':   # text: {"mots": [...], "categories": [...]} (replaces both when given)
         try:
             tags = json.loads(text or '{}')
@@ -436,18 +444,25 @@ def mots_of(value) -> list:
 # Keywords for reports sent before they existed (applied once, at the first index, to a report that has none).
 SEED = [
     {'cherche': 'macron', 'avant': '2026-11-10', 'mots': ['Emmanuel Macron', 'anciens présidents', 'Élysée', 'après-mandat', 'budget 2027', 'bureaux', 'sécurité'],
-     'categories': ['etat', 'elus', 'train-de-vie', 'opacite']},
+     'categories': ['etat', 'elus', 'train-de-vie', 'opacite'],
+     'resume': 'Le projet de budget 2027 prévoirait 2,3 M€ sur six ans pour les bureaux et la sécurité d’Emmanuel Macron après '
+               'l’Élysée ; le coût de chaque ancien président, lui, n’est pas publié.'},
 ]
 
 
 def _seed(d: dict) -> bool:
-    if d.get('mots') or d.get('categories'):
-        return False
+    """What SEED gives a report sent before these fields existed, for the fields it still lacks."""
     text = _norm(f"{d.get('titre', '')} {d.get('description', '')}")
     for s in SEED:
         if s['cherche'] in text and str(d.get('recu') or d.get('publie') or '') < s['avant']:
-            d['mots'], d['categories'] = mots_of(s['mots']), categories_of(s['categories'])
-            return True
+            changed = False
+            if not d.get('mots') and not d.get('categories'):
+                d['mots'], d['categories'] = mots_of(s['mots']), categories_of(s['categories'])
+                changed = True
+            if not d.get('resume') and s.get('resume'):
+                d['resume'] = clean(s['resume'], LIMITS['resume'][1])
+                changed = True
+            return changed
     return False
 
 
@@ -471,7 +486,7 @@ def _index_one(d: dict) -> None:
         _index.pop(ref, None)
         return
     _index[ref] = {
-        'titre': set(_words(d.get('titre', ''))),
+        'titre': set(_words(d.get('titre', '') + ' ' + d.get('resume', ''))),
         'mots': set(_words(' '.join(d.get('mots') or []) + ' ' + ' '.join(CATEGORIES.get(c, '') for c in d.get('categories') or []))),
         'lieu': set(_words(f"{d.get('lieu', '')} {d.get('siren', '')}")),
         'texte': set(_words(d.get('description', '') + ' ' + ' '.join(n.get('texte', '') for n in d.get('notes') or [] if n.get('statut', 'publie') == 'publie'))),
@@ -513,7 +528,7 @@ def search(q: str, limit: int = 8) -> list:
             v = e['vue']
             found.append((score + .1 * (v['votes']['up'] - v['votes']['down']) + (.5 if v.get('relu') else 0), v))
     found.sort(key=lambda x: (-x[0], x[1].get('publie') or ''))
-    return [{'ref': v['ref'], 'titre': v['titre'], 'extrait': v['description'][:220], 'lieu': v.get('lieu'), 'montant': v.get('montant'),
+    return [{'ref': v['ref'], 'titre': v['titre'], 'extrait': (v.get('resume') or v['description'])[:220], 'lieu': v.get('lieu'), 'montant': v.get('montant'),
              'categories': [CATEGORIES[c] for c in v['categories']], 'mots': v['mots'], 'relu': v.get('relu'), 'publie': v.get('publie'),
              'votes': v['votes'], 'url': f"signalements.html#{v['ref']}"} for _, v in found[:limit]]
 
@@ -524,13 +539,20 @@ _STOP = set('le la les l de des du d un une et en a au aux pour par sur dans est
 # ------------------------------------------------------------------------------- votes and community notes
 # A thumb up or down on a report (« Ce signalement est-il légitime, objectif, ou permet-il de mieux comprendre nos
 # dépenses publiques ? ») and on each note of the community (same question about the note). One vote per reader, which
-# they can change or take back. The reader is a key derived from the IP address with a secret kept on the server
-# (never the address itself), so that a vote counts once across days.
+# they can change or take back. The same for the audience of a report: the distinct readers who saw it on screen,
+# and those who opened something in it (a source, the rest of the text, the notes).
+# The reader is a key derived from the IP address with a secret kept on the server (never the address itself; for
+# IPv6, its /64 network, which a subscriber keeps while the end of the address changes), so that a reader counts once
+# across days. Each key is kept with its month ("key@2026-11") and erased after RETENTION_MONTHS: only the counts stay.
 NOTE_CHARS, MAX_NOTES = 1000, 30
+RETENTION_MONTHS = 12
+VIEWS_PER_HOUR = 600
 VOTES_PER_HOUR, NOTES_PER_HOUR, NOTES_PER_DAY = 120, 5, 15
 NOTE_SHOWN_UP, NOTE_HIDDEN_NET = 3, -3   # a note « retenue » from 3 thumbs up and twice as many up as down
 _votes_hits = collections.defaultdict(collections.deque)
 _notes_hits = collections.defaultdict(collections.deque)
+_views_hits = collections.defaultdict(collections.deque)
+_purged = {'day': ''}
 
 
 def _voter_secret() -> bytes:
@@ -548,12 +570,95 @@ def _voter_secret() -> bytes:
 
 
 def voter(ip: str) -> str:
-    return hmac.new(_voter_secret(), ip.encode(), hashlib.sha256).hexdigest()[:16]
+    import ipaddress
+    try:
+        addr = ipaddress.ip_address(ip.split('%')[0])
+        if addr.version == 6 and addr.ipv4_mapped:
+            addr = addr.ipv4_mapped
+        key = str(ipaddress.ip_network(f'{addr}/64', strict=False)) if addr.version == 6 else str(addr)
+    except ValueError:
+        key = ip
+    return hmac.new(_voter_secret(), key.encode(), hashlib.sha256).hexdigest()[:16]
 
 
-def _counts(votes) -> dict:
-    votes = votes or {}
-    return {'up': len(votes.get('up') or []), 'down': len(votes.get('down') or [])}
+def _month() -> str:
+    return dt.date.today().strftime('%Y-%m')
+
+
+def _who(entry: str) -> str:
+    return str(entry).split('@')[0]
+
+
+def _counts(bag, sides=('up', 'down')) -> dict:
+    """The counts of a votes (or audience) record: the keys still kept, plus those erased after RETENTION_MONTHS."""
+    bag = bag or {}
+    old = bag.get('ancien') or {}
+    return {k: len(bag.get(k) or []) + int(old.get(k) or 0) for k in sides}
+
+
+def _purge_bag(bag: dict, sides, limit: str) -> bool:
+    """Erase the keys older than the month limit, keeping their number (keys without a month get this one).
+    True when something changed."""
+    if not bag:
+        return False
+    changed = False
+    for k in sides:
+        old = [str(e) for e in bag.get(k) or []]
+        keep = [e if '@' in e else f'{e}@{_month()}' for e in old if '@' not in e or e.split('@')[1] >= limit]
+        gone = len(old) - len(keep)
+        if keep != old:
+            changed = True
+            bag[k] = keep
+            if gone:
+                bag.setdefault('ancien', {})[k] = int(bag.get('ancien', {}).get(k) or 0) + gone
+    return changed
+
+
+def purge(d: dict) -> bool:
+    today = dt.date.today()
+    y, m = today.year, today.month - RETENTION_MONTHS
+    while m <= 0:
+        y, m = y - 1, m + 12
+    limit = f'{y:04d}-{m:02d}'
+    changed = _purge_bag(d.get('votes'), ('up', 'down'), limit) | _purge_bag(d.get('audience'), ('vues', 'clics'), limit)
+    for n in d.get('notes') or []:
+        changed |= _purge_bag(n.get('votes'), ('up', 'down'), limit)
+    return changed
+
+
+def purge_all() -> None:
+    """Once a day (at the first list of the day): the keys past RETENTION_MONTHS erased in every report."""
+    today = dt.date.today().isoformat()
+    if _purged['day'] == today:
+        return
+    _purged['day'] = today
+    with _lock:
+        for d in all_reports():
+            if purge(d):
+                save(d)
+
+
+def seen(body: dict, who: str) -> dict:
+    """{"ref", "type": "vue" | "clic"}: a distinct reader saw the report on screen, or opened something in it."""
+    kind = {'vue': 'vues', 'clic': 'clics'}.get(str(body.get('type') or ''))
+    try:
+        d = load(str(body.get('ref') or ''))
+    except ValueError:
+        d = None
+    if not kind or not d or d.get('statut') != 'publie':
+        return {'ok': False, 'error': 'signalement introuvable'}
+    with _lock:
+        if _too_many(_views_hits, who, VIEWS_PER_HOUR):
+            return {'ok': True}
+        d = load(d['ref'])
+        bag = d.setdefault('audience', {'vues': [], 'clics': []})
+        if any(_who(e) == who for e in bag.get(kind) or []):
+            return {'ok': True, 'audience': _counts(bag, ('vues', 'clics'))}
+        bag.setdefault(kind, []).append(f'{who}@{_month()}')
+        if kind == 'clics' and not any(_who(e) == who for e in bag.get('vues') or []):
+            bag.setdefault('vues', []).append(f'{who}@{_month()}')   # a click is a view too
+        save(d)
+    return {'ok': True, 'audience': _counts(bag, ('vues', 'clics'))}
 
 
 def _too_many(hits: dict, who: str, per_hour: int, per_day: int = 0) -> bool:
@@ -589,9 +694,9 @@ def vote(body: dict, who: str) -> dict:
                 return {'ok': False, 'error': 'note introuvable'}
         v = target.setdefault('votes', {'up': [], 'down': []})
         for side in ('up', 'down'):
-            v[side] = [x for x in v.get(side) or [] if x != who]
+            v[side] = [x for x in v.get(side) or [] if _who(x) != who]
         if sens:
-            v['up' if sens > 0 else 'down'].append(who)
+            v['up' if sens > 0 else 'down'].append(f'{who}@{_month()}')
         save(d)
     return {'ok': True, 'votes': _counts(v)}
 
@@ -625,7 +730,7 @@ def add_note(body: dict, who: str, reader: str) -> dict:
         if len([n for n in notes if n.get('statut', 'publie') == 'publie']) >= MAX_NOTES:
             return {'ok': False, 'error': 'ce signalement a déjà beaucoup de notes'}
         note = {'id': secrets.token_hex(4), 'texte': texte, 'liens': liens, 'recu': dt.datetime.now().isoformat(timespec='seconds'),
-                'statut': 'publie', 'votes': {'up': [who], 'down': []}}
+                'statut': 'publie', 'votes': {'up': [f'{who}@{_month()}'], 'down': []}}
         notes.append(note)
         save(d)
     try:
