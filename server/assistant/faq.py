@@ -1,7 +1,8 @@
 """Saved answers (faq.json, built by scripts/loupe-faq.py): a question that many readers ask is answered from this file,
-at once and without calling a model, so it spends no credits. Only the first question of a conversation is matched (a
-follow-up needs the context, so it goes to the model): an entry matches when, for one of its sets of word groups
-(match_any), a word of every group appears in the question."""
+at once and without calling a model, so it spends no credits. find() matches a first question; fiche.answer() also
+asks it about a follow-up that stands alone (« Combien nous a coûté Bruno Le Maire ? » in the middle of a conversation),
+never about one that refers to the conversation. An entry matches when, for one of its sets of word groups (match_any),
+a word of every group appears in the question."""
 import json
 import re
 import unicodedata
@@ -26,15 +27,16 @@ def entries() -> list:
     return _entries
 
 
-def find(messages: list) -> dict | None:
-    """The saved answer for this conversation, or None."""
+def find(messages: list, strict: bool = False) -> dict | None:
+    """The saved answer for this conversation, or None. strict: not one word more than the saved question (a
+    follow-up: « quelles aides aux associations sportives » after a question about Chelles is not the national list)."""
     if len([m for m in messages if m.get('role') == 'user']) != 1:
         return None
     q = norm(messages[-1].get('text'))
     for e in entries():
         for groups in e.get('match_any') or [e.get('match', [])]:
             if groups and all(any(norm(w).strip() in q for w in group) for group in groups) \
-                    and not _narrower(q, e, groups, messages[-1].get('text')):
+                    and not _narrower(q, e, groups, messages[-1].get('text'), strict):
                 return e
     return None
 
@@ -46,7 +48,7 @@ france francais francaise publique publiques public montant total exactement env
 recu recus recues donne donnes donner ete fait faire peut peux veux savoir dire bercy etat gouvernement represente represent dernier derniers derniere dernieres ans actuel actuelle actuellement aujourd hui'''.split())
 
 
-def _narrower(q: str, entry: dict, groups: list, raw: str = '') -> bool:
+def _narrower(q: str, entry: dict, groups: list, raw: str = '', strict: bool = False) -> bool:
     """True when the question asks about something more precise than the saved answer (« associations financées par
     l'Éducation nationale » is not « les associations les plus subventionnées ») : more than one significant word of
     the question is neither in the saved question nor in the matched word groups, or the question quotes a name."""
@@ -60,7 +62,7 @@ def _narrower(q: str, entry: dict, groups: list, raw: str = '') -> bool:
     names = [norm(w).strip() for w in re.findall(r"[^\W\d_][\w-]*", str(raw or ''))[1:] if w[:1].isupper()]
     if any(n and n in extra for n in names):   # a proper name the saved answer does not cover (« Article 1 »)
         return True
-    return len(extra) > 1
+    return len(extra) > (0 if strict else 1)
 
 
 def result(entry: dict) -> dict:

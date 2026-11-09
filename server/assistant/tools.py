@@ -112,6 +112,13 @@ DECLARATIONS: List[dict] = [
                     'activité, siège).',
      'parameters': {'type': 'OBJECT', 'properties': {'nom': {'type': 'STRING', 'description': 'SIREN (9 chiffres) ou nom'}},
                     'required': ['nom']}},
+    {'name': 'personnalite',
+     'description': 'Une personnalité publique (élu, ministre, président, ancien ministre) : ses mandats en cours '
+                    '(Répertoire national des élus), son parcours (Wikidata, données des infobox de Wikipédia) et ce que la '
+                    'loi ou les assemblées publient sur la rémunération de ces fonctions. Le site n’a aucune dépense par '
+                    'personne.',
+     'parameters': {'type': 'OBJECT', 'properties': {'nom': {'type': 'STRING', 'description': 'Prénom et nom'}},
+                    'required': ['nom']}},
     {'name': 'chercher_fiche',
      'description': 'Cherche par mots-clés dans un des grands jeux du site : etat (missions et programmes du budget de '
                     'l’État, crédits), niches (458 dépenses fiscales et leur coût), impots (292 impôts et taxes, '
@@ -662,6 +669,24 @@ def _elected(i: int) -> Optional[dict]:
     return {k: v for k, v in out.items() if v is not None}
 
 
+def _personnalite(nom: str) -> dict:
+    from . import personnes
+    return clip(personnes.tool(nom))
+
+
+def _with_mayor(e: Optional[dict], code: str) -> Optional[dict]:
+    """The mayor in office (Répertoire national des élus), so that the model never guesses who runs the commune."""
+    try:
+        from . import personnes
+        mayor = personnes.mayor_of(code)
+    except Exception:  # noqa: BLE001
+        mayor = None
+    if mayor:
+        e = dict(e or {})
+        e['maire'] = f'{mayor["nom"]}, maire depuis le {mayor["depuis"]} (Répertoire national des élus, {mayor["source_date"]})'
+    return e
+
+
 def _signals(code: str) -> list:
     s = _json('local/signals.json')
     out = []
@@ -780,7 +805,7 @@ def dossier_commune(nom: str) -> dict:
         'comptes': {k: accounts.get(k) for k in accounts if k not in ('entite',)},
         'projets_aides_etat': _projects(code),
         'subventions_etat_associations_du_lieu': _associations(code),
-        'elus_et_personnel': _elected(i),
+        'elus_et_personnel': _with_mayor(_elected(i), code),
         'signaux': signals or 'aucun signal relevé pour cette commune',
         'mentions_dans_les_depenses': mentions,
         'liens': _links(code),
@@ -949,6 +974,7 @@ class Toolbox:
                       'comparer': lambda: O.comparer(args.get('nom', ''), args.get('agregat') or 'depenses-totales',
                                                      args.get('niveau') or 'communes', args.get('rapport_a') or ''),
                       'dossier_beneficiaire': lambda: O.dossier_beneficiaire(args.get('nom', '')),
+                      'personnalite': lambda: _personnalite(args.get('nom', '')),
                       'chercher_fiche': lambda: O.chercher_fiche(args.get('jeu', ''), args.get('mots', ''), args.get('tri') or '',
                                                                  args.get('cible') or ''),
                       'page_du_site': lambda: O.page_du_site(args.get('mots', '')),

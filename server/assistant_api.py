@@ -392,12 +392,11 @@ class Handler(BaseHTTPRequestHandler):
                 if problem:
                     return self.send(400, {'error': f'Votre piste : {problem}.'})
                 form['_piste'] = piste
-        saved = None if form else faq.find(messages)
-        if saved:  # a question many readers ask: answered from faq.json, no model call, no credits
-            return self.send(202, {'job': saved_job(self.client_ip(), saved, messages)})
-        place = None if form else fiche.answer(messages)
-        if place:  # only a commune, a postal code or a département: answered from the data, no model call
-            return self.send(202, {'job': saved_job(self.client_ip(), None, messages, place)})
+        # answered from the data or from faq.json, no model call, no credits: a SIREN, a commune and a question about it,
+        # a saved answer, a public figure, a place alone; on a follow-up too when the message stands alone (fiche.answer)
+        auto = None if form else fiche.answer(messages)
+        if auto:
+            return self.send(202, {'job': saved_job(self.client_ip(), None, messages, auto)})
         if body.get('auto'):  # opened by the site itself (a commune, a SIREN): only the answers that cost nothing
             return self.send(200, {'job': None, 'free': False})
         lack = credits_info()

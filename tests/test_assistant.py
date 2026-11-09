@@ -169,7 +169,7 @@ class SirenAnswerTest(unittest.TestCase):
         self.assertIn('2010 à 2021 et 2023', r['reply'])
         self.assertIsNone(self.ask('999999999'))  # placeholder of bodies without a SIREN: the model explains
         self.assertIsNone(self.ask('100000009'))  # nothing published: the model explains
-        self.assertIsNone(fiche_two_turns())
+        self.assertEqual(fiche_two_turns()['saved'], 'siren', 'a SIREN in a follow-up is answered from the data too')
 
 
 def fiche_two_turns():
@@ -729,8 +729,10 @@ class PlaceAnswerTest(unittest.TestCase):
     def test_real_questions_go_to_the_model(self):
         for q in ('Combien coûte la cantine à Audenge ?', 'mise en place', 'Pourquoi la dette augmente ?'):
             self.assertIsNone(self.ask(q), q)
+        self.assertEqual(self.F.answer([{'role': 'user', 'text': 'Audenge'}, {'role': 'assistant', 'text': '…'},
+                                        {'role': 'user', 'text': 'Arcachon'}])['saved'], 'lieu', 'a new commune alone, in a follow-up')
         self.assertIsNone(self.F.answer([{'role': 'user', 'text': 'Audenge'}, {'role': 'assistant', 'text': '…'},
-                                         {'role': 'user', 'text': 'Audenge'}]), 'a follow-up goes to the model')
+                                         {'role': 'user', 'text': 'Pourquoi la dette augmente ?'}]), 'a real question goes to the model')
 
 
 class SignalementsTest(unittest.TestCase):

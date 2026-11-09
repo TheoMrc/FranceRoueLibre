@@ -1,7 +1,7 @@
 """Vérifie tout le site sans dépenser un jeton : à lancer avant chaque déploiement (check.bat sur le PC).
 
 Étapes (chacune dit OK ou ce qui a cassé) :
-  unitaires   tests/test_assistant.py et tests/*.test.mjs
+  unitaires   tests/test_assistant.py, tests/test_auto.py (réponses sans modèle) et tests/*.test.mjs
   lieux       places.find sur les cas de tests/lieux.json (fautes, codes postaux, lieu dans une phrase…)
   loupe       tests/loupe-scenarios.json rejoués par un faux modèle, au format Claude puis au format Gemini, dans le
               vrai code de la Loupe : boucle de l'agent, conversion des messages, outils, données. Aucun appel réseau
@@ -87,7 +87,7 @@ def offline():
 
 # ================================================================ unit tests
 def step_unitaires(fast: bool) -> None:
-    r = subprocess.run([sys.executable, '-m', 'unittest', '-q', 'tests.test_assistant'], cwd=ROOT,
+    r = subprocess.run([sys.executable, '-m', 'unittest', '-q', 'tests.test_assistant', 'tests.test_auto'], cwd=ROOT,
                        capture_output=True, text=True, encoding='utf-8', errors='replace',
                        env={**os.environ, 'PYTHONPATH': str(ROOT / 'server')})
     tail = (r.stderr or r.stdout).strip().splitlines()[-1:] or ['']

@@ -111,6 +111,26 @@
     P.wire(box);
     if (one) openLoupe(one.nom, true);
   }
+  /* A public figure named in the search (« gérard larcher », « salaire yaël braun-pivet »): the site has no line per
+     person, so say who it is (Répertoire national des élus, Wikidata) and let the Loupe say what the functions pay. */
+  const PERSON = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>';
+  async function showPerson(q, runId) {
+    let box = $('srPerson');
+    if (!box) {
+      box = Object.assign(document.createElement('div'), { id: 'srPerson', className: 'sr-place', hidden: true });
+      $('srPlace').insertAdjacentElement('afterend', box);
+    }
+    box.hidden = true; box.innerHTML = '';
+    if (/^\s*\d/.test(q)) return;
+    let found = [];
+    try { const r = await fetch(`api/personne?q=${encodeURIComponent(q)}`); found = r.ok ? (await r.json()).personnes || [] : []; } catch { found = []; }
+    if (runId !== state.run || !found.length) return;
+    box.innerHTML = `<p class="sr-place__head">${found.length > 1 ? 'Élus de ce nom' : 'Personnalité publique'} · le site publie l’argent public par organisme, pas par personne</p><div class="sr-place__grid">${found.map(p =>
+      `<div class="sr-place__card"><span class="sr-place__pin">${PERSON}</span><span class="sr-place__body"><strong>${esc(p.nom)}</strong><small>${esc([...p.mandats, ...p.parcours.slice(0, p.mandats.length ? 1 : 3)].slice(0, 4).join(' · '))}</small></span>`
+      + `<span class="sr-place__links">${p.wikipedia ? `<div class="frl-chips-wrap"><div class="frl-chips"><a class="frl-chip frl-chip--commune" href="${esc(p.wikipedia)}" rel="noopener" target="_blank"><span>Wikipédia</span></a></div></div>` : ''}</span></div>`).join('')}</div>`
+      + (found.length === 1 ? loupeButton(found[0].question, `Ce que coûtent ses fonctions : demander à la Loupe`) : '');
+    box.hidden = false;
+  }
   /* The citizen reports of signalements.html that match the words (api/assistant/signalements/recherche) */
   const FLAG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>';
   async function showReports(q, runId) {
@@ -174,6 +194,7 @@
     $('srTitle').innerHTML = `« ${esc(state.q)} »`;
     $('srResults').hidden = false; clearPanels();
     showPlace(state.q, runId);
+    showPerson(state.q, runId);
     showReports(state.q, runId);
     if (state.words.every(w => COMMON.has(w))) {
       // « La », « de la » : in almost every line, nothing to learn from them alone
@@ -190,6 +211,16 @@
         state.mode = 'api'; state.api = api; state.stats = api.stats;
         state.rows = api.top.map(row => { state.details.set(row.id, row); return { ...row, whoKey: row.who || row.siren ? `${row.who}|${row.siren}` : null, extraKey: row.extra }; });
         if (!api.lines && !exact && !from) {
+          // « croix rouges », « mega bassines »: the phrase exists in the singular
+          const single = state.words.map(w => w.length >= 5 && /[sx]$/.test(w) && !/(ss|us|is)$/.test(w) ? w.slice(0, -1) : w).join(' ');
+          if (single !== state.words.join(' ')) {
+            const again = await apiSearch(single, state.prefix);
+            if (stale()) return;
+            if (again?.lines) {
+              history.replaceState(null, '', `?q=${encodeURIComponent(single)}&de=${encodeURIComponent(state.q)}`);
+              return run(single, { from: state.q });
+            }
+          }
           const fixed = await correction(state.words, state.prefix);
           if (stale()) return;
           if (fixed) {

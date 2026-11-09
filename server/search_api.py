@@ -11,6 +11,8 @@ GET /api/search?q=mise+en+place[&prefix=1]  →  JSON
   ms      server time
 GET /api/lieux?q=33980  →  {"communes": [...], "departement": {...} | null, "type": ...}  communes and départements
   from a name (typos tolerated), a postal code or a département number (server/assistant/places.py)
+GET /api/personne?q=gerard+larcher  →  {"personnes": [{nom, mandats, parcours, wikipedia, question}]}  the public figures a
+  search names (server/assistant/personnes.py: Répertoire national des élus, Wikidata), for a card above the results
 GET /api/health  →  {"ok": true, "lines": …}
 
 Python standard library only. The index is opened read-only (immutable). Run behind nginx (rate limit, HTTPS):
@@ -39,6 +41,7 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from assistant import places  # noqa: E402
+from assistant import personnes  # noqa: E402
 
 DATA_DIR = Path(__file__).resolve().parents[1] / 'dist' / 'data'
 
@@ -254,6 +257,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(200, places.find(q))
             except (OSError, ValueError, RuntimeError) as error:
                 return self.send(503, {'error': f'lieux indisponibles ({type(error).__name__})'}, cache=False)
+        if url.path == '/api/personne':
+            q = (params.get('q') or [''])[0][:120]
+            try:
+                return self.send(200, {'personnes': personnes.cards(q)})
+            except (OSError, ValueError, RuntimeError, KeyError) as error:
+                return self.send(503, {'error': f'personnes indisponibles ({type(error).__name__})'}, cache=False)
         if url.path != '/api/search':
             return self.send(404, {'error': 'not found'})
         maybe_sweep()

@@ -1,0 +1,20 @@
+{
+ "telecharge": "2026-11-09",
+ "parlementaire": {
+  "base": 5931.95,
+  "residence": 177.96,
+  "fonction": 1527.48,
+  "brut": 7637.39,
+  "net": 5953.34,
+  "dfp": 7238.04,
+  "collaborateurs": 11463.0,
+  "depuis": "",
+  "source": "Assemblée nationale, « La situation matérielle du député »",
+  "url": "https://www.assemblee-nationale.fr/dyn/synthese/deputes-groupes-parlementaires/la-situation-materielle-du-depute",
+  "note": "Même indemnité parlementaire pour les sénateurs (ordonnance n° 58-1210 du 13 décembre 1958). La dotation de fonctionnement et le crédit collaborateurs ne sont pas versés au député : ils paient ses frais de mandat et ses collaborateurs."
+ },
+ "gouvernement": {
+  "texte": "décret n° 2012-983 du 23 août 2012 relatif au traitement du Président de la République et des membres du Gouvernement",
+  "url": "https://www.legifrance.gouv.fr/search/all?tab_selection=all&query=d%C3%A9cret%202012-983"
+ }
+}

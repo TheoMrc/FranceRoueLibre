@@ -14,6 +14,7 @@ from . import outils as O
 from . import places
 from . import settings as S
 from . import tools as T
+from . import intents
 
 ASKED = re.compile(r'^\s*quelles sont les informations disponibles sur les d[ée]penses\s+(de la |de l[’\']|de |d[’\']|du |des )?(.+?)\s*(?:\((\w{2,3})\))?\s*\?\s*$', re.I)
 SOURCES = [{'title': 'OFGL, comptes des collectivités locales', 'url': 'https://data.ofgl.fr/'},
@@ -307,11 +308,67 @@ def _date(iso: str) -> str:
         return str(iso)
 
 
+# Single words that name a topic, not a place, even when a commune starts with them (« culture » → Cultures)
+TOPICS = set('''culture cultures sport sports recette recettes direction directions association associations dette dettes
+budget budgets ecole ecoles sante social police securite transport transports eau dechets ordures voirie logement logements
+emploi travail tourisme jeunesse education environnement energie agriculture assiciation oui non merci bonjour salut ok
+taxe taxes impot impots salaire salaires president ministre depute senateur maire elus personnel subvention subventions
+marche marches piscine stade cantine musee theatre hopital creche ministres deputes senateurs maires presidents prefets
+les ministres les deputes les senateurs les maires les elus'''.split()) | {'les ministres', 'les deputes', 'les senateurs', 'les maires', 'les elus'}
+REFERS = ('ca', 'cela', 'ceci', 'meme', 'aussi', 'pareil', 'idem', 'celle', 'celui', 'ceux', 'leur', 'leurs', 'il', 'elle',
+          'ils', 'elles', 'precedent', 'precedente', 'dessus', 'cette', 'ces', 'son', 'sa', 'ses')
+
+
+def standalone(text: str) -> bool:
+    """A follow-up that can be read without the conversation (« Combien nous a coûté Bruno Le Maire ? »), not one that
+    refers to it (« et la dette ? », « combien ça coûte par habitant ? »)."""
+    words = places.norm(text).split()
+    return len(words) >= 4 and words[0] not in ('et', 'mais', 'donc', 'alors', 'ok', 'oui', 'non') and not set(words) & set(REFERS)
+
+
 def answer(messages: list) -> Optional[dict]:
-    """The templated answer, or None (then the model answers)."""
-    if len([m for m in messages if m.get('role') == 'user']) != 1:
+    """Every answer given without a model, in this order: a SIREN, the accounts of a département, a region or an
+    intercommunality, a question about one commune that intents.py understands entirely, a saved answer (faq.json), a
+    public figure (personnes.py), a place alone. On a follow-up, the same, when the message stands alone or names a new
+    commune for sure (« 94450 », « et Vallauris ? »). None: the model answers."""
+    from . import faq, intents, personnes
+    users = [m for m in messages if m.get('role') == 'user']
+    first = len(users) == 1
+    text = str(messages[-1].get('text') or '')
+    res = _siren_or_level(text)
+    if res:
+        return res
+    res = intents.answer(messages)
+    if res:
+        return res
+    hit = faq.find(messages) if first else faq.find([{'role': 'user', 'text': text}], strict=True) if standalone(text) else None
+    if hit:
+        return faq.result(hit)
+    res = personnes.answer(text)
+    if res:
+        return res
+    if not first:
+        return intents.follow_up(messages) or _follow_place(text)
+    return _place_answer(text)
+
+
+def _follow_place(text: str) -> Optional[dict]:
+    """« Tarbes », « 94450 », « et Montbéliard ? », « la ville de Carquefou » in a conversation: the new commune's
+    dossier, when the message is a place and nothing else and the place is certain."""
+    m = intents.FOLLOW.match(' ' + text.strip()) if len(text) <= 80 else None
+    name = (m.group(1) if m else text).strip()
+    q = places.norm(name)
+    if not q or re.fullmatch(r'\d{1,3}', q) or q in TOPICS or len(q) < 3:
         return None
-    siren = siren_of(messages[-1].get('text'))
+    places.load(S.DATA_DIR / 'web' / 'communes-lookup.json')
+    found = places.find(name)
+    if found['type'] not in ('nom', 'code_postal', 'ancienne_commune', 'arrondissement'):
+        return None
+    return _place_answer(name)
+
+
+def _siren_or_level(text: str) -> Optional[dict]:
+    siren = siren_of(text)
     if siren:
         try:
             res = _beneficiary(siren)
@@ -322,7 +379,7 @@ def answer(messages: list) -> Optional[dict]:
         events = [{'type': 'tool_done', 'name': 'dossier_beneficiaire', 'label': f'Dossier du SIREN {siren}', 'ok': True,
                    'summary': 'lignes publiées par source', 's': 0}]
         return dict(res, searches=[], provider='faq', label='Réponse sourcée automatique', saved='siren', events=events)
-    lv = level_of(messages[-1].get('text'))
+    lv = level_of(text)
     if lv:
         try:
             res = _level(*lv)
@@ -336,8 +393,14 @@ def answer(messages: list) -> Optional[dict]:
                   {'type': 'tool_done', 'name': 'comparer', 'label': f'Comparaison de « {name} »', 'ok': True,
                    'summary': 'médiane et rang', 's': 0}]
         return dict(res, searches=[], provider='faq', label='Réponse sourcée automatique', saved='lieu', events=events)
-    q = place_of(messages[-1].get('text'))
+    return None
+
+
+def _place_answer(text: str) -> Optional[dict]:
+    q = place_of(text)
     if not q:
+        return None
+    if places.norm(q) in TOPICS:
         return None
     try:
         places.load(S.DATA_DIR / 'web' / 'communes-lookup.json')

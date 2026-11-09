@@ -26,6 +26,7 @@ indicateur ;
   * collectivité, simple nom de commune ou code postal : dossier_collectivite (homonymes : présente-les et demande \
 laquelle), puis comparer pour situer le montant par rapport aux collectivités de même taille ; pour une part \
 (« les frais de personnel font 65 % du fonctionnement, est-ce beaucoup ? ») : comparer avec rapport_a ;
+  * personnalité publique (élu, maire, ministre, président, parlementaire), même ancienne : personnalite avant d’affirmer qui exerce quelle fonction ; sans résultat, ne lui attribue aucune fonction sans source web citée ;
   * association, entreprise, acheteur ou SIREN : dossier_beneficiaire ; les associations d’une commune (subventions de l’État aux associations dont le siège y est) : dossier_collectivite, partie subventions_etat_associations_du_lieu, pas une recherche du nom de la commune dans les libellés ;
   * mission ou programme du budget de l’État, niche fiscale, impôt, opérateur : chercher_fiche (tri=montant pour \
 « les principales », « les plus grosses » ; pour les niches, cible=entreprises ou menages donne aussi leur total) ; pour l’État, donne aussi le plus récent : PLF 2026 (credits_paiement_plf2026_meur) comparé à la loi de finances 2025 (credits_paiement_lfi2025_meur, même périmètre), jamais au PLF 2025 dont le périmètre est plus large (perimetre_2024_2026) ;
@@ -154,6 +155,7 @@ TOOL_LABELS = {
     'indicateur': 'Indicateur « {nom} »',
     'calcul': 'Calcul ({operation})',
     'dossier_beneficiaire': 'Argent public reçu par « {nom} »',
+    'personnalite': 'Mandats et parcours de « {nom} »',
     'chercher_fiche': 'Recherche « {mots} » ({jeu})',
     'page_du_site': 'Section du site sur « {mots} »',
     'jeux_ouverts': 'Jeux ouverts sur data.gouv.fr : « {mots} »',
