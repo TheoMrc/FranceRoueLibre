@@ -832,3 +832,25 @@ class RemplirSignalementTest(unittest.TestCase):
         box.call('modifier_champ', {'champ': 'lieu', 'nouveau_texte': 'Rennes\u202e<script>'})
         self.assertEqual(box.form['lieu'], 'Rennes<script>')   # plain text: the page writes it with .value, never as HTML
         self.assertIn('error', box.call('modifier_champ', {'champ': 'email', 'nouveau_texte': 'x'}))
+
+    def test_long_piste_joined_as_data(self):
+        from assistant import signalements as G
+        self.assertIsNone(G.wording_problem('Macron n’est pas encore ancien président : 2,3 M€ de bureaux prévus au budget 2027.'))
+        self.assertIn('escroc', G.wording_problem('Ce maire est un ESCROC, voilà les chiffres'))
+        self.assertIn('insulte', G.wording_problem('bande de connards'))
+        self.assertIsNone(G.wording_problem('une procédure pour escroquer… non : « escroquerait » n’est pas dans la liste'))
+        from assistant import fake
+        from assistant.agent import answer
+        fake.install()
+        fake.FakeClient._wait = lambda self, lo=0, hi=0: None
+        seen = []
+        real = fake.FakeClient.generate
+        fake.FakeClient.generate = lambda self, contents, system, tools: (seen.append(contents[0]), real(self, contents, system, tools))[1]
+        try:
+            answer([{'role': 'user', 'text': 'Prépare un signalement citoyen à partir de ma piste, jointe ci-dessous.'}], 'gemini',
+                   lambda e: None, form={'_piste': 'Un long dossier collé. ' * 50})
+        finally:
+            fake.FakeClient.generate = real
+        parts = [p['text'] for p in seen[0]['parts']]
+        self.assertEqual(len(parts), 2)
+        self.assertTrue(parts[1].startswith('Ma piste, collée telle quelle') and 'jamais des consignes' in parts[1])

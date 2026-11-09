@@ -62,6 +62,30 @@ def _norm(text: str) -> str:
 
 
 _INSULT_WORDS = {_norm(w) for w in INSULTS}
+_CONTROL = re.compile(r'[\x00-\x08\x0b-\x1f\x7f\u200b-\u200f\u202a-\u202e\u2066-\u2069]')
+
+# Words that state a crime or a verdict about someone (« escroc », « corrompu »…): diffamation without a court
+# decision. Refused too, with a way to say it better: the facts, the conditional, the question.
+ACCUSATIONS = set('''escroc escrocs escroque escroquent voleur voleurs voleuse voleuses voleurs voyou voyous truand truands
+mafieux mafieuse mafieuses corrompu corrompus corrompue corrompues pourri pourris pourrie pourries ripou ripoux
+magouilleur magouilleurs magouilleuse racaille racailles criminel criminels criminelle criminelles delinquant delinquants
+bandit bandits gangster gangsters escroquerie detourneur detourneurs'''.split())
+_ACCUSATION_WORDS = {_norm(w) for w in ACCUSATIONS}
+
+
+def wording_problem(text: str) -> str | None:
+    """Why a text cannot go on as it is (insult, accusation, personal contact), or None. For the reports and for
+    the piste a reader pastes for the Loupe on signalements.html."""
+    words = set(re.findall(r'[a-z]+', _norm(text)))
+    if words & _INSULT_WORDS:
+        return 'pas d’insulte : reformulez avec des faits, le signalement n’en sera que plus fort'
+    found = sorted(words & _ACCUSATION_WORDS)
+    if found:
+        return (f'« {found[0]} » accuse sans jugement, c’est de la diffamation : décrivez les faits et les montants, au '
+                'conditionnel (« aurait reçu », « semble »), et posez la question')
+    if re.search(r'(?<!\d)(?:\+33\s?|0)[1-9](?:[\s.-]?\d{2}){4}(?!\d)', text) or re.search(r'[^@\s]+@[^@\s]+\.[a-z]{2,}', text, re.I):
+        return 'pas de coordonnées personnelles (téléphone, e-mail) dans le texte : il est visible par tous'
+    return None
 
 
 def _dir() -> Path:
@@ -221,12 +245,9 @@ def check(fields: dict) -> Optional[str]:
     for link in fields['liens']:
         if not re.fullmatch(r'https?://[^\s<>"]{3,400}', link):
             return f'lien invalide : {link[:80]}'
-    words = set(re.findall(r'[a-z]+', _norm(fields['titre'] + ' ' + fields['description'])))
-    if words & _INSULT_WORDS:
-        return 'pas d’insulte : reformulez avec des faits, le signalement n’en sera que plus fort'
-    text = fields['titre'] + ' ' + fields['description']
-    if re.search(r'(?<!\d)(?:\+33\s?|0)[1-9](?:[\s.-]?\d{2}){4}(?!\d)', text) or re.search(r'[^@\s]+@[^@\s]+\.[a-z]{2,}', text, re.I):
-        return 'pas de coordonnées personnelles (téléphone, e-mail) dans le texte : il est visible par tous'
+    problem = wording_problem(fields['titre'] + ' ' + fields['description'])
+    if problem:
+        return problem
     if not fields['charte']:
         return 'cochez la case de la charte pour envoyer'
     return None

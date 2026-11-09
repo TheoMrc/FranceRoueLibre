@@ -134,3 +134,6 @@
   body.sg-side #signaler .container { padding-right: max(var(--gutter), calc(480px - max(0px, (100vw - var(--maxw)) / 2))); }
 }
 @media (max-width: 620px) { .sg-logo { width: 34px; height: 34px; } .sg-loupe__head { align-items: flex-start; } }
+#sgIdea { resize: vertical; max-height: 420px; overflow-y: auto; }
+.sg-count--idea { margin-top: -.3rem; }
+.sg-count--idea:empty { display: none; }

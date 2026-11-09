@@ -58,7 +58,8 @@ def _question(contents: List[dict]) -> str:
         if c.get('role') == 'user':
             texts = [p['text'] for p in c.get('parts') or [] if p.get('text')]
             if texts and not any('functionResponse' in p for p in c['parts']):
-                return texts[-1]
+                # the question itself, not the piste joined after it on signalements.html
+                return next((t for t in reversed(texts) if not t.startswith('Ma piste, collée')), texts[-1])
     return ''
 
 
@@ -164,7 +165,9 @@ class FakeClient:
 
     def _report(self, contents: List[dict], q: str) -> dict:
         """The report form filled in three times: what the idea says, a search, then the whole draft."""
-        idea = (re.search(r'«\s*(.+?)\s*»', q, re.S) or re.search(r'(.+)', q)).group(1)[:300]
+        piste = next((p['text'] for c in contents if c.get('role') == 'user' for p in c.get('parts') or []
+                      if p.get('text', '').startswith('Ma piste, collée')), '')
+        idea = (re.search(r'«««\n(.+?)\n', piste, re.S) or re.search(r'«\s*(.+?)\s*»', q, re.S) or re.search(r'(.+)', q)).group(1)[:300]
         place = next((w for w in re.findall(r'\b(?:à|de|sur)\s+([A-ZÉÈ][\wéèêëàâîïôöûüç\-]{3,})', idea)), '')
         amount = (re.search(r'\d[\d\s.,]*\s*(?:€|M€|Md€|millions?|milliards?)', idea) or [''])[0].strip()
         call = lambda *calls: {'role': 'model', 'parts': [{'functionCall': {'name': n, 'args': a, 'id': f'toolu_demo{self.step}_{i}'}}

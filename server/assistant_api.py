@@ -1,8 +1,9 @@
 """AI assistant API of francerouelibre.fr (server/assistant/), behind nginx like search_api.py.
 
 POST /api/assistant/ask          {"messages": [{"role": "user"|"assistant", "text": …}], "provider": "auto"|"gemini"|"claude",
-                                  "signalement": {titre, lieu, …}}  (signalements.html: the form on screen, read and
-                                  edited by the Loupe with lire_formulaire, remplir_signalement, modifier_champ)
+                                  "signalement": {titre, lieu, …}, "piste": …}  (signalements.html: the form on screen,
+                                  read and edited by the Loupe with lire_formulaire, remplir_signalement, modifier_champ;
+                                  the piste pasted by the reader, 6 000 characters, insults and accusations refused)
                                   -> {"job": id}   the question is answered in the background
 GET  /api/assistant/job/<id>?after=N  -> {"events": [...], "next": N, "done": bool, "result": {...}}
 POST /api/assistant/job/<id>/cancel
@@ -60,6 +61,7 @@ from assistant.providers import CLIENTS  # noqa: E402
 from assistant.tools import signalement_fields  # noqa: E402
 
 MAX_BODY = 48_000
+PISTE_CHARS = 6000   # the piste pasted on signalements.html, sent apart from the question (MAX_QUESTION_CHARS)
 DEMO = {'on': False}
 JOB_TTL = 60 * 60   # a reader may still vote on an answer during this hour
 
@@ -358,6 +360,17 @@ class Handler(BaseHTTPRequestHandler):
         form = signalement_fields(body['signalement']) if isinstance(body.get('signalement'), dict) else None
         if form is not None:
             form.pop('questions', None)
+            # a long piste pasted by the reader (a dossier to start from, up to PISTE_CHARS): joined to the
+            # question by the agent, as data; refused at once if it insults or accuses
+            problem = signalements.wording_problem(question)   # what is asked here may end up in a public report
+            if problem:
+                return self.send(400, {'error': f'{problem[0].upper()}{problem[1:]}.'})
+            piste = signalements._CONTROL.sub('', str(body.get('piste') or '')).strip()[:PISTE_CHARS]
+            if piste:
+                problem = signalements.wording_problem(piste)
+                if problem:
+                    return self.send(400, {'error': f'Votre piste : {problem}.'})
+                form['_piste'] = piste
         saved = None if form else faq.find(messages)
         if saved:  # a question many readers ask: answered from faq.json, no model call, no credits
             return self.send(202, {'job': saved_job(self.client_ip(), saved, messages)})

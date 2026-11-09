@@ -459,7 +459,7 @@
     try {
       const script = hooks?.script || null;
       const r = pre || script ? { ok: true, status: 202 } : await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history.slice(-11), provider, ...(hooks?.form ? { signalement: hooks.form } : {}) }) });
+        body: JSON.stringify({ messages: history.slice(-11), provider, ...(hooks?.form ? { signalement: hooks.form } : {}), ...(hooks?.piste ? { piste: hooks.piste } : {}) }) });
       const data = script ? { job: 'demo' } : pre || await r.json().catch(() => ({}));
       if (data.credits === false) { m.donate = data.donate; noCredits(data); }
       if (!r.ok || !data.job) throw new Error(data.error || (r.status === 503 || r.status === 502 || r.status === 504

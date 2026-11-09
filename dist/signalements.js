@@ -307,7 +307,10 @@
   }
 
   /* ------------------------------------------------------------------ the Loupe at work */
-  const PROMPT = idea => `Je suis sur la page Remontées citoyennes. Prépare un signalement citoyen à partir de ma piste : « ${idea} ». `
+  /* A short piste goes in the question; a long one (a dossier pasted, up to 6 000 characters) is sent apart, joined to
+     the question by the server as data, after a check for insults and accusations. */
+  const LONG = 400;
+  const PROMPT = idea => `Je suis sur la page Remontées citoyennes. Prépare un signalement citoyen à partir de ma piste${idea.length > LONG ? ', jointe ci-dessous' : ` : « ${idea} »`}. `
     + 'Remplis le formulaire avec remplir_signalement : le titre, le lieu et le montant dès ta première étape, puis le dossier complet '
     + '(faits sourcés, questions à poser, sources du site et du web), en cherchant dans les données du site et, si utile, sur le web.';
   const card = $('sgLoupe'), live = $('sgLive'), liveNow = $('sgLiveNow'), liveSteps = $('sgLiveSteps'), st = $('sgDraftState');
@@ -337,7 +340,7 @@
   function hooks(idea, done) {
     let lastStep = null, tools = 0;
     return {
-      shown: `Préparer un signalement : « ${idea} »`,
+      shown: `Préparer un signalement : « ${idea.length > 240 ? `${idea.slice(0, 220).trim()}… » (${idea.length.toLocaleString('fr-FR')} caractères joints)` : `${idea} »`}`,
       onEvent(ev) {
         if (ev.type === 'queue') now(ev.place === 1 ? 'Vous êtes le prochain dans la file' : `File d’attente : ${ev.place - 1} question(s) avant la vôtre`);
         if (ev.type === 'model') now(`La Loupe se met au travail${ev.label ? ` (${ev.label})` : ''}`);
@@ -370,7 +373,7 @@
   async function direct(prompt, h) {
     const m = { text: '', error: '', sources: [], signalement: null };
     try {
-      const r = await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', text: prompt }], signalement: h.form || {} }) });
+      const r = await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', text: prompt }], signalement: h.form || {}, ...(h.piste ? { piste: h.piste } : {}) }) });
       const d = await r.json().catch(() => ({}));
       if (!d.job) throw new Error(d.error || 'La Loupe ne peut pas répondre pour l’instant.');
       direct.job = d.job;
@@ -405,7 +408,10 @@
     card.scrollIntoView({ behavior: reduce.matches ? 'auto' : 'smooth', block: 'start' });
     const finished = new Promise(ok => {
       const h = hooks(idea, ok);
-      if (demo) { h.shown = `Préparer un signalement (exemple) : « ${idea} »`; h.script = demo; } else h.form = fields();
+      if (demo) { h.shown = `Préparer un signalement (exemple) : « ${idea} »`; h.script = demo; } else {
+        h.form = fields();
+        if (idea.length > LONG) h.piste = idea;
+      }
       const opened = window.FRLLoupe?.ask && window.FRLLoupe.ask(demo ? `[démonstration] ${idea}` : PROMPT(idea), { hooks: h, background: !wide.matches });
       Promise.resolve(opened).then(started => { if (started) sideBySide(); else if (demo) play(demo, h); else direct(PROMPT(idea), h); });
     });
@@ -423,7 +429,7 @@
     if (m.error) {
       now('La Loupe s’est arrêtée');
       st.className = 'sg-loupe__state is-error';
-      st.textContent = `${m.error} Ce qui est déjà écrit reste dans le formulaire : complétez-le vous-même.`;
+      st.textContent = Object.keys(draftState).length ? `${m.error} Ce qui est déjà écrit reste dans le formulaire : complétez-le vous-même.` : m.error;
     } else if (demo) {
       state.demoTitle = form.titre.value;
       now('Démonstration terminée : à vous d’écrire votre propre piste');
@@ -463,16 +469,29 @@
   card.querySelector('.sg-examples').addEventListener('click', e => {
     const b = e.target.closest('[data-idea]');
     if (!b || b.disabled) return;
-    $('sgIdea').value = b.dataset.idea;
+    $('sgIdea').value = b.dataset.idea; grow();
     draft(b.dataset.demo);
   });
-  $('sgIdea').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); draft(); } });
+  // Enter sends a short piste; a long one (pasted, several lines) keeps its line breaks: Ctrl+Enter sends it
+  $('sgIdea').addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
+    if (!e.ctrlKey && !e.metaKey && ($('sgIdea').value.includes('\n') || $('sgIdea').value.length > LONG)) return;
+    e.preventDefault(); draft();
+  });
+  const grow = () => {
+    const el = $('sgIdea');
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight + 2, 420)}px`;
+    const n = el.value.length;
+    $('sgIdeaCount').textContent = n > LONG ? `${n.toLocaleString('fr-FR')} / 6 000 · dossier joint, Ctrl+Entrée pour lancer` : '';
+  };
+  $('sgIdea').addEventListener('input', grow);
 
   /* a report started from an answer of the Loupe panel (loupe-signal.js) */
   try {
     const from = JSON.parse(sessionStorage.getItem('frl-signalement') || 'null');
     if (from) {
-      $('sgIdea').value = String(from.question || '').slice(0, 600);
+      $('sgIdea').value = String(from.question || '').slice(0, 6000); grow();
       const links = (from.sources || []).map(s => s.url).filter(Boolean);
       fill({ titre: String(from.question || '').slice(0, 140), description: `${String(from.reponse || '').slice(0, 5500)}`, liens: links });
       state.loupe = true;
