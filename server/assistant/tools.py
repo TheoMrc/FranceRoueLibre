@@ -261,6 +261,9 @@ FILES = {
     'secu.json': 'Sécurité sociale : comptes simplifiés des régimes de base par branche (« accounts », années 2009-2010 '
                  'seulement : dernier fichier publié sur data.gouv.fr, ne pas présenter comme actuel), dépenses '
                  'd’assurance maladie par région (« regions »)',
+    'europe.json': 'Comparaison européenne (Eurostat, 1995-2025) : dépenses publiques et rémunération des agents publics en % du PIB '
+                   'pour les 27 pays de l’UE (« metrics », une valeur par année de « years »), écart France moins UE en points, '
+                   'en Md€ et en € par habitant avec le rang de la France (« gap », calculs du site listés dans « computed »)',
     'probite.json': 'Atteintes à la probité jugées 2021-2025 : affaires, infractions, peines',
     'fraude.json': 'Fraude et contrôle fiscal (Cour des comptes, décembre 2025 ; Commission européenne, 2025) : '
                    'résultats du contrôle 2015-2024 (« controle », Md€), droits rappelés par impôt, sommes '

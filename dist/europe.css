@@ -1,0 +1,53 @@
+/* La France et ses voisins (europe.html): ranking of the 27 EU countries, lines over the years. Colours from the --tx-* tokens of style.css. */
+#classement, #evolution, #ecart, #fonctions, #fmi, #lire, #manque { scroll-margin-top: var(--header-h); }
+.eu-controls { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem 1.4rem; margin-bottom: var(--sp-2); }
+.eu-year { display: flex; align-items: center; gap: .7rem; flex: 1 1 260px; min-width: 0; max-width: 520px; color: var(--c-muted); font-size: .84rem; }
+.eu-year input { flex: 1 1 auto; min-width: 0; accent-color: var(--c-teal-600); }
+.eu-year output { min-width: 3.2ch; color: var(--c-ink); font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.eu-rank { position: relative; margin: 0; padding: 0; list-style: none; columns: 2; column-gap: var(--sp-4); }
+.eu-rank__row { display: grid; grid-template-columns: 1.6rem minmax(0, 8.5rem) minmax(0, 1fr) 3.2rem; align-items: center; gap: .5rem; padding: .22rem .3rem; border-radius: var(--r-sm); break-inside: avoid; cursor: pointer; font-size: .84rem; }
+.eu-rank__row:hover { background: var(--c-surface-2); }
+.eu-rank__n { color: var(--c-muted); font-size: .74rem; font-variant-numeric: tabular-nums; text-align: right; }
+.eu-rank__name { overflow: hidden; color: var(--c-body); text-overflow: ellipsis; white-space: nowrap; }
+.eu-rank__name small { color: var(--c-muted); font-size: .7rem; }
+.eu-rank__track { position: relative; height: .7rem; border-radius: 3px; background: color-mix(in srgb, var(--tx-none) 35%, transparent); }
+.eu-rank__track::after { content: ""; position: absolute; top: -3px; bottom: -3px; left: var(--eu); width: 2px; margin-left: -1px; background: var(--c-ink); opacity: .75; }
+.eu-rank__fill { position: absolute; top: 0; bottom: 0; border-radius: 3px; background: var(--tx-other); transition: left .35s var(--ease), width .35s var(--ease); }
+.eu-rank__row strong { color: var(--c-ink); font-variant-numeric: tabular-nums; text-align: right; }
+.eu-rank__row.is-fr .eu-rank__fill { background: var(--tx-1); }
+.eu-rank__row.is-fr .eu-rank__name, .eu-rank__row.is-fr strong { color: var(--tx-1); font-weight: 700; }
+.eu-rank__row.is-pick .eu-rank__fill { background: var(--tx-3); }
+.eu-rank__row.is-pick .eu-rank__name { color: var(--c-ink); font-weight: 600; }
+.eu-rank__row.is-out .eu-rank__fill { background: var(--tx-none); }
+.eu-rank__row.is-out .eu-rank__name, .eu-rank__row.is-out strong { color: var(--c-muted); font-weight: 400; }
+
+.eu-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.eu-line { fill: none; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+.eu-line.is-bold { stroke-width: 3; }
+.eu-end { font-size: 11.5px; font-weight: 500; }
+.eu-end.is-bold { font-weight: 700; }
+.eu-guide { stroke: var(--c-muted); stroke-width: 1; stroke-dasharray: 3 3; pointer-events: none; }
+.eu-zero { stroke: var(--c-muted); }
+.eu-proj { fill: color-mix(in srgb, var(--tx-none) 28%, transparent); }
+.eu-chart .tx-hit { fill: transparent; }
+.eu-pick { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .9rem; }
+.eu-pick button { padding: .28rem .65rem; border: 0; border-radius: var(--r-pill); background: var(--c-surface-2); color: var(--c-muted); font: inherit; font-size: .76rem; font-weight: 600; cursor: pointer; }
+.eu-pick button:hover { color: var(--c-ink); }
+.eu-pick button.active { background: var(--c-ink); color: var(--c-bg); }
+
+.eu-cofog td { vertical-align: middle; }
+.eu-cofog__bars { min-width: 120px; }
+.eu-pair { display: grid; gap: 2px; }
+.eu-pair i { display: block; height: .42rem; border-radius: 2px; }
+.eu-pair i.is-fr { background: var(--tx-1); }
+.eu-pair i.is-eu { background: var(--tx-other); }
+.eu-pending { max-width: 70rem; margin-top: var(--sp-3); padding: .9rem 1.1rem; border-radius: var(--r-md); background: color-mix(in srgb, var(--c-amber) 10%, transparent); color: var(--c-body); font-size: .86rem; }
+.eu-pending strong { color: var(--c-ink); }
+#euSources .note { margin: 0; }
+
+@media (max-width: 860px) { .eu-rank { columns: 1; } }
+@media (max-width: 520px) {
+  .eu-rank__row { grid-template-columns: 1.3rem minmax(0, 6.2rem) minmax(0, 1fr) 2.9rem; gap: .4rem; font-size: .8rem; }
+  .eu-cofog th:nth-child(5), .eu-cofog td:nth-child(5), .eu-cofog th:nth-child(7), .eu-cofog td:nth-child(7) { display: none; }
+}

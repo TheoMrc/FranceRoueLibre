@@ -42,6 +42,7 @@ SYNONYMS = {
     'ugap.html': 'UGAP centrale d’achat prix catalogue',
     'signaux.html': 'anomalies signaux alertes contrôles',
     'demandes.html': 'demandes documents administratifs cada courrier mairie réponse',
+    'europe.html': 'europe union européenne comparaison pays voisins allemagne italie espagne eurostat classement dépenses publiques en % du PIB moyenne européenne',
     'probite.html': 'corruption favoritisme prise illégale d’intérêts condamnations probité',
     'donnees.html': 'sources données ouvertes open data angles morts méthode',
 }

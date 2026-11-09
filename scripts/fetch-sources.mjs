@@ -139,6 +139,19 @@ const SOURCES = [
     { path: 'raw/drees/capact_pm_pnm.7z', url: 'https://data.drees.solidarites-sante.gouv.fr/api/explore/v2.1/catalog/datasets/708_bases-statistiques-sae/attachments/capact_pm_pnm_7z' },
   ] },
 
+  // ---- France compared with the other EU countries (Eurostat) and IMF projections: page europe.html, scripts/europe-data.py ----
+  // Every file is optional for the page: a file that is missing or unreadable leaves its section out.
+  { id: 'international', kind: 'files', note: 'Eurostat (recettes, déficit, dette, intérêts, taux à dix ans, dépenses par fonction, 27 pays de l’UE) ; FMI, Perspectives de l’économie mondiale (prévisions)', files: [
+    { path: 'eurostat/gov_10a_main.json', url: 'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10a_main?sector=S13&na_item=TR&na_item=TE&na_item=D41PAY&na_item=B9&unit=PC_GDP&unit=MIO_EUR&sinceTimePeriod=1995' },
+    { path: 'eurostat/gov_10dd_edpt1.json', url: 'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10dd_edpt1?sector=S13&na_item=B9&na_item=GD&unit=PC_GDP&unit=MIO_EUR&sinceTimePeriod=1995' },
+    { path: 'eurostat/gov_10a_exp_TE_cofog.json', url: 'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10a_exp?sector=S13&na_item=TE&unit=PC_GDP&cofog99=TOTAL&cofog99=GF01&cofog99=GF02&cofog99=GF03&cofog99=GF04&cofog99=GF05&cofog99=GF06&cofog99=GF07&cofog99=GF08&cofog99=GF09&cofog99=GF10&sinceTimePeriod=1995' },
+    { path: 'eurostat/irt_lt_mcby_a.json', url: 'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/irt_lt_mcby_a?sinceTimePeriod=1995' },
+    { path: 'fmi/GGXWDG_NGDP.json', url: 'https://www.imf.org/external/datamapper/api/v1/GGXWDG_NGDP' },
+    { path: 'fmi/GGXCNL_NGDP.json', url: 'https://www.imf.org/external/datamapper/api/v1/GGXCNL_NGDP' },
+    { path: 'fmi/NGDP_RPCH.json', url: 'https://www.imf.org/external/datamapper/api/v1/NGDP_RPCH' },
+    { path: 'fmi/PCPIPCH.json', url: 'https://www.imf.org/external/datamapper/api/v1/PCPIPCH' },
+  ] },
+
   // ---- Indemnities actually paid to local elected officials (accounts 653) ----
   { id: 'balances-653-communes-2017', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-communes-en-2017', where: 'startswith(compte,"653")', note: 'Comptes 653 (indemnités et frais des élus) des communes, 2017' },
   { id: 'balances-653-communes-2018', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-communes-en-2018', where: 'startswith(compte,"653")', note: 'Comptes 653 (indemnités et frais des élus) des communes, 2018' },

@@ -12,6 +12,7 @@ Points utiles pour citer le site :
 ## Pages
 
 - [Carte, circuit et comptes nationaux](https://francerouelibre.fr/): comptes des communes, intercommunalités, départements et régions (2012 à 2025) ; circuit de l'argent public recettes, dépenses, déficit, dette (Insee, 1960 à 2025) ; comptes nationaux en Md€, % du PIB ou € par habitant.
+- [La France et ses voisins](https://francerouelibre.fr/europe.html): dépenses publiques et rémunération des agents publics des 27 pays de l'Union européenne depuis 1995 (Eurostat), rang de la France, écart avec l'ensemble de l'Union en points de PIB, en milliards d'euros et par habitant.
 - [Impôts et taxes](https://francerouelibre.fr/impots.html): les 292 impôts, taxes et prélèvements en vigueur, ce que chacun rapporte, qui le paie, qui le reçoit, qui le collecte, ce que coûte la collecte, l'avis de la Cour des comptes.
 - [Niches fiscales](https://francerouelibre.fr/niches.html): les 458 réductions et crédits d'impôt, coût 2024 à 2026 mesure par mesure, et les mesures sans montant publié.
 - [Budget de l'État](https://francerouelibre.fr/etat.html): crédits par mission, programme et action (AE et CP), exécution mois par mois, indicateurs de performance, budget vert, aide publique au développement, bilan de l'État.

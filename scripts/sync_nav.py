@@ -16,6 +16,7 @@ NAV = [
         ('Carte des comptes locaux', 'index.html#explorer', 'Les comptes de chaque commune, département et région'),
         ('Circuit de l’argent public', 'index.html#circuit', 'Des impôts aux dépenses, qui paie et qui dépense'),
         ('Comptes de la Nation', 'index.html#comptes', 'Recettes, dépenses, déficit et dette depuis 1960'),
+        ('La France et ses voisins', 'europe.html', 'Dépenses publiques comparées aux 27 pays de l’Union'),
     ]),
     ('Recettes', [
         ('Impôts et taxes', 'impots.html', 'Ce que rapporte et coûte chaque prélèvement'),
@@ -41,13 +42,14 @@ NAV = [
 
 # « Pour aller plus loin » at the bottom of each page: where a reader of this page naturally goes next, and why.
 RELATED = {
-    'index.html': [('impots.html', 'D’où viennent les recettes : chaque impôt, ce qu’il rapporte et coûte'), ('etat.html', 'Le budget de l’État voté et exécuté, mission par mission'), ('secu.html', 'La Sécurité sociale, premier poste de dépense publique'), ('signaux.html', 'Les anomalies repérées dans les comptes locaux et les marchés')],
+    'index.html': [('impots.html', 'D’où viennent les recettes : chaque impôt, ce qu’il rapporte et coûte'), ('europe.html', 'La dépense publique française comparée à celle des 27 pays de l’Union'), ('etat.html', 'Le budget de l’État voté et exécuté, mission par mission'), ('secu.html', 'La Sécurité sociale, premier poste de dépense publique'), ('signaux.html', 'Les anomalies repérées dans les comptes locaux et les marchés')],
+    'europe.html': [('index.html#comptes', 'Recettes, dépenses, déficit et dette de la France depuis 1960'), ('index.html#circuit', 'Où va chaque euro de dépense publique, fonction par fonction'), ('emplois.html', 'Agents publics : la France comparée à l’Union et à l’OCDE'), ('secu.html', 'La Sécurité sociale, premier poste de dépense publique')],
     'impots.html': [('niches.html', 'Ce que les réductions et crédits d’impôt retirent à ces recettes'), ('etat.html', 'Ce que l’État fait des recettes du budget général'), ('operateurs.html', 'Les agences financées par des taxes affectées'), ('donnees.html', 'Toutes les sources, et ce qui n’est pas publié')],
     'niches.html': [('impots.html', 'Ce que rapporte chaque impôt avant ces réductions'), ('aides.html', 'Les aides directes aux entreprises et associations'), ('etat.html', 'Les missions du budget auxquelles chaque niche se rattache')],
     'etat.html': [('operateurs.html', 'Les agences et établissements que ces programmes financent'), ('emplois.html', 'Les dépenses de personnel, mission par mission'), ('impots.html', 'D’où viennent les recettes du budget général'), ('niches.html', 'Les dépenses qui passent par l’impôt plutôt que par le budget'), ('aides.html', 'Qui reçoit les subventions, bénéficiaire par bénéficiaire')],
     'operateurs.html': [('etat.html', 'Les programmes budgétaires qui financent les opérateurs'), ('impots.html', 'Les taxes affectées à ces organismes'), ('marches.html', 'Ce que les opérateurs achètent')],
     'secu.html': [('impots.html', 'CSG, CRDS et autres prélèvements qui financent la Sécurité sociale'), ('index.html#circuit', 'La Sécurité sociale dans le circuit de l’argent public'), ('donnees.html', 'Hôpitaux, ARS : ce qui n’est pas publié')],
-    'emplois.html': [('etat.html', 'Les crédits de chaque mission, personnel compris'), ('index.html#explorer', 'Les comptes de chaque commune sur la carte'), ('secu.html', 'Hôpitaux et caisses : la Sécurité sociale'), ('operateurs.html', 'Les agences de l’État, qui emploient hors titre 2')],
+    'emplois.html': [('europe.html', 'Dépenses et salaires publics : la France parmi les 27'), ('etat.html', 'Les crédits de chaque mission, personnel compris'), ('index.html#explorer', 'Les comptes de chaque commune sur la carte'), ('secu.html', 'Hôpitaux et caisses : la Sécurité sociale'), ('operateurs.html', 'Les agences de l’État, qui emploient hors titre 2')],
     'aides.html': [('niches.html', 'Les aides qui passent par l’impôt (crédits d’impôt)'), ('etat.html', 'Les programmes budgétaires qui versent ces aides'), ('signaux.html', 'Subventions à des structures fermées et autres signaux')],
     'marches.html': [('ugap.html', 'Les prix de la centrale d’achat public'), ('signaux.html', 'Offres uniques, avenants, montants sous les seuils'), ('probite.html', 'Favoritisme et corruption : les affaires jugées')],
     'ugap.html': [('marches.html', 'Tous les marchés publics, acheteur par acheteur'), ('signaux.html', 'Les signaux sur la concurrence dans les achats')],

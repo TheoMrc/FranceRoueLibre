@@ -140,6 +140,7 @@ PAGES = [
     ('Opérateurs de l’État', 'operateurs.html'), ('Sécurité sociale', 'secu.html'),
     ('Aides et subventions', 'aides.html'), ('Marchés publics', 'marches.html'), ('UGAP', 'ugap.html'),
     ('Recherche dans les dépenses (recherche.html?q=mot)', 'recherche.html'), ('Signaux', 'signaux.html'),
+    ('La France et ses voisins (dépenses publiques comparées aux 27 pays de l’UE)', 'europe.html'),
     ('Probité', 'probite.html'), ('Élus et emplois des communes', 'emplois.html'),
     ('Données et angles morts', 'donnees.html'), ('Demandes aux instances publiques (documents demandés aux administrations)', 'demandes.html'),
     ('Remontées citoyennes (documenter un cas suspect, sources à l’appui, visible par tous)', 'signalements.html'),
