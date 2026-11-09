@@ -748,6 +748,9 @@ class SignalementsTest(unittest.TestCase):
         G._hits.clear(); G._votes_hits.clear(); G._notes_hits.clear(); G._day.update(day='', n=0)
         self.min = G.CHALLENGE_MIN
         G.CHALLENGE_MIN = 0
+        self.relecture = G.RELECTURE
+        G.RELECTURE = False   # the tests below publish directly; the relecture by the Loupe has its own test
+        G._relu_hits.clear(); G._relu_day.update(day='', n=0)
 
         def proof(trace=None):
             c = G.challenge()
@@ -764,7 +767,48 @@ class SignalementsTest(unittest.TestCase):
     def tearDown(self):
         S.STATE_DIR = self.old_state
         self.G.CHALLENGE_MIN = self.min
+        self.G.RELECTURE = self.relecture
         self.dir.cleanup()
+
+    def test_relecture_by_the_loupe_before_publishing(self):
+        G = self.G
+        G.RELECTURE = True
+        asked = []
+        answer = {'ok': True, 'titre': 'Une piscine municipale à 500 M€ ?', 'resume': 'Un marché de 500 M€ pour une piscine.',
+                  'description': 'Le marché publié [1] prévoit 500 000 000 € pour une piscine municipale. Sur quelles bases ce montant a-t-il été fixé ?',
+                  'mots': ['piscine', 'marché public'], 'changements': 'Accusation retirée, question ajoutée.'}
+        old = G._ask_model
+        G._ask_model = lambda system, text: (asked.append(text), json.dumps(answer))[1]
+        try:
+            # typed by hand, with an accusation: not refused before the Loupe, which rewrites it
+            raw = dict(self.base, description=self.base['description'] + ' Corruption évidente, comme par hasard le maire est un ami.')
+            self.assertIn('relecture de la Loupe', G.submit(dict(raw, preuve=self.proof()), 'r1')['error'])   # no jeton: refused
+            r = G.relecture(dict(raw, preuve=self.proof()), 'r1')
+            self.assertTrue(r['ok'], r)
+            self.assertIn('Corruption', asked[0])
+            self.assertEqual(r['version']['titre'], answer['titre'])
+            sent = dict(self.base, **r['version'], jeton=r['jeton'])
+            self.assertIn('changé', G.submit(dict(sent, description=sent['description'] + ' Ajouté à la main après la relecture.'), 'r1')['error'])
+            ok = G.submit(sent, 'r1')
+            self.assertTrue(ok['ok'] and ok['visible'], ok)
+            self.assertEqual(G.load(ok['ref'])['description'], answer['description'])
+            self.assertTrue(G.public_view(G.load(ok['ref']))['relu_loupe'])
+            self.assertIn('déjà été publié', G.submit(sent, 'r1')['error'])
+            # a correction asked to the Loupe: the « passe » stands for the human check
+            again = G.relecture(dict(self.base, **r['version'], passe=r['passe'], consigne='Ajoute le lieu'), 'r1')
+            self.assertTrue(again['ok'], again)
+            self.assertIn('Ajoute le lieu', asked[-1])
+            # refused by the Loupe; model down
+            G._ask_model = lambda system, text: '{"ok": false, "motif": "rien de vérifiable"}'
+            self.assertIn('rien de vérifiable', G.relecture(dict(self.base, passe=r['passe']), 'r1')['error'])
+            def down(system, text):
+                raise RuntimeError('budget')
+            G._ask_model = down
+            self.assertIn('pour l’instant', G.relecture(dict(self.base, passe=r['passe']), 'r1')['error'])
+            # private: no relecture, the human check as before
+            self.assertTrue(G.submit(dict(self.base, prive=True, preuve=self.proof()), 'r2')['ok'])
+        finally:
+            G._ask_model = old
 
     def test_shown_to_all_or_private(self):
         shown = self.G.submit(dict(self.base, preuve=self.proof()), 'r1')

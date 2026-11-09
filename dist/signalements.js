@@ -11,7 +11,7 @@
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const send = $('sgSend'), result = $('sgResult');
-  const state = { challenge: null, counter: null, trace: [], human: false, loupe: false };
+  const state = { challenge: null, counter: null, trace: [], human: false, loupe: false, jeton: null, passe: null };
 
   /* ------------------------------------------------------------------ human check: proof of work */
   async function getChallenge() {
@@ -98,9 +98,19 @@
     } else if (traced && state.counter === null && state.challenge) {
       $('sgHumanState').textContent = 'Tracé validé, dernière vérification en cours…';
     }
-    send.disabled = !(state.human && form.charte.checked);
+    send.disabled = !((form.prive.checked || state.jeton ? state.human || !!state.jeton : state.human || !!state.passe) && form.charte.checked);
+    send.textContent = form.prive.checked ? 'Envoyer à FranceRoueLibre seulement' : state.jeton ? 'Publier cette version' : 'Envoyer à la relecture de la Loupe';
   }
   form.charte.addEventListener('change', update);
+  form.prive.addEventListener('change', update);
+  /* Shown to all = the Loupe's version only (signed by the server): any change sends the text back to the relecture. */
+  form.addEventListener('input', e => {
+    if (!state.jeton || ['charte', 'prive', 'email'].includes(e.target.name)) return;
+    state.jeton = null;
+    result.className = 'sg-result';
+    result.textContent = 'Texte modifié : il repassera par la relecture de la Loupe avant publication.';
+    update();
+  });
   const count = () => { $('sgCount').textContent = `${form.description.value.length.toLocaleString('fr-FR')} / 6 000`; };
   form.description.addEventListener('input', count);
 
@@ -188,32 +198,52 @@
   /* ------------------------------------------------------------------ sending */
   form.addEventListener('submit', async e => {
     e.preventDefault();
-    if (!state.human) return;
+    if (!state.human && !state.passe) return;
     if (state.demoTitle && form.titre.value === state.demoTitle) {
       result.className = 'sg-result is-error';
       result.textContent = 'C’est le dossier de démonstration : écrivez votre propre piste, ou corrigez au moins le titre et les faits, avant d’envoyer.';
       return;
     }
     send.disabled = true;
-    result.className = 'sg-result'; result.textContent = 'Envoi…';
+    const relire = !form.prive.checked && !state.jeton;
+    result.className = 'sg-result';
+    result.textContent = relire ? 'La Loupe relit votre signalement et le reformule de façon factuelle… (10 à 20 secondes)' : 'Envoi…';
     const liens = form.liens.value.split(/\s+/).map(s => s.trim()).filter(s => /^https?:\/\//i.test(s));
     const body = { titre: form.titre.value, resume: form.resume.value, description: form.description.value, siren: form.siren.value, lieu: form.lieu.value,
       montant: form.montant.value, email: form.email.value, liens, site: form.site.value, categories: catsOf(form.categories.value), mots: tagsOf(form.mots.value), charte: form.charte.checked, prive: form.prive.checked, loupe: state.loupe,
-      preuve: { ...state.challenge, counter: state.counter, trace: state.trace } };
+      preuve: { ...state.challenge, counter: state.counter, trace: state.trace },
+      ...(relire && state.passe ? { passe: state.passe } : {}), ...(!relire && state.jeton ? { jeton: state.jeton } : {}) };
     try {
-      const r = await fetch(API + 'signalement', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const r = await fetch(API + (relire ? 'signalement/relecture' : 'signalement'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const d = await r.json();
+      if (d.passe) state.passe = d.passe;
+      if (relire && d.ok) {   // the Loupe's version goes into the form: this exact text is the one published
+        for (const k of ['titre', 'resume', 'description', 'mots']) {
+          const v = d.version[k];
+          form[k].value = Array.isArray(v) ? v.join(', ') : (v || '');
+          flash(form[k]);
+        }
+        count(); showCats(); showTags();
+        state.jeton = d.jeton;
+        result.className = 'sg-result is-ok';
+        result.innerHTML = `<strong>Relu par la Loupe.</strong> ${esc(d.changements || '')} C’est cette version, ci-dessus, qui sera publiée : relisez-la, puis cliquez sur « Publier cette version ». Pour la corriger, demandez-le à la Loupe ou modifiez le texte : il repassera par la relecture.`;
+        form.titre.closest('.sg-field')?.scrollIntoView?.({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+        update();
+        return;
+      }
       if (d.ok) {
         result.className = 'sg-result is-ok';
-        result.innerHTML = !d.ref ? 'Merci !' : d.visible ? `Merci ! Signalement <a href="#${esc(d.ref)}">${esc(d.ref)}</a> en ligne, visible par tous, marqué « non relu » jusqu’à la relecture.`
+        result.innerHTML = !d.ref ? 'Merci !' : d.visible ? `Merci ! Signalement <a href="#${esc(d.ref)}">${esc(d.ref)}</a> en ligne, visible par tous dans la version relue par la Loupe, marqué « non relu » jusqu’à la vérification par FranceRoueLibre.`
           : `Merci ! Signalement ${esc(d.ref)} reçu : seul FranceRoueLibre le lira.`;
+        state.jeton = null; state.passe = null;
         form.reset(); count(); showCats(); showTags(); list(d.ref);
         try { sessionStorage.removeItem('frl-signalement'); } catch (_) { /* private mode */ }
         resetHuman();
       } else {
         result.className = 'sg-result is-error';
         result.textContent = d.error || 'Envoi refusé.';
-        if (/vérification|tracé|rapide/.test(d.error || '')) resetHuman();
+        if (/relecture|changé|publié/.test(d.error || '')) state.jeton = null;
+        if (/vérification|tracé|rapide|déjà utilisée/.test(d.error || '')) resetHuman();
         else update();
       }
     } catch (err) {

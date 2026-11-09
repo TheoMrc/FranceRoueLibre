@@ -13,7 +13,8 @@ GET  /api/assistant/demandes     -> the published requests and their replies (pa
 POST /api/assistant/admin        {"action": "liste"|"voir"|"valider"|"refuser"|"publier"|"cloturer", "ref", "texte"}
                                   127.0.0.1 only, never through nginx, with MAIL_ADMIN_TOKEN (--demandes below)
 GET  /api/assistant/signalement/defi  -> a challenge for the « human » check of signalements.html
-POST /api/assistant/signalement  {"titre", "description", "siren", "lieu", "montant", "liens", "email", "charte", "preuve"}
+POST /api/assistant/signalement/relecture  {same fields, "preuve" or "passe", "consigne"?}  -> the Loupe's version and its jeton
+POST /api/assistant/signalement  {"titre", "description", "siren", "lieu", "montant", "liens", "email", "charte", "jeton" | "preuve"}
                                   -> {"ok", "ref"} shown to all at once (« non relu »), unless "prive" (assistant/signalements.py)
 POST /api/assistant/signalement/abus  {"ref", "motif"}  a reader flags a shown report
 POST /api/assistant/signalement/vote  {"ref", "note"?, "sens": 1|-1|0}  thumbs on a report or on a note of the community
@@ -323,7 +324,7 @@ class Handler(BaseHTTPRequestHandler):
                 body = {}
             res = signalements.flag(body if isinstance(body, dict) else {}, journal.reader(self.client_ip()))
             return self.send(200 if res.get('ok') else 400, res)
-        if url.path == '/api/assistant/signalement':
+        if url.path in ('/api/assistant/signalement', '/api/assistant/signalement/relecture'):
             try:
                 size = int(self.headers.get('Content-Length') or 0)
                 body = json.loads(self.rfile.read(size)) if 0 < size <= 60000 else {}
@@ -331,7 +332,7 @@ class Handler(BaseHTTPRequestHandler):
                 body = {}
             if not isinstance(body, dict) or not body:
                 return self.send(400, {'error': 'signalement illisible'})
-            res = signalements.submit(body, journal.reader(self.client_ip()))
+            res = (signalements.relecture if url.path.endswith('/relecture') else signalements.submit)(body, journal.reader(self.client_ip()))
             return self.send(200 if res.get('ok') else 400, res)
         if url.path in ('/api/assistant/demande', '/api/assistant/admin'):
             try:

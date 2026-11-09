@@ -146,7 +146,7 @@ NGX
     location /api/assistant/ {
         limit_req zone=frl_ai burst=10 nodelay; limit_req_status 429;
         client_max_body_size 64k;
-        proxy_pass http://127.0.0.1:8018; proxy_read_timeout 30s;
+        proxy_pass http://127.0.0.1:8018; proxy_read_timeout 60s;   # the relecture of a report waits for the model
         proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr;
     }
     # Search API behind nginx's cache: a search already made by someone (10 min, the API's Cache-Control) is answered
