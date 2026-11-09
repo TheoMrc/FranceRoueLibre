@@ -73,7 +73,7 @@ PY
   {
     echo "# francerouelibre.fr – written by deploy/vps.sh (FranceRoueLibre repo), static files from $WEB"
     echo "limit_req_zone \$binary_remote_addr zone=frl_api:10m rate=5r/s;"
-echo "limit_req_zone \$binary_remote_addr zone=frl_ai:10m rate=3r/s;"
+echo "limit_req_zone \$binary_remote_addr zone=frl_ai:10m rate=8r/s;"   # the Loupe page polls its answer every 0.65 s: room for several readers behind one address (mobile, office)
     # Answers of the search API, shared by all visitors: keys in memory (20 Mo), answers on disk (500 Mo at most)
     echo "proxy_cache_path /var/cache/nginx/frl levels=1:2 keys_zone=frl_search:20m max_size=500m inactive=2h use_temp_path=off;"
     # Own access log, without query strings, read by frl-stats. The searched words go to a separate journal without
@@ -144,7 +144,7 @@ NGX
     # Search API (server/search_api.py, systemd unit francerouelibre-search)
     # AI assistant (server/assistant_api.py, systemd unit francerouelibre-assistant); answers 502 when not installed
     location /api/assistant/ {
-        limit_req zone=frl_ai burst=10 nodelay; limit_req_status 429;
+        limit_req zone=frl_ai burst=30 nodelay; limit_req_status 429;
         client_max_body_size 64k;
         proxy_pass http://127.0.0.1:8018; proxy_read_timeout 60s;   # the relecture of a report waits for the model
         proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr;
