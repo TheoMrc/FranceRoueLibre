@@ -104,6 +104,87 @@
   const count = () => { $('sgCount').textContent = `${form.description.value.length.toLocaleString('fr-FR')} / 6 000`; };
   form.description.addEventListener('input', count);
 
+  /* ------------------------------------------------------------------ categories and keywords
+     Several categories per report, in three groups (the same keys as server/assistant/signalements.py, CATEGORIES),
+     and up to 8 free keywords. Both live in hidden inputs (categories, mots: comma-separated), so the Loupe fills
+     them like any field: her values come in as chips that light up one after the other. */
+  const CATEGORIES = [
+    ['Échelon', [['commune', 'Commune'], ['intercommunalite', 'Intercommunalité'], ['departement', 'Département'], ['region', 'Région'],
+      ['etat', 'État'], ['operateur', 'Opérateur ou agence de l’État'], ['secu', 'Sécurité sociale'], ['europe', 'Union européenne']]],
+    ['Nature de la dépense', [['association', 'Association financée'], ['marche-public', 'Marché public'], ['subvention', 'Subvention'],
+      ['projet-aide', 'Projet aidé'], ['niche-fiscale', 'Niche fiscale'], ['remunerations', 'Emplois et rémunérations publics'],
+      ['elus', 'Élus et anciens élus'], ['train-de-vie', 'Train de vie de l’État'], ['communication', 'Communication et événementiel'],
+      ['conseil', 'Cabinets de conseil et études'], ['immobilier', 'Immobilier public'], ['audiovisuel', 'Audiovisuel public']]],
+    ['Ce qui interroge', [['depense-inutile', 'Dépense inutile'], ['depense-abusive', 'Dépense abusive'], ['risque-fraude', 'Risque de fraude'],
+      ['conflit-interets', 'Conflit d’intérêts possible'], ['cout-disproportionne', 'Coût disproportionné'], ['derive', 'Dérive de coût ou de délai'],
+      ['doublon', 'Doublon entre échelons'], ['opacite', 'Donnée manquante, opacité']]],
+  ];
+  const CAT_LABEL = Object.fromEntries(CATEGORIES.flatMap(([, list]) => list));
+  const MAX_TAGS = 8;
+  $('sgCatGroups').innerHTML = CATEGORIES.map(([group, list]) => `<div class="sg-catgroup"><p>${esc(group)}</p><div class="sg-chips">${list.map(([k, label]) =>
+    `<button type="button" class="sg-chip" data-cat="${k}" aria-pressed="false">${esc(label)}</button>`).join('')}</div></div>`).join('');
+  const catsOf = v => String(v || '').split(',').map(x => x.trim()).filter(x => CAT_LABEL[x]);
+  const tagsOf = v => String(v || '').split(',').map(x => x.trim()).filter(Boolean);
+  function showCats() {
+    const on = new Set(catsOf(form.categories.value));
+    form.querySelectorAll('[data-cat]').forEach(b => b.setAttribute('aria-pressed', String(on.has(b.dataset.cat))));
+  }
+  function showTags() {
+    $('sgTagList').innerHTML = tagsOf(form.mots.value).map((t, i) => `<span class="sg-tag-chip">${esc(t)}<button type="button" data-untag="${i}" aria-label="Retirer ${esc(t)}">×</button></span>`).join('');
+    $('sgTagInput').hidden = tagsOf(form.mots.value).length >= MAX_TAGS;
+    $('sgTagInput').placeholder = tagsOf(form.mots.value).length ? 'Ajouter un mot-clé…' : 'Marché public, piscine, Exempleville…';
+  }
+  $('sgCats').addEventListener('click', e => {
+    const b = e.target.closest('[data-cat]');
+    if (!b || b.disabled || form.classList.contains('is-locked')) return;
+    const on = new Set(catsOf(form.categories.value));
+    on.has(b.dataset.cat) ? on.delete(b.dataset.cat) : on.add(b.dataset.cat);
+    form.categories.value = [...on].join(', ');
+    showCats();
+  });
+  function addTag(text) {
+    const t = String(text || '').replace(/[,;]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40);
+    const tags = tagsOf(form.mots.value);
+    if (t.length < 2 || tags.length >= MAX_TAGS || tags.some(x => x.toLowerCase() === t.toLowerCase())) return;
+    form.mots.value = [...tags, t].join(', ');
+    showTags();
+  }
+  $('sgTagInput').addEventListener('keydown', e => {
+    const input = e.currentTarget;
+    if ((e.key === 'Enter' || e.key === ',' || e.key === ';') && !e.isComposing) { e.preventDefault(); addTag(input.value); input.value = ''; }
+    else if (e.key === 'Backspace' && !input.value && tagsOf(form.mots.value).length) { form.mots.value = tagsOf(form.mots.value).slice(0, -1).join(', '); showTags(); }
+  });
+  $('sgTagInput').addEventListener('blur', e => { if (e.currentTarget.value.trim()) { addTag(e.currentTarget.value); e.currentTarget.value = ''; } });
+  $('sgTagbox').addEventListener('click', e => {
+    const x = e.target.closest('[data-untag]');
+    if (x && !form.classList.contains('is-locked')) { const tags = tagsOf(form.mots.value); tags.splice(+x.dataset.untag, 1); form.mots.value = tags.join(', '); showTags(); return; }
+    if (e.target === e.currentTarget) $('sgTagInput').focus();
+  });
+  /* the Loupe's categories and keywords: one chip after the other */
+  async function popChips(name, value) {
+    const step = reduce.matches ? 0 : 140;
+    if (name === 'categories') {
+      const want = catsOf(value);
+      form.categories.value = '';
+      showCats();
+      for (const k of want) {
+        form.categories.value = [...catsOf(form.categories.value), k].join(', ');
+        showCats();
+        form.querySelector(`[data-cat="${k}"]`)?.classList.add('is-popped');
+        await new Promise(ok => setTimeout(ok, step));
+      }
+    } else {
+      form.mots.value = '';
+      showTags();
+      for (const t of tagsOf(value).slice(0, MAX_TAGS)) {
+        form.mots.value = [...tagsOf(form.mots.value), t].join(', ');
+        showTags();
+        $('sgTagList').lastElementChild?.classList.add('is-popped');
+        await new Promise(ok => setTimeout(ok, step));
+      }
+    }
+  }
+
   /* ------------------------------------------------------------------ sending */
   form.addEventListener('submit', async e => {
     e.preventDefault();
@@ -117,7 +198,7 @@
     result.className = 'sg-result'; result.textContent = 'Envoi…';
     const liens = form.liens.value.split(/\s+/).map(s => s.trim()).filter(s => /^https?:\/\//i.test(s));
     const body = { titre: form.titre.value, description: form.description.value, siren: form.siren.value, lieu: form.lieu.value,
-      montant: form.montant.value, email: form.email.value, liens, site: form.site.value, charte: form.charte.checked, prive: form.prive.checked, loupe: state.loupe,
+      montant: form.montant.value, email: form.email.value, liens, site: form.site.value, categories: catsOf(form.categories.value), mots: tagsOf(form.mots.value), charte: form.charte.checked, prive: form.prive.checked, loupe: state.loupe,
       preuve: { ...state.challenge, counter: state.counter, trace: state.trace } };
     try {
       const r = await fetch(API + 'signalement', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -126,7 +207,7 @@
         result.className = 'sg-result is-ok';
         result.innerHTML = !d.ref ? 'Merci !' : d.visible ? `Merci ! Signalement <a href="#${esc(d.ref)}">${esc(d.ref)}</a> en ligne, visible par tous, marqué « non relu » jusqu’à la relecture.`
           : `Merci ! Signalement ${esc(d.ref)} reçu : seul FranceRoueLibre le lira.`;
-        form.reset(); count(); list(d.ref);
+        form.reset(); count(); showCats(); showTags(); list(d.ref);
         try { sessionStorage.removeItem('frl-signalement'); } catch (_) { /* private mode */ }
         resetHuman();
       } else {
@@ -154,10 +235,10 @@
   function fill(fields) {
     for (const [k, v] of Object.entries(fields)) {
       if (!v || !form[k]) continue;
-      form[k].value = Array.isArray(v) ? v.join('\n') : v;
+      form[k].value = Array.isArray(v) ? v.join(k === 'categories' || k === 'mots' ? ', ' : '\n') : v;
       flash(form[k]);
     }
-    count();
+    count(); showCats(); showTags();
   }
   /* The Loupe writes into the form as it goes (remplir_signalement, one event per call): one field after the other,
      typed, so the reader sees the dossier take shape. */
@@ -172,6 +253,14 @@
       const [name, text] = typing.queue.shift();
       const el = form[name];
       if (!el) continue;
+      if (name === 'categories' || name === 'mots') {
+        const box = el.closest('.sg-field');
+        box?.classList.add('is-typing');
+        box?.scrollIntoView?.({ block: 'nearest', behavior: reduce.matches ? 'auto' : 'smooth' });
+        await popChips(name, text);
+        box?.classList.remove('is-typing');
+        continue;
+      }
       const box = el.closest('.sg-field');
       const from = text.startsWith(el.value) ? el.value.length : 0;
       if (!from) el.value = '';
@@ -192,7 +281,7 @@
   }
   /* What the Loupe wrote (one event per remplir_signalement or modifier_champ call): whole fields, as plain text. They
      are only ever written with .value, so nothing in them can run on the page. */
-  const KEYS = ['titre', 'lieu', 'montant', 'siren', 'description', 'liens'];
+  const KEYS = ['titre', 'lieu', 'montant', 'siren', 'description', 'liens', 'categories', 'mots'];
   const QMARK = /\n*Questions à poser :\n[\s\S]*$/;   // the questions end the description
   const draftState = {};
   function applyDraft(champs, sources) {
@@ -263,7 +352,8 @@
           questions: 'Quel est le coût total voté, études et frais financiers compris ?\nQui finance, et à quelle hauteur (commune, intercommunalité, département, région, État) ?\n'
             + 'Une étude de besoin et de fréquentation a-t-elle été publiée ?\nQuel coût de fonctionnement annuel est prévu ?',
           liens: [`${SITE}recherche.html?q=piscine`, `${SITE}index.html#explorer`, `${SITE}aides.html`, 'https://www.collectivites-locales.gouv.fr/'].join('\n'),
-        }, 'faits, questions, sources', 700),
+          categories: 'commune, projet-aide, marche-public, cout-disproportionne', mots: 'centre aquatique, piscine, Exempleville, équipement sportif',
+        }, 'faits, questions, sources, catégories, mots-clés', 700),
       ],
       result: { reply: 'Le dossier est prérempli : un titre factuel, les faits à vérifier, les questions à poser à la mairie et les sources, du site d’abord, puis du web.\n\n'
         + `*${NOTE}*`, provider: 'demo', label: 'Démonstration', sources: [{ title: 'collectivites-locales.gouv.fr', url: 'https://www.collectivites-locales.gouv.fr/' }] },
@@ -288,7 +378,8 @@
           questions: 'Quelles subventions l’association a-t-elle reçues, de qui et pour quels projets ?\nLes conventions d’objectifs et les comptes annuels sont-ils publiés ?\n'
             + 'Un élu ou un agent ayant voté ou instruit ces subventions a-t-il un lien avec l’association, et s’est-il déporté ?',
           liens: [`${SITE}aides.html`, `${SITE}recherche.html`, 'https://annuaire-entreprises.data.gouv.fr/', 'https://www.journal-officiel.gouv.fr/'].join('\n'),
-        }, 'faits, questions, sources', 700),
+          categories: 'association, subvention, conflit-interets, opacite', mots: 'association, subventions, dirigeants, comptes annuels',
+        }, 'faits, questions, sources, catégories, mots-clés', 700),
       ],
       result: { reply: 'Le dossier est prérempli. Ajoutez le SIREN de l’association : la Loupe y lirait alors l’argent public réellement publié pour cet organisme.\n\n'
         + `*${NOTE}*`, provider: 'demo', label: 'Démonstration', sources: [{ title: 'annuaire-entreprises.data.gouv.fr', url: 'https://annuaire-entreprises.data.gouv.fr/' }] },
@@ -336,7 +427,7 @@
     liveSteps.appendChild(li);
     return li;
   }
-  const NAMES = { titre: 'titre', lieu: 'lieu', montant: 'montant', siren: 'SIREN', description: 'faits', questions: 'questions', liens: 'sources' };
+  const NAMES = { titre: 'titre', lieu: 'lieu', montant: 'montant', siren: 'SIREN', description: 'faits', questions: 'questions', liens: 'sources', categories: 'catégories', mots: 'mots-clés' };
   function hooks(idea, done) {
     let lastStep = null, tools = 0;
     return {
@@ -447,7 +538,7 @@
   const fields = () => Object.fromEntries(KEYS.map(k => [k, form[k].value.trim()]));
   window.FRLLoupePage = {
     wrap(text) {
-      if (form.classList.contains('is-locked')) return null;
+      if (form.classList.contains('is-locked') || view !== 'faire') return null;
       for (const k of Object.keys(draftState)) delete draftState[k];
       const cur = fields();
       Object.assign(draftState, cur);
@@ -502,31 +593,234 @@
   const params = new URLSearchParams(location.search);
   fill({ siren: params.get('siren'), lieu: params.get('lieu'), titre: params.get('titre') });
 
-  /* ------------------------------------------------------------------ every report shown to all */
+  /* ------------------------------------------------------------------ the two doors (route)
+     Arriving, the page shows two doors; #faire opens the rules and the form, #voir the reports. A report's own link
+     (#S-…) and ?q= open the reports too. */
+  const VIEWS = { faire: 'faire', signaler: 'faire', charte: 'faire', voir: 'voir', sgListTitle: 'voir' };
+  let view = '';
+  function route(scroll) {
+    const h = decodeURIComponent(location.hash.slice(1));
+    const want = VIEWS[h] || (/^S-\d{8}-[A-Z0-9]{4}$/.test(h) || new URLSearchParams(location.search).get('q') ? 'voir' : '');
+    view = want;
+    $('portes').hidden = !!want;
+    $('sgSwitch').hidden = !want;
+    document.querySelectorAll('.sg-view').forEach(v => { v.hidden = v.dataset.view !== want; });
+    document.querySelectorAll('.sg-switch [data-go]').forEach(a => a.setAttribute('aria-current', String(a.dataset.go === want)));
+    document.body.dataset.sgView = want;
+    if (!want || !scroll) return;
+    const target = /^S-/.test(h) ? null : document.getElementById(h === 'faire' || h === 'voir' ? 'sgSwitch' : h);
+    target?.scrollIntoView({ behavior: 'auto', block: 'start' });
+  }
+  addEventListener('hashchange', () => { route(true); if (/^#S-/.test(location.hash)) focusItem(location.hash.slice(1)); });
+  // the doors and the switch: their own links (the page's smooth scrolling would only look for the hidden target)
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[data-go]');
+    if (!a || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return;
+    e.preventDefault(); e.stopPropagation();
+    if (location.hash !== `#${a.dataset.go}`) history.pushState(null, '', `#${a.dataset.go}`);
+    route(false);
+    // the switch right under the header: the hero's end
+    const hero = document.querySelector('.sg-hero'), headerH = headerBottom();
+    scrollTo({ top: Math.max(0, hero.offsetTop + hero.offsetHeight - headerH), behavior: 'auto' });
+  }, true);
+  addEventListener('popstate', () => route(false));
+  // the switch sticks right under the header, whose height differs between phone (two rows) and wide screens
+  const headerBottom = () => {
+    const h = document.getElementById('siteHeader');
+    if (!h) return 68;
+    return Math.max(...[h, h.querySelector('.nav__links')].filter(Boolean).map(el => el.getBoundingClientRect().bottom), 0);   // the menu row under the header on a phone
+  };
+  const fitTop = () => document.documentElement.style.setProperty('--sg-top', `${Math.round(headerBottom())}px`);
+  fitTop(); addEventListener('resize', fitTop, { passive: true });
+
+  /* ------------------------------------------------------------------ every report shown to all
+     Filters: words (title, keywords, place, text), categories and keywords chips (facets), sort. Each report: its
+     categories and keywords (a click filters on them), thumbs up or down, the notes of the community with their own
+     thumbs. A note « retenue » (3 thumbs up at least, twice as many as down) shows above, as on X. */
+  const Q_REPORT = 'Ce signalement est-il légitime, objectif, ou permet-il de mieux comprendre nos dépenses publiques ?';
+  const Q_NOTE = 'Cette note est-elle légitime, objective, ou permet-elle de mieux comprendre nos dépenses publiques ?';
+  const THUMB = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v9H4v-9h3zm2 9h8.3a2 2 0 0 0 2-1.6l1.3-6A2 2 0 0 0 18.6 10H14l.8-4.1a1.6 1.6 0 0 0-2.9-1.2L9 9.6V20z"/></svg>';
   const day = iso => iso ? new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+  const nrm = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[’']/g, ' ');
+  const words = t => nrm(t).match(/[a-z0-9]+/g) || [];
+  const net = v => (v?.up || 0) - (v?.down || 0);
+  const retained = n => n.votes.up >= 3 && n.votes.up >= 2 * n.votes.down;
+  const reports = { all: [], q: '', cats: new Set(), tags: new Set(), sort: 'recent' };
+  let myVotes = {};
+  try { myVotes = JSON.parse(localStorage.getItem('frl-votes') || '{}'); } catch (_) { myVotes = {}; }
+  const keepVotes = () => { try { localStorage.setItem('frl-votes', JSON.stringify(myVotes)); } catch (_) { /* private mode */ } };
+
+  function thumbs(ref, note, votes, question) {
+    const key = note ? `${ref}:${note}` : ref, mine = myVotes[key] || 0, total = votes.up + votes.down;
+    const share = total ? Math.round(100 * votes.up / total) : 50;
+    return `<div class="sg-vote${note ? ' sg-vote--note' : ''}" data-ref="${esc(ref)}"${note ? ` data-note="${esc(note)}"` : ''}><p>${esc(question)}</p>`
+      + `<div class="sg-vote__row"><button type="button" class="sg-thumb sg-thumb--up" data-sens="1" aria-pressed="${mine === 1}" aria-label="Oui">${THUMB}<span>${votes.up}</span></button>`
+      + `<button type="button" class="sg-thumb sg-thumb--down" data-sens="-1" aria-pressed="${mine === -1}" aria-label="Non">${THUMB}<span>${votes.down}</span></button>`
+      + `${total ? `<span class="sg-vote__bar" aria-hidden="true"><i style="width:${share}%"></i></span>` : ''}<small>${total ? `${share} % oui sur ${total} vote${total > 1 ? 's' : ''}` : 'Pas encore de vote'}</small></div></div>`;
+  }
+  function noteHtml(ref, n, lead) {
+    return `<div class="sg-note${lead ? ' is-retained' : ''}">${lead ? '<p class="sg-note__lead">Note de la communauté retenue</p>' : ''}<p>${esc(n.texte)}</p>`
+      + `${n.liens?.length ? `<ul>${n.liens.map(u => `<li><a href="${esc(u)}" target="_blank" rel="noopener noreferrer nofollow ugc">${esc(u)}</a></li>`).join('')}</ul>` : ''}`
+      + `<p class="sg-note__date">${day(n.recu)}</p>${thumbs(ref, n.id, n.votes, Q_NOTE)}</div>`;
+  }
   function item(s) {
     const meta = [s.siren && `SIREN ${esc(s.siren)}`, s.lieu && esc(s.lieu), s.montant && esc(s.montant)].filter(Boolean);
+    const notes = [...(s.notes || [])].sort((a, b) => net(b.votes) - net(a.votes));
+    const lead = notes.find(retained), others = notes.filter(n => n !== lead);
+    const long = (s.description || '').length > 700;
     return `<article class="sg-item${s.relu ? ' is-read' : ''}" id="${esc(s.ref)}"><header><span class="sg-tag${s.relu ? ' sg-tag--read' : ''}">${s.relu ? 'Relu par FranceRoueLibre' : 'Non relu'}</span>`
       + `<span>${esc(s.ref)}</span><span>${day(s.publie)}</span>${s.loupe ? '<span>préparé avec la Loupe</span>' : ''}</header>`
-      + `<h3>${esc(s.titre)}</h3><p>${esc(s.description)}</p>${meta.length ? `<p class="note">${meta.join(' · ')}</p>` : ''}`
+      + `<h3>${esc(s.titre)}</h3>`
+      + `${(s.categories || []).length || (s.mots || []).length ? `<div class="sg-item__tags">${(s.categories || []).map(c => `<button type="button" class="sg-pill" data-fcat="${esc(c)}">${esc(CAT_LABEL[c] || c)}</button>`).join('')}${(s.mots || []).map(m => `<button type="button" class="sg-kw" data-ftag="${esc(m)}">#${esc(m)}</button>`).join('')}</div>` : ''}`
+      + `<div class="sg-item__text${long ? ' is-long' : ''}"><p>${esc(s.description)}</p>${long ? '<button type="button" class="sg-more">Lire la suite</button>' : ''}</div>`
+      + `${meta.length ? `<p class="note">${meta.join(' · ')}</p>` : ''}`
       + `${(s.liens || []).length ? `<ul>${s.liens.map(u => `<li><a href="${esc(u)}" target="_blank" rel="noopener noreferrer nofollow ugc">${esc(u)}</a></li>`).join('')}</ul>` : ''}`
       + `${s.reponse ? `<div class="sg-reply"><strong>Réponse</strong><p>${esc(s.reponse)}</p></div>` : ''}`
+      + `${lead ? noteHtml(s.ref, lead, true) : ''}`
+      + thumbs(s.ref, null, s.votes || { up: 0, down: 0 }, Q_REPORT)
+      + `<details class="sg-notes"><summary>${others.length ? `Notes de la communauté (${others.length})` : 'Ajouter une note de la communauté'}</summary>`
+      + `${others.map(n => noteHtml(s.ref, n, false)).join('')}`
+      + `<form class="sg-noteform" data-ref="${esc(s.ref)}" novalidate><label><span>Votre note : un contexte, une correction, une source qui manque</span><textarea name="texte" rows="3" maxlength="1000" placeholder="Les faits, avec leurs sources. Pas d’insulte, pas d’accusation."></textarea></label>`
+      + `<label><span>Sources <em>un lien par ligne</em></span><textarea name="liens" rows="2" placeholder="https://…"></textarea></label><input name="site" class="sg-hp" tabindex="-1" autocomplete="off" aria-hidden="true">`
+      + `<div class="sg-noteform__row"><button type="submit" class="btn btn--ghost">Proposer la note</button><span class="sg-noteform__state" aria-live="polite"></span></div></form></details>`
       + `<footer><span>Une piste à vérifier, pas un verdict.</span><button type="button" class="sg-abuse" data-ref="${esc(s.ref)}">Signaler un abus</button></footer></article>`;
   }
+  function matches(s) {
+    if (reports.cats.size && ![...reports.cats].every(c => (s.categories || []).includes(c))) return false;
+    if (reports.tags.size && ![...reports.tags].every(t => (s.mots || []).some(m => nrm(m) === nrm(t)))) return false;
+    const ws = words(reports.q);
+    if (!ws.length) return true;
+    const bag = words(`${s.titre} ${(s.mots || []).join(' ')} ${(s.categories || []).map(c => CAT_LABEL[c]).join(' ')} ${s.lieu} ${s.siren} ${s.montant} ${s.description} ${(s.notes || []).map(n => n.texte).join(' ')}`);
+    return ws.every((w, i) => bag.includes(w) || (i === ws.length - 1 && w.length >= 3 && bag.some(x => x.startsWith(w))));
+  }
+  function facets(rows) {
+    const cat = new Map(), tag = new Map();
+    for (const s of rows) {
+      (s.categories || []).forEach(c => cat.set(c, (cat.get(c) || 0) + 1));
+      (s.mots || []).forEach(m => { const k = m.trim(); tag.set(k, (tag.get(k) || 0) + 1); });
+    }
+    const cats = [...cat].sort((a, b) => b[1] - a[1]);
+    const tags = [...tag].sort((a, b) => b[1] - a[1]).slice(0, 14);
+    $('sgFacets').innerHTML = (cats.length ? `<div class="sg-facet"><p>Thèmes</p><div class="sg-chips">${cats.map(([c, n]) => `<button type="button" class="sg-chip" data-fcat="${esc(c)}" aria-pressed="${reports.cats.has(c)}">${esc(CAT_LABEL[c] || c)} <small>${n}</small></button>`).join('')}</div></div>` : '')
+      + (tags.length ? `<div class="sg-facet"><p>Mots-clés</p><div class="sg-chips">${tags.map(([t, n]) => `<button type="button" class="sg-chip sg-chip--kw" data-ftag="${esc(t)}" aria-pressed="${[...reports.tags].some(x => nrm(x) === nrm(t))}">#${esc(t)} <small>${n}</small></button>`).join('')}</div></div>` : '');
+  }
+  function render() {
+    const rows = reports.all.filter(matches);
+    const by = { recent: (a, b) => String(b.publie).localeCompare(String(a.publie)), note: (a, b) => net(b.votes) - net(a.votes) || String(b.publie).localeCompare(String(a.publie)),
+      notes: (a, b) => (b.notes || []).length - (a.notes || []).length || String(b.publie).localeCompare(String(a.publie)) }[reports.sort];
+    rows.sort(by);
+    facets(reports.all);
+    const filtered = reports.q || reports.cats.size || reports.tags.size;
+    $('sgFilterState').innerHTML = filtered ? `${rows.length.toLocaleString('fr-FR')} remontée${rows.length > 1 ? 's' : ''} sur ${reports.all.length.toLocaleString('fr-FR')} <button type="button" class="sg-clear">Tout afficher</button>` : '';
+    $('sgList').innerHTML = rows.length ? rows.map(item).join('') : reports.all.length ? '<p class="note">Aucune remontée ne correspond : essayez un autre mot.</p>' : '<p class="note">Aucune remontée pour l’instant : soyez le premier.</p>';
+  }
+  function focusItem(ref) {
+    const el = document.getElementById(ref);
+    if (!el) return;
+    el.classList.add('is-focus');
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => el.classList.remove('is-focus'), 2400);
+  }
   async function list(focus) {
-    const box = $('sgList');
     try {
       const r = await fetch(API + 'signalements', { cache: 'no-store' });
       const d = await r.json();
-      const rows = d.signalements || [];
-      $('sgListCount') && ($('sgListCount').textContent = rows.length ? `· ${rows.length.toLocaleString('fr-FR')} signalement${rows.length > 1 ? 's' : ''}` : '');
-      box.innerHTML = rows.length ? rows.map(item).join('') : '<p class="note">Aucun signalement pour l’instant : soyez le premier.</p>';
-      if (focus) document.getElementById(focus)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      reports.all = d.signalements || [];
+      const n = reports.all.length;
+      const label = n ? `${n.toLocaleString('fr-FR')} remontée${n > 1 ? 's' : ''}` : '';
+      $('sgListCount').textContent = label ? `· ${label}` : '';
+      $('sgSwitchCount').textContent = n ? `(${n.toLocaleString('fr-FR')})` : '';
+      $('sgDoorCount').textContent = n ? `${label[0].toUpperCase()}${label.slice(1)}` : 'Les pistes';
+      render();
+      const want = focus || (/^#S-/.test(location.hash) ? location.hash.slice(1) : '');
+      if (want) { if (view !== 'voir') { location.hash = want; } else focusItem(want); }
     } catch (e) {
-      box.innerHTML = '<p class="note">La liste n’est pas joignable pour l’instant.</p>';
+      $('sgList').innerHTML = '<p class="note">La liste n’est pas joignable pour l’instant.</p>';
     }
   }
+  $('sgFilterQ').addEventListener('input', e => { reports.q = e.currentTarget.value; render(); });
+  $('sgSort').addEventListener('change', e => { reports.sort = e.currentTarget.value; render(); });
+  function toggleFilter(t) {
+    const c = t.closest('[data-fcat]'), k = t.closest('[data-ftag]');
+    if (!c && !k) return false;
+    if (c) { const v = c.dataset.fcat; reports.cats.has(v) ? reports.cats.delete(v) : reports.cats.add(v); }
+    else { const v = k.dataset.ftag, has = [...reports.tags].find(x => nrm(x) === nrm(v)); has ? reports.tags.delete(has) : reports.tags.add(v); }
+    render();
+    $('sgFilters')?.scrollIntoView?.({ block: 'nearest' });
+    return true;
+  }
+  $('sgFacets').addEventListener('click', e => toggleFilter(e.target));
+  $('sgFilterState').addEventListener('click', e => {
+    if (!e.target.closest('.sg-clear')) return;
+    reports.q = ''; reports.cats.clear(); reports.tags.clear(); $('sgFilterQ').value = ''; render();
+  });
+
+  /* the notes: a challenge asked when the reader starts writing (answered 3 s later at the soonest), its proof of
+     work done meanwhile; no drawing here */
+  const noteProof = new WeakMap();
+  async function proofFor(f) {
+    if (!noteProof.has(f)) noteProof.set(f, (async () => {
+      const r = await fetch(API + 'signalement/defi', { cache: 'no-store' });
+      const c = await r.json();
+      const enc = new TextEncoder();
+      for (let i = 0; ; i++) {
+        const h = new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(`${c.nonce}:${i}`)));
+        if (zeroBits(h) >= c.difficulty) return { ...c, counter: i, at: Date.now() };
+      }
+    })().catch(() => null));
+    return noteProof.get(f);
+  }
+  $('sgList').addEventListener('focusin', e => { const f = e.target.closest('.sg-noteform'); if (f) proofFor(f); });
+  $('sgList').addEventListener('submit', async e => {
+    const f = e.target.closest('.sg-noteform');
+    if (!f) return;
+    e.preventDefault();
+    const st = f.querySelector('.sg-noteform__state'), btn = f.querySelector('button[type=submit]');
+    const texte = f.texte.value.trim();
+    if (texte.length < 30) { st.className = 'sg-noteform__state is-error'; st.textContent = 'Une note explique, avec ses sources : 30 caractères au moins.'; return; }
+    btn.disabled = true; st.className = 'sg-noteform__state'; st.textContent = 'Envoi…';
+    const proof = await proofFor(f);
+    if (!proof) { st.className = 'sg-noteform__state is-error'; st.textContent = 'Le service ne répond pas : réessayez plus tard.'; btn.disabled = false; noteProof.delete(f); return; }
+    const wait = proof.at + 3200 - Date.now();
+    if (wait > 0) await new Promise(ok => setTimeout(ok, wait));
+    try {
+      const liens = f.liens.value.split(/\s+/).filter(u => /^https?:\/\//i.test(u));
+      const r = await fetch(API + 'signalement/note', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ref: f.dataset.ref, texte, liens, site: f.site.value, preuve: { nonce: proof.nonce, ts: proof.ts, sig: proof.sig, counter: proof.counter } }) });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'Note refusée.');
+      if (d.id) myVotes[`${f.dataset.ref}:${d.id}`] = 1;
+      keepVotes();
+      await list(f.dataset.ref);
+    } catch (err) {
+      st.className = 'sg-noteform__state is-error'; st.textContent = err.message; btn.disabled = false; noteProof.delete(f);
+    }
+  });
   $('sgList').addEventListener('click', async e => {
+    if (toggleFilter(e.target)) return;
+    const more = e.target.closest('.sg-more');
+    if (more) { more.parentElement.classList.remove('is-long'); more.remove(); return; }
+    const t = e.target.closest('.sg-thumb');
+    if (t) {
+      const box = t.closest('.sg-vote'), ref = box.dataset.ref, note = box.dataset.note || null, key = note ? `${ref}:${note}` : ref;
+      const sens = myVotes[key] === +t.dataset.sens ? 0 : +t.dataset.sens;
+      box.querySelectorAll('.sg-thumb').forEach(b => { b.disabled = true; });
+      try {
+        const r = await fetch(API + 'signalement/vote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ref, note, sens }) });
+        const d = await r.json();
+        if (!d.ok) throw new Error(d.error);
+        if (sens) myVotes[key] = sens; else delete myVotes[key];
+        keepVotes();
+        const s = reports.all.find(x => x.ref === ref);
+        const target = note ? s?.notes.find(n => n.id === note) : s;
+        if (target) target.votes = d.votes;
+        box.outerHTML = thumbs(ref, note, d.votes, note ? Q_NOTE : Q_REPORT);
+      } catch (err) {
+        box.querySelectorAll('.sg-thumb').forEach(b => { b.disabled = false; });
+        box.querySelector('small').textContent = err.message || 'Vote non pris en compte';
+      }
+      return;
+    }
     const b = e.target.closest('.sg-abuse');
     if (!b || b.disabled) return;
     const motif = prompt('Pourquoi ce signalement pose-t-il problème ? (insulte, accusation sans preuve, vie privée, faux…)');
@@ -537,6 +831,8 @@
       b.textContent = r.ok ? 'Merci, alerte transmise' : 'Alerte non transmise';
     } catch (err) { b.textContent = 'Alerte non transmise'; }
   });
+  const q0 = new URLSearchParams(location.search).get('q');
+  if (q0) { reports.q = q0; $('sgFilterQ').value = q0; }
   document.querySelectorAll('[data-ico]').forEach(el => { if (window.FRL_ICONS) el.innerHTML = FRL_ICONS.icon(el.dataset.ico); });
-  getChallenge(); list(); count(); update();
+  route(true); getChallenge(); list(); count(); update(); showCats(); showTags();
 })();

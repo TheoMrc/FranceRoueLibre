@@ -90,12 +90,37 @@
         <span class="eyebrow">Contrôle citoyen</span>
         <h1>Un truc qui cloche ? <span class="gradient-text">Faites-le remonter.</span></h1>
         <figure class="hero__quote sg-quote">
-          <blockquote>« Le but unique de cette page est de permettre un effort collectif de remontée de l'information — pas une délation généralisée, mais une gestion mieux contrôlée et supervisée de <strong>notre argent</strong>, car les politiques en sont incapables. »</blockquote>
+          <blockquote>« Le but unique de cette page est de permettre un effort collectif de remontée de l'information – pas une délation généralisée, mais une gestion mieux contrôlée et supervisée de <strong>notre argent</strong>, car les politiques en sont incapables. »</blockquote>
           <figcaption>Un data scientist avec trop de temps libre</figcaption>
         </figure>
-        <p class="hero__search-hint sg-jump">Directement : <a href="#signaler">documenter un cas suspect</a> · <a href="#sgListTitle">le tableau de bord des remontées</a> · <a href="#charte">les règles du jeu</a></p>
       </div></div>
     </section>
+
+    <!-- Arriving: two doors. #faire opens the rules and the form, #voir the reports (signalements.js, route). -->
+    <section class="section sg-doors-wrap" id="portes" aria-label="Que voulez-vous faire ?">
+      <div class="container">
+        <nav class="sg-doors">
+          <a class="sg-door sg-door--faire" href="#faire" data-go="faire">
+            <span class="sg-door__ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12,8H4A2,2 0 0,0 2,10V14A2,2 0 0,0 4,16H5V20A1,1 0 0,0 6,21H8A1,1 0 0,0 9,20V16H12L17,20V4L12,8M21.5,12C21.5,13.71 20.54,15.26 19,16V8C20.53,8.75 21.5,10.3 21.5,12Z"/></svg></span>
+            <span class="sg-door__body"><strong>Faire une remontée citoyenne</strong><span>Une dépense qui interroge ? Décrivez-la en une phrase : la Loupe vous aide à la documenter, sources à l’appui.</span></span>
+            <span class="sg-door__go">Commencer<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </a>
+          <a class="sg-door sg-door--voir" href="#voir" data-go="voir">
+            <span class="sg-door__ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h18v2H3zm0 6h12v2H3zm0 6h15v2H3z"/></svg></span>
+            <span class="sg-door__body"><strong>Voir les remontées citoyennes</strong><span><b id="sgDoorCount">Les pistes</b> envoyées par des lecteurs, classées par thème et notées par la communauté.</span></span>
+            <span class="sg-door__go">Parcourir<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </a>
+        </nav>
+      </div>
+    </section>
+
+    <div class="sg-switch-wrap" id="sgSwitch" hidden>
+      <div class="container"><nav class="sg-switch" aria-label="Remontées citoyennes">
+        <a href="#faire" data-go="faire">Faire une remontée</a><a href="#voir" data-go="voir">Voir les remontées <span id="sgSwitchCount"></span></a>
+      </nav></div>
+    </div>
+
+    <div class="sg-view" id="faire" data-view="faire" hidden>
 
     <section class="section" id="charte" aria-labelledby="sgCharteTitle">
       <div class="container">
@@ -131,6 +156,9 @@
             <label class="sg-field"><span>Montant <em>facultatif</em></span><input name="montant" maxlength="40" placeholder="500 000 000 €"></label>
             <label class="sg-field sg-field--free"><span>Votre e-mail <em>facultatif, jamais publié</em></span><input name="email" type="email" maxlength="160" autocomplete="email"></label>
             <label class="sg-field sg-field--wide"><span>Sources <em>un lien par ligne : pages du site, documents officiels, articles</em></span><textarea name="liens" rows="4" placeholder="https://francerouelibre.fr/recherche.html?q=…"></textarea></label>
+            <fieldset class="sg-field sg-field--wide sg-cats" id="sgCats"><legend><span>Catégories <em>plusieurs possibles, la Loupe les coche à la fin de sa rédaction</em></span></legend><div id="sgCatGroups"></div><input type="hidden" name="categories"></fieldset>
+            <div class="sg-field sg-field--wide sg-tags"><label for="sgTagInput"><span>Mots-clés <em>pour retrouver la remontée : un organisme, un lieu, un objet ; Entrée ou virgule pour ajouter, 8 au plus</em></span></label>
+              <div class="sg-tagbox" id="sgTagbox"><span id="sgTagList" class="sg-taglist"></span><input id="sgTagInput" maxlength="40" placeholder="Marché public, piscine, Exempleville…" autocomplete="off" enterkeyhint="done"></div><input type="hidden" name="mots"></div>
             <label class="sg-hp" aria-hidden="true">Ne pas remplir<input name="site" tabindex="-1" autocomplete="off"></label>
           </div>
           <div class="sg-human">
@@ -141,17 +169,26 @@
           <label class="sg-check"><input type="checkbox" name="charte"><span>J’ai lu les règles du jeu : des faits sourcés, pas d’insulte, pas d’accusation que je ne peux pas étayer, pas de vie privée. Mon signalement sera visible par tous et relu ensuite.</span></label>
           <label class="sg-check sg-check--soft"><input type="checkbox" name="prive"><span><strong>Ne pas montrer à tous</strong> : seulement à FranceRoueLibre (par exemple si vous n’êtes pas sûr, ou pour transmettre un document).</span></label>
           <div class="sg-submit"><button type="submit" class="btn btn--primary" id="sgSend" disabled>Envoyer le signalement</button><span class="sg-result" id="sgResult" aria-live="polite"></span></div>
-          <p class="note">Ce que nous gardons : le signalement lui-même et, si vous la donnez, votre adresse e-mail, jamais affichée et effacée dès la relecture. Votre adresse IP n’est pas enregistrée. Détails dans les <a href="mentions.html">mentions légales</a>.</p>
+          <p class="note">Ce que nous gardons : le signalement lui-même et, si vous la donnez, votre adresse e-mail, jamais affichée et effacée dès la relecture. Votre adresse IP n’est pas enregistrée (pour les votes, seule une empreinte calculée avec une clé secrète évite qu’une même personne vote deux fois). Détails dans les <a href="mentions.html">mentions légales</a>.</p>
         </form>
       </div>
     </section>
+    </div>
 
+    <div class="sg-view" id="voir" data-view="voir" hidden>
     <section class="section" aria-labelledby="sgListTitle">
       <div class="container">
-        <div class="section__head"><span class="eyebrow">Tout ce qui remonte <span id="sgListCount"></span></span><h2 id="sgListTitle">Tableau de bord des remontées</h2><p class="lead">Des pistes à vérifier, jamais des verdicts : chacune avec ses sources, son état de relecture, et la réponse de l’organisme quand il y en a une.</p></div>
+        <div class="section__head"><span class="eyebrow">Tout ce qui remonte <span id="sgListCount"></span></span><h2 id="sgListTitle">Tableau de bord des remontées</h2><p class="lead">Des pistes à vérifier, jamais des verdicts : chacune avec ses sources, son état de relecture, les notes et les votes de la communauté, et la réponse de l’organisme quand il y en a une.</p></div>
+        <div class="sg-filters">
+          <label class="sg-filter-q"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><span class="sr-only">Chercher dans les remontées</span><input id="sgFilterQ" type="search" placeholder="Chercher : Macron, piscine, une commune, un SIREN…" autocomplete="off"></label>
+          <label class="sg-sort">Trier <select id="sgSort"><option value="recent">les plus récentes</option><option value="note">les mieux notées</option><option value="notes">les plus discutées</option></select></label>
+        </div>
+        <div class="sg-facets" id="sgFacets"></div>
+        <p class="sg-filter-state" id="sgFilterState" aria-live="polite"></p>
         <div id="sgList" class="sg-list"><p class="note">Chargement…</p></div>
       </div>
     </section>
+    </div>
   </main>
 
   <footer class="site-footer">

@@ -16,7 +16,10 @@ GET  /api/assistant/signalement/defi  -> a challenge for the « human » check o
 POST /api/assistant/signalement  {"titre", "description", "siren", "lieu", "montant", "liens", "email", "charte", "preuve"}
                                   -> {"ok", "ref"} shown to all at once (« non relu »), unless "prive" (assistant/signalements.py)
 POST /api/assistant/signalement/abus  {"ref", "motif"}  a reader flags a shown report
-GET  /api/assistant/signalements -> every report shown to all
+POST /api/assistant/signalement/vote  {"ref", "note"?, "sens": 1|-1|0}  thumbs on a report or on a note of the community
+POST /api/assistant/signalement/note  {"ref", "texte", "liens", "preuve"}  a note of the community
+GET  /api/assistant/signalements -> every report shown to all, with their categories, keywords, votes and notes
+GET  /api/assistant/signalements/recherche?q=…  -> the reports matching q (search box of the site, recherche.html)
 GET  /api/assistant/status       -> which models can answer now (no amount of money is published), whether the site
                                     still has credits (else a message and the donation link), length of the queue
 
@@ -250,7 +253,10 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(200, {'demandes': demandes.published(), 'delai_jours': demandes.DELAY_DAYS,
                                    'envoi': S.MAIL_CONFIGURED})
         if url.path == '/api/assistant/signalements':
-            return self.send(200, {'signalements': signalements.published()})
+            return self.send(200, {'signalements': signalements.published(), 'categories': signalements.CATEGORIES})
+        if url.path == '/api/assistant/signalements/recherche':
+            q = (parse_qs(url.query).get('q') or [''])[0][:200]
+            return self.send(200, {'resultats': signalements.search(q, 8)})
         if url.path == '/api/assistant/signalement/defi':
             return self.send(200, signalements.challenge())
         if url.path.startswith('/api/assistant/job/'):
@@ -296,6 +302,17 @@ class Handler(BaseHTTPRequestHandler):
                 job['voted'] = vote
                 journal.write(S.STATE_DIR, journal.vote_entry(job['id'], journal.reader(job['ip']), vote, body.get('note')))
             return self.send(200, {'ok': True})
+        if url.path in ('/api/assistant/signalement/vote', '/api/assistant/signalement/note'):
+            try:
+                size = int(self.headers.get('Content-Length') or 0)
+                body = json.loads(self.rfile.read(size)) if 0 < size <= 12000 else {}
+            except (ValueError, AttributeError):
+                body = {}
+            body = body if isinstance(body, dict) else {}
+            who = signalements.voter(self.client_ip())
+            res = (signalements.vote(body, who) if url.path.endswith('/vote')
+                   else signalements.add_note(body, who, journal.reader(self.client_ip())))
+            return self.send(200 if res.get('ok') else 400, res)
         if url.path == '/api/assistant/signalement/abus':
             try:
                 size = int(self.headers.get('Content-Length') or 0)
@@ -417,8 +434,13 @@ def admin_cli(args) -> None:
     import urllib.request
     action, ref = ((args.demandes or []) + ['', ''])[:2]
     text = Path(args.texte).read_text(encoding='utf-8') if args.texte else ''
-    if args.signalements:  # liste | voir REF | relu REF [--texte F] | masquer REF | afficher REF
+    if args.signalements:  # liste | voir REF | relu REF [--texte F] | masquer REF | afficher REF | mots REF "a, b" ["cat,cat"] | note_masquer REF ID
         action, ref = ('sig_' + args.signalements[0], (args.signalements + [''])[1])
+        extra = args.signalements[2:]
+        if action == 'sig_mots':
+            text = json.dumps({**({'mots': extra[0]} if extra else {}), **({'categories': extra[1]} if len(extra) > 1 else {})}, ensure_ascii=False)
+        elif action == 'sig_note_masquer' and extra:
+            text = extra[0]
     if args.mail:  # frl-mail liste [N] | lire UID | apercu UID | repondre UID [--force], the reply text on stdin
         action, ref = (args.mail + ['', ''])[:2]
         if action in ('apercu', 'repondre'):
@@ -444,7 +466,7 @@ def main():
     parser.add_argument('--mail', nargs='+', metavar='ACTION', help='boîte du site : liste [N] | lire UID | apercu UID | '
                                                                    'repondre UID [--force] (texte de la réponse sur stdin)')
     parser.add_argument('--signalements', nargs='+', metavar='ACTION', help='signalements citoyens : liste | voir REF | '
-                                                                           'relu REF [--texte F] | masquer REF | afficher REF')
+                                                                           'relu REF [--texte F] | masquer REF | afficher REF | mots REF "mot, mot" ["categorie,categorie"] | note_masquer REF ID')
     parser.add_argument('--force', action='store_true', help='--mail repondre : répondre à un message déjà répondu')
     parser.add_argument('--texte', help='texte publié de la réponse (sinon la réponse anonymisée automatiquement)')
     parser.add_argument('--fake', action='store_true', help='fake models, no network call, no token (tests)')

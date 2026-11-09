@@ -172,6 +172,13 @@ DECLARATIONS: List[dict] = [
      'parameters': {'type': 'OBJECT', 'properties': {'url': {'type': 'STRING', 'description': 'Adresse https complète'},
                                                      'question': {'type': 'STRING', 'description': 'Ce qu’il faut y trouver'}},
                     'required': ['url', 'question']}},
+    {'name': 'chercher_signalements',
+     'description': 'Cherche dans les remontées citoyennes publiées sur le site (signalements.html) : des pistes '
+                    'envoyées par des lecteurs, avec leurs catégories, mots-clés et votes de la communauté. Ce sont des '
+                    'pistes à vérifier, pas des faits (sauf mention « relu » : relues par le site, toujours pas un verdict) ; '
+                    'cite-les comme telles, avec leur lien, quand elles éclairent la question.',
+     'parameters': {'type': 'OBJECT', 'properties': {'requete': {'type': 'STRING', 'description': 'mots à chercher, ex. « Macron bureaux »'}},
+                    'required': ['requete']}},
     {'name': 'recherche_web',
      'description': 'Recherche sur le web (actualité, textes de loi, rapports, contexte absent des données du site). '
                     'Renvoie une synthèse et ses sources. Seulement pour une question sur l’argent public que les '
@@ -179,6 +186,9 @@ DECLARATIONS: List[dict] = [
                     'question du lecteur : formule-la précisément.',
      'parameters': {'type': 'OBJECT', 'properties': {'question': {'type': 'STRING'}}, 'required': ['question']}},
 ]
+
+from . import signalements as G  # noqa: E402
+from .signalements import CATEGORIES  # noqa: E402
 
 # Only for a question asked on signalements.html (the page sends its form): the Loupe reads and edits the dossier there.
 PAGE_DECLARATIONS: List[dict] = [
@@ -191,7 +201,8 @@ PAGE_DECLARATIONS: List[dict] = [
      'description': 'Remplit, en direct sous les yeux du lecteur, le formulaire de la page Remontées citoyennes. '
                     'Pour un nouveau dossier : un premier appel dès le début, en même temps que ta première recherche, '
                     'avec le titre et le lieu déduits de sa piste (et le montant s’il le donne) ; puis un dernier '
-                    'appel, après les recherches, avec le dossier complet. Chaque champ donné remplace tout le champ '
+                    'appel, après les recherches, avec le dossier complet, ses catégories et ses mots-clés. Chaque '
+                    'champ donné remplace tout le champ '
                     '(pour changer un passage ou ajouter une phrase : modifier_champ). Ton sobre et '
                     'vérifiable : faits et montants sourcés, conditionnel pour ce qui n’est pas établi, aucune '
                     'accusation contre une personne nommée sans source publique, ni vie privée ni insulte.',
@@ -206,14 +217,20 @@ PAGE_DECLARATIONS: List[dict] = [
          'questions': {'type': 'STRING', 'description': 'Les questions à poser à l’organisme, une par ligne : elles '
                                                         'remplacent la partie « Questions à poser » à la fin de la description'},
          'liens': {'type': 'STRING', 'description': 'Les sources, une adresse https par ligne : pages du site d’abord, '
-                                                    'puis documents officiels et articles trouvés sur le web'}}}},
+                                                    'puis documents officiels et articles trouvés sur le web'},
+         'categories': {'type': 'STRING', 'description': 'Au dernier appel : les catégories qui s’appliquent, clés '
+                                                         'séparées par des virgules (2 à 5 en général : l’échelon, la nature de la '
+                                                         'dépense, ce qui interroge), parmi ' + ', '.join(CATEGORIES)},
+         'mots': {'type': 'STRING', 'description': 'Au dernier appel : 3 à 6 mots-clés qu’un lecteur taperait pour '
+                                                   'retrouver ce dossier (organisme, lieu, personne publique concernée, objet), '
+                                                   'séparés par des virgules, sans jugement'}}}},
     {'name': 'modifier_champ',
      'description': 'Modifie un seul champ du formulaire de signalement, en direct : remplacer un passage exact '
                     '(chercher + remplacer), ajouter à la fin (ajouter : un paragraphe pour la description, une ligne '
                     'pour les sources), ou réécrire tout le champ (nouveau_texte ; vide pour l’effacer). Lis d’abord le '
                     'formulaire (lire_formulaire) pour citer le passage exact.',
      'parameters': {'type': 'OBJECT', 'properties': {
-         'champ': {'type': 'STRING', 'enum': ['titre', 'lieu', 'montant', 'siren', 'description', 'liens']},
+         'champ': {'type': 'STRING', 'enum': ['titre', 'lieu', 'montant', 'siren', 'description', 'liens', 'categories', 'mots']},
          'chercher': {'type': 'STRING', 'description': 'Passage exact du champ à remplacer'},
          'remplacer': {'type': 'STRING', 'description': 'Texte qui le remplace (vide pour le supprimer)'},
          'ajouter': {'type': 'STRING', 'description': 'Texte ajouté à la fin du champ'},
@@ -845,10 +862,10 @@ def lire_donnees(fichier: str, chemin: str = '', filtre: str = '', debut: int = 
 
 
 SIGNAL_LIMITS = {'titre': 140, 'lieu': 120, 'montant': 40, 'siren': 20, 'description': 6000, 'questions': 1500,
-                 'liens': 3000}
+                 'liens': 3000, 'categories': 400, 'mots': 400}
 
 
-FORM_KEYS = ('titre', 'lieu', 'montant', 'siren', 'description', 'liens')
+FORM_KEYS = ('titre', 'lieu', 'montant', 'siren', 'description', 'liens', 'categories', 'mots')
 _CONTROL = re.compile(r'[\x00-\x08\x0b-\x1f\x7f\u200b-\u200f\u202a-\u202e\u2066-\u2069]')
 QUESTIONS_MARK = re.compile(r'\n*Questions à poser :\n[\s\S]*$')
 
@@ -879,6 +896,11 @@ def signalement_fields(args: dict) -> dict:
             value = m.group(0) if m else ''
         elif key in ('titre', 'lieu', 'montant'):
             value = value.splitlines()[0].strip(' *#-')
+        elif key == 'categories':   # keys of signalements.CATEGORIES only, labels accepted too
+            labels = {G._norm(v): k for k, v in CATEGORIES.items()}
+            value = ', '.join(G.categories_of([labels.get(G._norm(c.strip()), c.strip()) for c in re.split(r'[,;\n]', value)]))
+        elif key == 'mots':
+            value = ', '.join(G.mots_of(value))
         if value:
             out[key] = value[:limit]
     return out
@@ -942,6 +964,13 @@ class Toolbox:
                 return res
             if name in ('lire_formulaire', 'remplir_signalement', 'modifier_champ'):
                 return self._form_tool(name, args)
+            if name == 'chercher_signalements':
+                found = G.search(str(args.get('requete') or ''), 6)
+                for f in found:
+                    f['url'] = f"{S.SITE_URL}/{f['url']}"
+                return {'signalements': found, 'nombre': len(found),
+                        'note': 'pistes citoyennes à vérifier, pas des faits : les citer comme telles'} if found else \
+                       {'signalements': [], 'note': 'aucune remontée citoyenne publiée sur ce sujet'}
             if name == 'lire_donnees':
                 return lire_donnees(args.get('fichier', ''), args.get('chemin') or '', args.get('filtre') or '',
                                     args.get('debut') or 0, args.get('limite') or 20)

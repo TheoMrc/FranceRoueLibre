@@ -111,6 +111,20 @@
     P.wire(box);
     if (one) openLoupe(one.nom, true);
   }
+  /* The citizen reports of signalements.html that match the words (api/assistant/signalements/recherche) */
+  const FLAG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>';
+  async function showReports(q, runId) {
+    const box = $('srReports');
+    if (!box) return;
+    box.hidden = true; box.innerHTML = '';
+    let found = [];
+    try { const r = await fetch(`api/assistant/signalements/recherche?q=${encodeURIComponent(q)}`); found = r.ok ? (await r.json()).resultats || [] : []; } catch { found = []; }
+    if (runId !== state.run || !found.length) return;
+    box.innerHTML = `<p class="sr-place__head">Remontées citoyennes · des pistes envoyées par des lecteurs, à vérifier</p><div class="sr-place__grid">${found.slice(0, 4).map(r =>
+      `<a class="sr-place__card" href="${esc(r.url)}"><span class="sr-place__pin">${FLAG}</span><span><strong>${esc(r.titre)}</strong><small>${esc([r.relu ? 'Relu par FranceRoueLibre' : 'Non relu', r.lieu, ...(r.mots || []).slice(0, 4)].filter(Boolean).join(' · '))}</small></span></a>`).join('')}</div>`
+      + (found.length > 4 ? `<p class="note"><a href="signalements.html?q=${encodeURIComponent(q)}#voir">Les ${found.length} remontées sur « ${esc(q)} »</a></p>` : '');
+    box.hidden = false;
+  }
   const COMMON = new Set('la le les l de des du d un une et en a au aux sur sous pour par avec'.split(' '));
 
   /* Nothing published under these words: where else to look. The site's own pages on the subject (« évasion
@@ -160,6 +174,7 @@
     $('srTitle').innerHTML = `« ${esc(state.q)} »`;
     $('srResults').hidden = false; clearPanels();
     showPlace(state.q, runId);
+    showReports(state.q, runId);
     if (state.words.every(w => COMMON.has(w))) {
       // « La », « de la » : in almost every line, nothing to learn from them alone
       $('srSummary').innerHTML = `<div class="sr-error"><strong>« ${esc(state.q)} » est un mot trop courant pour une recherche.</strong><p>Il figure dans presque toutes les lignes publiées. Ajoutez un mot (un objet, un bénéficiaire, une commune), par exemple « la poste » ou « la rochelle ».</p></div>`;

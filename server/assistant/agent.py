@@ -48,13 +48,16 @@ officiel qui contient le chiffre (comptes, rapport), cite ce chiffre plutôt qu�
 exister chez un organisme public (budget détaillé, coût d’un service, convention, délibération, liste de \
 subventions), dis-le, puis appelle preparer_demande pour que le lecteur puisse le demander à cet organisme. Pas de \
 demande pour une question d’opinion, une explication ou une donnée personnelle, ni quand la réponse est trouvée.
+- Remontées citoyennes : sur une dépense précise, une personne publique ou un organisme, regarde aussi \
+chercher_signalements ; ce que les lecteurs y ont fait remonter se cite comme des pistes à vérifier, avec leur lien, \
+jamais comme des faits.
 - Signalement citoyen : quand le lecteur veut signaler une dépense qui l’interroge, ou te demande de préparer un \
 signalement, rédige un dossier sobre et vérifiable (titre factuel ; faits et montants sourcés ; conditionnel pour ce qui \
 n’est pas établi ; questions à poser à l’organisme ; sources du site et du web), sans accuser une personne nommée sans \
 source publique, sans vie privée ni insulte. Si tu as les outils du formulaire (lire_formulaire, remplir_signalement, \
 modifier_champ), le lecteur est sur la page Remontées citoyennes, son dossier sous les yeux : un nouveau dossier se \
 remplit avec remplir_signalement (un premier appel dès ta première étape, avec ta première recherche ; un dernier avec \
-le dossier complet) ; une demande sur le dossier (« ajoute… », « va chercher le maire… », « raccourcis… ») se fait en \
+le dossier complet, ses catégories et ses mots-clés) ; une demande sur le dossier (« ajoute… », « va chercher le maire… », « raccourcis… ») se fait en \
 lisant le formulaire, en cherchant ce qui manque, puis avec modifier_champ (un passage, un ajout) ou \
 remplir_signalement (un champ réécrit en entier), sans toucher à ce qu’il n’a pas demandé. Réponds ensuite en une ou \
 deux phrases sur ce que tu as écrit et ce qui reste à vérifier. Sans ces outils, rédige le dossier dans ta réponse et \
@@ -157,6 +160,7 @@ TOOL_LABELS = {
     'suivi_demandes': 'Demandes déjà envoyées',
     'lire_donnees': 'Lecture de {fichier}',
     'recherche_web': 'Recherche sur le web : « {question} »',
+    'chercher_signalements': 'Remontées citoyennes sur « {requete} »',
     'lire_page': 'Lecture de la page {url}',
     'preparer_demande': 'Préparation d’une demande à « {organisme} »',
     'remplir_signalement': 'Remplit le dossier de signalement',

@@ -6,6 +6,7 @@
    - « Communes » / « Département »: a commune or a département typed by its name (even misspelt), its postal code or
      its number (places.js, api/lieux), to its accounts on the map; under the first commune, a row of buttons to each
      level (its intercommunality, département, region), the projects the State funded and its elected officials;
+   - « Remontées citoyennes »: the reports of signalements.html matching the words (api/assistant/signalements/recherche);
    - « Chercher dans les dépenses »: the spending lines search (recherche.html?q=…), with the words of the published
      lines that start like the query and their number of lines (search-core.js, loaded on first use).
    Enter follows the first suggestion: the Loupe for a question, a section when one matches, the spending search
@@ -84,6 +85,16 @@
   const ICON_SEARCH = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>';
   const ICON_SPARK = '<svg class="omni__spark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3Q12.3 10.7 20 12Q12.3 13.3 11 21Q9.7 13.3 2 12Q9.7 10.7 11 3Z"/><path d="M19 1.5Q19.4 3.6 21.5 4Q19.4 4.4 19 6.5Q18.6 4.4 16.5 4Q18.6 3.6 19 1.5Z"/></svg>';
   const ICON_LOUPE = '<svg class="omni__loupe" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 4L41 14V34L24 44L16.5 39.6L6 45.5L10.8 36.2L7 34V14Z"/><circle cx="22" cy="21" r="8.5"/><path d="M28.3 27.3L33.3 32.3"/><path class="omni__spark" d="M22 15.6Q22.8 20.2 27.4 21Q22.8 21.8 22 26.4Q21.2 21.8 16.6 21Q21.2 20.2 22 15.6Z"/></svg>';
+  /* the citizen reports published on signalements.html (api/assistant/signalements/recherche), never waited for long */
+  const ICON_FLAG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>';
+  const reportsCache = new Map();
+  const reports = q => {
+    const key = norm(q);
+    if (key.length < 3 || isQuestion(q)) return Promise.resolve([]);
+    if (!reportsCache.has(key)) reportsCache.set(key, fetch(`${asset('api/assistant/signalements/recherche')}?q=${encodeURIComponent(q)}`)
+      .then(r => r.ok ? r.json() : { resultats: [] }).then(d => d.resultats || []).catch(() => []));
+    return Promise.race([reportsCache.get(key), new Promise(ok => setTimeout(() => ok([]), 1200))]);
+  };
   const ICON_LINES = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h13"/></svg>';
   const ENTER = '<kbd class="omni__enter" aria-hidden="true">Entrée ↵</kbd>';
   let uidN = 0;
@@ -102,7 +113,7 @@
 
     const go = item => {
       if (!item) return;
-      if (item.kind === 'site' || item.kind === 'place') { close(); location.href = item.kind === 'place' ? withLoupe(item.url) : item.url; }
+      if (item.kind === 'site' || item.kind === 'place' || item.kind === 'report') { close(); location.href = item.kind === 'place' ? withLoupe(item.url) : item.url; }
       else if (item.kind === 'loupe') {
         close(); input.blur();
         if (window.FRLLoupe) window.FRLLoupe.ask(item.q);
@@ -119,12 +130,14 @@
     async function suggest() {
       const q = input.value.trim(), my = ++seq;
       if (!q) { close(); return; }
-      const [entries, engine, lib] = await Promise.all([siteIndex(), core(), placesLib()]);
+      const [entries, engine, lib, found] = await Promise.all([siteIndex(), core(), placesLib(), reports(q)]);
       const where = lib && !isQuestion(q) ? await lib.find(q) : null;
       let words = [];
       if (engine && !isQuestion(q)) { try { words = (await engine.suggest(q)).filter(s => engine.norm(s.text) !== engine.norm(q)).slice(0, 3); } catch { words = []; } }
       if (my !== seq) return;
       const site = matchSite(entries, q).map(e => ({ kind: 'site', url: e.url, title: e.title, page: e.section ? e.page : '', sub: e.eyebrow || '' }));
+      const cited = found.slice(0, 3).map(r => ({ kind: 'report', url: asset(r.url), title: r.titre,
+        sub: [r.relu ? 'Relu par FranceRoueLibre' : 'Non relu', r.lieu, ...(r.mots || []).slice(0, 3)].filter(Boolean).join(' · '), icon: ICON_FLAG }));
       const spend = [{ kind: 'lines', q }, ...words.map(w => ({ kind: 'lines', q: w.text, count: w.count, amount: w.amount }))];
       /* a commune or a département typed: the Loupe is offered the question a reader means by it */
       const placeQ = !where || !lib?.sure(where) ? '' : where.region ? `Quelles sont les informations disponibles sur les dépenses de la région ${where.region.nom} ?`
@@ -144,18 +157,18 @@
       const placeFirst = lib && lib.sure(where);
       const groups = isQuestion(q)
         ? [['Demander à la Loupe', loupe], ['Sur le site', site], ['Chercher dans les dépenses', spend]]
-        : placeFirst ? [[placeTitle, place], ['Sur le site', site], ['Chercher dans les dépenses', spend], ['Demander à la Loupe', loupe]]
-          : [['Sur le site', site], [placeTitle, place], ['Chercher dans les dépenses', spend], ['Demander à la Loupe', loupe]];
+        : placeFirst ? [[placeTitle, place], ['Sur le site', site], ['Chercher dans les dépenses', spend], ['Remontées citoyennes', cited], ['Demander à la Loupe', loupe]]
+          : [['Sur le site', site], [placeTitle, place], ['Chercher dans les dépenses', spend], ['Remontées citoyennes', cited], ['Demander à la Loupe', loupe]];
       items = [];
       panel.innerHTML = groups.filter(([, list]) => list.length).map(([title, list]) => `<div class="omni__group"><p class="omni__group-title">${esc(title)}</p>${list.map(it => {
         const i = items.push(it) - 1;
-        const icon = it.kind === 'place' ? it.icon : it.kind === 'site' ? ((typeof FRL_ICONS !== 'undefined' && FRL_ICONS.forText(`${it.title} ${it.page}`)) || ICON_LINES) : it.kind === 'loupe' ? ICON_LOUPE : ICON_SEARCH;
-        const body = it.kind === 'place' ? `<strong>${esc(it.title)}</strong><small>${esc(it.sub)}</small>`
+        const icon = it.kind === 'place' || it.kind === 'report' ? it.icon : it.kind === 'site' ? ((typeof FRL_ICONS !== 'undefined' && FRL_ICONS.forText(`${it.title} ${it.page}`)) || ICON_LINES) : it.kind === 'loupe' ? ICON_LOUPE : ICON_SEARCH;
+        const body = it.kind === 'place' || it.kind === 'report' ? `<strong>${esc(it.title)}</strong><small>${esc(it.sub)}</small>`
           : it.kind === 'site' ? `<strong>${esc(it.title)}</strong><small>${esc(it.page || 'Page du site')}${it.sub ? ` · ${esc(it.sub)}` : ''}</small>`
           : it.kind === 'loupe' ? `<strong>« ${esc(it.q)} »</strong><small>La Loupe cherche dans les données et sur le web, puis répond avec ses sources</small>`
             : it.count != null ? `<strong>${esc(it.q)}</strong><small>${it.count.toLocaleString('fr-FR')} ligne${it.count > 1 ? 's' : ''}${it.amount ? ` · ${euros(it.amount)}` : ''} dans les dépenses publiées</small>`
               : `<strong>« ${esc(it.q)} » dans les dépenses publiées</strong><small>Associations, marchés publics, projets, aides, budget de l’État</small>`;
-        const link = `<a class="omni__item omni__item--${it.kind}" role="option" id="${uid}-o${i}" data-i="${i}" href="${it.kind === 'site' || it.kind === 'place' ? esc(it.url) : esc(spendUrl(it.q))}"><span class="omni__item-icon">${icon}</span><span class="omni__item-body">${body}</span>${i === 0 ? ENTER : ''}</a>`;
+        const link = `<a class="omni__item omni__item--${it.kind}" role="option" id="${uid}-o${i}" data-i="${i}" href="${it.kind === 'site' || it.kind === 'place' || it.kind === 'report' ? esc(it.url) : esc(spendUrl(it.q))}"><span class="omni__item-icon">${icon}</span><span class="omni__item-body">${body}</span>${i === 0 ? ENTER : ''}</a>`;
         return it.links?.length && window.FRLPlaces ? `${link}<div class="omni__chips">${FRLPlaces.chips(it.links, { attr: 'data-side' })}</div>` : link;
       }).join('')}</div>`).join('');
       panel.hidden = false;

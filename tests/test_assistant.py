@@ -2,6 +2,7 @@
 import datetime as dt
 import json
 import os
+import re
 import sqlite3
 import sys
 import tempfile
@@ -742,6 +743,9 @@ class SignalementsTest(unittest.TestCase):
         S.STATE_DIR = Path(self.dir.name)
         from assistant import signalements as G
         self.G = G
+        G._index.clear()
+        G._index_ready['done'] = False
+        G._hits.clear(); G._votes_hits.clear(); G._notes_hits.clear(); G._day.update(day='', n=0)
         self.min = G.CHALLENGE_MIN
         G.CHALLENGE_MIN = 0
 
@@ -789,6 +793,58 @@ class SignalementsTest(unittest.TestCase):
         self.G.admin('sig_relu', ref, '')
         self.assertTrue(self.G.published()[0]['relu'])
 
+    def test_categories_keywords_and_search(self):
+        r = self.G.submit(dict(self.base, categories=['commune', 'marche-public', 'inconnue'], mots='Marché public, piscine, escroc, piscine',
+                               preuve=self.proof()), 'r1')
+        self.assertTrue(r['ok'])
+        v = self.G.published()[0]
+        self.assertEqual(v['categories'], ['commune', 'marche-public'])
+        self.assertEqual(v['mots'], ['Marché public', 'piscine'])        # the accusation and the duplicate dropped
+        self.assertEqual(self.G.search('marche publ')[0]['ref'], r['ref'])   # keywords, accents, unfinished last word
+        self.assertEqual(self.G.search('piscine municipale')[0]['ref'], r['ref'])
+        self.assertEqual(self.G.search('rond-point'), [])
+        # a new report goes in the index alone, at once
+        r2 = self.G.submit(dict(self.base, titre='Des bureaux pour Macron', description='2,3 M€ de bureaux prévus au budget 2027 pour un ancien président, sur six ans.',
+                                preuve=self.proof()), 'r2')
+        self.assertEqual([x['ref'] for x in self.G.search('macron')], [r2['ref']])
+        self.G.admin('sig_masquer', r2['ref'], '')
+        self.assertEqual(self.G.search('macron'), [])
+
+    def test_seed_and_admin_keywords(self):
+        d = {'ref': 'S-20261108-ABCD', 'statut': 'publie', 'titre': 'Après l’Élysée : le coût de Macron', 'description': 'x' * 50, 'publie': '2026-11-08T10:00:00'}
+        (S.STATE_DIR / 'signalements').mkdir(parents=True, exist_ok=True)
+        (S.STATE_DIR / 'signalements' / 'S-20261108-ABCD.json').write_text(json.dumps(d), encoding='utf-8')
+        self.assertEqual(self.G.search('anciens presidents')[0]['ref'], 'S-20261108-ABCD')   # the seed, applied once
+        self.assertIn('elus', self.G.load('S-20261108-ABCD')['categories'])
+        out = self.G.admin('sig_mots', 'Macron', json.dumps({'mots': 'Élysée, budget 2027'}))
+        self.assertEqual(out['mots'], ['Élysée', 'budget 2027'])
+
+    def test_votes_and_notes(self):
+        ref = self.G.submit(dict(self.base, preuve=self.proof()), 'r1')['ref']
+        self.assertEqual(self.G.vote({'ref': ref, 'sens': 1}, 'v1')['votes'], {'up': 1, 'down': 0})
+        self.assertEqual(self.G.vote({'ref': ref, 'sens': 1}, 'v1')['votes'], {'up': 1, 'down': 0})   # once per reader
+        self.assertEqual(self.G.vote({'ref': ref, 'sens': -1}, 'v1')['votes'], {'up': 0, 'down': 1})  # changed
+        self.assertEqual(self.G.vote({'ref': ref, 'sens': 0}, 'v1')['votes'], {'up': 0, 'down': 0})   # taken back
+        self.assertFalse(self.G.vote({'ref': ref, 'sens': 5}, 'v1')['ok'])
+        short = self.G.add_note({'ref': ref, 'texte': 'trop court', 'preuve': self.proof(trace=[])}, 'v1', 'r')
+        self.assertFalse(short['ok'])
+        bad = self.G.add_note({'ref': ref, 'texte': 'Ce maire est un escroc notoire, tout le monde le sait bien ici.', 'preuve': self.proof(trace=[])}, 'v1', 'r')
+        self.assertIn('diffamation', bad['error'])
+        ok = self.G.add_note({'ref': ref, 'texte': 'Le marché a été attribué en 2024, voir la délibération du conseil municipal.',
+                              'liens': ['https://exemple.fr/deliberation', 'javascript:alert(1)'], 'preuve': self.proof(trace=[])}, 'v1', 'r')
+        self.assertTrue(ok['ok'])
+        note = self.G.published()[0]['notes'][0]
+        self.assertEqual((note['liens'], note['votes']), (['https://exemple.fr/deliberation'], {'up': 1, 'down': 0}))
+        self.assertEqual(self.G.vote({'ref': ref, 'note': ok['id'], 'sens': -1}, 'v2')['votes'], {'up': 1, 'down': 1})
+        self.assertEqual(self.G.search('deliberation')[0]['ref'], ref)   # the notes are searched too
+        self.G.admin('sig_note_masquer', ref, ok['id'])
+        self.assertEqual(self.G.published()[0]['notes'], [])
+
+    def test_categories_match_the_page(self):
+        js = (Path(__file__).resolve().parents[1] / 'dist' / 'signalements.js').read_text(encoding='utf-8')
+        page = re.findall(r"\['([a-z-]+)', '[^']+'\]", js[js.index('const CATEGORIES'):js.index('const CAT_LABEL')])
+        self.assertEqual(page, list(self.G.CATEGORIES))
+
 
 class RemplirSignalementTest(unittest.TestCase):
     """The Loupe fills the form of signalements.html live (remplir_signalement): cleaned fields, one event per call."""
@@ -814,7 +870,7 @@ class RemplirSignalementTest(unittest.TestCase):
         self.assertEqual(len(fills), 2)
         self.assertEqual(fills[0].get('lieu'), 'Rennes')
         self.assertIn('description', fills[1])
-        self.assertEqual(set(res['signalement']), {'titre', 'lieu', 'montant', 'description', 'liens'})
+        self.assertEqual(set(res['signalement']), {'titre', 'lieu', 'montant', 'description', 'liens', 'categories', 'mots'})
         self.assertIn('Questions à poser :\n', res['signalement']['description'])
 
     def test_form_tools_only_on_the_page(self):
