@@ -472,6 +472,16 @@ MORE = {'dette': 'Quelle est la dette de {n} ?', 'sante': 'Quelle est la santé 
 
 
 def build(code: str, intent: str, text: str = '', compare: bool = False) -> Optional[dict]:
+    if intent == 'depenses' and not compare:   # « les comptes de Vannes », « budget Corbigny »: the commune's whole dossier
+        from . import fiche
+        res = fiche._commune(code)
+        if res:
+            name = res['liens']['commune']
+            return dict(res, events=[{'type': 'tool_done', 'name': 'dossier_collectivite', 'label': f'Dossier de « {name} »',
+                                      'ok': True, 'summary': 'comptes, échelons, projets aidés, signaux', 's': 0},
+                                     {'type': 'tool_done', 'name': 'comparer', 'ok': True, 's': 0, 'summary': 'médiane et rang',
+                                      'label': f'Comparaison de « {name} » avec les collectivités de même taille'}],
+                        searches=[], provider='faq', label='Réponse sourcée automatique', saved='commune-depenses')
     d = T.dossier_commune(f'insee:{code}')
     if not d.get('commune'):
         return None
