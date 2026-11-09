@@ -244,10 +244,13 @@ def prepare(organisme: str, code_insee: str = '', objet: str = '', documents: st
     save(d)
     return {'demande': {'id': draft_id, 'destinataire': to['nom'], 'email': to['email'], 'formulaire': to['formulaire'],
                         'fiche': to['fiche'], 'objet': subject, 'texte': body,
-                        'envoi_par_le_site': bool(to['email'] and S.MAIL_CONFIGURED)},
+                        # an address: the site e-mails the letter; only a contact form: the site's team pastes it in
+                        'envoi_par_le_site': bool((to['email'] or to['formulaire']) and S.MAIL_CONFIGURED),
+                        'depot_formulaire': bool(not to['email'] and to['formulaire'])},
             'autres_contacts': [c['nom'] for c in contacts if c is not to][:5],
             'note': 'Le lecteur voit la lettre sous ta réponse, avec deux boutons : la faire envoyer par FranceRoueLibre '
-                    '(si une adresse officielle existe) ou la copier pour l’envoyer lui-même. Ne recopie pas la lettre '
+                    '(par courriel, ou déposée dans le formulaire de contact quand l’organisme n’a pas d’adresse) ou la '
+                    'copier pour l’envoyer lui-même. Ne recopie pas la lettre '
                     'dans ta réponse : dis en une phrase à qui elle s’adresse et pourquoi, et le délai d’un mois.'}
 
 
@@ -256,7 +259,7 @@ def public_view(d: dict) -> dict:
     due = (dt.datetime.fromisoformat(sent) + dt.timedelta(days=DELAY_DAYS)).date().isoformat() if sent else None
     return {'ref': d['ref'], 'status': d['status'], 'organisme': d['to']['nom'], 'objet': d['fields']['objet'],
             'documents': d['fields']['documents'], 'contexte': d['fields'].get('contexte'), 'envoyee': sent,
-            'echeance': due, 'fiche': d['to'].get('fiche'),
+            'echeance': due, 'fiche': d['to'].get('fiche'), 'canal': d.get('mode') or 'courriel',
             'reponses': [{'date': r['date'], 'texte': r['public_text'], 'pieces': r.get('public_files', [])}
                          for r in d.get('replies', []) if r.get('public_text')]}
 
@@ -278,11 +281,13 @@ def request_send(draft_id: str, reader: str) -> dict:
         d = load(draft_id)
         if not d or d['status'] != 'brouillon':
             return {'error': 'brouillon inconnu ou déjà envoyé'}
-        if not d['to'].get('email'):
-            return {'error': 'cet organisme ne publie pas d’adresse électronique : copiez la lettre dans son formulaire'}
+        form = not d['to'].get('email')   # only a contact form: FranceRoueLibre pastes the letter in it by hand
+        if form and not d['to'].get('formulaire'):
+            return {'error': 'cet organisme ne publie ni adresse électronique ni formulaire : copiez la lettre et envoyez-la par courrier'}
         if not S.MAIL_CONFIGURED:
             return {'error': 'l’envoi par le site n’est pas encore ouvert : copiez la lettre et envoyez-la vous-même'}
-        recent = [x for x in all_requests() if x['to'].get('email') == d['to']['email'] and x['status'] != 'refusee'
+        key = lambda x: x['to'].get('email') or x['to'].get('nom')
+        recent = [x for x in all_requests() if key(x) == key(d) and x['ref'] != d['ref'] and x['status'] != 'refusee'
                   and (dt.datetime.now() - dt.datetime.fromisoformat(x['created'])).days < 30]
         if any(x['fields']['objet'] == d['fields']['objet'] for x in recent):
             return {'error': 'la même demande a déjà été faite à cet organisme ce mois-ci', 'ref': recent[0]['ref']}
@@ -295,8 +300,19 @@ def request_send(draft_id: str, reader: str) -> dict:
         d.update(ref=ref, reader=reader, requested=dt.datetime.now().isoformat(timespec='seconds'))
         d['subject'], d['body'] = letter(d['to']['nom'], d['fields'], ref, by_site=True)
         d['status'] = 'a_valider'
+        if form:
+            d['mode'] = 'formulaire'
         save(d)
         old.unlink(missing_ok=True)
+    if form:
+        notify(f'Demande {ref} à déposer dans un formulaire', f'{d["to"]["nom"]} : {d["to"]["formulaire"]}\n\n'
+                                                          f'{d["subject"]}\n\n{d["body"]}\n\n'
+                                                          f'Question du lecteur : {d.get("question")}\n\n'
+                                                          f'Coller la lettre dans le formulaire (avec {ref} dans l’objet), '
+                                                          f'puis : assistant_api.py --demandes deposee {ref}')
+        return {'ok': True, 'ref': ref, 'status': 'a_valider', 'mode': 'formulaire',
+                'message': f'Demande {ref} enregistrée : FranceRoueLibre la relit et la dépose dans le formulaire de '
+                           f'l’organisme, puis la publie sur la page des demandes avec sa réponse.'}
     if S.MAIL_AUTO_SEND and _sent_today() < S.MAIL_DAILY:
         return send(ref)
     notify(f'Demande {ref} à valider', f'{d["to"]["nom"]} <{d["to"]["email"]}>\n\n{d["subject"]}\n\n{d["body"]}\n\n'
@@ -398,6 +414,8 @@ def send(ref: str) -> dict:
         d = load(ref)
         if not d or d['status'] != 'a_valider':
             return {'error': 'demande inconnue ou pas à valider'}
+        if d.get('mode') == 'formulaire':
+            return {'error': f'pas d’adresse : coller la lettre dans {d["to"]["formulaire"]}, puis --demandes deposee {ref}'}
         if _sent_today() >= S.MAIL_DAILY:
             return {'error': f'{S.MAIL_DAILY} envois par jour au plus : réessayer demain'}
         m = _message(d['to']['email'], d['subject'], d['body'], ref, signed=True)
@@ -502,7 +520,7 @@ def mail_test() -> dict:
 
 
 def admin(action: str, ref: str = '', text: str = '') -> dict:
-    """liste | tout | voir | valider | refuser | modifier (JSON subject and body in text) | destinataire (name or INSEE code in text) | publier (the last reply, anonymized or the given text) | cloturer | test."""
+    """liste | tout | voir | valider | deposee (a letter pasted in the body's contact form) | refuser | modifier (JSON subject and body in text) | destinataire (name or INSEE code in text) | publier (the last reply, anonymized or the given text) | cloturer | test."""
     if action == 'test':
         return mail_test()
     if action == 'tout':  # every request in full, for the review panel (frl_panel.bat), with its deadline
@@ -577,6 +595,8 @@ def admin(action: str, ref: str = '', text: str = '') -> dict:
     with _lock:
         if action == 'refuser' and d['status'] == 'a_valider':
             d['status'] = 'refusee'
+        elif action == 'deposee' and d['status'] == 'a_valider' and d.get('mode') == 'formulaire':
+            d.update(status='envoyee', sent=dt.datetime.now().isoformat(timespec='seconds'))
         elif action == 'publier' and d.get('replies'):
             d['replies'][-1]['public_text'] = text.strip() or anonymize(d['replies'][-1]['text'])
         elif action == 'cloturer':

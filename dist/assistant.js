@@ -332,24 +332,28 @@
     const d = m.demande;
     const fresh = Date.now() - (m.at || 0) < 55 * 60 * 1000;
     const bySite = d.envoi_par_le_site && fresh && !d.envoyee;
+    const form = !d.email && formOf(d);   // no address, only a contact form: « Copier » also opens it
     const own = d.email ? `<a class="ai-req__ico" href="mailto:${esc(d.email)}?subject=${encodeURIComponent(d.objet)}&body=${encodeURIComponent(d.texte)}" title="Ouvrir dans ma messagerie" aria-label="Ouvrir dans ma messagerie">${REQ_ICON.mail}</a>`
       : d.formulaire ? `<a class="ai-req__ico" href="${esc(d.formulaire)}" target="_blank" rel="noopener noreferrer" title="Ouvrir le formulaire de contact" aria-label="Ouvrir le formulaire de contact">${REQ_ICON.form}</a>` : '';
     const copyIco = `<button type="button" class="ai-req__ico" data-req="copy" title="Copier la lettre" aria-label="Copier la lettre">${REQ_ICON.copy}</button>`;
     const links = `<a href="demandes.html">la page Demandes</a>${d.fiche ? ` · <a href="${esc(d.fiche)}" target="_blank" rel="noopener noreferrer">fiche officielle</a>` : ''}`;
     let bar;
-    if (d.envoyee) bar = sentHtml(d.envoyee, links);
-    else if (bySite) bar = `<div class="ai-req__bar"><button type="button" class="ai-req__send" data-req="send">${REQ_ICON.send}<span>Faire envoyer<span class="ai-req__long"> par nous</span></span></button>${copyIco}${own}</div>`
-      + `<p class="ai-req__note">Envoyée par FranceRoueLibre après relecture, sans votre nom. Réponse sous un mois, publiée sur ${links}.</p>`;
+    if (d.envoyee) bar = sentHtml(d.envoyee, links, form);
+    else if (bySite) bar = `<div class="ai-req__bar"><button type="button" class="ai-req__send" data-req="send">${REQ_ICON.send}<span>${form ? 'Faire déposer' : 'Faire envoyer'}<span class="ai-req__long"> par nous</span></span></button>${copyIco}${own}</div>`
+      + `<p class="ai-req__note">${form ? 'Déposée par FranceRoueLibre dans le formulaire de l’organisme' : 'Envoyée par FranceRoueLibre'} après relecture, sans votre nom. Réponse sous un mois, publiée sur ${links}.</p>`;
     else bar = `<div class="ai-req__bar"><button type="button" class="ai-req__send is-ghost" data-req="copy">${REQ_ICON.copy}<span>Copier la lettre</span></button>${own}</div>`
       + `<p class="ai-req__note">À envoyer vous-même${d.email ? '' : d.formulaire ? ' par le formulaire de l’organisme' : ''} : remplacez « [Votre nom] ». Réponse sous un mois. Suivi : ${links}.</p>`;
     return `<div class="ai-req"><div class="ai-req__hd"><span>À</span><span><b>${esc(d.destinataire)}</b><small>${esc(d.email || (d.formulaire ? 'formulaire de contact' : 'pas d’adresse publiée'))}</small></span>`
       + `<span>Objet</span><span><b>${esc(d.objet)}</b></span></div>`
       + `<div class="ai-req__paper">${esc(d.texte)}</div><button type="button" class="ai-req__more" data-req="read" aria-expanded="false">Lire toute la lettre</button>`
-      + `<p class="ai-req__msg" role="status"></p>${bar}</div>`;
+      + `<p class="ai-req__msg" role="status"></p>`
+      + (form && !d.envoyee ? `<p class="ai-req__warn">Cet organisme ne publie pas d’adresse électronique, seulement un formulaire de contact : « Copier » copie la lettre et ouvre ce formulaire.</p>` : '')
+      + `${bar}</div>`;
   }
-  function sentHtml(ref, links) {
+  const formOf = d => String(d.formulaire || '').split(';')[0].trim();
+  function sentHtml(ref, links, form) {
     return `<div class="ai-req__sent"><span class="ai-req__ok">${REQ_ICON.ok}</span><span><b>Demande ${esc(ref)} enregistrée</b>`
-      + `FranceRoueLibre la relit puis l’envoie. Réponse sous un mois, publiée sur ${links}.</span></div>`;
+      + `FranceRoueLibre la relit puis ${form ? 'la dépose dans le formulaire de l’organisme' : 'l’envoie'}. Réponse sous un mois, publiée sur ${links}.</span></div>`;
   }
   async function demandeClick(m, e, box) {
     const b = e.target.closest('button[data-req]');
@@ -366,7 +370,10 @@
     if (b.dataset.req === 'copy') {
       try {
         await navigator.clipboard.writeText(`${d.objet}\n\n${d.texte}`);
-        msg.textContent = 'Lettre copiée : remplacez « [Votre nom] » avant de l’envoyer.';
+        const url = !d.email && formOf(d);
+        if (url && /^https?:\/\//i.test(url)) window.open(url, '_blank', 'noopener');
+        msg.textContent = url ? 'Lettre copiée et formulaire ouvert dans un nouvel onglet : collez-la (Ctrl+V) et remplacez « [Votre nom] ».'
+          : 'Lettre copiée : remplacez « [Votre nom] » avant de l’envoyer.';
         if (b.classList.contains('ai-req__ico')) { b.innerHTML = REQ_ICON.ok; setTimeout(() => { b.innerHTML = REQ_ICON.copy; }, 1800); }
       } catch (err) { box.classList.add('is-open'); getSelection().selectAllChildren(paper); msg.textContent = 'Lettre sélectionnée : copiez-la (Ctrl+C).'; }
       return;
@@ -380,7 +387,8 @@
       msg.textContent = '';
       box.querySelector('.ai-req__bar')?.remove();
       box.querySelector('.ai-req__note')?.remove();
-      box.insertAdjacentHTML('beforeend', sentHtml(res.ref, `<a href="demandes.html">la page Demandes</a>${d.fiche ? ` · <a href="${esc(d.fiche)}" target="_blank" rel="noopener noreferrer">fiche officielle</a>` : ''}`));
+      box.querySelector('.ai-req__warn')?.remove();
+      box.insertAdjacentHTML('beforeend', sentHtml(res.ref, `<a href="demandes.html">la page Demandes</a>${d.fiche ? ` · <a href="${esc(d.fiche)}" target="_blank" rel="noopener noreferrer">fiche officielle</a>` : ''}`, !d.email && formOf(d)));
     } catch (err) { msg.textContent = 'Envoi impossible : réessayez.'; b.disabled = false; }
   }
   function staticBot(m) {

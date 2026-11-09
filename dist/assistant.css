@@ -252,6 +252,7 @@
 .ai-req__ico:hover, .ai-req__ico:focus-visible { color: var(--c-teal-600); border-color: var(--c-teal-500); outline: none; transform: translateY(-1px); }
 .ai-req a.ai-req__ico { color: var(--c-muted); } .ai-req a.ai-req__ico:hover { color: var(--c-teal-600); }
 .ai-req__note { margin: 0; padding: 0 .8rem .6rem; background: var(--c-surface); color: var(--c-muted); font-size: .72rem; line-height: 1.4; }
+.ai-req__warn { margin: 0; padding: .5rem .8rem 0; background: var(--c-surface); color: #e11d48; font-size: .78rem; font-weight: 600; line-height: 1.4; }
 .ai-req__note a, .ai-req__sent a { color: var(--c-teal-600); text-decoration: underline; text-underline-offset: 2px; }
 .ai-req__sent { display: flex; gap: .6rem; align-items: center; padding: .65rem .8rem; border-top: 1px solid color-mix(in srgb, var(--c-teal-600) 40%, var(--c-line)); background: color-mix(in srgb, var(--c-teal-600) 7%, var(--c-bg)); font-size: .8rem; color: var(--c-muted); line-height: 1.4; animation: ai-in .35s var(--ai-ease) both; }
 .ai-req__sent b { display: block; color: var(--c-ink); }

@@ -573,6 +573,21 @@ class RequestsTest(unittest.TestCase):
         cleaned = self.D.clean('Voir https://x.fr ou écrire à a@b.fr, 06 12 34 56 78 !!!', 200)
         self.assertNotIn('http', cleaned); self.assertNotIn('@', cleaned); self.assertNotIn('06 12', cleaned)
 
+    def test_form_only_body_is_deposited_by_hand(self):
+        """Vaulx-en-Velin: the Métropole de Lyon has no address, only a contact form. The reader can still have the
+        site deal with it: the team pastes the letter in the form, then marks it deposited, and it is published."""
+        S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND = True, True
+        self.D.annuaire = lambda code_insee='', nom='': [{'nom': 'Métropole de Lyon - Rhône', 'email': None,
+            'formulaire': 'https://www.grandlyon.com/contact', 'site': None, 'fiche': None, 'siret': None}]
+        d = self.draft(organisme='Métropole de Lyon', code_insee='')['demande']
+        self.assertTrue(d['envoi_par_le_site'] and d['depot_formulaire'])
+        r = self.D.request_send(d['id'], 'lecteur')
+        self.assertEqual((r['status'], r['mode']), ('a_valider', 'formulaire'), 'never e-mailed, even with auto send')
+        self.assertTrue(any('formulaire' in x for x in self.sent), 'the team is told to paste it')
+        self.assertIn('error', self.D.send(r['ref']))
+        self.assertEqual(self.D.admin('deposee', r['ref'])['status'], 'envoyee')
+        self.assertEqual(self.D.published()[0]['canal'], 'formulaire')
+
     def test_send_waits_for_validation_then_is_published(self):
         S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND = True, False
         draft = self.draft()['demande']

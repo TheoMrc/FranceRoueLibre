@@ -426,7 +426,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=8018)
     parser.add_argument('--usage', action='store_true')
-    parser.add_argument('--demandes', nargs='+', metavar='ACTION', help='liste | tout | voir REF | valider REF | refuser REF | destinataire REF --texte F | '
+    parser.add_argument('--demandes', nargs='+', metavar='ACTION', help='liste | tout | voir REF | valider REF | deposee REF | refuser REF | destinataire REF --texte F | '
                                                                        'publier REF [--texte F] | cloturer REF')
     parser.add_argument('--mail', nargs='+', metavar='ACTION', help='boîte du site : liste [N] | lire UID | apercu UID | '
                                                                    'repondre UID [--force] (texte de la réponse sur stdin)')
