@@ -217,9 +217,9 @@ ProtectSystem=strict
 ReadWritePaths=$LIB/recherches
 ProtectHome=yes
 PrivateTmp=yes
-# Shares the VPS with other sites: at most one CPU core, 512 Mo of memory, lower priority
-MemoryMax=512M
-CPUQuota=100%
+# Shares the VPS with other sites: at most two CPU cores, 2 Go of memory, lower priority
+MemoryMax=2G
+CPUQuota=200%
 Nice=10
 IOWeight=50
 
@@ -239,7 +239,7 @@ sudo -n systemctl --no-pager --lines=3 status francerouelibre-search | grep -E "
 echo "== AI assistant"
 # Installed only when /etc/francerouelibre/assistant.env exists (keys, root only, never in the repo; see
 # deploy/assistant.env.example). Sandboxed service: throwaway system user, read-only system, no home, its own state
-# folder for the spending ledger, 256 Mo and half a core at most. The Vertex AI service account key, if present, is
+# folder for the spending ledger, 1 Go and one core at most. The Vertex AI service account key, if present, is
 # handed to the service by systemd (LoadCredential) and readable by it alone.
 AENV=/etc/francerouelibre/assistant.env
 if sudo -n test -f "$AENV"; then
@@ -287,8 +287,8 @@ LockPersonality=yes
 CapabilityBoundingSet=
 RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 SystemCallFilter=@system-service
-MemoryMax=256M
-CPUQuota=50%
+MemoryMax=1G
+CPUQuota=100%
 Nice=10
 
 [Install]
