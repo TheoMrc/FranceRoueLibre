@@ -7,6 +7,8 @@ Corpus (one row per spending line):
   4 fonds vert    Fonds vert projects (2023–2025): project, beneficiary, measure
   5 entreprises   de minimis aid (2026): company, sector, granting authority
   6 budget État   lines of the 2026 budget bill tagged by the green budget (PLF 2026 amounts): label, programme
+  7 collectivités grants published by regions, départements, communes and other public bodies (SCDL files harvested on
+                  data.gouv.fr, scripts/subventions-collectivites.py): object, beneficiary, granting authority
 
 The browser queries the database through HTTP range requests (vendor/sql.js-httpvfs), so only the pages a query
 needs are downloaded. Tables:
@@ -36,7 +38,7 @@ from rawfiles import csv as raw_csv
 OUT_DIR = 'dist/data/search'
 DB = os.environ.get('FRL_SEARCH_DB') or f'{OUT_DIR}/frl-search.sqlite3'  # another file while the local search API holds this one open
 DERIVED = 'sources/derived'
-SOURCES = {1: 'Subventions aux associations', 2: 'Marchés publics', 3: 'Projets aidés par l’État (DGCL)', 4: 'Fonds vert', 5: 'Aides aux entreprises (de minimis)', 6: 'Budget de l’État (PLF 2026)'}
+SOURCES = {1: 'Subventions aux associations', 2: 'Marchés publics', 3: 'Projets aidés par l’État (DGCL)', 4: 'Fonds vert', 5: 'Aides aux entreprises (de minimis)', 6: 'Budget de l’État (PLF 2026)', 7: 'Subventions des collectivités'}
 FREQUENT = 500          # words found in more lines than this get precomputed totals and top lines
 TOP = 60
 CHUNK = 45 * 1024 * 1024  # bytes per file of the split index (a multiple of the 4 096-byte page size)
@@ -215,6 +217,16 @@ def main():
         for kind, mission, programme, label, amount in duck.execute(f'''SELECT type_depense, mission, programme, libelle, TRY_CAST(replace(plf_2026_cp_ou_prevision_2026_si_depense_fiscale, ',', '.') AS DOUBLE)
                 FROM {src}''').fetchall():
             add(6, 2026, amount, 0, clip(label, 300), clip(programme, 160), None, clip(f'{kind} · {mission}', 200), None)
+        flush()
+    # 7. Grants published by local authorities and other public bodies (SCDL files)
+    path = f'{DERIVED}/subventions-collectivites.csv.gz'
+    if os.path.exists(path):
+        import csv
+        import gzip
+        with gzip.open(path, 'rt', encoding='utf-8', newline='') as handle:
+            for r in csv.DictReader(handle):
+                add(7, int(r['annee']) if r['annee'] else None, float(r['montant']), 0, clip(r['objet'], 300) or clip(r['beneficiaire'], 200), clip(r['beneficiaire'], 160),
+                    r['beneficiaire_siren'] or None, clip(f'Attribué par {r["attribuant"]}', 200) if r['attribuant'] else None, None)
         flush()
     total = db.execute('SELECT count(*) FROM doc').fetchone()[0]
     print(f'· {total} lignes')

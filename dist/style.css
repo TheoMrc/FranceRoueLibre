@@ -824,7 +824,7 @@ h3 { font-size: var(--fs-h3); line-height: 1.3; }
 .sr-table mark, .sr-summary mark { padding: 0 .1em; border-radius: 3px; background: rgba(250, 204, 21, .45); color: inherit; }
 [data-theme="dark"] .sr-table mark { background: rgba(250, 204, 21, .3); }
 .data-table .tag--src1 { background: rgba(79, 70, 229, .14); } .data-table .tag--src2 { background: rgba(14, 116, 144, .14); } .data-table .tag--src3 { background: rgba(37, 99, 235, .14); }
-.data-table .tag--src4 { background: rgba(22, 163, 74, .15); } .data-table .tag--src5 { background: rgba(245, 158, 11, .16); } .data-table .tag--src6 { background: rgba(100, 116, 139, .16); }
+.data-table .tag--src4 { background: rgba(22, 163, 74, .15); } .data-table .tag--src5 { background: rgba(245, 158, 11, .16); } .data-table .tag--src6 { background: rgba(100, 116, 139, .16); } .data-table .tag--src7 { background: rgba(13, 148, 136, .16); }
 .sr-related { margin-top: var(--sp-4); }
 .sr-related h3 { margin-bottom: .6rem; }
 #srMore { margin-top: .8rem; }

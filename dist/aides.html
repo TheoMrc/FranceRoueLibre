@@ -88,7 +88,7 @@
       <div class="container"><div class="hero__inner">
         <span class="eyebrow">Subventions et aides publiques</span>
         <h1>Qui reçoit <span class="gradient-text">l’argent public ?</span></h1>
-        <p class="hero__lead">Subventions de l’État aux associations depuis 2010, aides de minimis aux entreprises, Fonds vert, plan de relance. Chaque bénéficiaire identifié par son SIREN renvoie à l’annuaire officiel des entreprises.</p>
+        <p class="hero__lead">Subventions de l’État aux associations depuis 2010, subventions publiées par les régions, départements et communes, aides de minimis aux entreprises, Fonds vert, plan de relance. Chaque bénéficiaire identifié par son SIREN renvoie à l’annuaire officiel des entreprises.</p>
       </div></div>
     </section>
     <section class="section" id="associations" aria-labelledby="assoTitle">
@@ -107,7 +107,28 @@
       </div>
     </section>
 
-    <section class="section section--alt" id="entreprises" aria-labelledby="entTitle">
+    <section class="section section--alt" id="collectivites" aria-labelledby="colTitle">
+      <div class="container">
+        <div class="section__head"><span class="eyebrow">Régions, départements, communes → associations et entreprises</span><h2 id="colTitle">Subventions des collectivités : qui publie, qui ne publie pas</h2><p class="lead" id="colLead">Il n’existe aucun fichier national des subventions versées par les régions, les départements et les communes. Chaque collectivité doit publier les siennes au-dessus de 23 000 € ; en dessous, rien ne l’y oblige. Voici tout ce qui est publié sur data.gouv.fr, et la liste de ceux qui ne publient rien.</p></div>
+        <div class="kpis" id="colKpis"></div>
+        <div class="panel panel--wide">
+          <div class="panel__head"><h3>Chercher un bénéficiaire dans les subventions des collectivités</h3><label class="search-field search-field--inline"><span class="sr-only">Rechercher un bénéficiaire</span><input id="colSearch" type="search" placeholder="Nom ou SIREN d’une association, d’une entreprise…" autocomplete="off"></label></div>
+          <div id="colTable" class="table-wrap"></div>
+          <p class="note" id="colTableNote"></p>
+        </div>
+        <div class="grid-2">
+          <div class="panel"><h3 id="colRegTitle">Les régions</h3><div id="colRegions" class="col-cover"></div><p class="note" id="colRegNote"></p></div>
+          <div class="panel"><h3 id="colDepTitle">Les départements</h3><div id="colDeps" class="col-cover col-cover--dense"></div><div class="tx-legend col-legend"><span><i class="col-k col-k--all"></i>Publie aussi sous 23 000 €</span><span><i class="col-k col-k--min"></i>Publie seulement le minimum légal</span><span><i class="col-k col-k--none"></i>Rien sur data.gouv.fr</span></div><p class="note" id="colDepNote"></p></div>
+        </div>
+        <div class="grid-2">
+          <div class="panel"><h3>Montant publié par année de convention</h3><div id="colBars" class="chart"></div><p class="note" id="colBarsNote"></p></div>
+          <div class="panel"><h3>Par type d’attribuant</h3><div id="colTypes"></div><p class="note" id="colTypesNote"></p></div>
+        </div>
+        <div class="gap-grid rel-gaps" id="colGaps"></div>
+      </div>
+    </section>
+
+    <section class="section" id="entreprises" aria-labelledby="entTitle">
       <div class="container">
         <div class="section__head"><span class="eyebrow">État et collectivités → entreprises</span><h2 id="entTitle">Aides de minimis aux entreprises</h2><p class="lead">Aides de faible montant (règlement européen « de minimis ») déclarées au registre de transparence : prêts d’honneur, avances remboursables, subventions directes…</p></div>
         <div class="kpis" id="entKpis"></div>
@@ -118,13 +139,13 @@
       </div>
     </section>
 
-    <section class="section" id="fondsvert" aria-labelledby="fvTitle">
+    <section class="section section--alt" id="fondsvert" aria-labelledby="fvTitle">
       <div class="container">
         <div class="section__head"><span class="eyebrow">Transition écologique</span><h2 id="fvTitle">Fonds vert</h2><p class="lead" id="fvLead">Projets des collectivités subventionnés par le Fonds d’accélération de la transition écologique.</p></div>
         <div id="fvContent" class="panel"></div>
       </div>
     </section>
-    <section class="section section--alt" id="relance" aria-labelledby="relTitle">
+    <section class="section" id="relance" aria-labelledby="relTitle">
       <div class="container">
         <div class="section__head"><span class="eyebrow">État → ménages, entreprises, collectivités · France Relance 2020–2022</span><h2 id="relTitle">Plan de relance</h2><p class="lead">Le tableau de bord public de France Relance suivait chaque mesure, mois par mois et département par département, avec ses propres indicateurs : aides versées, primes validées, coût des projets aidés, investissement « déclenché ». Ces montants sont de natures différentes et ne s’additionnent pas.</p></div>
         <div class="kpis" id="relKpis"></div>

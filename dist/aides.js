@@ -1,4 +1,4 @@
-/* Aides et subventions: State grants to associations (annexes jaunes), de minimis aid, Fonds vert, plan de relance. */
+/* Aides et subventions: State grants to associations (annexes jaunes), grants published by local authorities, de minimis aid, Fonds vert, plan de relance. */
 (() => {
   const { money, count, pct, esc, load, sirenLink, bars, ranking, lazy } = FRL;
   const $ = id => document.getElementById(id);
@@ -33,7 +33,7 @@
     if (query && index) {
       rows = index.rows.filter(([siren, name]) => siren.includes(query) || (name || '').toLowerCase().includes(query)).slice(0, 100)
         .map(([siren, name, total, years, dept]) => `<tr><td>${sirenLink(siren, name)}</td><td class="muted">${esc(dept || '')}</td><td class="muted">${years.join(', ')}</td><td class="num">${money(total)}</td></tr>`);
-      $('assoTable').innerHTML = `<table class="data-table"><thead><tr><th>Bénéficiaire</th><th>Dép.</th><th>Années subventionnées</th><th class="num">Total toutes années</th></tr></thead><tbody>${rows.join('') || '<tr><td colspan="4">Aucun résultat</td></tr>'}</tbody></table>`;
+      $('assoTable').innerHTML = `<table class="data-table"><thead><tr><th>Bénéficiaire</th><th>Dép.</th><th>Années subventionnées</th><th class="num">Total toutes années</th></tr></thead><tbody>${rows.join('') || '<tr><td colspan="4">Aucun résultat dans les subventions de l’État. Les subventions des régions, départements et communes sont dans la section suivante : <a href="#collectivites">chercher dans les subventions des collectivités</a>.</td></tr>'}</tbody></table>`;
       return;
     }
     rows = (asso.top[String(year)] || []).slice(0, 60).map(([siren, name, amount, lines, dept, city]) =>
@@ -56,6 +56,77 @@
       }, 200);
     });
     renderAsso();
+  }
+
+  /* ---- Subventions des collectivités (SCDL files harvested on data.gouv.fr, scripts/subventions-collectivites.py) ---- */
+  async function initCollectivites() {
+    let col;
+    try { col = await load('./data/aides/collectivites.json'); }
+    catch (error) { $('collectivites').hidden = true; return; }
+    let colIndex = null;
+    const T = col.totals, C = col.coverage, limit = col.threshold;
+    const plural = (n, word) => `${count(n)} ${word}${n > 1 ? 's' : ''}`;
+    const state = row => !row.published ? 'none' : row.underThreshold > 0 ? 'all' : 'min';
+    const describe = row => row.published
+      ? `${row.name} : ${plural(row.lines, 'ligne')}, ${money(row.amount)}, ${row.years.length ? `conventions de ${row.years[0]}${row.years.length > 1 ? ' à ' + row.years[row.years.length - 1] : ''}` : 'années non renseignées'}, plus petite subvention publiée ${money(row.min)}`
+      : `${row.name} : aucun fichier de subventions au format national trouvé sur data.gouv.fr`;
+    const missingReg = col.regions.filter(r => !r.published), missingDep = col.departments.filter(r => !r.published);
+    $('colKpis').innerHTML = [
+      ['Subventions publiées', money(T.amount), `${plural(T.lines, 'ligne')}, toutes années`],
+      ['Attribuants', count(T.givers), `dont ${count(C.communes)} communes et ${count(C.groupements)} groupements`],
+      ['Régions qui publient', `${C.regions[0]} sur ${C.regions[1]}`, missingReg.length ? `rien pour ${missingReg.length} région${missingReg.length > 1 ? 's' : ''}` : 'toutes', missingReg.length > 0],
+      ['Départements qui publient', `${C.departments[0]} sur ${C.departments[1]}`, `rien pour ${missingDep.length} département${missingDep.length > 1 ? 's' : ''}`, missingDep.length > 0]
+    ].map(([label, value, sub, alert]) => `<div class="kpi${alert ? ' is-alert' : ''}"><span>${label}</span><strong>${value}</strong><small>${sub}</small></div>`).join('');
+    $('colRegions').innerHTML = col.regions.map(r => `<span class="col-cell is-${state(r)}" title="${esc(describe(r))}"><b>${esc(r.name)}</b>${r.published ? `<small>${count(r.lines)} lignes</small>` : '<small>rien</small>'}</span>`).join('');
+    $('colRegNote').textContent = `${missingReg.length ? `Aucun fichier trouvé pour : ${missingReg.map(r => r.name).join(', ')}. ` : ''}Vert : la région publie aussi des subventions inférieures à ${count(limit)} €. Orange : seulement celles que le décret impose. Survolez une case pour le détail.`;
+    $('colDeps').innerHTML = col.departments.map(r => `<span class="col-cell is-${state(r)}" title="${esc(describe(r))}">${esc(r.code)}</span>`).join('');
+    $('colDepNote').textContent = `Chaque case est un département (numéro). ${count(missingDep.length)} sur ${col.departments.length} n’ont aucun fichier de subventions au format national sur data.gouv.fr. Une case grise ne dit pas que le département ne subventionne personne : elle dit que la liste n’est pas publiée là où elle devrait l’être, ou pas dans un format lisible par une machine.`;
+    const years = col.perYear.filter(y => y.year);
+    bars($('colBars'), years.map(y => ({ label: y.year, value: y.amount })));
+    const noYear = col.perYear.find(y => !y.year);
+    $('colBarsNote').textContent = `Ce graphique ne mesure pas les subventions versées en France : il mesure ce qui est publié. Une année monte quand davantage de collectivités publient.${noYear ? ` ${plural(noYear.lines, 'ligne')} (${money(noYear.amount)}) n’ont pas de date de convention lisible.` : ''}`;
+    ranking($('colTypes'), col.types.map(t => ({ label: t.label, value: t.amount, sub: `${plural(t.givers, 'attribuant')} · ${plural(t.lines, 'ligne')}` })), { limit: 8 });
+    $('colTypesNote').textContent = `${count(col.files.read)} fichiers lus sur ${count(col.files.csv)} trouvés (${count(col.files.otherFormats)} dans un autre format que le modèle national, ${count(col.files.unreachable + col.files.unreadable)} inaccessibles ou illisibles). ${count(col.quality.republished)} lignes publiées deux fois ne sont comptées qu’une fois. Données téléchargées le ${col.downloaded.split('-').reverse().join('/')}.`;
+
+    const top = () => `<table class="data-table"><thead><tr><th>Attribuant</th><th>Type</th><th>Années</th><th class="num">Lignes</th><th class="num">Plus petite</th><th class="num">Montant publié</th></tr></thead><tbody>${col.givers.slice(0, 40).map(g =>
+      `<tr><td>${g.pages[0] ? `<a href="${esc(g.pages[0])}" target="_blank" rel="noopener noreferrer">${esc(g.name)}</a>` : esc(g.name)}</td><td class="muted">${esc((col.types.find(t => t.type === g.type) || {}).label || '')}</td><td class="muted">${g.years.length ? `${g.years[0]}${g.years.length > 1 ? '–' + g.years[g.years.length - 1] : ''}` : '–'}</td><td class="num">${count(g.lines)}</td><td class="num">${g.min != null ? money(g.min) : '–'}</td><td class="num">${money(g.amount)}</td></tr>`).join('')}</tbody></table>`;
+    function renderCol() {
+      const query = $('colSearch').value.trim().toLowerCase();
+      if (!query || !colIndex) {
+        $('colTable').innerHTML = top();
+        $('colTableNote').textContent = 'Sans recherche : les quarante attribuants qui publient les plus gros montants, avec un lien vers leur jeu de données. « Plus petite » est la plus petite subvention de leurs fichiers : au-dessus de 23 000 €, la collectivité ne publie que le minimum légal.';
+        return;
+      }
+      const words = query.split(/\s+/);
+      const rows = colIndex.rows.filter(([siren, name]) => siren.includes(query) || words.every(w => (name || '').toLowerCase().includes(w))).slice(0, 100);
+      if (rows.length) {
+        $('colTable').innerHTML = `<table class="data-table"><thead><tr><th>Bénéficiaire</th><th>Années</th><th class="num">Attribuants</th><th class="num">Lignes</th><th class="num">Total publié</th><th></th></tr></thead><tbody>${rows.map(([siren, name, total, yrs, givers, lines]) =>
+          `<tr><td>${sirenLink(siren, name)}</td><td class="muted">${yrs.join(', ')}</td><td class="num">${count(givers)}</td><td class="num">${count(lines)}</td><td class="num">${money(total)}</td><td><a href="recherche.html?q=${encodeURIComponent(siren)}">Voir les lignes</a></td></tr>`).join('')}</tbody></table>`;
+        $('colTableNote').textContent = 'Total des lignes publiées par les collectivités pour ce SIREN, toutes années. Ce n’est pas forcément tout ce que le bénéficiaire a reçu : voir plus bas qui ne publie pas.';
+        return;
+      }
+      $('colTable').innerHTML = `<div class="col-empty"><strong>Aucune ligne pour « ${esc($('colSearch').value.trim())} ».</strong> Cela ne veut pas dire que ce bénéficiaire n’a rien reçu. Trois raisons possibles :<ul>
+        <li>la collectivité qui l’a subventionné ne publie rien : c’est le cas de ${missingReg.length} région${missingReg.length > 1 ? 's' : ''} sur ${col.regions.length}${missingReg.length ? ` (${esc(missingReg.map(r => r.name).join(', '))})` : ''} et de ${missingDep.length} départements sur ${col.departments.length} ;</li>
+        <li>la subvention est inférieure à ${count(limit)} € : sous ce seuil, la publication n’est pas obligatoire, et la plupart des collectivités s’arrêtent au minimum ;</li>
+        <li>elle vient d’une commune : seules ${count(C.communes)} communes sur près de 35 000 publient un fichier.</li></ul>
+        Toute personne peut demander la liste à la collectivité : c’est un document administratif communicable. <a href="demandes.html">Voir les demandes aux instances publiques</a>.</div>`;
+      $('colTableNote').textContent = '';
+    }
+    let timer = 0;
+    $('colSearch').addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(async () => {
+        if (!colIndex && $('colSearch').value.trim()) { $('colTable').innerHTML = '<p class="note">Chargement de l’index des bénéficiaires…</p>'; colIndex = await load('./data/aides/collectivites-index.json').catch(() => ({ rows: [] })); }
+        renderCol();
+      }, 200);
+    });
+    renderCol();
+    $('colGaps').innerHTML = [
+      ['none', 'Sous 23 000 €, le trou est la règle', `Le décret du 5 mai 2017 n’impose la publication qu’à partir de ${count(limit)} € par an et par bénéficiaire. Une association qui reçoit quelques milliers d’euros de sa région ou de sa commune n’apparaît donc nulle part, sauf si la collectivité choisit d’aller plus loin que la loi.`],
+      ['partial', 'Pas de fichier national', 'Les subventions de l’État ont une annexe au budget. Celles des collectivités n’ont rien d’équivalent : il faut ramasser un par un les fichiers de chaque région, département, intercommunalité et commune, quand ils existent.'],
+      ['partial', 'Un modèle national peu suivi', `Sur ${count(col.files.csv)} fichiers de subventions trouvés sur data.gouv.fr, ${count(col.files.otherFormats)} n’ont pas les colonnes du modèle national et ne peuvent pas être additionnés aux autres sans les réécrire à la main, ce que ce site ne fait pas.`],
+      ['partial', `${count(T.withoutSiren)} lignes sans SIRET`, `Sans identifiant, impossible de savoir si deux lignes concernent le même bénéficiaire, ni de le retrouver dans l’annuaire des entreprises. ${count(T.withoutYear)} lignes n’ont pas non plus de date lisible.`]
+    ].map(([st, title, text]) => `<article class="gap"><span class="gap__state ${st}">${st === 'none' ? 'Aucune donnée ouverte' : 'Données partielles'}</span><h3>${esc(title)}</h3><p>${esc(text)}</p></article>`).join('');
   }
 
   /* ---- De minimis ---- */
@@ -175,6 +246,7 @@
   }
 
   lazy($('associations'), initAsso);
+  lazy($('collectivites'), initCollectivites);
   lazy($('entreprises'), initEntreprises);
   lazy($('fondsvert'), initFondsVert);
   lazy($('relance'), initRelance);

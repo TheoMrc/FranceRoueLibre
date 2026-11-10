@@ -1,8 +1,25 @@
 /* Aides page (aides.html): plan de relance section. */
-#associations, #entreprises, #fondsvert, #relance { scroll-margin-top: var(--header-h); }
+#associations, #collectivites, #entreprises, #fondsvert, #relance { scroll-margin-top: var(--header-h); }
 .rel-pick { flex: 0 1 420px; max-width: 100%; }
 .rel-pick select { width: 100%; text-overflow: ellipsis; }
 .rel-sub { margin: 0 0 .8rem; color: var(--c-ink); font-size: .92rem; }
 #relUnit { margin-bottom: .9rem; }
 .rel-gaps { margin-top: var(--sp-3); }
 .section--alt .rel-gaps .gap { background: var(--c-bg); }
+/* Subventions des collectivités: who publishes (regions, départements). */
+.col-cover { display: flex; flex-wrap: wrap; gap: .35rem; }
+.col-cell { display: inline-flex; align-items: center; gap: .4rem; padding: .32rem .6rem; border-radius: var(--r-sm); background: color-mix(in srgb, var(--tx-none) 30%, transparent); color: var(--c-muted); font-size: .8rem; line-height: 1.2; cursor: default; }
+.col-cell b { font-weight: 600; }
+.col-cell small { font-size: .7rem; opacity: .85; }
+.col-cell.is-min { background: color-mix(in srgb, var(--c-amber) 22%, transparent); color: var(--c-ink); }
+.col-cell.is-all { background: color-mix(in srgb, var(--c-teal-600) 22%, transparent); color: var(--c-ink); }
+.col-cover--dense .col-cell { min-width: 2.5rem; justify-content: center; padding: .3rem .25rem; font-size: .76rem; font-variant-numeric: tabular-nums; }
+.col-legend { margin-top: .9rem; }
+.col-k { border-radius: 3px; }
+.col-k--all { background: color-mix(in srgb, var(--c-teal-600) 55%, transparent) !important; }
+.col-k--min { background: color-mix(in srgb, var(--c-amber) 60%, transparent) !important; }
+.col-k--none { background: color-mix(in srgb, var(--tx-none) 60%, transparent) !important; }
+.col-empty { padding: 1rem 1.1rem; border-radius: var(--r-md); background: color-mix(in srgb, var(--c-amber) 10%, transparent); color: var(--c-body); font-size: .9rem; }
+.col-empty strong { color: var(--c-ink); }
+.col-empty ul { margin: .5rem 0 0; padding-left: 1.1rem; }
+.section--alt .col-cover .col-cell:not(.is-min):not(.is-all) { background: color-mix(in srgb, var(--tx-none) 38%, transparent); }

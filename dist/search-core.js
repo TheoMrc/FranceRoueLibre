@@ -7,7 +7,8 @@ window.FRLSearch = (() => {
     3: { label: 'Projets aidés par l’État (DGCL)', phrase: 'projets locaux aidés par l’État', short: 'Projets DGCL', who: 'Commune' },
     4: { label: 'Fonds vert', phrase: 'Fonds vert', short: 'Fonds vert', who: 'Bénéficiaire' },
     5: { label: 'Aides aux entreprises (de minimis)', phrase: 'aides de minimis aux entreprises', short: 'Entreprises', who: 'Entreprise' },
-    6: { label: 'Budget de l’État (PLF 2026)', phrase: 'budget de l’État 2026', short: 'Budget État', who: 'Programme' }
+    6: { label: 'Budget de l’État (PLF 2026)', phrase: 'budget de l’État 2026', short: 'Budget État', who: 'Programme' },
+    7: { label: 'Subventions des collectivités', phrase: 'subventions publiées par les régions, départements, communes et autres organismes publics', short: 'Collectivités', who: 'Bénéficiaire' }
   };
   const base = new URL('.', document.currentScript?.src || location.href);
   let dbPromise = null, metaPromise = null;
