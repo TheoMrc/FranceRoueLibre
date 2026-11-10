@@ -264,6 +264,10 @@ FILES = {
     'europe.json': 'Comparaison européenne (Eurostat, 1995-2025) : dépenses publiques et rémunération des agents publics en % du PIB '
                    'pour les 27 pays de l’UE (« metrics », une valeur par année de « years »), écart France moins UE en points, '
                    'en Md€ et en € par habitant avec le rang de la France (« gap », calculs du site listés dans « computed »)',
+    'aides/collectivites.json': 'Subventions publiées par les régions, départements, communes et autres organismes publics (fichiers au '
+                                'modèle national trouvés sur data.gouv.fr) : totaux, par année, par type d’attribuant, principaux '
+                                'attribuants, et couverture (« regions », « departments » : published vrai ou faux, plus petite '
+                                'subvention publiée). Seuil légal de publication : 23 000 € ; en dessous, la plupart ne publient pas',
     'probite.json': 'Atteintes à la probité jugées 2021-2025 : affaires, infractions, peines',
     'fraude.json': 'Fraude et contrôle fiscal (Cour des comptes, décembre 2025 ; Commission européenne, 2025) : '
                    'résultats du contrôle 2015-2024 (« controle », Md€), droits rappelés par impôt, sommes '

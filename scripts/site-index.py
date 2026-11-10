@@ -37,7 +37,7 @@ SYNONYMS = {
     'niches.html': 'niches fiscales crédit d’impôt réduction d’impôt dépenses fiscales exonérations',
     'operateurs.html': 'agences opérateurs établissements publics universités France Travail ADEME CNRS',
     'secu.html': 'sécurité sociale assurance maladie retraites hôpitaux CNAM branches déficit de la sécu',
-    'aides.html': 'subventions associations aides aux entreprises plan de relance fonds vert',
+    'aides.html': 'subventions associations aides aux entreprises plan de relance fonds vert subventions des régions départements communes collectivités qui publie',
     'marches.html': 'marchés publics appels d’offres contrats acheteurs fournisseurs commande publique',
     'ugap.html': 'UGAP centrale d’achat prix catalogue',
     'signaux.html': 'anomalies signaux alertes contrôles',
