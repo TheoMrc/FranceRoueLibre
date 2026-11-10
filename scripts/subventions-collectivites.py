@@ -49,18 +49,24 @@ def norm(text):
 
 # normalized header -> field. First match wins, in this order.
 ALIASES = {
-    'giver': ['nomattribuant', 'attribuant', 'nomdelattribuant'],
-    'giver_id': ['idattribuant', 'siretattribuant', 'identifiantattribuant'],
-    'name': ['nombeneficiaire', 'nombenecifiaire', 'nombeneficiere', 'beneficiaire', 'nomdubeneficiaire', 'raison1'],
-    'id': ['idbeneficiaire', 'siretbeneficiaire', 'identifiantbeneficiaire', 'numerodereferencementaurepertoiredesentreprises', 'numsiren', 'siret', 'siren'],
+    'giver': ['nomattribuant', 'attribuant', 'nomdelattribuant', 'collnom'],
+    'giver_id': ['idattribuant', 'siretattribuant', 'identifiantattribuant', 'collsiret'],
+    'name': ['nombeneficiaire', 'nombenecifiaire', 'nombeneficiere', 'nomdubeneficiaire', 'beneficiaire', 'raisonsocialebeneficiaire', 'raisonsociale', 'nomraisonsociale',
+             'tiersbeneficiaire', 'nomdutiers', 'nomdelassociation', 'association', 'organisme', 'attribnom', 'raison1'],
+    'id': ['idbeneficiaire', 'siretbeneficiaire', 'identifiantbeneficiaire', 'identificationdubeneficiaire', 'identifiantdubeneficiaire',
+           'numerodereferencementaurepertoiredesentreprises', 'attribsiret', 'numerosiret', 'nsiret', 'codesiret', 'codesirensiret', 'codesiren', 'numsiren', 'siret', 'siren'],
     'rna': ['rnabeneficiaire', 'idrna', 'rna'],
-    'amount': ['montant', 'montantsubvention', 'montantdelasubvention', 'lasommeemtdel', 'montantvote', 'montantattribue'],
-    'object': ['objet', 'objetdelasubvention', 'objetdescriptif'],
-    'date': ['dateconvention', 'datedeconvention', 'ladateconv', 'datedecision', 'datedeliberation'],
-    'year': ['annee', 'exercice', 'anneebudgetaire'],
+    'amount': ['montant', 'montantsubvention', 'montantdelasubvention', 'montanttotaldelasubvention', 'montantdelasubventioneuros', 'montantattribue', 'montantvote',
+               'montantverse', 'montantordonnance', 'montantsubventionverseeeneuros', 'montantdelasubventionverseemontanteneuros', 'totalmontanteneuros',
+               'montanteneuro', 'montanteuros', 'submontant', 'lasommeemtdel'],
+    'object': ['objet', 'objetdelasubvention', 'objetdescriptif', 'objetdudossier', 'subobjet'],
+    'date': ['dateconvention', 'datedeconvention', 'datedelaconventiondesubvention', 'ladateconv', 'datedecision', 'datedeliberation'],
+    'year': ['annee', 'exercice', 'anneebudgetaire', 'anneebudgetairedaffectationdelasubvention'],
     'nature': ['nature', 'naturedelasubvention', 'odnature'],
     'scheme': ['dispositifaide'],
 }
+# A file with one of these columns is a contract or budget file that happens to have an amount and a SIRET.
+NOT_GRANTS = ('cpv', 'marche', 'acheteur', 'titulaire', 'procedure', 'bgt')
 
 # Datasets published by a third party without the grantor in the file: dataset id -> (name, SIREN).
 GIVER_BY_DATASET = {}
@@ -197,7 +203,7 @@ def main():
                         if name in header:
                             col[field] = header.index(name)
                             break
-                if 'amount' not in col or ('name' not in col and 'id' not in col):
+                if 'amount' not in col or ('name' not in col and 'id' not in col) or any(mark in c for c in header for mark in NOT_GRANTS):
                     files['autres_formats'] += 1
                     rejected_headers[res.get('organization') or '?'] += 1
                     continue
