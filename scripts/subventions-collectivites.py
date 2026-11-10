@@ -119,8 +119,12 @@ def year_of(date, year, paid=''):
 
 
 def siren_of(text):
-    digits = re.sub(r'\D', '', str(text or ''))
-    return digits[:9] if len(digits) in (9, 14) else None
+    """SIREN from a SIREN or SIRET. An RNA number (W332021273) or an internal code with letters is not one."""
+    text = str(text or '')
+    if re.search(r'[A-Za-z]', text):
+        return None
+    digits = re.sub(r'\D', '', text)
+    return digits[:9] if len(digits) in (9, 14) and digits.strip('0') else None
 
 
 def clean(text, size=300):
