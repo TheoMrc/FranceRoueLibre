@@ -589,6 +589,20 @@ class RequestsTest(unittest.TestCase):
         self.assertEqual(self.D.admin('deposee', r['ref'])['status'], 'envoyee')
         self.assertEqual(self.D.published()[0]['canal'], 'formulaire')
 
+    def test_request_sent_by_hand_through_a_form_is_followed_with_its_link(self):
+        """Lycée Jacques Cartier: the Région Bretagne has no address in the directory; the team sends the letter
+        through https://www.bretagne.bzh/contact/ and marks it so, with the form's link shown on the public page."""
+        S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND = True, False
+        r = self.D.request_send(self.draft()['demande']['id'], 'lecteur')
+        self.assertIn('error', self.D.admin('deposee', r['ref'], 'pas un lien'))
+        self.assertEqual(self.D.load(r['ref'])['status'], 'a_valider', 'nothing changes without a valid link')
+        res = self.D.admin('deposee', r['ref'], ' https://www.bretagne.bzh/contact/ ')
+        self.assertEqual(res['status'], 'envoyee')
+        pub = self.D.published()[0]
+        self.assertEqual((pub['canal'], pub['formulaire']), ('formulaire', 'https://www.bretagne.bzh/contact/'))
+        self.assertTrue(pub['echeance'], 'the one-month deadline runs from the day it was deposited')
+        self.assertIn('error', self.D.admin('deposee', r['ref'], 'https://www.bretagne.bzh/contact/'), 'only once')
+
     def test_send_waits_for_validation_then_is_published(self):
         S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND = True, False
         draft = self.draft()['demande']

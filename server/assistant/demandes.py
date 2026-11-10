@@ -260,6 +260,7 @@ def public_view(d: dict) -> dict:
     return {'ref': d['ref'], 'status': d['status'], 'organisme': d['to']['nom'], 'objet': d['fields']['objet'],
             'documents': d['fields']['documents'], 'contexte': d['fields'].get('contexte'), 'envoyee': sent,
             'echeance': due, 'fiche': d['to'].get('fiche'), 'canal': d.get('mode') or 'courriel',
+            'formulaire': d['to'].get('formulaire') if d.get('mode') == 'formulaire' else None,
             'reponses': [{'date': r['date'], 'texte': r['public_text'], 'pieces': r.get('public_files', [])}
                          for r in d.get('replies', []) if r.get('public_text')]}
 
@@ -520,7 +521,7 @@ def mail_test() -> dict:
 
 
 def admin(action: str, ref: str = '', text: str = '') -> dict:
-    """liste | tout | voir | valider | deposee (a letter pasted in the body's contact form) | refuser | modifier (JSON subject and body in text) | destinataire (name or INSEE code in text) | publier (the last reply, anonymized or the given text) | cloturer | test."""
+    """liste | tout | voir | valider | deposee (a letter pasted by hand in the body's contact form; text = the form's link) | refuser | modifier (JSON subject and body in text) | destinataire (name or INSEE code in text) | publier (the last reply, anonymized or the given text) | cloturer | test."""
     if action == 'test':
         return mail_test()
     if action == 'tout':  # every request in full, for the review panel (frl_panel.bat), with its deadline
@@ -592,11 +593,20 @@ def admin(action: str, ref: str = '', text: str = '') -> dict:
             save(d)
         return {'ok': True, 'ref': ref, 'status': d['status'], 'destinataire': to,
                 'autres': [c['nom'] for c in found if c is not to][:6]}
+    if action == 'deposee':  # sent by hand through the body's contact form: the request is followed like a mailed one
+        if d['status'] != 'a_valider':
+            return {'error': f'déjà traitée (demande {d["status"]})'}
+        url = text.strip() or d['to'].get('formulaire') or ''
+        if not re.fullmatch(r'https?://[^\s<>"\']{4,500}', url):
+            return {'error': 'lien du formulaire manquant ou invalide (https://…)'}
+        with _lock:
+            d['to']['formulaire'] = url
+            d.update(mode='formulaire', status='envoyee', sent=dt.datetime.now().isoformat(timespec='seconds'))
+            save(d)
+        return {'ok': True, 'ref': ref, 'status': d['status'], 'message': f'Marquée envoyée par le formulaire {url}'}
     with _lock:
         if action == 'refuser' and d['status'] == 'a_valider':
             d['status'] = 'refusee'
-        elif action == 'deposee' and d['status'] == 'a_valider' and d.get('mode') == 'formulaire':
-            d.update(status='envoyee', sent=dt.datetime.now().isoformat(timespec='seconds'))
         elif action == 'publier' and d.get('replies'):
             d['replies'][-1]['public_text'] = text.strip() or anonymize(d['replies'][-1]['text'])
         elif action == 'cloturer':
