@@ -156,7 +156,7 @@ MAIL_SIG_TAGLINE = _str('MAIL_SIG_TAGLINE', 'Comprendre où va l’argent public
 MAIL_NOTIFY = _str('MAIL_NOTIFY', MAIL_FROM)          # validations and replies are announced here
 MAIL_CONFIGURED = bool(MAIL_SMTP_HOST and MAIL_USER and MAIL_PASSWORD)
 MAIL_AUTO_SEND = _str('MAIL_AUTO_SEND', '0') == '1'   # 0: every request waits for the site's validation
-MAIL_DAILY = _int('MAIL_DAILY', 5)                    # requests sent per day, in all
+MAIL_DAILY = _int('MAIL_DAILY', 20)                   # requests sent per day, in all
 MAIL_PER_BODY_MONTH = _int('MAIL_PER_BODY_MONTH', 2)  # requests to one body per 30 days
 # Token of the local admin endpoint (assistant_api.py --demandes): drawn once by deploy/vps.sh, root only.
 MAIL_ADMIN_TOKEN = _credential('admin-token', 'MAIL_ADMIN_TOKEN', '/etc/francerouelibre')

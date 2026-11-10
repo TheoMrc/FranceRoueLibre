@@ -756,7 +756,7 @@ def admin(action: str, ref: str = '', text: str = '') -> dict:
                     and p['email'] != (d['to'].get('email') or '').lower():
                 view['prada_suggeree'] = p
             rows.append({**view, 'echeance': public_view(d)['echeance'],
-                         'meme_organisme_30j': sum(1 for x in all_requests() if x is not d and x['to'].get('email')
+                         'meme_organisme_30j': sum(1 for x in all_requests() if x['ref'] != d['ref'] and x['to'].get('email')
                                                    and x['to'].get('email') == d['to'].get('email')
                                                    and x['status'] not in ('brouillon', 'refusee')),
                          'reponse_anonymisee': anonymize(d['replies'][-1]['text']) if d.get('replies') else None})
