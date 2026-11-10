@@ -23,3 +23,5 @@
 .col-empty strong { color: var(--c-ink); }
 .col-empty ul { margin: .5rem 0 0; padding-left: 1.1rem; }
 .section--alt .col-cover .col-cell:not(.is-min):not(.is-all) { background: color-mix(in srgb, var(--tx-none) 38%, transparent); }
+.col-cell.is-dead { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--tx-none) 45%, transparent) 0 5px, color-mix(in srgb, var(--c-amber) 30%, transparent) 5px 10px); color: var(--c-ink); }
+.col-k--dead { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--tx-none) 70%, transparent) 0 3px, color-mix(in srgb, var(--c-amber) 60%, transparent) 3px 6px) !important; }

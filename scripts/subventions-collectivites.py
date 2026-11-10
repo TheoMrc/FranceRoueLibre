@@ -60,8 +60,9 @@ ALIASES = {
                'montantverse', 'montantordonnance', 'montantsubventionverseeeneuros', 'montantdelasubventionverseemontanteneuros', 'totalmontanteneuros',
                'montanteneuro', 'montanteuros', 'submontant', 'lasommeemtdel'],
     'object': ['objet', 'objetdelasubvention', 'objetdescriptif', 'objetdudossier', 'subobjet'],
-    'date': ['dateconvention', 'datedeconvention', 'datedelaconventiondesubvention', 'ladateconv', 'datedecision', 'datedeliberation'],
-    'year': ['annee', 'exercice', 'anneebudgetaire', 'anneebudgetairedaffectationdelasubvention'],
+    'date': ['dateconvention', 'datedeconvention', 'datedelaconventiondesubvention', 'ladateconv', 'datedecision', 'datededecision', 'datedeliberation'],
+    'year': ['annee', 'exercice', 'anneebudgetaire', 'anneebudgetairedaffectationdelasubvention', 'anneeattribution', 'anneedeladecision'],
+    'paid': ['datesperiodeversement', 'dateperiodeversement', 'dateversement', 'datesversement'],
     'nature': ['nature', 'naturedelasubvention', 'odnature'],
     'scheme': ['dispositifaide'],
 }
@@ -71,7 +72,7 @@ NOT_GRANTS = ('cpv', 'marche', 'acheteur', 'titulaire', 'procedure', 'bgt')
 # Datasets published by a third party without the grantor in the file: dataset id -> (name, SIREN).
 GIVER_BY_DATASET = {}
 # Organisation names on data.gouv.fr that are harvesters, not grantors: never used as the grantor's name.
-HARVESTERS = {'ressourcerie datalocale', 'gironde numerique', 'opendatafrance', 'data.gouv.fr'}
+HARVESTERS = {'ressourcerie datalocale', 'gironde numerique', 'opendatafrance', 'data.gouv.fr', 'open data bourgogne'}
 
 
 def decode(raw):
@@ -102,10 +103,12 @@ def amount_of(text):
 YEAR = re.compile(r'(?<!\d)(20[0-2]\d|19[89]\d)(?!\d)')
 
 
-def year_of(date, year):
-    for text in (date, year):
+def year_of(date, year, paid=''):
+    """Year of the convention; failing that the year column; failing that the first payment date."""
+    for text in (date, year, paid):
         text = str(text or '')
-        m = re.match(r'\s*(\d{4})-\d{1,2}', text) or re.match(r'\s*\d{1,2}[/.-]\d{1,2}[/.-](\d{4})', text) or re.fullmatch(r'\s*(\d{4})\s*', text)
+        m = (re.match(r'\s*(\d{4})-\d{1,2}', text) or re.match(r'\s*\d{1,2}[/.-]\d{1,2}[/.-](\d{4})', text) or re.fullmatch(r'\s*(\d{4})(?:\.0)?\s*', text)
+             or re.fullmatch(r'\s*(\d{4})[01]\d[0-3]\d\s*', text))
         if not m:
             m = YEAR.search(text) if text and len(text) <= 24 else None
         if m and 2000 <= int(m.group(1)) <= THIS_YEAR + 1:
@@ -147,12 +150,38 @@ def reference_sirens():
     return regions, departments
 
 
-def giver_type(siren, regions, departments):
+def resolver(regions, departments):
+    """Name of a grantor without a usable SIRET -> SIREN of the region or département it names, else None.
+    'Conseil régional de Normandie', 'DEPARTEMENT DU MORBIHAN', 'Région Île-de-France'. The longest territory name
+    wins (Loire, Haute-Loire, Loire-Atlantique)."""
+    reg = sorted(((norm(name), siren) for siren, name in regions.values()), key=lambda x: -len(x[0]))
+    dep = sorted(((norm(name), siren) for siren, name in departments.values()), key=lambda x: -len(x[0]))
+
+    def resolve(name):
+        n = norm(name)
+        if 'region' in n and not any(w in n for w in ('prefecture', 'agence', 'direction', 'academie')):
+            for key, siren in reg:
+                if key in n:
+                    return siren
+        if any(w in n for w in ('departement', 'conseildepartemental', 'conseilgeneral')) and not any(w in n for w in ('prefecture', 'direction', 'service', 'agence', 'syndicat')):
+            for key, siren in dep:
+                if n.endswith(key):
+                    return siren
+        return None
+    return resolve
+
+
+def giver_type(siren, regions, departments, name=''):
     if siren in regions:
         return 'region'
     if siren in departments:
         return 'departement'
     if not siren:
+        n = norm(name)
+        if n.startswith(('ville', 'commune', 'mairie')):
+            return 'commune'
+        if any(w in n for w in ('metropole', 'communaute', 'agglomeration', 'syndicat')):
+            return 'groupement'
         return 'inconnu'
     if siren.startswith('21'):
         return 'commune'
@@ -173,6 +202,9 @@ def main():
         sys.exit('sources/raw/subventions-collectivites/index.json absent : lancer node scripts/fetch-sources.mjs --only=subventions-collectivites')
     index = json.load(open(index_path, encoding='utf-8'))
     regions, departments = reference_sirens()
+    # The Métropole de Lyon is listed with the départements by the OFGL (code 691): here it is a grouping, the Rhône stays a département.
+    departments = {code: v for code, v in departments.items() if len(code) <= 3 and code != '691'}
+    resolve = resolver(regions, departments)
     region_sirens = {s: (code, name) for code, (s, name) in regions.items()}
     department_sirens = {s: (code, name) for code, (s, name) in departments.items()}
     known = set(region_sirens) | set(department_sirens)
@@ -180,6 +212,7 @@ def main():
     files = collections.Counter()
     quality = collections.Counter()
     seen = {}                                   # row key -> file that first carried it
+    dead = {}                                   # SIREN of a region or département -> page of a file that no longer downloads
     rows_out = []
     rejected_headers = collections.Counter()
     per_file = []
@@ -190,6 +223,10 @@ def main():
         path = os.path.join(SRC, res['file'])
         if res.get('bytes') is None or not os.path.exists(path):
             files['inaccessibles'] += 1
+            if 'subvention' in norm(res.get('title') or ''):      # a subsidy file that is announced but cannot be downloaded
+                owner = resolve(res.get('organization') or '') or resolve(res.get('title') or '')
+                if owner:
+                    dead.setdefault(owner, res['page'])
             continue
         try:
             with gzip.open(path, 'rb') as handle:
@@ -218,6 +255,7 @@ def main():
         fallback = GIVER_BY_DATASET.get(res['dataset']) or ((org, None) if norm(org) not in {norm(h) for h in HARVESTERS} else ('', None))
         kept = 0
         local = set()
+        before = quality['sans_montant']
         try:
             for raw in reader:
                 if not any(raw):
@@ -239,12 +277,12 @@ def main():
                 if amount == 0:
                     quality['montant_nul'] += 1
                     continue
-                giver_siren = siren_of(get('giver_id')) or fallback[1]
                 giver = clean(get('giver'), 140) or fallback[0]
+                giver_siren = siren_of(get('giver_id')) or fallback[1] or resolve(giver)
                 if not giver and not giver_siren:
                     quality['sans_attribuant'] += 1
                     continue
-                year = year_of(get('date'), get('year'))
+                year = year_of(get('date'), get('year'), get('paid'))
                 obj = clean(get('object'), 300)
                 key = (giver_siren or norm(giver), siren or norm(name), round(amount, 2), get('date'), norm(obj)[:80])
                 if key in seen and seen[key] != res['file'] and key not in local:
@@ -258,12 +296,12 @@ def main():
                     quality['sans_siren'] += 1
                 if year is None:
                     quality['sans_annee'] += 1
-                rows_out.append((giver_siren or '', giver, giver_type(giver_siren, region_sirens, department_sirens), siren or '', name, amount, year or '', obj,
+                rows_out.append((giver_siren or '', giver, giver_type(giver_siren, region_sirens, department_sirens, giver), siren or '', name, amount, year or '', obj,
                                  clean(get('nature'), 60), clean(get('scheme'), 120), res['dataset'], res['page']))
                 kept += 1
         except csv.Error:
             quality['fichiers_tronques'] += 1
-        per_file.append((res['file'], org, kept))
+        per_file.append((res['file'], org, kept, quality['sans_montant'] - before, res['title']))
 
     if not rows_out:
         sys.exit('Aucune ligne de subvention lue.')
@@ -335,7 +373,7 @@ def main():
         out = []
         for code, (siren, name) in sorted(reference.items()):
             g = givers.get(siren)
-            out.append({'code': code, 'name': name, 'siren': siren, 'published': bool(g), **({k: v for k, v in giver_row(g).items() if k in ('lines', 'amount', 'years', 'underThreshold', 'min', 'pages')} if g else {})})
+            out.append({'code': code, 'name': name, 'siren': siren, 'published': bool(g), **({'deadLink': dead[siren]} if not g and siren in dead else {}), **({k: v for k, v in giver_row(g).items() if k in ('lines', 'amount', 'years', 'underThreshold', 'min', 'pages')} if g else {})})
         return out
 
     reg_cov, dep_cov = coverage(regions), coverage(departments)
@@ -367,6 +405,8 @@ def main():
           f'{len(rows_out):,} lignes, {total_amount / 1e9:.2f} Md€, {len(givers)} attribuants, {len(benef):,} bénéficiaires avec SIREN'.replace(',', ' '))
     print(f'  régions qui publient : {c["regions"][0]}/{c["regions"][1]} ; départements : {c["departments"][0]}/{c["departments"][1]} ; communes : {c["communes"]} ; groupements : {c["groupements"]}')
     print('  qualité :', dict(quality))
+    worst = sorted(per_file, key=lambda f: -f[3])[:5]
+    print('  fichiers avec le plus de lignes sans montant :', [(f[1], f[4][:50], f[3], f[2]) for f in worst if f[3]])
     no_id = sorted(((g['lines'], g['name']) for g in givers.values() if not g['siren']), reverse=True)[:12]
     if no_id:
         print('  attribuants sans SIRET (nom de l’organisation data.gouv.fr) :', no_id)

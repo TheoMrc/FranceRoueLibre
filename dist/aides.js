@@ -66,10 +66,11 @@
     let colIndex = null;
     const T = col.totals, C = col.coverage, limit = col.threshold;
     const plural = (n, word) => `${count(n)} ${word}${n > 1 ? 's' : ''}`;
-    const state = row => !row.published ? 'none' : row.underThreshold > 0 ? 'all' : 'min';
+    const state = row => !row.published ? (row.deadLink ? 'dead' : 'none') : row.underThreshold > 0 ? 'all' : 'min';
     const describe = row => row.published
       ? `${row.name} : ${plural(row.lines, 'ligne')}, ${money(row.amount)}, ${row.years.length ? `conventions de ${row.years[0]}${row.years.length > 1 ? ' à ' + row.years[row.years.length - 1] : ''}` : 'années non renseignées'}, plus petite subvention publiée ${money(row.min)}`
-      : `${row.name} : aucun fichier de subventions au format national trouvé sur data.gouv.fr`;
+      : row.deadLink ? `${row.name} : un fichier de subventions est annoncé sur data.gouv.fr, mais son lien ne répond plus`
+        : `${row.name} : aucun fichier de subventions au format national trouvé sur data.gouv.fr`;
     const missingReg = col.regions.filter(r => !r.published), missingDep = col.departments.filter(r => !r.published);
     $('colKpis').innerHTML = [
       ['Subventions publiées', money(T.amount), `${plural(T.lines, 'ligne')}, toutes années`],
