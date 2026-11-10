@@ -451,10 +451,13 @@ function budgets() {
   const cCap = B ? bc.limit_eur : Math.min(C.claude_eur || Infinity, C.claude_usd || Infinity);
   const day = p => all.filter(r => r.t.startsWith(iso(new Date())) && (!p || r.p === p)).reduce((a, r) => a + r.c, 0);
   const cDay = B ? bc.daily_limit_eur : C.claude_daily_eur;
+  const E = bc.envelope, frDate = d => new Date(d.length > 10 ? d : d + 'T12:00').toLocaleDateString('fr-FR');
   $('budgetsHint').textContent = B ? `Plafonds en vigueur sur le VPS et dépense de son registre, lus le ${B.read || '?'}.`
     : 'VPS non lu : dépense d’après le journal, plafonds par défaut de server/assistant/settings.py (le VPS peut en avoir d’autres).';
   $('budgets').innerHTML =
-    g('Claude, au total', B ? bc.spent_eur : spent('claude'), cCap, `Crédit Anthropic, sans date de fin. Rythme moyen : ${eur(rate('claude'), 3)} par jour.${B && bc.refusal ? ` Arrêté : ${esc(bc.refusal)}.` : ''}`, 'var(--c3)') +
+    g(E ? 'Claude, enveloppe en cours' : 'Claude, au total', B ? bc.spent_eur : spent('claude'), cCap, (E
+      ? `Depuis le ${frDate(E.since)} : ${eur(E.start_eur, 0)} au départ, ${eur(E.monthly_eur, 0)} ajoutés chaque ${E.day} du mois, le non-dépensé est reporté. Prochain crédit le ${frDate(E.next)}. ${eur(E.total_spent_eur)} dépensés depuis le début.`
+      : `Crédit Anthropic, sans date de fin. Rythme moyen : ${eur(rate('claude'), 3)} par jour.`) + (B && bc.refusal ? ` Arrêté : ${esc(bc.refusal)}.` : ''), 'var(--c3)') +
     (cDay ? g("Claude, aujourd'hui", B ? bc.today_eur : day('claude'), cDay, 'Plafond quotidien de Claude seul.', 'var(--c3)') : '') +
     g('Gemini', B ? bg.spent_eur : spent('gemini'), B ? bg.limit_eur : C.gemini_eur, `Crédits Google Cloud${left != null ? `, ${left > 0 ? `encore ${left} jour(s), jusqu'au ${new Date(until + 'T12:00').toLocaleDateString('fr-FR')}` : 'expirés'}` : ''}.`, 'var(--c1)') +
     g("Aujourd'hui (les deux)", B ? B.today_eur : day(), B ? B.daily_limit_eur : C.daily_eur, 'Plafond quotidien commun, contre un emballement.', 'var(--brand-gradient)') +

@@ -2,6 +2,9 @@
 
 * Three caps, all checked: one provider in all (CLAUDE_BUDGET_EUR, GEMINI_BUDGET_EUR), one provider for one day
   (CLAUDE_DAILY_EUR, GEMINI_DAILY_EUR), both providers together for one day (ASSISTANT_DAILY_EUR).
+* A provider with a monthly **envelope** (Claude: credits that arrive on the 9th) has it instead of the cap in all: so
+  many euros at a start date, so many more on each monthly day after it, minus what was spent since the start. What
+  is not spent one month stays available the next.
 * Each call first **reserves** its worst case (whole prompt at the uncached price, the full output budget, the maximum
   number of web searches). The call is refused if the money already spent, plus what other calls in flight have
   reserved, plus this worst case, would go over the cap. So even many questions at once cannot overshoot it.
@@ -54,6 +57,23 @@ def today() -> dt.date:
     return dt.datetime.now(PARIS).date()
 
 
+def now() -> dt.datetime:
+    """Paris time without zone, like the day and time written in the ledger."""
+    return dt.datetime.now(PARIS).replace(tzinfo=None)
+
+
+def refills(start: dt.datetime, until: dt.datetime, day: int) -> tuple:
+    """(how many monthly days fell after ``start`` and up to ``until``, the next one after ``until``)."""
+    n, y, m = 0, start.year, start.month
+    while True:
+        d = dt.datetime(y, m, day)
+        if d > until:
+            return n, d.date()
+        if d > start:
+            n += 1
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+
+
 def price(model: str) -> Optional[dict]:
     m = (model or '').lower()
     for key in sorted(PRICES, key=len, reverse=True):
@@ -81,7 +101,8 @@ def worst_case_eur(provider: str, model: str, body_chars: int, max_output: int, 
 
 
 class Budget:
-    def __init__(self, ledger: Path, limits: dict, daily_eur: float, daily_by: Optional[dict] = None):
+    def __init__(self, ledger: Path, limits: dict, daily_eur: float, daily_by: Optional[dict] = None,
+                 envelopes: Optional[dict] = None):
         self.ledger = ledger
         self.limits = limits            # provider -> (euros, last day or None)
         self.daily_eur = daily_eur      # both providers together, for one day
@@ -90,6 +111,9 @@ class Budget:
         self.spent = defaultdict(float)     # provider -> euros since the start
         self.by_day = defaultdict(float)    # 'YYYY-MM-DD' -> euros, both providers
         self.by_day_of = defaultdict(float)  # ('YYYY-MM-DD', provider) -> euros
+        # provider -> {'start': datetime, 'eur': euros at the start, 'monthly': euros per month, 'day': day of the month}
+        self.envelopes = {p: e for p, e in (envelopes or {}).items() if e and e.get('monthly', 0) > 0}
+        self.since = defaultdict(float)     # provider -> euros since the start of its envelope
         self.reserved = defaultdict(float)  # provider -> euros of the calls in flight
         self._load()
 
@@ -106,14 +130,32 @@ class Budget:
                 self.spent[row.get('provider', '?')] += eur
                 self.by_day[row.get('day', '')] += eur
                 self.by_day_of[(row.get('day', ''), row.get('provider', '?'))] += eur
+                env = self.envelopes.get(row.get('provider'))
+                try:
+                    if env and dt.datetime.fromisoformat(f'{row.get("day")}T{row.get("time") or "00:00:00"}') >= env['start']:
+                        self.since[row['provider']] += eur
+                except ValueError:
+                    pass
+
+    def _envelope(self, provider: str) -> Optional[tuple]:
+        """(euros allowed since the start, date of the next monthly credit), or None without envelope."""
+        env = self.envelopes.get(provider)
+        if not env:
+            return None
+        n, nxt = refills(env['start'], now(), env['day'])
+        return env['eur'] + n * env['monthly'], nxt
 
     def _refusal(self, provider: str, extra: float = 0.0) -> Optional[str]:
         limit, until = self.limits.get(provider, (0.0, None))
-        if limit <= 0:
+        env = self._envelope(provider)
+        if limit <= 0 and not env:
             return 'désactivé (budget nul)'
         if until and today() > until:
             return f'période terminée (jusqu’au {until.strftime("%d/%m/%Y")})'
-        if self.spent[provider] + self.reserved[provider] + extra > limit:
+        if env:
+            if self.since[provider] + self.reserved[provider] + extra > env[0]:
+                return f'budget du mois épuisé (prochain crédit le {env[1].strftime("%d/%m/%Y")})'
+        elif self.spent[provider] + self.reserved[provider] + extra > limit:
             return f'budget épuisé ({limit:g} €)'
         day = today().isoformat()
         own = self.daily_by.get(provider) or 0
@@ -145,6 +187,8 @@ class Budget:
             self.spent[provider] += eur
             self.by_day[row['day']] += eur
             self.by_day_of[(row['day'], provider)] += eur
+            if provider in self.envelopes and now.replace(tzinfo=None) >= self.envelopes[provider]['start']:
+                self.since[provider] += eur
             try:
                 self.ledger.parent.mkdir(parents=True, exist_ok=True)
                 with self.ledger.open('a', encoding='utf-8') as f:
@@ -157,7 +201,16 @@ class Budget:
             out = {}
             for p in PROVIDERS:
                 limit, until = self.limits.get(p, (0.0, None))
-                out[p] = {'spent_eur': round(self.spent[p], 4), 'limit_eur': limit,
+                env = self._envelope(p)
+                if env:   # the gauge of the envelope: spent since its start, out of what it holds today
+                    e = self.envelopes[p]
+                    out[p] = {'spent_eur': round(self.since[p], 4), 'limit_eur': round(env[0], 2),
+                              'envelope': {'since': e['start'].isoformat(timespec='minutes'), 'start_eur': e['eur'],
+                                           'monthly_eur': e['monthly'], 'day': e['day'], 'next': env[1].isoformat(),
+                                           'total_spent_eur': round(self.spent[p], 4)}}
+                else:
+                    out[p] = {'spent_eur': round(self.spent[p], 4), 'limit_eur': limit}
+                out[p] |= {
                           'today_eur': round(self.by_day_of[(today().isoformat(), p)], 4),
                           'daily_limit_eur': self.daily_by.get(p) or 0,
                           'until': until.isoformat() if until else None,
@@ -175,5 +228,7 @@ def budget() -> Budget:
     if _budget is None:
         _budget = Budget(S.STATE_DIR / 'spend.jsonl',
                          {'claude': (S.CLAUDE_BUDGET_EUR, S.CLAUDE_UNTIL), 'gemini': (S.GEMINI_BUDGET_EUR, S.GEMINI_UNTIL)},
-                         S.DAILY_BUDGET_EUR, {'claude': S.CLAUDE_DAILY_EUR, 'gemini': S.GEMINI_DAILY_EUR})
+                         S.DAILY_BUDGET_EUR, {'claude': S.CLAUDE_DAILY_EUR, 'gemini': S.GEMINI_DAILY_EUR},
+                         {'claude': {'start': S.CLAUDE_ENVELOPE_START, 'eur': S.CLAUDE_ENVELOPE_EUR,
+                                     'monthly': S.CLAUDE_MONTHLY_EUR, 'day': S.CLAUDE_MONTH_DAY}})
     return _budget

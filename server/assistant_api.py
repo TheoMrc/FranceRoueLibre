@@ -424,6 +424,8 @@ def print_usage(as_json: bool = False) -> None:
         d = s[p]
         print(f'{p:7s} {d["spent_eur"]:8.3f} € sur {d["limit_eur"]:g} €'
               + (f', aujourd’hui {d["today_eur"]:.3f} € sur {d["daily_limit_eur"]:g} €' if d['daily_limit_eur'] else '')
+              + (f' (enveloppe depuis le {d["envelope"]["since"]}, +{d["envelope"]["monthly_eur"]:g} € le {d["envelope"]["day"]} du mois, '
+                 f'prochain crédit le {d["envelope"]["next"]} ; {d["envelope"]["total_spent_eur"]:.3f} € depuis le début)' if d.get('envelope') else '')
               + (f', jusqu’au {d["until"]}' if d['until'] else '') + (f'  [{d["refusal"]}]' if d['refusal'] else ''))
     print(f'aujourd’hui {s["today_eur"]:.3f} € (plafond {s["daily_limit_eur"]:g} €/jour) · registre : {path}')
     per_day = collections.defaultdict(lambda: [0, 0.0])

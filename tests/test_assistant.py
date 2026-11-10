@@ -76,7 +76,38 @@ class BudgetTest(unittest.TestCase):
         again = self.make(claude=10, gemini=10, daily=5.0, daily_by={'claude': 1.0})   # a restart reads the ledger back
         self.assertIn('plafond du jour', again.refusal('claude', 0.3))
 
+    def test_monthly_envelope_carries_over(self):
+        D = dt.datetime
+        self.assertEqual(B.refills(D(2026, 11, 10, 16, 41), D(2026, 12, 8, 23, 0), 9), (0, dt.date(2026, 12, 9)))
+        self.assertEqual(B.refills(D(2026, 11, 10, 16, 41), D(2026, 12, 9, 0, 0), 9), (1, dt.date(2027, 1, 9)))
+        self.assertEqual(B.refills(D(2026, 11, 10, 16, 41), D(2027, 2, 20), 9), (3, dt.date(2027, 3, 9)))
+        self.assertEqual(B.refills(D(2026, 11, 5), D(2026, 11, 9, 8), 9), (1, dt.date(2026, 12, 9)))
+        env = {'claude': {'start': D(2026, 11, 10, 16, 41), 'eur': 2.0, 'monthly': 1.0, 'day': 9}}
+        real = B.now
+        rows = [{'day': '2026-11-09', 'time': '10:00:00', 'provider': 'claude', 'eur': 50.0},    # before the start: not counted
+                {'day': '2026-11-10', 'time': '16:40:59', 'provider': 'claude', 'eur': 5.0},
+                {'day': '2026-11-10', 'time': '18:00:00', 'provider': 'claude', 'eur': 1.5}]
+        self.ledger.write_text('\n'.join(json.dumps(r) for r in rows) + '\n', encoding='utf-8')
+        try:
+            B.now = lambda: D(2026, 11, 20, 12, 0)
+            b = B.Budget(self.ledger, {'claude': (1.0, None), 'gemini': (1.0, None)}, 0, None, env)   # the cap in all (1 €) is ignored
+            self.assertIsNone(b.refusal('claude', 0.4))
+            self.assertIn('prochain crédit le 09/12/2026', b.refusal('claude', 0.6))             # 1.5 + 0.6 > 2
+            s = b.summary()['claude']
+            self.assertEqual((s['spent_eur'], s['limit_eur'], s['envelope']['next'], s['envelope']['total_spent_eur']),
+                             (1.5, 2.0, '2026-12-09', 56.5))
+            B.now = lambda: D(2026, 12, 9, 0, 5)                                                 # the monthly credit: 2 + 1
+            self.assertIsNone(b.refusal('claude', 1.4))
+            self.assertIn('épuisé', b.refusal('claude', 1.6))
+            B.now = lambda: D(2027, 1, 9, 9, 0)                                                  # unspent euros carry over: 2 + 2
+            self.assertIsNone(b.refusal('claude', 2.4))
+        finally:
+            B.now = real
+        b = B.Budget(self.ledger, {'claude': (1.0, None), 'gemini': (1.0, None)}, 0, None, {'claude': dict(env['claude'], monthly=0)})
+        self.assertIn('budget épuisé (1 €)', b.refusal('claude'))                                 # no envelope: the cap in all
+
     def test_defaults_match_the_request(self):
+        self.assertEqual((S.CLAUDE_MONTHLY_EUR, S.CLAUDE_MONTH_DAY, S.CLAUDE_ENVELOPE_EUR), (90, 9, 150))
         self.assertEqual((S.CLAUDE_BUDGET_EUR, S.CLAUDE_DAILY_EUR, S.GEMINI_BUDGET_EUR), (150, 50, 100))
         self.assertLessEqual(S.CLAUDE_BUDGET_EUR, S.CLAUDE_MAX_USD * S.USD_EUR)
         self.assertEqual(S.GEMINI_UNTIL, dt.date(2026, 11, 17))

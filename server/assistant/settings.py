@@ -89,6 +89,17 @@ GEMINI_BUDGET_EUR = _float('GEMINI_BUDGET_EUR', 100)
 GEMINI_UNTIL = _date('GEMINI_UNTIL', '2026-11-17')
 # Cap on the two providers together for one day, so that a burst of abuse cannot burn the whole budget at once.
 DAILY_BUDGET_EUR = _float('ASSISTANT_DAILY_EUR', 10)
+# Claude's monthly envelope (budget.py): Théo's API credits arrive on the 9th of each month. On CLAUDE_ENVELOPE_START the
+# Loupe may spend CLAUDE_ENVELOPE_EUR; CLAUDE_MONTHLY_EUR are added on each CLAUDE_MONTH_DAY after it, and what is not spent
+# carries over. It replaces the cap in all (CLAUDE_BUDGET_EUR), which only applies when CLAUDE_MONTHLY_EUR is 0.
+# To realign on the real balance of the Console: set a new start (date and time, Paris) and the euros left for the Loupe.
+CLAUDE_MONTHLY_EUR = _float('CLAUDE_MONTHLY_EUR', 90)
+CLAUDE_MONTH_DAY = min(28, max(1, _int('CLAUDE_MONTH_DAY', 9)))
+CLAUDE_ENVELOPE_EUR = _float('CLAUDE_ENVELOPE_EUR', 150)   # 173 € of credits left that day, 23 € kept for his other projects
+try:
+    CLAUDE_ENVELOPE_START = dt.datetime.fromisoformat(_str('CLAUDE_ENVELOPE_START', '2026-11-10T16:41'))
+except ValueError:
+    raise SystemExit('CLAUDE_ENVELOPE_START : date et heure attendues au format AAAA-MM-JJTHH:MM')
 # Cap of one provider alone for one day (0: none, only the common cap above applies).
 CLAUDE_DAILY_EUR = _float('CLAUDE_DAILY_EUR', 50)
 GEMINI_DAILY_EUR = _float('GEMINI_DAILY_EUR', 0)
