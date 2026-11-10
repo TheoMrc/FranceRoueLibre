@@ -10,7 +10,8 @@ Sorties :
   sources/derived/subventions-collectivites.csv.gz   une ligne par subvention (lue par process_search.py)
   dist/data/aides/collectivites.json                 totaux, par année, par type d'attribuant, attribuants,
                                                      couverture des régions et des départements, compteurs de qualité
-  dist/data/aides/collectivites-index.json           une ligne par bénéficiaire identifié par un SIREN (recherche)
+  dist/data/aides/collectivites-index.json           une ligne par bénéficiaire identifié par un SIREN (recherche),
+                                                     avec ses trois premiers attribuants
 
 Règles : aucun montant corrigé ni complété. Les lignes des préfectures et services de l'État sans SIRET (crédits du
 budget de l'État, déjà dans les annexes « jaunes ») sont écartées pour ne pas être comptées deux fois sur le site. Une ligne sans montant lisible ou sans bénéficiaire est comptée et écartée.
@@ -410,9 +411,12 @@ def main():
     }
     with open(os.path.join(OUT, 'collectivites.json'), 'w', encoding='utf-8') as handle:
         json.dump(result, handle, ensure_ascii=False, separators=(',', ':'))
-    rows = sorted(([s, benef_label.get(s, ''), round(b['total']), sorted(b['years']), len(b['givers']), b['lines']] for s, b in benef.items()), key=lambda r: -r[2])
+    def names(keys):
+        ranked = sorted(keys, key=lambda k: -givers[k]['amount'])
+        return [givers[k]['name'] for k in ranked[:3]]
+    rows = sorted(([s, benef_label.get(s, ''), round(b['total']), sorted(b['years']), len(b['givers']), b['lines'], names(b['givers'])] for s, b in benef.items()), key=lambda r: -r[2])
     with open(os.path.join(OUT, 'collectivites-index.json'), 'w', encoding='utf-8') as handle:
-        json.dump({'fields': ['siren', 'name', 'total', 'years', 'givers', 'lines'], 'rows': rows}, handle, ensure_ascii=False, separators=(',', ':'))
+        json.dump({'fields': ['siren', 'name', 'total', 'years', 'givers', 'lines', 'by'], 'rows': rows}, handle, ensure_ascii=False, separators=(',', ':'))
 
     c = result['coverage']
     print(f'subventions des collectivités : {files["lus"]} fichiers lus sur {len(resources)} ({files["autres_formats"]} dans un autre format, {files["inaccessibles"]} inaccessibles), '

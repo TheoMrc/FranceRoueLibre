@@ -63,7 +63,8 @@
     let col;
     try { col = await load('./data/aides/collectivites.json'); }
     catch (error) { $('collectivites').hidden = true; return; }
-    let colIndex = null;
+    let colIndex = null, hasLines = false;      // « Voir les lignes » only once the search index carries this source
+    load('./data/search/meta.json').then(meta => { hasLines = Boolean(meta.sources && meta.sources['7']); }).catch(() => {});
     const T = col.totals, C = col.coverage, limit = col.threshold;
     const plural = (n, word) => `${count(n)} ${word}${n > 1 ? 's' : ''}`;
     const state = row => !row.published ? (row.deadLink || row.otherFormat ? 'dead' : 'none') : row.underThreshold > 0 ? 'all' : 'min';
@@ -103,8 +104,8 @@
       const words = query.split(/\s+/);
       const rows = colIndex.rows.filter(([siren, name]) => siren.includes(query) || words.every(w => (name || '').toLowerCase().includes(w))).slice(0, 100);
       if (rows.length) {
-        $('colTable').innerHTML = `<table class="data-table"><thead><tr><th>Bénéficiaire</th><th>Années</th><th class="num">Attribuants</th><th class="num">Lignes</th><th class="num">Total publié</th><th></th></tr></thead><tbody>${rows.map(([siren, name, total, yrs, givers, lines]) =>
-          `<tr><td>${sirenLink(siren, name)}</td><td class="muted">${yrs.join(', ')}</td><td class="num">${count(givers)}</td><td class="num">${count(lines)}</td><td class="num">${money(total)}</td><td><a href="recherche.html?q=${encodeURIComponent(siren)}">Voir les lignes</a></td></tr>`).join('')}</tbody></table>`;
+        $('colTable').innerHTML = `<table class="data-table"><thead><tr><th>Bénéficiaire</th><th>Attribué par</th><th>Années</th><th class="num">Lignes</th><th class="num">Total publié</th>${hasLines ? '<th></th>' : ''}</tr></thead><tbody>${rows.map(([siren, name, total, yrs, givers, lines, by]) =>
+          `<tr><td>${sirenLink(siren, name)}</td><td class="muted">${esc((by || []).join(', '))}${givers > (by || []).length ? ` et ${givers - by.length} autre${givers - by.length > 1 ? 's' : ''}` : ''}</td><td class="muted">${yrs.length ? `${yrs[0]}${yrs.length > 1 ? '–' + yrs[yrs.length - 1] : ''}` : '–'}</td><td class="num">${count(lines)}</td><td class="num">${money(total)}</td>${hasLines ? `<td><a href="recherche.html?q=${encodeURIComponent(siren)}">Voir les lignes</a></td>` : ''}</tr>`).join('')}</tbody></table>`;
         $('colTableNote').textContent = 'Total des lignes publiées par les collectivités pour ce SIREN, toutes années. Ce n’est pas forcément tout ce que le bénéficiaire a reçu : voir plus bas qui ne publie pas.';
         return;
       }

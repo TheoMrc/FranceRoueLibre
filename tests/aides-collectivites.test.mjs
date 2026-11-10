@@ -47,12 +47,12 @@ test('grantors: sorted by amount, typed, with the page of their dataset', () => 
 });
 
 test('beneficiary index: one row per SIREN, sorted by total', () => {
-  assert.deepEqual(index.fields, ['siren', 'name', 'total', 'years', 'givers', 'lines']);
+  assert.deepEqual(index.fields, ['siren', 'name', 'total', 'years', 'givers', 'lines', 'by']);
   assert.equal(index.rows.length, data.totals.beneficiaries);
   assert.equal(new Set(index.rows.map(r => r[0])).size, index.rows.length);
   index.rows.forEach((row, i) => {
     assert.match(row[0], /^\d{9}$/);
-    assert.ok(row[4] >= 1 && row[5] >= 1);
+    assert.ok(row[4] >= 1 && row[5] >= 1 && row[6].length >= 1 && row[6].length <= 3);
     if (i) assert.ok(index.rows[i - 1][2] >= row[2]);
   });
 });
@@ -63,13 +63,13 @@ import importlib.util, json, sys
 spec = importlib.util.spec_from_file_location('sc', sys.argv[1]); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
 print(json.dumps({
   'amounts': [m.amount_of(x) for x in ['23 000,50 €', '23000.5', '1.234.567,8', '1,234,567.8', '', 'néant', '-1500']],
-  'years': [m.year_of('2021-05-03', ''), m.year_of('03/05/2021', ''), m.year_of('', '2019'), m.year_of('date inconnue', ''), m.year_of('1899-01-01', '')],
+  'years': [m.year_of('2021-05-03', ''), m.year_of('03/05/2021', ''), m.year_of('', '2019'), m.year_of('date inconnue', ''), m.year_of('1899-01-01', ''), m.year_of('20200117', ''), m.year_of('', '', '2023-11-09')],
   'sirens': [m.siren_of('22330001300016'), m.siren_of('827 585 928'), m.siren_of('W332021273'), m.siren_of('')],
   'norm': m.norm('Nom_Bénéficiaire'),
 }))`;
   const out = JSON.parse(execFileSync(process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3'), ['-c', py, new URL('../scripts/subventions-collectivites.py', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')], { encoding: 'utf8' }));
   assert.deepEqual(out.amounts, [23000.5, 23000.5, 1234567.8, 1234567.8, null, null, -1500]);
-  assert.deepEqual(out.years, [2021, 2021, 2019, null, null]);
+  assert.deepEqual(out.years, [2021, 2021, 2019, null, null, 2020, 2023]);
   assert.deepEqual(out.sirens, ['223300013', '827585928', null, null]);
   assert.equal(out.norm, 'nombeneficiaire');
 });
