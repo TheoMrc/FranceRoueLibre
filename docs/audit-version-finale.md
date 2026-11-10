@@ -25,12 +25,24 @@ node --test tests/europe.test.mjs
 au premier passage : le code `D41PAY` dans `gov_10a_main`, les dimensions de `irt_lt_mcby_a`, et le FMI, qui refuse
 parfois les requêtes sans navigateur (les quatre fichiers `fmi/` seraient alors en échec, sans gêner le reste).
 
+## 1 bis. Suite du 10 novembre (téléchargements faits sur le PC par le runner)
+
+| Quoi | Résultat |
+|---|---|
+| Source `international` | Les 8 fichiers Eurostat et FMI sont téléchargés et lus. La page Europe affiche 7 séries (dépenses, rémunérations, recettes, solde, dette, intérêts, taux à dix ans), les dépenses par fonction 2024 et les prévisions du FMI jusqu’en 2031. Les CSV extraits sont versionnés dans `sources/international/` |
+| Subventions des collectivités | Nouvelle source `subventions-collectivites` : 930 jeux de données et 2 002 CSV trouvés sur data.gouv.fr, 1 568 téléchargés (434 liens morts), 778 lus au modèle national ou avec les intitulés de l’arrêté. Section « Subventions des collectivités » sur la page Aides : recherche d’un bénéficiaire, régions et départements qui publient ou non, compteurs de qualité. Chiffres exacts dans `dist/data/aides/collectivites.json` |
+| Zebracool (SIREN 827585928, Martillac) et AAPPMA de Parentis-en-Born (SIREN 807524442) | **Aucune ligne dans aucun fichier ouvert.** La Région Nouvelle-Aquitaine et le Département des Landes n’ont aucun fichier de subventions sur data.gouv.fr ; le fichier du Département de la Gironde est annoncé mais son lien ne répond plus ; sous 23 000 € la publication n’est pas obligatoire. Le trou n’est pas réparable par téléchargement : il faut une demande de communication à la Région (page Demandes). La page l’explique désormais à qui cherche un nom introuvable |
+| Recherche | Les subventions des collectivités sont la septième source de `process_search.py`, avec un mode `--collectivites-only` qui ne remplace que ces lignes dans l’index existant. **Pas encore exécuté** : le runner bloque ce script (il supprime puis réécrit les morceaux de l’index) et la justification n’a pas été acceptée. À autoriser dans la fenêtre Runners, puis : `python scripts/process_search.py --collectivites-only`. Tant que ce n’est pas fait, la page Aides n’affiche pas le lien « Voir les lignes » |
+
+Attention : la reconstruction complète de l’index (`process_search.py` sans option) effacerait aujourd’hui les marchés publics, car `sources/derived/decp.parquet` n’est plus sur le PC. Relancer `process_procurement.py` avant toute reconstruction complète.
+
 ## 2. Pas fini dans le site
 
 | Sujet | Constat | Ce qu’il faut |
 |---|---|---|
 | Sécurité sociale, soins de ville et cliniques | `secu.html` annonce « les séries existent, les montants ne sont pas encore ici » : les liens data.gouv.fr des jeux `datagouv-cnam-ville` et `datagouv-cnam-cliniques` renvoient une page à jeton | Trouver l’URL directe des fichiers sur assurance-maladie.ameli.fr, ou passer par Open Damir |
 | Sécurité sociale, comptes par branche | Derniers comptes ouverts : 2009–2010 | Tableaux de la Commission des comptes de la Sécurité sociale (PDF, annexes tableur à vérifier), ou une demande via la page Demandes |
+| Subventions des collectivités hors data.gouv.fr | Plusieurs régions (Auvergne-Rhône-Alpes, Bourgogne-Franche-Comté, Corse) publient sur leur propre portail sans le référencer : non lues | Ajouter leurs portails un par un à `fetch-sources.mjs` |
 | Subventions aux associations 2022 | Annexe au PLF 2024 publiée sans noms : année manquante | Demande à la Direction du budget |
 | PISA 2022 | La reprise Banque mondiale s’arrête à 2018 (`emplois.js` le dit) | Fichier OCDE PISA 2022 |
 | Impôts | 34 des 53 lignes de `sources/impots-liste.json` et les coûts de collecte sont des relevés « extrait », marqués d’un astérisque | Ouvrir les documents complets et passer chaque ligne en `check: "source"` |
