@@ -12,7 +12,8 @@ Sorties :
                                                      couverture des régions et des départements, compteurs de qualité
   dist/data/aides/collectivites-index.json           une ligne par bénéficiaire identifié par un SIREN (recherche)
 
-Règles : aucun montant corrigé ni complété. Une ligne sans montant lisible ou sans bénéficiaire est comptée et écartée.
+Règles : aucun montant corrigé ni complété. Les lignes des préfectures et services de l'État sans SIRET (crédits du
+budget de l'État, déjà dans les annexes « jaunes ») sont écartées pour ne pas être comptées deux fois sur le site. Une ligne sans montant lisible ou sans bénéficiaire est comptée et écartée.
 Une ligne strictement identique (attribuant, bénéficiaire, montant, date, objet) déjà lue dans un autre fichier est
 une republication et n'est comptée qu'une fois. L'année est celle de la convention ; à défaut celle de la colonne
 année ou exercice ; sinon la ligne reste sans année.
@@ -111,7 +112,7 @@ def year_of(date, year, paid=''):
              or re.fullmatch(r'\s*(\d{4})[01]\d[0-3]\d\s*', text))
         if not m:
             m = YEAR.search(text) if text and len(text) <= 24 else None
-        if m and 2000 <= int(m.group(1)) <= THIS_YEAR + 1:
+        if m and 2000 <= int(m.group(1)) <= THIS_YEAR:
             return int(m.group(1))
     return None
 
@@ -289,6 +290,12 @@ def main():
                 if not giver and not giver_siren:
                     quality['sans_attribuant'] += 1
                     continue
+                gtype = giver_type(giver_siren, region_sirens, department_sirens, giver)
+                if gtype == 'etat' and not giver_siren:
+                    # Prefectures and State services paying from the State budget (« DGCL - PREF-147 »…): those grants are
+                    # already in the annexes « jaunes » (subventions de l'État aux associations). Left out, not counted twice.
+                    quality['services_etat_ecartes'] += 1
+                    continue
                 year = year_of(get('date'), get('year'), get('paid'))
                 obj = clean(get('object'), 300)
                 key = (giver_siren or norm(giver), siren or norm(name), round(amount, 2), get('date'), norm(obj)[:80])
@@ -303,7 +310,7 @@ def main():
                     quality['sans_siren'] += 1
                 if year is None:
                     quality['sans_annee'] += 1
-                rows_out.append((giver_siren or '', giver, giver_type(giver_siren, region_sirens, department_sirens, giver), siren or '', name, amount, year or '', obj,
+                rows_out.append((giver_siren or '', giver, gtype, siren or '', name, amount, year or '', obj,
                                  clean(get('nature'), 60), clean(get('scheme'), 120), res['dataset'], res['page']))
                 kept += 1
         except csv.Error:
@@ -393,7 +400,7 @@ def main():
         'files': {'datasets': index.get('datasets'), 'csv': len(resources), 'read': files['lus'], 'otherFormats': files['autres_formats'], 'unreachable': files['inaccessibles'], 'unreadable': files['illisibles']},
         'totals': {'lines': len(rows_out), 'amount': round(total_amount), 'givers': len(givers), 'beneficiaries': len(benef), 'withoutSiren': quality['sans_siren'], 'withoutYear': quality['sans_annee']},
         'quality': {'read': quality['lignes_lues'], 'noAmount': quality['sans_montant'], 'zero': quality['montant_nul'], 'noBeneficiary': quality['sans_beneficiaire'], 'noGiver': quality['sans_attribuant'],
-                    'aberrant': quality['montant_aberrant'], 'republished': quality['republications'], 'negative': quality['montants_negatifs'], 'truncatedFiles': quality['fichiers_tronques']},
+                    'aberrant': quality['montant_aberrant'], 'republished': quality['republications'], 'stateServices': quality['services_etat_ecartes'], 'negative': quality['montants_negatifs'], 'truncatedFiles': quality['fichiers_tronques']},
         'perYear': [{'year': y or None, 'lines': v['lines'], 'amount': round(v['amount']), 'givers': len(v['givers']), 'beneficiaries': len(v['benef'])} for y, v in sorted(per_year.items())],
         'types': [{'type': t, 'label': TYPE_LABELS[t], 'givers': len(v['givers']), 'lines': v['lines'], 'amount': round(v['amount'])} for t, v in sorted(per_type.items(), key=lambda kv: -kv[1]['amount'])],
         'givers': [giver_row(g) for g in sorted(givers.values(), key=lambda g: -g['amount'])[:400]],
