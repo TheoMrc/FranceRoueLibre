@@ -66,12 +66,14 @@
     let colIndex = null;
     const T = col.totals, C = col.coverage, limit = col.threshold;
     const plural = (n, word) => `${count(n)} ${word}${n > 1 ? 's' : ''}`;
-    const state = row => !row.published ? (row.deadLink ? 'dead' : 'none') : row.underThreshold > 0 ? 'all' : 'min';
+    const state = row => !row.published ? (row.deadLink || row.otherFormat ? 'dead' : 'none') : row.underThreshold > 0 ? 'all' : 'min';
     const describe = row => row.published
       ? `${row.name} : ${plural(row.lines, 'ligne')}, ${money(row.amount)}, ${row.years.length ? `conventions de ${row.years[0]}${row.years.length > 1 ? ' à ' + row.years[row.years.length - 1] : ''}` : 'années non renseignées'}, plus petite subvention publiée ${money(row.min)}`
-      : row.deadLink ? `${row.name} : un fichier de subventions est annoncé sur data.gouv.fr, mais son lien ne répond plus`
+      : row.otherFormat ? `${row.name} : un fichier de subventions existe sur data.gouv.fr, mais pas avec les colonnes du modèle national`
+        : row.deadLink ? `${row.name} : un fichier de subventions est annoncé sur data.gouv.fr, mais son lien ne répond plus`
         : `${row.name} : aucun fichier de subventions au format national trouvé sur data.gouv.fr`;
     const missingReg = col.regions.filter(r => !r.published), missingDep = col.departments.filter(r => !r.published);
+    const unusable = rows => rows.filter(r => !r.published && (r.deadLink || r.otherFormat));
     $('colKpis').innerHTML = [
       ['Subventions publiées', money(T.amount), `${plural(T.lines, 'ligne')}, toutes années`],
       ['Attribuants', count(T.givers), `dont ${count(C.communes)} communes et ${count(C.groupements)} groupements`],
@@ -79,9 +81,9 @@
       ['Départements qui publient', `${C.departments[0]} sur ${C.departments[1]}`, `rien pour ${missingDep.length} département${missingDep.length > 1 ? 's' : ''}`, missingDep.length > 0]
     ].map(([label, value, sub, alert]) => `<div class="kpi${alert ? ' is-alert' : ''}"><span>${label}</span><strong>${value}</strong><small>${sub}</small></div>`).join('');
     $('colRegions').innerHTML = col.regions.map(r => `<span class="col-cell is-${state(r)}" title="${esc(describe(r))}"><b>${esc(r.name)}</b>${r.published ? `<small>${count(r.lines)} lignes</small>` : '<small>rien</small>'}</span>`).join('');
-    $('colRegNote').textContent = `${missingReg.length ? `Aucun fichier trouvé pour : ${missingReg.map(r => r.name).join(', ')}. ` : ''}Vert : la région publie aussi des subventions inférieures à ${count(limit)} €. Orange : seulement celles que le décret impose. Survolez une case pour le détail.`;
+    $('colRegNote').textContent = `${missingReg.length ? `Aucun fichier lisible sur data.gouv.fr pour : ${missingReg.map(r => r.name).join(', ')}${unusable(col.regions).length ? ` (fichier annoncé mais inutilisable pour ${unusable(col.regions).map(r => r.name).join(', ')})` : ''}. Une région peut publier sur son propre portail sans le signaler sur data.gouv.fr : ce site ne lit que le portail national. ` : ''}Vert : la région publie aussi des subventions inférieures à ${count(limit)} €. Orange : seulement celles que le décret impose. Survolez une case pour le détail.`;
     $('colDeps').innerHTML = col.departments.map(r => `<span class="col-cell is-${state(r)}" title="${esc(describe(r))}">${esc(r.code)}</span>`).join('');
-    $('colDepNote').textContent = `Chaque case est un département (numéro). ${count(missingDep.length)} sur ${col.departments.length} n’ont aucun fichier de subventions au format national sur data.gouv.fr. Une case grise ne dit pas que le département ne subventionne personne : elle dit que la liste n’est pas publiée là où elle devrait l’être, ou pas dans un format lisible par une machine.`;
+    $('colDepNote').textContent = `Chaque case est un département (numéro). ${count(missingDep.length)} sur ${col.departments.length} n’ont aucun fichier de subventions lisible au format national sur data.gouv.fr${unusable(col.departments).length ? `, dont ${unusable(col.departments).length} avec un fichier annoncé mais inutilisable (lien mort ou autre format : ${unusable(col.departments).map(r => r.code).join(', ')})` : ''}. Une case grise ne dit pas que le département ne subventionne personne : elle dit que la liste n’est pas publiée là où elle devrait l’être, ou pas dans un format lisible par une machine.`;
     const years = col.perYear.filter(y => y.year);
     bars($('colBars'), years.map(y => ({ label: y.year, value: y.amount })));
     const noYear = col.perYear.find(y => !y.year);

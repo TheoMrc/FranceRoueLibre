@@ -58,7 +58,7 @@ ALIASES = {
     'rna': ['rnabeneficiaire', 'idrna', 'rna'],
     'amount': ['montant', 'montantsubvention', 'montantdelasubvention', 'montanttotaldelasubvention', 'montantdelasubventioneuros', 'montantattribue', 'montantvote',
                'montantverse', 'montantordonnance', 'montantsubventionverseeeneuros', 'montantdelasubventionverseemontanteneuros', 'totalmontanteneuros',
-               'montanteneuro', 'montanteuros', 'submontant', 'lasommeemtdel'],
+               'montanteneuro', 'montanteuros', 'submontant', 'lasommeemtdel', 'mandatvaleur'],
     'object': ['objet', 'objetdelasubvention', 'objetdescriptif', 'objetdudossier', 'subobjet'],
     'date': ['dateconvention', 'datedeconvention', 'datedelaconventiondesubvention', 'ladateconv', 'datedecision', 'datededecision', 'datedeliberation'],
     'year': ['annee', 'exercice', 'anneebudgetaire', 'anneebudgetairedaffectationdelasubvention', 'anneeattribution', 'anneedeladecision'],
@@ -180,6 +180,8 @@ def giver_type(siren, regions, departments, name=''):
         n = norm(name)
         if n.startswith(('ville', 'commune', 'mairie')):
             return 'commune'
+        if n.startswith(('dgcl', 'cget', 'anct', 'prefecture', 'prefet', 'souspref', 'ministere', 'drac', 'dreal', 'ddets', 'dreets', 'ddcs', 'premierministre', 'agencenationale')):
+            return 'etat'
         if any(w in n for w in ('metropole', 'communaute', 'agglomeration', 'syndicat')):
             return 'groupement'
         return 'inconnu'
@@ -213,6 +215,7 @@ def main():
     quality = collections.Counter()
     seen = {}                                   # row key -> file that first carried it
     dead = {}                                   # SIREN of a region or département -> page of a file that no longer downloads
+    other = {}                                  # same, for a subsidy file in another format
     rows_out = []
     rejected_headers = collections.Counter()
     per_file = []
@@ -243,6 +246,10 @@ def main():
                 if 'amount' not in col or ('name' not in col and 'id' not in col) or any(mark in c for c in header for mark in NOT_GRANTS):
                     files['autres_formats'] += 1
                     rejected_headers[res.get('organization') or '?'] += 1
+                    if 'subvention' in norm(res.get('title') or ''):      # a subsidy file whose columns are not those of the national model
+                        owner = resolve(res.get('organization') or '') or resolve(res.get('title') or '')
+                        if owner:
+                            other.setdefault(owner, res['page'])
                     continue
                 text = decode(head + handle.read())
             reader = csv.reader(io.StringIO(text, newline=''), delimiter=delimiter)
@@ -373,7 +380,7 @@ def main():
         out = []
         for code, (siren, name) in sorted(reference.items()):
             g = givers.get(siren)
-            out.append({'code': code, 'name': name, 'siren': siren, 'published': bool(g), **({'deadLink': dead[siren]} if not g and siren in dead else {}), **({k: v for k, v in giver_row(g).items() if k in ('lines', 'amount', 'years', 'underThreshold', 'min', 'pages')} if g else {})})
+            out.append({'code': code, 'name': name, 'siren': siren, 'published': bool(g), **({'otherFormat': other[siren]} if not g and siren in other else {'deadLink': dead[siren]} if not g and siren in dead else {}), **({k: v for k, v in giver_row(g).items() if k in ('lines', 'amount', 'years', 'underThreshold', 'min', 'pages')} if g else {})})
         return out
 
     reg_cov, dep_cov = coverage(regions), coverage(departments)
