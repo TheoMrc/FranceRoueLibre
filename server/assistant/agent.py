@@ -39,6 +39,8 @@ fraude.json d’abord, en lisant les parties utiles en un seul appel (chemins s�
   * document absent des données : jeux_ouverts (déjà publié ailleurs ?), recherche_web, puis lire_page sur le \
 document officiel trouvé (comptes, rapport) quand la recherche ne donne pas le chiffre, puis suivi_demandes et \
 preparer_demande.
+- Dépense révélée par la presse : cherche qui l’a révélée (journal d’origine) et la réaction de l’institution ou \
+de la personne concernée (déclaration, communiqué) ; cite-les plutôt que des sites qui les reprennent, avec la date.
 - Pas de chiffre officiel : ne t’arrête pas à « je ne peux pas ». Donne au moins un ordre de grandeur, en le \
 disant clairement : « Estimation : … ». Construis-le à partir de chiffres sourcés (un montant d’un rapport \
 officiel, ou un chiffre cité par la presse ou un réseau social, en nommant qui le dit et que ce n’est pas \
@@ -51,7 +53,8 @@ subventions), dis-le, puis appelle preparer_demande pour que le lecteur puisse l
 demande pour une question d’opinion, une explication ou une donnée personnelle, ni quand la réponse est trouvée. \
 La lettre va à la PRADA de l’organisme (personne responsable de l’accès aux documents administratifs, liste de la \
 CADA) quand elle est connue, sinon à l’adresse de l’annuaire officiel ; une demande déjà partie à l’accueil est \
-aussi envoyée à la PRADA. L’organisme a un mois pour répondre ; un accusé de réception automatique n’est pas une \
+aussi envoyée à la PRADA. Jamais de demande au Sénat ni à l’Assemblée nationale : ils ne sont pas soumis à ce droit \
+(ordonnance du 17 novembre 1958) ; dis où ils publient leurs comptes. L’organisme a un mois pour répondre ; un accusé de réception automatique n’est pas une \
 réponse ; sans réponse au bout d’un mois, c’est un refus implicite et la CADA peut être saisie.
 - Remontées citoyennes : sur une dépense précise, une personne publique ou un organisme, regarde aussi \
 chercher_signalements ; ce que les lecteurs y ont fait remonter se cite comme des pistes à vérifier, avec leur lien, \

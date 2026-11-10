@@ -289,6 +289,12 @@ def sweep_drafts() -> None:
 
 
 # ------------------------------------------------------------------------------------------------------- tool
+# The parliamentary assemblies are outside the right of access (CRPA, L. 300-2, second paragraph): their documents
+# are governed by the ordonnance n° 58-1100 of 17 November 1958 and the CADA declares itself incompetent.
+PARLIAMENT = re.compile(r'(?<![-\w])(?:senat|senateurs?|assemblee nationale|deputes?|questure|questeurs?)\b')   # not « Taxat-Senat »
+TOWN_WORDS = re.compile(r'\b(?:mairie|commune|ville|municipal\w*)\b')
+
+
 def prepare(organisme: str, code_insee: str = '', objet: str = '', documents: str = '', contexte: str = '',
             question: str = '') -> dict:
     """The tool preparer_demande: finds the official contact, builds the letter, keeps a draft for the reader."""
@@ -298,6 +304,14 @@ def prepare(organisme: str, code_insee: str = '', objet: str = '', documents: st
     if why:
         return {'error': why}
     code = re.sub(r'\s', '', str(code_insee or ''))[:5]
+    asked = norm(organisme)
+    if PARLIAMENT.search(asked) and not TOWN_WORDS.search(asked) and not code:
+        return {'error': 'Le Sénat et l’Assemblée nationale ne sont pas soumis au droit d’accès aux documents '
+                         'administratifs : leurs documents relèvent de l’ordonnance n° 58-1100 du 17 novembre 1958 et la '
+                         'CADA se déclare incompétente. Pas de demande par le site. Indique plutôt ce que l’assemblée '
+                         'publie (comptes annuels certifiés, rapports de la questure, sur senat.fr ou '
+                         'assemblee-nationale.fr) et qu’un lecteur peut écrire aux questeurs, sans obligation de réponse.',
+                'non_soumis': True}
     try:
         contacts = annuaire(code_insee=code) if re.fullmatch(r'\d[\dAB]\d{3}', code) else annuaire(nom=organisme)
     except NetworkError as exc:
@@ -309,6 +323,11 @@ def prepare(organisme: str, code_insee: str = '', objet: str = '', documents: st
     # without an address (its contact form then), never another office that merely publishes one (FRL Vaulx-en-Velin:
     # « Maison de la Métropole de Lyon - Limonest » instead of the Métropole)
     to = next((c for c in contacts if c['email']), contacts[0]) if re.fullmatch(r'\d[\dAB]\d{3}', code) else contacts[0]
+    # a name search that lands on a town hall the reader did not ask for (« Sénat » → « Mairie - Taxat-Senat »)
+    if not re.fullmatch(r'\d[\dAB]\d{3}', code) and to.get('type') == 'mairie' and not TOWN_WORDS.search(asked) \
+            and _core(to['nom']) != _core(organisme):
+        return {'error': f'« {organisme} » introuvable dans l’annuaire de l’administration (le plus proche est « {to["nom"]} », '
+                         'sans rapport) ; donner le nom exact de l’organisme, ou le code Insee pour une mairie'}
     sweep_drafts()
     draft_id = 'B-' + secrets.token_urlsafe(12)
     subject, body = letter(to['nom'], fields, by_site=False)

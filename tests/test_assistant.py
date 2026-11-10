@@ -647,6 +647,18 @@ class RequestsTest(unittest.TestCase):
         d = D.load(ref)
         self.assertEqual((d['status'], d['replies'], d['accuses'][-1]['type']), ('envoyee', [], 'antispam'))
 
+    def test_no_request_to_parliament_nor_to_an_unrelated_town(self):
+        """« combien a coûté le fauteuil de Larcher » : a request was prepared for the Mairie de Taxat-Senat."""
+        D = self.D
+        D.annuaire = lambda code_insee='', nom='': [{'nom': 'Mairie - Taxat-Senat', 'email': 'mairie@taxat-senat.fr',
+            'formulaire': None, 'site': None, 'fiche': None, 'siret': None, 'type': 'mairie', 'code_postal': '03140'}]
+        r = self.draft(organisme='Sénat', code_insee='', objet='coût du fauteuil de la présidence')
+        self.assertTrue(r.get('non_soumis'), r)
+        self.assertTrue(self.draft(organisme='Assemblée nationale', code_insee='').get('non_soumis'))
+        r = self.draft(organisme='Office de tourisme de Taxat-Senat', code_insee='')
+        self.assertIn('introuvable', r.get('error', ''))
+        self.assertIn('demande', self.draft(organisme='Mairie de Taxat-Senat', code_insee=''), 'the town itself is fine')
+
     def test_old_copies_taken_for_replies_are_removed(self):
         S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND = True, False
         D = self.D

@@ -152,6 +152,7 @@ DECLARATIONS: List[dict] = [
                     'publiée par la CADA) quand il en a une, sinon celle de l’annuaire officiel de l’administration ; '
                     'la lettre suit un modèle poli fixe. Le lecteur la voit '
                     'sous la réponse et choisit de la faire envoyer par FranceRoueLibre ou de l’envoyer lui-même. '
+                    'Pas pour le Sénat ni l’Assemblée nationale (hors du droit d’accès). '
                     'Seulement pour des documents qui existent (budget, compte administratif, délibération, '
                     'convention, marché, liste de subventions, rapport), jamais pour une opinion, une explication ou '
                     'des données personnelles. Une seule demande par réponse.',
