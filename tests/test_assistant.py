@@ -669,6 +669,43 @@ class RequestsTest(unittest.TestCase):
         finally:
             D.PRADA_FILE, D._prada = old[0], old[1]
 
+    def test_letter_already_sent_to_the_desk_goes_to_the_prada_as_validated(self):
+        """Gironde and Blois: sent to contact@ / courrier@ before the PRADA list; the same letter goes to the PRADA."""
+        D = self.D
+        old = D.PRADA_FILE, D._prada.copy(), D._smtp, S.MAIL_DAILY
+        f = Path(self.dir.name) / 'prada.json'
+        f.write_text(json.dumps({'lignes': [['Mairie', "Mairie d'Hautmont", 'prada@hautmont.fr', '59330', 'Hautmont']]}), encoding='utf-8')
+        out = []
+
+        class Fake:
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+            def send_message(self, m): out.append(m)
+        D.PRADA_FILE, D._prada['mtime'], D._smtp, S.MAIL_DAILY = f, None, lambda: Fake(), 5
+        try:
+            S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND = True, False
+            ref = D.request_send(self.draft()['demande']['id'], 'lecteur')['ref']
+            d = D.load(ref)
+            d['to'] = {k: v for k, v in d['to'].items() if k not in ('prada', 'email_annuaire')}
+            d['to']['email'] = 'mairie@mairie-hautmont.fr'
+            D.save(d)
+            self.assertIn('error', D.send_to_prada(ref), 'not before it is validated')
+            self.assertEqual(D.admin('valider', ref)['status'], 'envoyee')
+            self.assertEqual(out[-1]['To'], 'mairie@mairie-hautmont.fr')
+            view = D.admin('tout')['demandes'][0]
+            self.assertEqual(view['prada_suggeree']['email'], 'prada@hautmont.fr')
+            res = D.admin('envoyer_prada', ref)
+            self.assertTrue(res['ok'], res)
+            first, again = out[-2], out[-1]
+            self.assertEqual((again['To'], again['Subject']), ('prada@hautmont.fr', first['Subject']), 'same letter, as validated')
+            self.assertEqual(again.get_body(('plain',)).get_content(), first.get_body(('plain',)).get_content())
+            self.assertEqual([e['role'] for e in D.envois(D.load(ref))], ['annuaire', 'prada'])
+            self.assertEqual(D.published()[0]['destinataires'], ['annuaire', 'prada'])
+            self.assertNotIn('prada_suggeree', D.admin('tout')['demandes'][0])
+            self.assertIn('error', D.send_to_prada(ref), 'only once')
+        finally:
+            D.PRADA_FILE, D._prada, D._smtp, S.MAIL_DAILY = old
+
     def test_request_sent_by_hand_through_a_form_is_followed_with_its_link(self):
         """Lycée Jacques Cartier: the Région Bretagne has no address in the directory; the team sends the letter
         through https://www.bretagne.bzh/contact/ and marks it so, with the form's link shown on the public page."""

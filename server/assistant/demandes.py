@@ -128,6 +128,18 @@ def prada_for(to: dict) -> Optional[dict]:
     return {'email': found[0][2], 'organisme': found[0][1]}
 
 
+def envois(d: dict) -> list:
+    """Every address the letter was sent to: [{date, email, role: annuaire | prada | formulaire}]. Requests sent before
+    this list existed get it from their recipient and date."""
+    if d.get('envois'):
+        return d['envois']
+    if not d.get('sent'):
+        return []
+    if d.get('mode') == 'formulaire':
+        return [{'date': d['sent'], 'email': None, 'role': 'formulaire', 'lien': d['to'].get('formulaire')}]
+    return [{'date': d['sent'], 'email': d['to'].get('email'), 'role': 'prada' if d['to'].get('prada') else 'annuaire'}]
+
+
 def with_prada(to: dict) -> dict:
     p = prada_for(to)
     if not p or p['email'] == (to.get('email') or '').lower():
@@ -304,6 +316,8 @@ def prepare(organisme: str, code_insee: str = '', objet: str = '', documents: st
          'to': to, 'fields': fields, 'question': str(question or '')[:500]}
     save(d)
     return {'demande': {'id': draft_id, 'destinataire': to['nom'], 'email': to['email'], 'formulaire': to['formulaire'],
+                        # the PRADA (CADA's list): the person in charge of these requests in the body, used when known
+                        'prada': bool(to.get('prada')),
                         'fiche': to['fiche'], 'objet': subject, 'texte': body,
                         # an address: the site e-mails the letter; only a contact form: the site's team pastes it in
                         'envoi_par_le_site': bool((to['email'] or to['formulaire']) and S.MAIL_CONFIGURED),
@@ -311,7 +325,9 @@ def prepare(organisme: str, code_insee: str = '', objet: str = '', documents: st
             'autres_contacts': [c['nom'] for c in contacts if c is not to][:5],
             'note': 'Le lecteur voit la lettre sous ta réponse, avec deux boutons : la faire envoyer par FranceRoueLibre '
                     '(par courriel, ou déposée dans le formulaire de contact quand l’organisme n’a pas d’adresse) ou la '
-                    'copier pour l’envoyer lui-même. Ne recopie pas la lettre '
+                    'copier pour l’envoyer lui-même. Quand « prada » est vrai, l’adresse est celle de la personne '
+                    'responsable de l’accès aux documents administratifs de l’organisme (liste de la CADA), chargée de '
+                    'ces demandes : dis-le en quelques mots. Ne recopie pas la lettre '
                     'dans ta réponse : dis en une phrase à qui elle s’adresse et pourquoi, et le délai d’un mois.'}
 
 
@@ -322,6 +338,7 @@ def public_view(d: dict) -> dict:
             'documents': d['fields']['documents'], 'contexte': d['fields'].get('contexte'), 'envoyee': sent,
             'echeance': due, 'fiche': d['to'].get('fiche'), 'canal': d.get('mode') or 'courriel',
             'formulaire': d['to'].get('formulaire') if d.get('mode') == 'formulaire' else None,
+            'destinataires': sorted({e['role'] for e in envois(d)}),
             'accuse': next((a['date'] for a in d.get('accuses', []) if a['type'] == 'automatique'), None),
             'reponses': [{'date': r['date'], 'texte': r['public_text'], 'pieces': r.get('public_files', [])}
                          for r in d.get('replies', []) if r.get('public_text')]}
@@ -334,8 +351,9 @@ def published() -> list:
 
 # ------------------------------------------------------------------------------------------------------- sending
 def _sent_today() -> int:
+    """E-mails sent today by the site (first sendings and copies to a PRADA; a contact form is not counted)."""
     today = dt.date.today().isoformat()
-    return sum(1 for d in all_requests() if (d.get('sent') or '').startswith(today))
+    return sum(1 for d in all_requests() for e in envois(d) if e['date'].startswith(today) and e['role'] != 'formulaire')
 
 
 def request_send(draft_id: str, reader: str) -> dict:
@@ -488,10 +506,40 @@ def send(ref: str) -> dict:
                 server.send_message(m)
         except (OSError, smtplib.SMTPException) as exc:
             return {'error': f'envoi impossible : {type(exc).__name__}'}
-        d.update(status='envoyee', sent=dt.datetime.now().isoformat(timespec='seconds'), message_id=m['Message-ID'])
+        now = dt.datetime.now().isoformat(timespec='seconds')
+        d.update(status='envoyee', sent=now, message_id=m['Message-ID'],
+                 envois=[{'date': now, 'email': d['to']['email'], 'role': 'prada' if d['to'].get('prada') else 'annuaire'}])
         save(d)
     return {'ok': True, 'ref': ref, 'status': 'envoyee',
             'message': f'Demande {ref} envoyée à {d["to"]["nom"]}. Elle est suivie sur la page des demandes.'}
+
+
+def send_to_prada(ref: str) -> dict:
+    """The letter as it was validated (subject and text unchanged, signed), sent again to the PRADA of the body when
+    the first sending went elsewhere. The one-month deadline still runs from the first sending."""
+    with _lock:
+        d = load(ref)
+        if not d or d['status'] not in ('envoyee', 'repondue'):
+            return {'error': 'demande inconnue ou pas encore envoyée'}
+        p = prada_for(d['to'])
+        if not p:
+            return {'error': 'pas de PRADA trouvée sans ambiguïté pour cet organisme dans la liste de la CADA'}
+        done = envois(d)
+        if any((e.get('email') or '').lower() == p['email'] for e in done):
+            return {'error': f'déjà envoyée à la PRADA ({p["email"]})'}
+        if _sent_today() >= S.MAIL_DAILY:
+            return {'error': f'{S.MAIL_DAILY} envois par jour au plus : réessayer demain'}
+        m = _message(p['email'], d['subject'], d['body'], ref, signed=True)
+        m['Bcc'] = S.MAIL_NOTIFY
+        try:
+            with _smtp() as server:
+                server.send_message(m)
+        except (OSError, smtplib.SMTPException) as exc:
+            return {'error': f'envoi impossible : {type(exc).__name__}'}
+        d['envois'] = done + [{'date': dt.datetime.now().isoformat(timespec='seconds'), 'email': p['email'], 'role': 'prada'}]
+        d['to'] = {**d['to'], 'prada_email': p['email'], 'prada': p['organisme']}
+        save(d)
+    return {'ok': True, 'ref': ref, 'status': d['status'], 'message': f'Envoyée aussi à la PRADA : {p["email"]}'}
 
 
 # ------------------------------------------------------------------------------------------------------- replies
@@ -652,7 +700,7 @@ def mail_test() -> dict:
 
 
 def admin(action: str, ref: str = '', text: str = '') -> dict:
-    """liste | tout | voir | valider | deposee (a letter pasted by hand in the body's contact form; text = the form's link) | prada (the body's PRADA as recipient) | refuser | modifier (JSON subject and body in text) | destinataire (name or INSEE code in text) | publier (the last reply, anonymized or the given text) | cloturer | test."""
+    """liste | tout | voir | valider | deposee (a letter pasted by hand in the body's contact form; text = the form's link) | prada (the body's PRADA as recipient, before sending) | envoyer_prada (the validated letter again, to the PRADA) | refuser | modifier (JSON subject and body in text) | destinataire (name or INSEE code in text) | publier (the last reply, anonymized or the given text) | cloturer | test."""
     if action == 'test':
         return mail_test()
     if action == 'tout':  # every request in full, for the review panel (frl_panel.bat), with its deadline
@@ -663,8 +711,10 @@ def admin(action: str, ref: str = '', text: str = '') -> dict:
             view = {k: v for k, v in d.items() if k != 'reader'}
             if d['status'] == 'a_valider':  # the signature is added when sending: not shown in the editable text
                 view['body'] = strip_signature(d['body'])
-            p = prada_for(d['to']) if d['status'] == 'a_valider' else None
-            if p and p['email'] != (d['to'].get('email') or '').lower():
+            view['envois'] = envois(d)
+            p = prada_for(d['to']) if d['status'] in ('a_valider', 'envoyee', 'repondue') else None
+            if p and all((e.get('email') or '').lower() != p['email'] for e in view['envois']) \
+                    and p['email'] != (d['to'].get('email') or '').lower():
                 view['prada_suggeree'] = p
             rows.append({**view, 'echeance': public_view(d)['echeance'],
                          'meme_organisme_30j': sum(1 for x in all_requests() if x is not d and x['to'].get('email')
@@ -727,6 +777,8 @@ def admin(action: str, ref: str = '', text: str = '') -> dict:
             save(d)
         return {'ok': True, 'ref': ref, 'status': d['status'], 'destinataire': to,
                 'autres': [c['nom'] for c in found if c is not to][:6]}
+    if action == 'envoyer_prada':  # a request already sent to the general contact: the same letter, as validated, to
+        return send_to_prada(ref)   # the body's PRADA too (CADA's list), which handles these requests
     if action == 'prada':  # a request not sent yet goes to the body's PRADA (CADA's list) instead of its general contact
         if d['status'] != 'a_valider':
             return {'error': f'destinataire modifiable seulement avant l’envoi (demande {d["status"]})'}
@@ -748,7 +800,9 @@ def admin(action: str, ref: str = '', text: str = '') -> dict:
             return {'error': 'lien du formulaire manquant ou invalide (https://…)'}
         with _lock:
             d['to']['formulaire'] = url
-            d.update(mode='formulaire', status='envoyee', sent=dt.datetime.now().isoformat(timespec='seconds'))
+            now = dt.datetime.now().isoformat(timespec='seconds')
+            d.update(mode='formulaire', status='envoyee', sent=now,
+                     envois=[{'date': now, 'email': None, 'role': 'formulaire', 'lien': url}])
             save(d)
         return {'ok': True, 'ref': ref, 'status': d['status'], 'message': f'Marquée envoyée par le formulaire {url}'}
     with _lock:

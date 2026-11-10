@@ -147,8 +147,10 @@ DECLARATIONS: List[dict] = [
     {'name': 'preparer_demande',
      'description': 'Quand les données du site ET le web ne donnent pas la réponse : prépare une demande de '
                     'communication de documents administratifs (CRPA, art. L. 300-1) à l’organisme qui les détient '
-                    '(mairie, intercommunalité, département, région, ministère, opérateur). L’adresse vient de '
-                    'l’annuaire officiel de l’administration ; la lettre suit un modèle poli fixe. Le lecteur la voit '
+                    '(mairie, intercommunalité, département, région, ministère, opérateur). L’adresse est celle de la '
+                    'personne responsable de l’accès aux documents administratifs de l’organisme (PRADA, liste '
+                    'publiée par la CADA) quand il en a une, sinon celle de l’annuaire officiel de l’administration ; '
+                    'la lettre suit un modèle poli fixe. Le lecteur la voit '
                     'sous la réponse et choisit de la faire envoyer par FranceRoueLibre ou de l’envoyer lui-même. '
                     'Seulement pour des documents qui existent (budget, compte administratif, délibération, '
                     'convention, marché, liste de subventions, rapport), jamais pour une opinion, une explication ou '
@@ -169,7 +171,8 @@ DECLARATIONS: List[dict] = [
                     'required': ['mots']}},
     {'name': 'suivi_demandes',
      'description': 'Les demandes de documents déjà envoyées par le site aux organismes publics, leur état et les '
-                    'réponses publiées. Pour « la mairie a-t-elle répondu ? », et avant d’en préparer une nouvelle.',
+                    'réponses publiées, et à qui chacune a été envoyée (accueil de l’organisme, PRADA, formulaire de contact). '
+                    'Pour « la mairie a-t-elle répondu ? », et avant d’en préparer une nouvelle.',
      'parameters': {'type': 'OBJECT', 'properties': {'recherche': {'type': 'STRING', 'description': 'Organisme, objet ou référence FRL-…'}}}},
     {'name': 'lire_page',
      'description': 'Ouvre une page web précise trouvée par recherche_web (de préférence officielle : comptes, rapport, '

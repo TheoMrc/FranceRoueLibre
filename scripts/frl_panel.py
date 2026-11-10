@@ -80,7 +80,7 @@ def journals(offline: bool):
 
 
 REF = re.compile(r'^FRL-\d{4}-\d{4}$')
-ACTIONS = ('valider', 'deposee', 'prada', 'refuser', 'modifier', 'destinataire', 'publier', 'cloturer')
+ACTIONS = ('valider', 'deposee', 'prada', 'envoyer_prada', 'refuser', 'modifier', 'destinataire', 'publier', 'cloturer')
 
 
 def frl_demandes(action: str, ref: str = '', text: str = '') -> dict:

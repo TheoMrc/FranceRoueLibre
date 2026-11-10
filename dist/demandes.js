@@ -13,13 +13,14 @@
     if (d.echeance && d.echeance < today) return { k: 'silence', label: `Sans réponse depuis le ${day(d.echeance)} : refus implicite` };
     return { k: 'attente', label: `En attente, réponse due au plus tard le ${day(d.echeance)}` };
   }
+  const ROLES = { annuaire: 'à l’accueil de l’organisme', prada: 'à sa personne responsable de l’accès aux documents administratifs (PRADA)' };
   const LABELS = { tout: 'Toutes', attente: 'En attente', repondue: 'Réponse reçue', silence: 'Sans réponse' };
   let rows = [], current = 'tout';
   function card(d) {
     const s = state(d);
     const docs = d.documents.split('\n').map(x => `<li>${esc(x)}</li>`).join('');
     const replies = d.reponses.map(r => `<div class="dm-reply"><h4>Réponse du ${day(r.date)}</h4><p>${esc(r.texte).replace(/\n/g, '<br>')}</p>${r.pieces?.length ? `<p class="note">Pièces jointes : ${r.pieces.map(esc).join(', ')}</p>` : ''}</div>`).join('');
-    return `<article class="dm-card" id="${esc(d.ref)}"><header><span class="dm-state dm-state--${s.k}">${esc(s.label)}</span><small>${esc(d.ref)} · ${d.formulaire ? `déposée le ${day(d.envoyee)} via <a href="${esc(d.formulaire)}" target="_blank" rel="noopener noreferrer">le formulaire de contact</a>` : `envoyée le ${day(d.envoyee)}`}${d.accuse ? ` · accusé de réception automatique le ${day(d.accuse)}` : ''}</small></header>`
+    return `<article class="dm-card" id="${esc(d.ref)}"><header><span class="dm-state dm-state--${s.k}">${esc(s.label)}</span><small>${esc(d.ref)} · ${d.formulaire ? `déposée le ${day(d.envoyee)} via <a href="${esc(d.formulaire)}" target="_blank" rel="noopener noreferrer">le formulaire de contact</a>` : `envoyée le ${day(d.envoyee)}${(d.destinataires || []).filter(r => ROLES[r]).length ? ' ' + d.destinataires.filter(r => ROLES[r]).map(r => ROLES[r]).join(' et ') : ''}`}${d.accuse ? ` · accusé de réception automatique le ${day(d.accuse)}` : ''}</small></header>`
       + `<h3>${esc(d.objet)}</h3><p class="dm-to">À ${d.fiche ? `<a href="${esc(d.fiche)}" target="_blank" rel="noopener noreferrer">${esc(d.organisme)}</a>` : esc(d.organisme)}</p>`
       + `<p class="dm-label">Documents demandés</p><ul>${docs}</ul>${d.contexte ? `<p class="dm-ctx">${esc(d.contexte)}</p>` : ''}${replies}</article>`;
   }
