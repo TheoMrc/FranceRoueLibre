@@ -559,6 +559,8 @@ def _text_of(msg) -> tuple:
 
 AUTO_SUBJECT = re.compile(r'r[ée]ponse automatique|message automatique|accus[ée] de r[ée]ception|absen(?:ce|t)\b|'
                           r'out of office|automatic reply|auto[- ]?reply|autoreply|ne pas r[ée]pondre', re.I)
+CHALLENGE = re.compile(r'mailinblack|confirmer qu.il est bien humain|un clic pour d[ée]livrer votre e-?mail|'
+                       r'validez? (?:votre|l.)\s*(?:adresse|envoi)|captcha', re.I)
 BOUNCE_FROM = re.compile(r'^(?:mailer-daemon|postmaster)@', re.I)
 NO_REPLY_FROM = re.compile(r'^(?:no-?reply|ne-?pas-?repondre|donotreply|noreply-[\w-]+)@', re.I)
 
@@ -569,18 +571,41 @@ def _own_addresses() -> set:
 
 def classify(msg) -> str:
     """own: a message of the site itself (the Bcc copy of a letter, a [Loupe] notification), never a reply;
-    rejet: a delivery failure; automatique: an acknowledgement or absence message; reponse: written by someone."""
+    rejet: a delivery failure; antispam: a filter (Mailinblack...) holding the letter until a person clicks its link;
+    automatique: an acknowledgement or absence message; reponse: written by someone."""
     sender = email.utils.parseaddr(str(msg.get('From', '')))[1].lower()
     subject = str(msg.get('Subject', ''))
     if sender in _own_addresses() or subject.lstrip().startswith('[Loupe]'):
         return 'own'
     if BOUNCE_FROM.match(sender) or msg.get_content_type() == 'multipart/report':
         return 'rejet'
+    if CHALLENGE.search(subject + ' ' + _raw_text(msg)):
+        return 'antispam'
     auto = (str(msg.get('Auto-Submitted') or 'no').strip().lower() != 'no'
             or any(msg.get(h) for h in ('X-Autoreply', 'X-Autorespond', 'X-Auto-Reply'))
             or str(msg.get('Precedence') or '').strip().lower() in ('auto_reply', 'bulk', 'junk')
             or NO_REPLY_FROM.match(sender) or AUTO_SUBJECT.search(subject))
     return 'automatique' if auto else 'reponse'
+
+
+def _raw_text(msg) -> str:
+    out = []
+    for part in msg.walk():
+        if part.get_content_maintype() == 'text':
+            try:
+                out.append(part.get_content())
+            except (LookupError, ValueError):
+                continue
+    return '\n'.join(out)[:200000]
+
+
+def challenge_link(msg) -> Optional[str]:
+    """The link an anti-spam filter asks to click so that the letter is delivered (not its fonts or logos)."""
+    links = re.findall(r'href=["\'](https?://[^"\']+)', _raw_text(msg))
+    links = [html.unescape(u) for u in links if not re.search(r'\.(?:ttf|eot|woff2?|png|jpe?g|gif|svg|css)(?:\?|$)', u, re.I)
+             and not re.search(r'mailinblack\.com/?(?:$|\?)|/(?:cgu|privacy|confidentialite)', u, re.I)]
+    return next((u for u in links if re.search(r'captcha|challenge|valid|deliver|deliv|confirm|human|release|mib', u, re.I)),
+                links[0] if links else None)
 
 
 def ingest(d: dict, msg, kind: str) -> bool:
@@ -591,9 +616,12 @@ def ingest(d: dict, msg, kind: str) -> bool:
     text, files = _text_of(msg)
     sender = email.utils.parseaddr(str(msg.get('From', '')))[1]
     now = dt.datetime.now().isoformat(timespec='seconds')
-    if kind in ('automatique', 'rejet'):
-        d.setdefault('accuses', []).append({'date': now, 'type': kind, 'from_domain': sender.split('@')[-1],
-                                            'sujet': str(msg.get('Subject', ''))[:200], 'text': text[:1500]})
+    if kind in ('automatique', 'rejet', 'antispam'):
+        note = {'date': now, 'type': kind, 'from_domain': sender.split('@')[-1],
+                'sujet': str(msg.get('Subject', ''))[:200], 'text': re.sub(r'\{[^{}]*\}', '', text)[:1500]}
+        if kind == 'antispam':
+            note['lien'] = challenge_link(msg)
+        d.setdefault('accuses', []).append(note)
     else:
         d.setdefault('replies', []).append({'date': now, 'from_domain': sender.split('@')[-1], 'text': text,
                                             'files': files, 'public_text': None})
@@ -611,8 +639,15 @@ def repair_own_replies() -> int:
         for d in all_requests():
             reps = d.get('replies') or []
             keep = [r for r in reps if (r.get('from_domain') or '').lower() not in own]
+            held = [r for r in keep if CHALLENGE.search(r.get('text') or '')]   # Mailinblack: not a reply either
+            keep = [r for r in keep if r not in held]
             if len(keep) == len(reps):
                 continue
+            for r in held:
+                d.setdefault('accuses', []).append({'date': r['date'], 'type': 'antispam', 'from_domain': r['from_domain'],
+                                                    'sujet': 'Invitation', 'text': 'Filtre anti-spam (Mailinblack) : '
+                                                    'la lettre est retenue tant que l’expéditeur n’a pas cliqué sur le lien '
+                                                    'de l’invitation reçue dans la boîte du site.', 'lien': None})
             d['replies'] = keep
             if d['status'] == 'repondue' and not keep:
                 d['status'] = 'envoyee'
@@ -651,6 +686,10 @@ def poll_replies() -> int:
                 notify(f'Réponse à {d["ref"]}', f'{d["to"]["nom"]} a répondu :\n\n{d["replies"][-1]["text"]}\n\n'
                                                 f'Pièces : {", ".join(d["replies"][-1]["files"]) or "aucune"}'
                                                 f'\n\nÀ relire et publier dans le tableau de bord (frl_panel.bat).')
+            elif kind == 'antispam':
+                notify(f'Lettre {d["ref"]} retenue par un filtre anti-spam',
+                       f'{d["to"]["nom"]} filtre ses courriels (Mailinblack ou équivalent) : la lettre n’est délivrée '
+                       f'qu’après un clic sur ce lien, à faire soi-même :\n\n{d["accuses"][-1].get("lien") or "(lien dans le message reçu)"}')
             elif kind == 'rejet':
                 notify(f'Lettre {d["ref"]} non distribuée', f'La lettre à {d["to"]["nom"]} <{d["to"].get("email")}> '
                                                            f'est revenue en erreur :\n\n{d["accuses"][-1]["text"][:800]}')

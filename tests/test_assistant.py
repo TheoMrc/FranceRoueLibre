@@ -621,6 +621,32 @@ class RequestsTest(unittest.TestCase):
         D.ingest(d, self.mail('j.agent@hautmont.fr', 'RE: ' + subj), 'reponse')
         self.assertEqual(D.load(ref)['status'], 'repondue')
 
+    def test_antispam_challenge_holds_the_letter_and_is_not_a_reply(self):
+        """Blois and Le Croisic: Mailinblack answers « Invitation : un clic pour délivrer votre email »."""
+        from email.message import EmailMessage
+        S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND = True, False
+        D = self.D
+        ref = D.request_send(self.draft()['demande']['id'], 'lecteur')['ref']
+        D.admin('deposee', ref, 'https://www.hautmont.fr/contact')
+        m = EmailMessage(); m['From'] = 'noreply@antispam.blois.fr'; m['Subject'] = f'Invitation [{ref}]'
+        m.set_content('Un clic pour délivrer votre email !')
+        m.add_alternative('<p>Je suis protégé par Protect de Mailinblack</p><link href="https://cdn.mailinblack.com/f.ttf">'
+                          '<a href="https://blois.protect.mailinblack.com/captcha/abc123">Cliquez ici !</a>', subtype='html')
+        self.assertEqual(D.classify(m), 'antispam')
+        self.assertEqual(D.challenge_link(m), 'https://blois.protect.mailinblack.com/captcha/abc123')
+        d = D.load(ref)
+        D.ingest(d, m, 'antispam')
+        d = D.load(ref)
+        self.assertEqual((d['status'], d['accuses'][-1]['type']), ('envoyee', 'antispam'))
+        self.assertIsNone(D.published()[0]['accuse'], 'held by a filter is not received')
+        # stored as a reply before the fix: moved back to a note, the request waits again
+        d['status'], d['replies'] = 'repondue', [{'date': '2026-11-10T09:32:13', 'from_domain': 'antispam.blois.fr',
+            'text': 'Invitation Je suis protégé par Protect de Mailinblack', 'files': [], 'public_text': None}]
+        D.save(d)
+        self.assertEqual(D.repair_own_replies(), 1)
+        d = D.load(ref)
+        self.assertEqual((d['status'], d['replies'], d['accuses'][-1]['type']), ('envoyee', [], 'antispam'))
+
     def test_old_copies_taken_for_replies_are_removed(self):
         S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND = True, False
         D = self.D

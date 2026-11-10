@@ -597,7 +597,9 @@ function dmRender() {
       ${(d.envois || []).length ? `<div class="pn-dm-meta">Envoyée ${d.envois.map(e => `le ${fdate(e.date)} ${e.role === 'formulaire' ? `par <a href="${esc(e.lien || '')}" target="_blank" rel="noopener">le formulaire de contact</a>` : `à <b>${esc(e.email)}</b>${e.role === 'prada' ? ' <span class="pn-tag faq">PRADA</span>' : ' (annuaire)'}`}`).join(' et ')}</div>` : ''}
       ${warn.map(w => `<div class="pn-dm-warn">${esc(w)}</div>`).join('')}
       ${d.prada_suggeree ? `<div class="pn-dm-actions" style="margin-top:.2rem">${d.status === 'a_valider' ? `<button type="button" data-act="prada">Écrire plutôt à la PRADA : ${esc(d.prada_suggeree.email)}</button>` : `<button type="button" class="go" data-act="envoyer_prada">Envoyer aussi la lettre validée à la PRADA : ${esc(d.prada_suggeree.email)}</button>`}<span class="pn-dm-msg">${esc(d.prada_suggeree.organisme)}, liste de la CADA</span></div>` : ''}
-      ${(d.accuses || []).map(a => a.type === 'rejet'
+      ${(d.accuses || []).map(a => a.type === 'antispam'
+        ? `<div class="pn-dm-warn">Lettre retenue par le filtre anti-spam de ${esc(a.from_domain)} depuis le ${fdate(a.date)} : elle n’arrive qu’après un clic humain. ${a.lien ? `<a href="${esc(a.lien)}" target="_blank" rel="noopener" style="font-weight:600">Débloquer la lettre</a>` : 'Ouvrir l’« Invitation » reçue dans stonks@francerouelibre.fr et cliquer sur « Cliquez ici ».'}</div>`
+        : a.type === 'rejet'
         ? `<details><summary class="pn-dm-warn">Lettre revenue en erreur le ${fdate(a.date)} (${esc(a.from_domain)}) : adresse à changer ?</summary><pre>${esc(a.text)}</pre></details>`
         : `<details><summary class="muted" style="color:var(--c-muted)">Accusé de réception automatique du ${fdate(a.date)} (${esc(a.from_domain)}), en attente d’une vraie réponse</summary><pre>${esc(a.sujet)}\n\n${esc(a.text)}</pre></details>`).join('')}
       ${d.question ? `<div class="pn-dm-meta">Question du lecteur : « ${esc(d.question)} »</div>` : ''}
