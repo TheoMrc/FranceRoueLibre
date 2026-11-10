@@ -155,7 +155,7 @@ def serve(page: Path, token: str, port: int = 8765, offline: bool = False) -> No
                 return self.reply(200, frl_demandes('tout')) if self.allowed() else self.reply(403, {'error': 'refusé'})
             if self.path == '/api/state':  # the page asks whether newer data is ready
                 return self.reply(200, STATE) if self.allowed() else self.reply(403, {'error': 'refusé'})
-            if not (self.path.startswith('/_journal/panel.html') or self.path.startswith('/dist/vendor/fonts/') or self.path == '/dist/logo-512.png'):
+            if not (self.path.startswith('/_journal/panel.html') or self.path.startswith('/dist/vendor/fonts/') or self.path.split('?')[0] in ('/dist/logo-512.png', '/dist/style.css', '/dist/favicon.svg')):
                 return self.reply(404, {'error': 'introuvable'})
             return super().do_GET()
 

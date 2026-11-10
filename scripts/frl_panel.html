@@ -3,187 +3,283 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FRL · Tableau de bord</title>
+<meta name="robots" content="noindex">
+<title>Tableau de bord · FranceRoueLibre</title>
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('frl-panel-theme'); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<link rel="icon" type="image/svg+xml" href="/dist/favicon.svg">
+<link rel="stylesheet" href="/dist/style.css">
 <style>
-@font-face { font-family: 'Inter'; font-weight: 400; src: url('../dist/vendor/fonts/inter-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Inter'; font-weight: 500; src: url('../dist/vendor/fonts/inter-latin-500-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Inter'; font-weight: 600; src: url('../dist/vendor/fonts/inter-latin-600-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Sora'; font-weight: 600; src: url('../dist/vendor/fonts/sora-latin-600-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Sora'; font-weight: 700; src: url('../dist/vendor/fonts/sora-latin-700-normal.woff2') format('woff2'); }
+/* Panneau local : reprend dist/style.css du site, ajoute seulement ce qui lui est propre (préfixe pn-). */
 :root {
-  --bg: #f3f6f9; --card: #ffffff; --ink: #0d1b2a; --body: #36485a; --muted: #6b7c8d; --line: #e4ebf1; --soft: #f6f9fb;
-  --c1: #2563eb; --c2: #0e7490; --c3: #d97706; --c4: #7c3aed; --good: #15803d; --bad: #b91c1c;
-  --grad: linear-gradient(100deg, #0e7490 0%, #2563eb 100%);
-  --shadow: 0 1px 2px rgba(13,27,42,.05), 0 4px 16px rgba(13,27,42,.05);
-  color-scheme: light;
+  --c1: var(--c-blue-600); --c2: var(--c-teal-600); --c3: var(--c-amber); --c4: #7c3aed; --good: #16a34a; --bad: #e11d48;
+  --ink: var(--c-ink); --body: var(--c-body); --muted: var(--c-muted); --line: var(--c-line); --card: var(--c-bg); --soft: var(--c-surface-2);
+  --grad: var(--brand-gradient); --bar-h: 56px;
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0a131d; --card: #111d2a; --ink: #e8eef4; --body: #c0ccd8; --muted: #8597a8; --line: #1f2f40; --soft: #15222f;
-  --c1: #60a5fa; --c2: #22d3ee; --c3: #fbbf24; --c4: #a78bfa; --good: #4ade80; --bad: #f87171;
-  --grad: linear-gradient(100deg, #22d3ee 0%, #60a5fa 100%); --shadow: 0 1px 2px rgba(0,0,0,.3); color-scheme: dark; } }
-:root[data-theme="dark"] {
-  --bg: #0a131d; --card: #111d2a; --ink: #e8eef4; --body: #c0ccd8; --muted: #8597a8; --line: #1f2f40; --soft: #15222f;
-  --c1: #60a5fa; --c2: #22d3ee; --c3: #fbbf24; --c4: #a78bfa; --good: #4ade80; --bad: #f87171;
-  --grad: linear-gradient(100deg, #22d3ee 0%, #60a5fa 100%); --shadow: 0 1px 2px rgba(0,0,0,.3); color-scheme: dark; }
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--body); font: 14px/1.5 Inter, "Segoe UI", system-ui, sans-serif; }
-.wrap { max-width: 1440px; margin: 0 auto; padding: 20px max(16px, env(safe-area-inset-left, 0px)) 48px; }
-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; justify-content: space-between; margin-bottom: 18px; }
-h1 { font: 700 22px/1.2 Sora, Inter, sans-serif; color: var(--ink); margin: 0; letter-spacing: -.01em; }
-h1 span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.sub { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
-.seg { display: inline-flex; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 3px; box-shadow: var(--shadow); }
-.seg button { border: 0; background: none; color: var(--muted); font: 500 13px Inter, sans-serif; padding: 6px 12px; border-radius: 7px; cursor: pointer; }
-.seg button.on { background: var(--grad); color: #fff; }
-.tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.icon-btn { border: 1px solid var(--line); background: var(--card); color: var(--body); border-radius: 10px; padding: 7px 10px; cursor: pointer; font: 500 13px Inter, sans-serif; box-shadow: var(--shadow); }
-.icon-btn:disabled { opacity: .6; cursor: progress; }
-.notes button { margin-left: 8px; font: 600 13px Inter, sans-serif; border: 0; background: none; color: var(--c1, inherit); text-decoration: underline; cursor: pointer; }
-.notes { margin: 0 0 16px; padding: 10px 14px; border-radius: 10px; background: color-mix(in srgb, var(--c3) 12%, var(--card)); color: var(--ink); border: 1px solid color-mix(in srgb, var(--c3) 35%, var(--line)); font-size: 13px; }
-.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; box-shadow: var(--shadow); min-width: 0; }
-.card h2 { font: 600 14px/1.3 Sora, Inter, sans-serif; color: var(--ink); margin: 0 0 2px; }
-.card .hint { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
-.s12 { grid-column: span 12; } .s8 { grid-column: span 8; } .s7 { grid-column: span 7; } .s6 { grid-column: span 6; } .s5 { grid-column: span 5; } .s4 { grid-column: span 4; }
-@media (max-width: 1100px) { .s8, .s7, .s6, .s5, .s4 { grid-column: span 12; } }
-.section { font: 600 12px Inter, sans-serif; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 26px 0 10px; display: flex; align-items: center; gap: 10px; }
-.section::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
-@media (min-width: 1300px) { .kpis { grid-template-columns: repeat(9, minmax(0, 1fr)); } }
-.kpi { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
-.kpi::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--grad); }
-.kpi .l { font-size: 12px; color: var(--muted); }
-.kpi .v { font: 700 24px/1.2 Sora, Inter, sans-serif; color: var(--ink); margin-top: 4px; font-variant-numeric: tabular-nums; }
-.kpi .d { font-size: 12px; margin-top: 2px; color: var(--muted); }
-.up { color: var(--good); } .down { color: var(--bad); }
-.chart { position: relative; height: 280px; } .chart.tall { height: 320px; } .chart.short { height: 220px; }
-.bars { display: flex; flex-direction: column; gap: 6px; }
-.bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; font-size: 13px; }
-.bar .n { color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 500; }
-.bar .lab { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar .track { grid-column: 1 / -1; height: 5px; border-radius: 3px; background: var(--soft); overflow: hidden; }
-.bar .track i { display: block; height: 100%; background: var(--grad); border-radius: 3px; }
-.bar.zero .track i { background: var(--bad); }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
-td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
-td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.scroll { overflow-x: auto; }
-.tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
-.tag.claude { background: color-mix(in srgb, var(--c3) 16%, transparent); color: var(--c3); }
-.tag.gemini { background: color-mix(in srgb, var(--c1) 16%, transparent); color: var(--c1); }
-.tag.faq { background: color-mix(in srgb, var(--c2) 16%, transparent); color: var(--c2); }
-.tag.err { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
-.tag.dem { background: color-mix(in srgb, var(--c4) 16%, transparent); color: var(--c4); }
-.gauge { margin: 10px 0 16px; }
-.gauge .top { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink); gap: 10px; }
-.gauge .track { height: 10px; border-radius: 6px; background: var(--soft); margin-top: 6px; overflow: hidden; }
-.gauge .track i { display: block; height: 100%; border-radius: 6px; }
-.gauge .foot { font-size: 12px; color: var(--muted); margin-top: 4px; }
-.filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-.filters input, .filters select { font: 13px Inter, sans-serif; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); color: var(--ink); }
-.filters input { flex: 1; min-width: 180px; }
-tr.q { cursor: pointer; } tr.q:hover td { background: var(--soft); }
-tr.detail td { background: var(--soft); white-space: pre-wrap; font-size: 12.5px; color: var(--body); }
-.qtext { color: var(--ink); }
-.muted { color: var(--muted); }
-.more { margin-top: 10px; }
-.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
-.heat { display: grid; grid-template-columns: 34px repeat(24, minmax(0, 1fr)); gap: 2px; font-size: 10.5px; color: var(--muted); }
-.heat div { aspect-ratio: 1.4; border-radius: 3px; }
-.heat .lab { aspect-ratio: auto; display: flex; align-items: center; }
-.heat .hh { aspect-ratio: auto; text-align: center; }
-.dm-list { display: flex; flex-direction: column; gap: 12px; }
-.dm { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: var(--soft); min-width: 0; }
-.dm.is-todo { border-color: color-mix(in srgb, var(--c3) 55%, var(--line)); }
-.dm-top { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; justify-content: space-between; }
-.dm-top b { color: var(--ink); font: 600 14px Sora, Inter, sans-serif; }
-.dm-meta { color: var(--muted); font-size: 12.5px; margin: 4px 0 8px; overflow-wrap: anywhere; }
-.dm-meta a { color: var(--c1); }
-.dm pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 13px/1.5 Inter, sans-serif; color: var(--body); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 8px 0; max-height: 340px; overflow: auto; }
-.dm details summary { cursor: pointer; color: var(--c1); font-size: 13px; margin-top: 4px; }
-.dm textarea { width: 100%; min-height: 140px; font: 13px/1.5 Inter, sans-serif; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
-.dm-compose { border: 1px solid var(--line); border-radius: 10px; background: var(--card); margin: 8px 0; overflow: hidden; }
-.dm-field { display: flex; align-items: center; gap: 10px; padding: 0 14px; min-height: 40px; border-bottom: 1px solid var(--line); font-size: 13px; min-width: 0; }
-.dm-field label { flex: none; width: 46px; color: var(--muted); font-size: 12px; }
-.dm-field span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
-.dm-field input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 600 14px Inter, sans-serif; padding: 9px 0; outline: none; }
-.dm-compose textarea { display: block; width: 100%; border: 0; border-radius: 0; resize: none; min-height: 260px; padding: 14px; font: 14px/1.6 Inter, sans-serif; color: var(--ink); background: transparent; outline: none; }
-.dm-compose:focus-within { border-color: var(--c1); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c1) 18%, transparent); }
-.dm-sig { padding: 4px 14px 12px; border-top: 1px dashed var(--line); }
-.dm-sig__lab { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; margin: 8px 0 4px; }
-.dm-sig__paper { display: inline-block; max-width: 100%; overflow: auto; background: #fff; border-radius: 8px; padding: 2px 12px 12px; }
-.dm-sig__paper table { margin-top: 10px !important; }
-.dm-cbar { display: flex; justify-content: space-between; gap: 10px; padding: 6px 14px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
-.dm-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
-.dm-actions button { font: 500 13px Inter, sans-serif; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
-.dm-actions input { flex: 1 1 220px; min-width: 0; font: 13px Inter, sans-serif; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); }
-.dm-actions button.go { background: var(--grad); color: #fff; border: 0; }
-.dm-actions button.go.confirm { background: var(--bad); }
-.dm-actions button:disabled { opacity: .5; cursor: not-allowed; }
-.dm-msg { font-size: 12.5px; color: var(--muted); }
-.dm-warn { color: var(--bad); font-size: 12.5px; margin: 4px 0; }
-.tag.st-a_valider { background: color-mix(in srgb, var(--c3) 18%, transparent); color: var(--c3); }
-.tag.st-envoyee { background: color-mix(in srgb, var(--c1) 16%, transparent); color: var(--c1); }
-.tag.st-repondue { background: color-mix(in srgb, var(--c4) 16%, transparent); color: var(--c4); }
-.tag.st-refusee, .tag.st-close { background: var(--line); color: var(--muted); }
-.empty { color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center; }
+[data-theme="dark"] { --c4: #a78bfa; --good: #4ade80; --bad: #fb7185; }
+html { scroll-padding-top: calc(var(--header-h) + var(--bar-h) + 16px); }
+body.pn { padding-top: var(--header-h); }
+.pn .container { max-width: 1440px; }
+.pn .site-header { background: var(--c-header-bg); backdrop-filter: saturate(150%) blur(12px); border-bottom-color: var(--c-line); }
+.pn-pill { display: inline-flex; align-items: center; margin-left: .9rem; padding: .3rem .75rem; border-radius: var(--r-pill); background: color-mix(in srgb, var(--c-teal-600) 12%, transparent); color: var(--c-teal-600); font: 600 .78rem var(--font-display); letter-spacing: .02em; white-space: nowrap; }
+.pn-btn { display: inline-flex; align-items: center; gap: .45rem; height: 2.4rem; padding: 0 1rem; border: 1px solid var(--c-line); border-radius: var(--r-pill); background: var(--c-bg); color: var(--c-ink); font: 600 .85rem var(--font-display); white-space: nowrap; transition: color .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease); }
+.pn-btn:hover:not(:disabled) { color: var(--c-teal-600); border-color: var(--c-teal-600); transform: translateY(-1px); }
+.pn-btn svg { width: 16px; height: 16px; flex: none; }
+.pn-btn:disabled { cursor: progress; opacity: .8; }
+.pn-btn.is-busy svg { animation: pn-spin 1s linear infinite; }
+@keyframes pn-spin { to { transform: rotate(360deg); } }
+
+/* barre collante : onglets de la page + période */
+.pn-bar { position: sticky; top: var(--header-h); z-index: 90; background: var(--c-header-bg); backdrop-filter: saturate(150%) blur(12px); border-bottom: 1px solid var(--c-line); }
+.pn-bar .container { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: var(--bar-h); }
+.pn-tabs { display: flex; gap: .2rem; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.pn-tabs::-webkit-scrollbar { display: none; }
+.pn-tabs a { display: inline-flex; align-items: center; gap: .4rem; padding: .45rem .85rem; border-radius: var(--r-pill); color: var(--c-muted); font: 600 .86rem var(--font-display); white-space: nowrap; transition: color .2s var(--ease), background .2s var(--ease); }
+.pn-tabs a:hover { color: var(--c-ink); background: var(--c-surface-2); }
+.pn-tabs a.is-on { color: var(--c-teal-600); background: color-mix(in srgb, var(--c-teal-600) 11%, transparent); }
+.pn-count { display: inline-grid; place-items: center; min-width: 1.35rem; height: 1.35rem; padding: 0 .35rem; border-radius: var(--r-pill); background: var(--c-amber); color: #fff; font-size: .72rem; line-height: 1; }
+.pn-count:empty { display: none; }
+.pn-bar .chip-select { flex: none; }
+@media (max-width: 760px) {
+  .pn-bar .container { flex-wrap: wrap; gap: .35rem; padding-block: .45rem; }
+  .pn-bar .chip-select { width: 100%; justify-content: space-between; }
+  .pn-bar .chip-select button { flex: 1; padding-inline: .4rem; }
+  :root { --bar-h: 104px; }
+  .pn-pill, .pn-btn .pn-lab { display: none; }
+  .pn-btn { padding: 0 .7rem; }
+}
+
+/* en-tête de page */
+.pn-hero { position: relative; isolation: isolate; padding: var(--sp-5) 0 var(--sp-4); }
+.pn-hero h1 { font-size: clamp(1.9rem, 3.6vw, 2.8rem); letter-spacing: -.03em; margin-bottom: .5rem; }
+.pn-status { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem 1rem; color: var(--c-muted); font-size: .9rem; margin-bottom: var(--sp-3); }
+.pn-dot { display: inline-block; width: 8px; height: 8px; margin-right: .45rem; border-radius: 50%; background: var(--c-muted); vertical-align: 1px; }
+.pn-dot.is-live { background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 22%, transparent); }
+.pn-note { display: flex; align-items: center; justify-content: space-between; gap: .8rem; margin-bottom: .6rem; padding: .7rem 1rem; border-radius: var(--r-md); background: color-mix(in srgb, var(--c-amber) 12%, transparent); color: var(--c-ink); font-size: .88rem; }
+.pn-note button { flex: none; border: 0; background: none; color: var(--c-teal-600); font: 600 .88rem var(--font-display); text-decoration: underline; }
+.pn-kgroups { display: grid; grid-template-columns: 4fr 5fr; gap: var(--sp-3); }
+@media (max-width: 1100px) { .pn-kgroups { grid-template-columns: minmax(0, 1fr); } }
+.pn-kgroups .small-label { margin-bottom: .5rem; }
+.pn .kpis { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .7rem; margin: 0; }
+@media (min-width: 1101px) { .pn-kgroups > div:first-child .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); } .pn-kgroups > div:last-child .kpis { grid-template-columns: repeat(5, minmax(0, 1fr)); } .pn .kpi { padding: .9rem 1rem; } .pn .kpi strong { font-size: 1.3rem; } }
+.pn .kpi { position: relative; overflow: hidden; padding: 1rem 1.1rem; }
+.pn .kpi::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--brand-gradient); }
+.pn .kpi strong { font-size: 1.45rem; line-height: 1.25; }
+@media (max-width: 760px) { .pn .kpi { padding: .8rem .9rem; } .pn .kpi strong { font-size: 1.25rem; } }
+.up { color: var(--good); } .down { color: var(--bad); } .muted { color: var(--c-muted); }
+
+/* sections et panneaux */
+.pn .section { padding-block: var(--sp-5); }
+.pn .section h2 { font-size: clamp(1.4rem, 2.2vw, 1.85rem); }
+.pn .section .lead { font-size: .98rem; margin-top: .4rem; }
+.pn .section__head-row { margin-bottom: var(--sp-3); }
+.pn-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--sp-2); }
+.pn-s12 { grid-column: span 12; } .pn-s8 { grid-column: span 8; } .pn-s7 { grid-column: span 7; } .pn-s6 { grid-column: span 6; } .pn-s5 { grid-column: span 5; } .pn-s4 { grid-column: span 4; }
+@media (max-width: 1100px) { .pn-s8, .pn-s7, .pn-s6, .pn-s5, .pn-s4 { grid-column: span 12; } }
+.pn .panel h3 { margin-bottom: .25rem; font-size: 1.02rem; }
+.pn-hint { margin-bottom: 1rem; color: var(--c-muted); font-size: .8rem; line-height: 1.45; }
+.pn-chart { position: relative; height: 280px; } .pn-chart.tall { height: 320px; }
+.pn .ranking__line { font-size: .84rem; }
+.pn .ranking__label small { display: inline; margin-left: .3rem; }
+.pn-empty { padding: 1.4rem 0; color: var(--c-muted); font-size: .86rem; text-align: center; }
+
+.pn-gauge { margin: .4rem 0 1.2rem; }
+.pn-gauge__top { display: flex; justify-content: space-between; gap: .6rem; color: var(--c-ink); font-size: .88rem; }
+.pn-gauge__track { height: 10px; margin-top: .4rem; border-radius: var(--r-pill); background: var(--c-surface-2); overflow: hidden; }
+.section--alt .pn-gauge__track { background: var(--c-surface); }
+.pn-gauge__track i { display: block; height: 100%; border-radius: inherit; }
+.pn-gauge__foot { margin-top: .3rem; color: var(--c-muted); font-size: .78rem; }
+
+.pn-tag { display: inline-block; padding: .1rem .5rem; border-radius: var(--r-pill); font-size: .72rem; font-weight: 600; white-space: nowrap; }
+.pn-tag.claude { background: color-mix(in srgb, var(--c3) 16%, transparent); color: var(--c3); }
+.pn-tag.gemini { background: color-mix(in srgb, var(--c1) 16%, transparent); color: var(--c1); }
+.pn-tag.faq { background: color-mix(in srgb, var(--c2) 16%, transparent); color: var(--c2); }
+.pn-tag.err { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+.pn-tag.dem { background: color-mix(in srgb, var(--c4) 16%, transparent); color: var(--c4); }
+.pn-tag.st-a_valider { background: color-mix(in srgb, var(--c3) 18%, transparent); color: var(--c3); }
+.pn-tag.st-envoyee { background: color-mix(in srgb, var(--c1) 16%, transparent); color: var(--c1); }
+.pn-tag.st-repondue { background: color-mix(in srgb, var(--c4) 16%, transparent); color: var(--c4); }
+.pn-tag.st-refusee, .pn-tag.st-close { background: var(--c-surface-2); color: var(--c-muted); }
+
+.pn-heat { display: grid; grid-template-columns: 38px repeat(24, minmax(0, 1fr)); gap: 2px; color: var(--c-muted); font-size: .68rem; }
+.pn-heat div { aspect-ratio: 1.4; border-radius: 3px; }
+.pn-heat .lab { aspect-ratio: auto; display: flex; align-items: center; white-space: nowrap; }
+.pn-heat .hh { aspect-ratio: auto; text-align: center; }
+
+/* journal */
+.pn-filters { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .8rem; }
+.pn-filters input, .pn-filters select { padding: .6rem 1rem; border: 1px solid var(--c-line); border-radius: var(--r-pill); background: var(--c-bg); color: var(--c-ink); font-size: .88rem; outline: none; transition: border-color .2s var(--ease), box-shadow .2s var(--ease); }
+.pn-filters input { flex: 1; min-width: 200px; }
+.pn-filters input:focus, .pn-filters select:focus { border-color: var(--c-teal-600); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-teal-600) 16%, transparent); }
+.pn .table-wrap { background: var(--c-bg); }
+.pn .data-table td.when { color: var(--c-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pn .data-table .qtext { color: var(--c-ink); }
+.pn .data-table tr.pn-q { cursor: pointer; }
+.pn .data-table tr.pn-q.is-open td { background: var(--c-surface-2); }
+.pn .data-table tr.pn-detail td { background: var(--c-surface-2); color: var(--c-body); white-space: pre-wrap; overflow-wrap: anywhere; font-size: .84rem; line-height: 1.55; }
+.pn .data-table tr.pn-detail a { font-weight: 500; }
+.pn-more { margin-top: .8rem; }
+
+/* demandes aux administrations */
+.pn-dm-list { display: flex; flex-direction: column; gap: .8rem; }
+.pn-dm { min-width: 0; padding: 1rem 1.2rem; border: 1px solid var(--c-line); border-radius: var(--r-md); background: var(--c-bg); }
+.pn-dm.is-todo { border-color: color-mix(in srgb, var(--c3) 50%, var(--c-line)); box-shadow: inset 3px 0 0 var(--c3); }
+.pn-dm-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .4rem .8rem; }
+.pn-dm-top b { color: var(--c-ink); font: 600 .98rem var(--font-display); overflow-wrap: anywhere; }
+.pn-dm-meta { margin: .3rem 0 .5rem; color: var(--c-muted); font-size: .84rem; overflow-wrap: anywhere; }
+.pn-dm-meta a { color: var(--c-teal-600); font-weight: 600; }
+.pn-dm-warn { margin: .25rem 0; color: var(--bad); font-size: .84rem; }
+.pn-dm pre { max-height: 340px; overflow: auto; margin: .5rem 0; padding: .7rem .9rem; border: 1px solid var(--c-line); border-radius: var(--r-sm); background: var(--c-surface); color: var(--c-body); font: .86rem/1.55 var(--font-body); white-space: pre-wrap; overflow-wrap: anywhere; }
+.pn-dm details summary { margin-top: .3rem; color: var(--c-teal-600); font-size: .86rem; font-weight: 600; cursor: pointer; }
+.pn-dm textarea { width: 100%; min-height: 140px; padding: .7rem .9rem; border: 1px solid var(--c-line); border-radius: var(--r-sm); background: var(--c-surface); color: var(--c-ink); font: .88rem/1.55 var(--font-body); }
+.pn-dm-letter > summary { margin: .4rem 0; }
+.pn-dm-compose { margin: .5rem 0; overflow: hidden; border: 1px solid var(--c-line); border-radius: var(--r-md); background: var(--c-bg); transition: border-color .2s var(--ease), box-shadow .2s var(--ease); }
+.pn-dm-compose:focus-within { border-color: var(--c-teal-600); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-teal-600) 16%, transparent); }
+.pn-dm-field { display: flex; align-items: center; gap: .7rem; min-width: 0; min-height: 42px; padding: 0 1rem; border-bottom: 1px solid var(--c-line); font-size: .86rem; }
+.pn-dm-field label { flex: none; width: 46px; color: var(--c-muted); font-size: .78rem; }
+.pn-dm-field span { min-width: 0; overflow: hidden; color: var(--c-ink); text-overflow: ellipsis; white-space: nowrap; }
+.pn-dm-field input { flex: 1; min-width: 0; padding: .6rem 0; border: 0; outline: none; background: transparent; color: var(--c-ink); font: 600 .92rem var(--font-body); }
+.pn-dm-compose textarea { display: block; min-height: 260px; padding: 1rem; border: 0; border-radius: 0; outline: none; resize: none; background: transparent; font-size: .92rem; line-height: 1.6; }
+.pn-dm-sig { padding: .3rem 1rem .8rem; border-top: 1px dashed var(--c-line); }
+.pn-dm-sig__lab { margin: .5rem 0 .3rem; color: var(--c-muted); font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.pn-dm-sig__paper { display: inline-block; max-width: 100%; overflow: auto; padding: 2px 12px 12px; border-radius: var(--r-sm); background: #fff; }
+.pn-dm-sig__paper table { margin-top: 10px !important; }
+.pn-dm-cbar { display: flex; justify-content: space-between; gap: .6rem; padding: .4rem 1rem; border-top: 1px solid var(--c-line); color: var(--c-muted); font-size: .78rem; }
+.pn-dm-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .7rem; }
+.pn-dm-actions button { padding: .5rem 1rem; border: 1px solid var(--c-line); border-radius: var(--r-pill); background: var(--c-bg); color: var(--c-ink); font: 600 .84rem var(--font-display); transition: color .2s var(--ease), border-color .2s var(--ease); }
+.pn-dm-actions button:hover:not(:disabled) { color: var(--c-teal-600); border-color: var(--c-teal-600); }
+.pn-dm-actions button.go { border-color: transparent; background: var(--brand-gradient); color: #fff; box-shadow: 0 6px 16px rgba(37, 99, 235, .22); }
+.pn-dm-actions button.go:hover:not(:disabled) { color: #fff; }
+.pn-dm-actions button.go.confirm { background: var(--bad); box-shadow: none; }
+.pn-dm-actions button:disabled { opacity: .5; cursor: not-allowed; }
+.pn-dm-actions input { flex: 1 1 220px; min-width: 0; padding: .5rem .9rem; border: 1px solid var(--c-line); border-radius: var(--r-pill); background: var(--c-bg); color: var(--c-ink); font-size: .84rem; }
+.pn-dm-msg { color: var(--c-muted); font-size: .84rem; }
+.pn .dm-filters button { background: var(--c-bg); }
+.pn .dm-filters button span { margin-left: .3rem; color: var(--c-muted); font-weight: 500; }
+
+.pn-foot { padding: var(--sp-4) 0; border-top: 1px solid var(--c-line); color: var(--c-muted); font-size: .8rem; }
+.pn-foot a { color: var(--c-teal-600); font-weight: 600; }
 </style>
 </head>
-<body>
-<div class="wrap">
-  <header>
-    <div>
-      <h1>France<span>RoueLibre</span> · tableau de bord</h1>
-      <div class="sub" id="sub"></div>
+<body class="pn">
+<header class="site-header is-scrolled" id="siteHeader">
+  <div class="container nav">
+    <a class="brand brand--lockup" href="https://francerouelibre.fr/" target="_blank" rel="noopener" title="Ouvrir francerouelibre.fr">
+      <svg class="brand__mark" width="40" height="40" viewBox="0 0 48 48" fill="none" aria-hidden="true"><defs><linearGradient id="g7" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#0e7490"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><path d="M24 4l17 10v20L24 44 7 34V14z" stroke="url(#g7)" stroke-width="3" stroke-linejoin="round"/><path d="M14 17l7 7 5-4 9 11" stroke="#e11d48" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 31 H35 V25" stroke="#e11d48" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="brand__sep" aria-hidden="true"></span>
+      <span class="brand__name"><span>France</span><span class="gradient-text">RoueLibre</span></span>
+    </a>
+    <span class="pn-pill" style="margin-right:auto">Tableau de bord</span>
+    <div class="nav__actions">
+      <button class="pn-btn" id="refresh" type="button" title="Relire le VPS sans relancer frl_panel.bat (touche R)" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg><span class="pn-lab">Actualiser</span>
+      </button>
+      <button class="theme-toggle-btn tbtn-morph" id="themeToggle" type="button" aria-label="Changer de thème" title="Changer de thème">
+        <span class="tbtn-halo" aria-hidden="true"></span>
+        <svg class="tbtn-svg-morph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <mask id="theme-morph-mask"><rect width="32" height="32" fill="white"/><circle class="mask-moon-bite" cx="23" cy="11" r="6.5" fill="black"/></mask>
+          <circle class="morph-core" cx="16" cy="16" r="6" fill="currentColor" mask="url(#theme-morph-mask)"/>
+          <g class="morph-rays" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="16" y1="3" x2="16" y2="6"/><line x1="16" y1="26" x2="16" y2="29"/><line x1="3" y1="16" x2="6" y2="16"/><line x1="26" y1="16" x2="29" y2="16"/>
+            <line x1="6.81" y1="6.81" x2="8.93" y2="8.93"/><line x1="23.07" y1="23.07" x2="25.19" y2="25.19"/><line x1="6.81" y1="25.19" x2="8.93" y2="23.07"/><line x1="23.07" y1="8.93" x2="25.19" y2="6.81"/>
+          </g>
+        </svg>
+      </button>
     </div>
-    <div class="tools">
-      <div class="seg" id="period"></div>
-      <button class="icon-btn" id="refresh" title="Relire le VPS sans relancer frl_panel.bat" hidden>Actualiser</button>
-      <button class="icon-btn" id="theme" title="Thème clair ou sombre">Thème</button>
+  </div>
+</header>
+
+<nav class="pn-bar" aria-label="Sections du tableau de bord">
+  <div class="container">
+    <div class="pn-tabs" id="tabs">
+      <a href="#vue">Vue d’ensemble</a>
+      <a href="#demandes">Demandes <span class="pn-count" id="tabDm"></span></a>
+      <a href="#audience">Audience</a>
+      <a href="#loupe">La Loupe</a>
+      <a href="#recherches">Recherches</a>
+      <a href="#journal">Journal</a>
     </div>
-  </header>
-  <div id="notes"></div>
-
-  <div class="kpis" id="kpis"></div>
-
-  <div class="section">Demandes aux administrations</div>
-  <div class="grid"><div class="card s12"><h2>À relire avant envoi, réponses à publier</h2><p class="hint" id="dmHint"></p><div id="dm"></div></div></div>
-
-  <div class="section">Audience</div>
-  <div class="grid">
-    <div class="card s8"><h2>Visiteurs et pages vues par jour</h2><p class="hint">Robots exclus. Un visiteur = une adresse et un navigateur sur une journée.</p><div class="chart tall"><canvas id="cAud"></canvas></div></div>
-    <div class="card s4"><h2>Pages les plus vues</h2><p class="hint" id="pagesHint"></p><div class="bars" id="pages"></div></div>
-    <div class="card s6"><h2>Sites qui envoient des visiteurs</h2><p class="hint">Domaine du lien suivi, hors francerouelibre.fr.</p><div class="bars" id="refs"></div></div>
-    <div class="card s6"><h2>Activité par heure</h2><p class="hint">Recherches et questions à la Loupe, heure de Paris, jour par jour.</p><div id="heat"></div></div>
+    <div class="chip-select" id="period" role="group" aria-label="Période"></div>
   </div>
+</nav>
 
-  <div class="section">La Loupe</div>
-  <div class="grid">
-    <div class="card s8"><h2>Questions par jour et coût</h2><p class="hint">Barres : qui a répondu. Ligne : coût du jour en euros (axe de droite).</p><div class="chart tall"><canvas id="cLoupe"></canvas></div></div>
-    <div class="card s4"><h2>Budgets des modèles</h2><p class="hint">Dépense cumulée d'après le journal, plafonds de server/assistant/settings.py.</p><div id="budgets"></div></div>
-    <div class="card s7"><h2>Coût et durée de chaque réponse</h2><p class="hint">Un point par question. Les réponses automatiques (gratuites, immédiates) ne sont pas tracées.</p><div class="chart"><canvas id="cScatter"></canvas></div></div>
-    <div class="card s5"><h2>Outils appelés</h2><p class="hint">Nombre d'appels sur la période.</p><div class="chart"><canvas id="cTools"></canvas></div></div>
-    <div class="card s12"><h2>Par moteur de réponse</h2><p class="hint">Sur la période choisie.</p><div class="scroll" id="prov"></div></div>
-  </div>
+<main>
+  <section class="pn-hero" id="vue">
+    <div class="hero__bg" aria-hidden="true"></div>
+    <div class="container">
+      <span class="eyebrow">Privé · sur ce PC seulement</span>
+      <h1>Tableau de <span class="gradient-text">bord</span></h1>
+      <div class="pn-status" id="sub"></div>
+      <div id="notes"></div>
+      <div class="pn-kgroups" id="kpis"></div>
+    </div>
+  </section>
 
-  <div class="section">Recherches</div>
-  <div class="grid">
-    <div class="card s6"><h2>Les plus cherchées</h2><p class="hint">Saisies complètes (hors suggestions pendant la frappe), casse ignorée.</p><div class="bars" id="topq"></div></div>
-    <div class="card s6"><h2>Sans résultat</h2><p class="hint">Recherches qui n'ont trouvé aucune ligne de dépense.</p><div class="bars" id="zeroq"></div></div>
-  </div>
+  <section class="section section--alt" id="demandes">
+    <div class="container">
+      <div class="section__head-row"><div class="section__head"><span class="eyebrow">Contrôle</span><h2>Demandes aux administrations</h2><p class="lead" id="dmHint"></p></div></div>
+      <div class="dm-filters" id="dmFilters" role="group" aria-label="Filtrer les demandes"></div>
+      <div id="dm"></div>
+    </div>
+  </section>
 
-  <div class="section">Détail</div>
-  <div class="grid">
-    <div class="card s12"><h2>Questions à la Loupe</h2><p class="hint">Cliquer sur une ligne pour lire la réponse, les outils et les sources.</p>
-      <div class="filters"><input id="fq" placeholder="Filtrer (question, réponse, outil)"><select id="fp"><option value="">Tous les moteurs</option><option value="claude">Claude</option><option value="gemini">Gemini</option><option value="faq">Réponse automatique</option><option value="err">Erreurs</option></select></div>
-      <div class="scroll"><table id="qt"></table></div><button class="icon-btn more" id="qmore" hidden>Afficher plus</button></div>
-    <div class="card s12"><h2>Dernières recherches</h2><p class="hint"></p>
-      <div class="filters"><input id="fs" placeholder="Filtrer les recherches"></div>
-      <div class="scroll"><table id="st"></table></div><button class="icon-btn more" id="smore" hidden>Afficher plus</button></div>
-  </div>
-</div>
+  <section class="section" id="audience">
+    <div class="container">
+      <div class="section__head-row"><div class="section__head"><span class="eyebrow">Visites</span><h2>Audience</h2><p class="lead">Robots exclus. Un visiteur = une adresse et un navigateur sur une journée.</p></div></div>
+      <div class="pn-grid">
+        <div class="panel pn-s8"><h3>Visiteurs et pages vues par jour</h3><p class="pn-hint">Barres : visiteurs. Ligne : pages vues.</p><div class="pn-chart tall"><canvas id="cAud"></canvas></div></div>
+        <div class="panel pn-s4"><h3>Pages les plus vues</h3><p class="pn-hint" id="pagesHint"></p><div id="pages"></div></div>
+        <div class="panel pn-s6"><h3>Sites qui envoient des visiteurs</h3><p class="pn-hint">Domaine du lien suivi, hors francerouelibre.fr.</p><div id="refs"></div></div>
+        <div class="panel pn-s6"><h3>Activité par heure</h3><p class="pn-hint">Recherches et questions à la Loupe, heure de Paris, jour par jour.</p><div id="heat"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt" id="loupe">
+    <div class="container">
+      <div class="section__head-row"><div class="section__head"><span class="eyebrow">Assistant</span><h2>La Loupe</h2><p class="lead">Qui répond, combien ça coûte, combien de temps ça prend.</p></div></div>
+      <div class="pn-grid">
+        <div class="panel pn-s8"><h3>Questions par jour et coût</h3><p class="pn-hint">Barres : qui a répondu. Ligne : coût du jour en euros (axe de droite).</p><div class="pn-chart tall"><canvas id="cLoupe"></canvas></div></div>
+        <div class="panel pn-s4"><h3>Budgets des modèles</h3><p class="pn-hint">Dépense cumulée d’après le journal, plafonds de server/assistant/settings.py.</p><div id="budgets"></div></div>
+        <div class="panel pn-s7"><h3>Coût et durée de chaque réponse</h3><p class="pn-hint">Un point par question. Les réponses automatiques (gratuites, immédiates) ne sont pas tracées.</p><div class="pn-chart"><canvas id="cScatter"></canvas></div></div>
+        <div class="panel pn-s5"><h3>Outils appelés</h3><p class="pn-hint">Nombre d’appels sur la période.</p><div class="pn-chart"><canvas id="cTools"></canvas></div></div>
+        <div class="panel pn-s12"><h3>Par moteur de réponse</h3><p class="pn-hint">Sur la période choisie.</p><div class="table-wrap" id="prov"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="recherches">
+    <div class="container">
+      <div class="section__head-row"><div class="section__head"><span class="eyebrow">Barre de recherche</span><h2>Recherches</h2><p class="lead">Saisies complètes (hors suggestions pendant la frappe), casse ignorée.</p></div></div>
+      <div class="pn-grid">
+        <div class="panel pn-s6"><h3>Les plus cherchées</h3><p class="pn-hint">Avec le nombre de lignes de dépense trouvées.</p><div id="topq"></div></div>
+        <div class="panel pn-s6"><h3>Sans résultat</h3><p class="pn-hint">Recherches qui n’ont trouvé aucune ligne de dépense : des pistes de données à ajouter.</p><div id="zeroq"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt" id="journal">
+    <div class="container">
+      <div class="section__head-row"><div class="section__head"><span class="eyebrow">Détail</span><h2>Journal</h2><p class="lead">Cliquer sur une question pour lire la réponse, les outils et les sources. Touche / pour filtrer.</p></div></div>
+      <div class="pn-grid">
+        <div class="pn-s12"><h3 style="font-size:1.05rem;margin-bottom:.7rem">Questions à la Loupe</h3>
+          <div class="pn-filters"><input id="fq" type="search" placeholder="Filtrer (question, réponse, outil)"><select id="fp"><option value="">Tous les moteurs</option><option value="claude">Claude</option><option value="gemini">Gemini</option><option value="faq">Réponse automatique</option><option value="err">Erreurs</option></select></div>
+          <div class="table-wrap"><table class="data-table" id="qt"></table></div><button class="pn-btn pn-more" id="qmore" type="button" hidden>Afficher plus</button></div>
+        <div class="pn-s12" style="margin-top:var(--sp-3)"><h3 style="font-size:1.05rem;margin-bottom:.7rem">Dernières recherches</h3>
+          <div class="pn-filters"><input id="fs" type="search" placeholder="Filtrer les recherches"></div>
+          <div class="table-wrap"><table class="data-table" id="st"></table></div><button class="pn-btn pn-more" id="smore" type="button" hidden>Afficher plus</button></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="pn-foot"><div class="container">Panneau local servi par frl_panel.bat sur 127.0.0.1 : rien n’est publié, fermez la fenêtre noire pour l’arrêter. <a href="https://francerouelibre.fr/" target="_blank" rel="noopener">Ouvrir le site</a></div></footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
@@ -197,6 +293,13 @@ const pct = (a, q) => { if (!a.length) return null; const s = [...a].sort((x, y)
 const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const PROV = { faq: 'Réponse automatique', claude: 'Claude', gemini: 'Gemini' };
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const ctx2d = document.createElement('canvas').getContext('2d');
+const alpha = (c, a) => {   // any CSS colour (the site's tokens compute to rgb()) with an opacity, for Chart.js
+  ctx2d.fillStyle = '#000'; ctx2d.fillStyle = c; const h = ctx2d.fillStyle;
+  if (h[0] === '#') { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; }
+  return h.replace(/rgba?\(([^)]+)\)/, (m, v) => `rgba(${v.split(',').slice(0, 3).join(',')},${a})`);
+};
+const live = !!DATA.live && location.protocol === 'http:' && location.hostname === '127.0.0.1';
 
 // ---------------------------------------------------------------- period
 const allDays = new Set([...Object.keys(DATA.visits || {}), ...DATA.loupe.map(r => r.t.slice(0, 10)), ...DATA.searches.map(r => r.t.slice(0, 10))]);
@@ -225,31 +328,34 @@ function totals(days) {
 
 // ---------------------------------------------------------------- KPIs
 function delta(cur, prev, inverse) {
-  if (!period || prev == null || cur == null || !prev) return '<span class="muted">pas de période précédente</span>';
+  if (!period || prev == null || cur == null || !prev) return 'pas de période précédente';
   const p = 100 * (cur / prev - 1), good = inverse ? p < 0 : p > 0;
-  return `<span class="${Math.abs(p) < .5 ? '' : good ? 'up' : 'down'}">${p > 0 ? '+' : ''}${fmt(p)} %</span> <span class="muted">vs période précédente</span>`;
+  return `<span class="${Math.abs(p) < .5 ? '' : good ? 'up' : 'down'}">${p > 0 ? '+' : ''}${fmt(p)} %</span> vs période précédente`;
 }
 function kpis(t, p) {
-  const k = [
+  const a = [
     ['Visiteurs (somme des jours)', t.hasVisits ? fmt(t.visitors) : '·', delta(t.visitors, p.visitors)],
     ['Pages vues', t.hasVisits ? fmt(t.views) : '·', delta(t.views, p.views)],
     ['Recherches', fmt(t.searches), delta(t.searches, p.searches)],
+    ['Recherches sans résultat', t.zero == null ? '·' : fmt(100 * t.zero) + ' %', delta(t.zero, p.zero, true)],
+  ], k = [
     ['Questions à la Loupe', fmt(t.q), delta(t.q, p.q)],
     ['Lecteurs de la Loupe', fmt(t.readers), delta(t.readers, p.readers)],
     ['Coût de la Loupe', eur(t.cost), delta(t.cost, p.cost, true)],
     ['Coût par question payante', t.avg == null ? '·' : fmt(100 * t.avg, 2) + ' c', delta(t.avg, p.avg, true)],
-    ['Réponses sans modèle', t.free == null ? '·' : fmt(100 * t.free) + ' %', '<span class="muted">gratuites et immédiates</span>'],
-    ['Recherches sans résultat', t.zero == null ? '·' : fmt(100 * t.zero) + ' %', delta(t.zero, p.zero, true)],
+    ['Réponses sans modèle', t.free == null ? '·' : fmt(100 * t.free) + ' %', 'gratuites et immédiates'],
   ];
-  $('kpis').innerHTML = k.map(([l, v, d]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join('');
+  const grp = (title, rows) => `<div><span class="small-label">${title}</span><div class="kpis">${rows.map(([l, v, d]) => `<div class="kpi"><span>${l}</span><strong>${v}</strong><small>${d}</small></div>`).join('')}</div></div>`;
+  $('kpis').innerHTML = grp('Audience et recherches', a) + grp('La Loupe', k);
 }
 
-// ---------------------------------------------------------------- bars (HTML)
-function bars(el, rows, cls = '') {
+// ---------------------------------------------------------------- rankings (the site's .ranking bars)
+function bars(el, rows, alert = false) {
   const max = Math.max(1, ...rows.map(r => r[1]));
-  $(el).innerHTML = rows.length ? rows.map(([lab, n, extra]) => `<div class="bar ${cls}"><span class="lab" title="${esc(lab)}">${esc(lab)}${extra ? ` <span class="muted">${extra}</span>` : ''}</span><span class="n">${fmt(n)}</span><span class="track"><i style="width:${100 * n / max}%"></i></span></div>`).join('')
-    : '<div class="empty">Rien sur la période.</div>';
+  $(el).innerHTML = rows.length ? `<ol class="ranking">${rows.map(([lab, n, extra]) => `<li><div class="ranking__line"><span class="ranking__label" title="${esc(lab)}">${esc(lab)}${extra ? `<small>${extra}</small>` : ''}</span><strong>${fmt(n)}</strong></div><span class="ranking__track"><span class="ranking__fill${alert ? ' is-alert' : ''}" style="--w:${100 * n / max}%"></span></span></li>`).join('')}</ol>`
+    : '<div class="pn-empty">Rien sur la période.</div>';
 }
+const grow = () => setTimeout(() => document.querySelectorAll('.ranking__fill:not(.is-in)').forEach(e => e.classList.add('is-in')), 40);
 function topOf(days, key) {
   const c = {};
   for (const d of days) for (const [k, n] of Object.entries(((DATA.visits || {})[d] || {})[key] || {})) c[k] = (c[k] || 0) + n;
@@ -260,12 +366,12 @@ function topOf(days, key) {
 const charts = {};
 function chart(id, cfg) {
   charts[id]?.destroy();
-  const grid = css('--line'), muted = css('--muted');
+  const grid = css('--c-line'), muted = css('--c-muted');
   Chart.defaults.locale = 'fr-FR'; Chart.defaults.font.family = 'Inter, "Segoe UI", system-ui, sans-serif'; Chart.defaults.font.size = 12; Chart.defaults.color = muted;
   for (const ax of Object.values(cfg.options.scales || {})) { ax.grid = { color: grid, drawTicks: false, ...(ax.grid || {}) }; ax.border = { display: false }; ax.ticks = { padding: 6, ...(ax.ticks || {}) }; }
-  cfg.options.maintainAspectRatio = false; cfg.options.animation = { duration: 350 };
+  cfg.options.maintainAspectRatio = false; cfg.options.animation = { duration: 450 };
   cfg.options.plugins = { legend: { position: 'top', align: 'end', labels: { boxWidth: 10, boxHeight: 10, useBorderRadius: true, borderRadius: 3 } },
-    tooltip: { backgroundColor: css('--ink'), titleColor: css('--card'), bodyColor: css('--card'), padding: 10, cornerRadius: 8, boxPadding: 4 }, ...(cfg.options.plugins || {}) };
+    tooltip: { backgroundColor: css('--c-ink'), titleColor: css('--c-bg'), bodyColor: css('--c-bg'), padding: 10, cornerRadius: 8, boxPadding: 4 }, ...(cfg.options.plugins || {}) };
   charts[id] = new Chart($(id), cfg);
 }
 const dayLab = d => new Date(d + 'T12:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
@@ -286,7 +392,7 @@ function drawLoupe(t) {
     { type: 'bar', label: 'Claude', data: by('claude'), backgroundColor: css('--c3'), stack: 's', borderRadius: 3, maxBarThickness: 28 },
     { type: 'bar', label: 'Gemini', data: by('gemini'), backgroundColor: css('--c1'), stack: 's', borderRadius: 3, maxBarThickness: 28 },
     { type: 'bar', label: 'Erreur', data: by('err'), backgroundColor: css('--bad'), stack: 's', borderRadius: 3, maxBarThickness: 28 },
-    { type: 'line', label: 'Coût (€)', data: cost, yAxisID: 'y2', borderColor: css('--ink'), backgroundColor: css('--ink'), borderDash: [4, 3], pointRadius: 2, borderWidth: 1.5, tension: .3 },
+    { type: 'line', label: 'Coût (€)', data: cost, yAxisID: 'y2', borderColor: css('--c-ink'), backgroundColor: css('--c-ink'), borderDash: [4, 3], pointRadius: 2, borderWidth: 1.5, tension: .3 },
   ] }, options: { interaction: { mode: 'index', intersect: false },
     plugins: { tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y2' ? ` Coût : ${eur(c.raw, 3)}` : ` ${c.dataset.label} : ${c.raw}` } } },
     scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } },
@@ -296,8 +402,8 @@ function drawLoupe(t) {
 function drawScatter(t) {
   const pts = p => t.L.filter(r => r.p === p && r.s != null && !r.e).map(r => ({ x: r.s, y: 100 * r.c, q: r.q }));
   chart('cScatter', { type: 'scatter', data: { datasets: [
-    { label: 'Claude', data: pts('claude'), backgroundColor: css('--c3') + 'cc', pointRadius: 4, pointHoverRadius: 6 },
-    { label: 'Gemini', data: pts('gemini'), backgroundColor: css('--c1') + 'cc', pointRadius: 4, pointHoverRadius: 6 },
+    { label: 'Claude', data: pts('claude'), backgroundColor: alpha(css('--c3'), .8), pointRadius: 4, pointHoverRadius: 6 },
+    { label: 'Gemini', data: pts('gemini'), backgroundColor: alpha(css('--c1'), .8), pointRadius: 4, pointHoverRadius: 6 },
   ] }, options: { plugins: { tooltip: { callbacks: { title: c => c[0].raw.q.slice(0, 90), label: c => ` ${fmt(c.raw.x, 1)} s · ${fmt(c.raw.y, 2)} centime(s)` } } },
     scales: { x: { type: 'logarithmic', title: { display: true, text: 'Durée (secondes, échelle log)' } },
       y: { beginAtZero: true, title: { display: true, text: 'Coût (centimes)' } } } } });
@@ -308,7 +414,7 @@ function drawTools(t) {
   for (const r of t.L) for (const x of r.tl) c[x] = (c[x] || 0) + 1;
   const rows = Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 14);
   chart('cTools', { type: 'bar', data: { labels: rows.map(r => r[0]), datasets: [{ label: 'Appels', data: rows.map(r => r[1]), backgroundColor: css('--c2'), borderRadius: 4, maxBarThickness: 18 }] },
-    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } }, y: { grid: { display: false } } } } });
+    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } }, y: { grid: { display: false }, ticks: { autoSkip: false } } } } });
 }
 
 function heat(t) {
@@ -316,15 +422,15 @@ function heat(t) {
   const days = t.days.filter(d => d >= first).slice(-14), grid = {};
   for (const r of [...t.L, ...t.S]) { const k = r.t.slice(0, 13); grid[k] = (grid[k] || 0) + 1; }
   const max = Math.max(1, ...Object.values(grid));
-  let h = '<div class="heat"><div class="lab"></div>' + Array.from({ length: 24 }, (_, i) => `<div class="hh">${i % 3 ? '' : i}</div>`).join('');
+  let h = '<div class="pn-heat"><div class="lab"></div>' + Array.from({ length: 24 }, (_, i) => `<div class="hh">${i % 3 ? '' : i}</div>`).join('');
   for (const d of days) {
     h += `<div class="lab">${dayLab(d).replace('.', '')}</div>`;
     for (let i = 0; i < 24; i++) {
       const n = grid[`${d} ${String(i).padStart(2, '0')}`] || 0;
-      h += `<div title="${dayLab(d)} ${i} h : ${n}" style="background:${n ? `color-mix(in srgb, var(--c1) ${15 + 85 * n / max}%, var(--soft))` : 'var(--soft)'}"></div>`;
+      h += `<div title="${dayLab(d)} ${i} h : ${n}" style="background:${n ? `color-mix(in srgb, var(--c-teal-600) ${15 + 85 * n / max}%, var(--c-surface-2))` : 'var(--c-surface-2)'}"></div>`;
     }
   }
-  $('heat').innerHTML = days.length ? h + '</div>' : '<div class="empty">Rien sur la période.</div>';
+  $('heat').innerHTML = days.length ? h + '</div>' : '<div class="pn-empty">Rien sur la période.</div>';
 }
 
 // ---------------------------------------------------------------- budgets and providers
@@ -332,18 +438,18 @@ function budgets() {
   const C = DATA.caps || {}, all = DATA.loupe, spent = p => all.filter(r => r.p === p).reduce((a, r) => a + r.c, 0);
   const g = (label, used, cap, foot, color) => {
     const share = cap ? Math.min(100, 100 * used / cap) : 0;
-    return `<div class="gauge"><div class="top"><span>${label}</span><span><b>${eur(used)}</b> / ${cap ? eur(cap, 0) : '?'}</span></div>
-      <div class="track"><i style="width:${share}%;background:${color}"></i></div><div class="foot">${foot}</div></div>`;
+    return `<div class="pn-gauge"><div class="pn-gauge__top"><span>${label}</span><span><b>${eur(used)}</b> / ${cap ? eur(cap, 0) : '?'}</span></div>
+      <div class="pn-gauge__track"><i style="width:${share}%;background:${color}"></i></div><div class="pn-gauge__foot">${foot}</div></div>`;
   };
   const rate = p => { const t0 = all.filter(r => r.p === p).map(r => r.t)[0]; return t0 ? spent(p) / Math.max(1, (new Date() - new Date(t0.replace(' ', 'T'))) / 864e5) : 0; };
   const left = C.gemini_until ? Math.ceil((new Date(C.gemini_until + 'T23:59') - new Date()) / 864e5) : null;
   const cCap = Math.min(C.claude_eur || Infinity, C.claude_usd || Infinity);
   const today = all.filter(r => r.t.startsWith(iso(new Date()))).reduce((a, r) => a + r.c, 0);
   $('budgets').innerHTML =
-    g('Claude', spent('claude'), cCap, `Crédit Anthropic, sans date de fin. Rythme moyen : ${eur(rate('claude'), 3)} par jour.`, css('--c3')) +
-    g('Gemini', spent('gemini'), C.gemini_eur, `Crédits Google Cloud${left != null ? `, ${left > 0 ? `encore ${left} jour(s), jusqu'au ${new Date(C.gemini_until + 'T12:00').toLocaleDateString('fr-FR')}` : 'expirés'}` : ''}.`, css('--c1')) +
-    g("Aujourd'hui (les deux)", today, C.daily_eur, 'Plafond quotidien commun, contre un emballement.', css('--c2')) +
-    `<p class="hint" style="margin:6px 0 0">Ordre des moteurs par défaut : <b>${esc((C.order || '').replace(',', ' puis '))}</b>.</p>`;
+    g('Claude', spent('claude'), cCap, `Crédit Anthropic, sans date de fin. Rythme moyen : ${eur(rate('claude'), 3)} par jour.`, 'var(--c3)') +
+    g('Gemini', spent('gemini'), C.gemini_eur, `Crédits Google Cloud${left != null ? `, ${left > 0 ? `encore ${left} jour(s), jusqu'au ${new Date(C.gemini_until + 'T12:00').toLocaleDateString('fr-FR')}` : 'expirés'}` : ''}.`, 'var(--c1)') +
+    g("Aujourd'hui (les deux)", today, C.daily_eur, 'Plafond quotidien commun, contre un emballement.', 'var(--brand-gradient)') +
+    `<p class="pn-hint" style="margin:0">Ordre des moteurs par défaut : <b>${esc((C.order || '').replace(',', ' puis '))}</b>.</p>`;
 }
 
 function providers(t) {
@@ -353,11 +459,11 @@ function providers(t) {
       ok.length ? ok.reduce((a, r) => a + r.n, 0) / ok.length : null, L.filter(r => r.e).length, L.filter(r => r.tl.includes('recherche_web')).length, L.filter(r => r.v == '1').length, L.filter(r => r.v == '-1').length];
   }).filter(r => r[1]);
   const tot = t.L.length || 1;
-  $('prov').innerHTML = rows.length ? `<table><tr><th>Moteur</th><th class="r">Questions</th><th class="r">Part</th><th class="r">Coût total</th><th class="r">Coût moyen</th><th class="r">Coût médian</th><th class="r">Durée médiane</th><th class="r">Durée 90 %</th><th class="r">Appels moyens</th><th class="r">Erreurs</th><th class="r">Recherches web</th><th class="r">👍 / 👎</th></tr>` +
-    rows.map(r => `<tr><td><span class="tag ${r[0]}">${PROV[r[0]]}</span></td><td class="r">${r[1]}</td><td class="r">${fmt(100 * r[1] / tot)} %</td><td class="r">${eur(r[2], 3)}</td>
-      <td class="r">${r[3] == null ? '·' : fmt(100 * r[3], 2) + ' c'}</td><td class="r">${r[4] == null ? '·' : fmt(100 * r[4], 2) + ' c'}</td><td class="r">${r[5] == null ? '·' : fmt(r[5], 1) + ' s'}</td><td class="r">${r[6] == null ? '·' : fmt(r[6], 0) + ' s'}</td>
-      <td class="r">${r[7] == null ? '·' : fmt(r[7], 1)}</td><td class="r">${r[8]}</td><td class="r">${r[9]}</td><td class="r">${r[10]} / ${r[11]}</td></tr>`).join('') + '</table>'
-    : '<div class="empty">Aucune question sur la période.</div>';
+  $('prov').innerHTML = rows.length ? `<table class="data-table"><thead><tr><th>Moteur</th><th class="num">Questions</th><th class="num">Part</th><th class="num">Coût total</th><th class="num">Coût moyen</th><th class="num">Coût médian</th><th class="num">Durée médiane</th><th class="num">Durée 90 %</th><th class="num">Appels moyens</th><th class="num">Erreurs</th><th class="num">Recherches web</th><th class="num">👍 / 👎</th></tr></thead><tbody>` +
+    rows.map(r => `<tr><td><span class="pn-tag ${r[0]}">${PROV[r[0]]}</span></td><td class="num">${r[1]}</td><td class="num">${fmt(100 * r[1] / tot)} %</td><td class="num">${eur(r[2], 3)}</td>
+      <td class="num">${r[3] == null ? '·' : fmt(100 * r[3], 2) + ' c'}</td><td class="num">${r[4] == null ? '·' : fmt(100 * r[4], 2) + ' c'}</td><td class="num">${r[5] == null ? '·' : fmt(r[5], 1) + ' s'}</td><td class="num">${r[6] == null ? '·' : fmt(r[6], 0) + ' s'}</td>
+      <td class="num">${r[7] == null ? '·' : fmt(r[7], 1)}</td><td class="num">${r[8]}</td><td class="num">${r[9]}</td><td class="num">${r[10]} / ${r[11]}</td></tr>`).join('') + '</tbody></table>'
+    : '<div class="pn-empty">Aucune question sur la période.</div>';
 }
 
 // ---------------------------------------------------------------- searches
@@ -365,108 +471,154 @@ function searches(t) {
   const c = {}, z = {};
   for (const r of t.S) { const k = r.q.trim().toLowerCase(); if (!k) continue; (c[k] ||= [0, r.n])[0]++; if (r.n === 0) z[k] = (z[k] || 0) + 1; }
   bars('topq', Object.entries(c).sort((a, b) => b[1][0] - a[1][0]).slice(0, 15).map(([k, [n, l]]) => [k, n, l == null ? '' : `${fmt(l)} lignes`]));
-  bars('zeroq', Object.entries(z).sort((a, b) => b[1] - a[1]).slice(0, 15), 'zero');
+  bars('zeroq', Object.entries(z).sort((a, b) => b[1] - a[1]).slice(0, 15), true);
 }
 
 // ---------------------------------------------------------------- tables
 let qLimit = 25, sLimit = 25;
+const when = t => t.slice(5, 16).replace('-', '/');
 function qTable(t) {
   const f = $('fq').value.trim().toLowerCase(), p = $('fp').value;
   let rows = [...t.L].reverse().filter(r => (!p || (p === 'err' ? r.e : r.p === p)) && (!f || (r.q + ' ' + r.a + ' ' + r.tl.join(' ')).toLowerCase().includes(f)));
   const n = rows.length; rows = rows.slice(0, qLimit);
-  $('qt').innerHTML = `<tr><th>Quand</th><th>Question</th><th>Moteur</th><th class="r">Durée</th><th class="r">Coût</th><th class="r">Appels</th></tr>` +
-    (rows.map((r, i) => `<tr class="q" data-i="${i}"><td class="muted" style="white-space:nowrap">${r.t.slice(5, 16).replace('-', '/')}</td>
-      <td class="qtext">${esc(r.q)}${r.f ? ' <span class="muted">(suite)</span>' : ''}${r.d ? ' <span class="tag dem">demande</span>' : ''}${r.v == '1' ? ' 👍' : r.v == '-1' ? ' 👎' : ''}</td>
-      <td>${r.e ? '<span class="tag err">erreur</span>' : `<span class="tag ${r.p}">${PROV[r.p] || r.p}</span>`}</td>
-      <td class="r">${r.s == null ? '·' : fmt(r.s, 1) + ' s'}</td><td class="r">${r.c ? fmt(100 * r.c, 2) + ' c' : '·'}</td><td class="r">${r.n || '·'}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">Aucune question.</td></tr>');
-  $('qt').querySelectorAll('tr.q').forEach(tr => tr.onclick = () => {
+  $('qt').innerHTML = `<thead><tr><th>Quand</th><th>Question</th><th>Moteur</th><th class="num">Durée</th><th class="num">Coût</th><th class="num">Appels</th></tr></thead><tbody>` +
+    (rows.map((r, i) => `<tr class="pn-q" data-i="${i}"><td class="when">${when(r.t)}</td>
+      <td class="qtext">${esc(r.q)}${r.f ? ' <span class="muted">(suite)</span>' : ''}${r.d ? ' <span class="pn-tag dem">demande</span>' : ''}${r.v == '1' ? ' 👍' : r.v == '-1' ? ' 👎' : ''}</td>
+      <td>${r.e ? '<span class="pn-tag err">erreur</span>' : `<span class="pn-tag ${r.p}">${PROV[r.p] || r.p}</span>`}</td>
+      <td class="num">${r.s == null ? '·' : fmt(r.s, 1) + ' s'}</td><td class="num">${r.c ? fmt(100 * r.c, 2) + ' c' : '·'}</td><td class="num">${r.n || '·'}</td></tr>`).join('') || '<tr><td colspan="6" class="pn-empty">Aucune question.</td></tr>') + '</tbody>';
+  $('qt').querySelectorAll('tr.pn-q').forEach(tr => tr.onclick = () => {
     const nx = tr.nextElementSibling;
-    if (nx && nx.classList.contains('detail')) return nx.remove();
+    if (nx && nx.classList.contains('pn-detail')) { tr.classList.remove('is-open'); return nx.remove(); }
     const r = rows[+tr.dataset.i], d = document.createElement('tr');
-    d.className = 'detail';
+    d.className = 'pn-detail'; tr.classList.add('is-open');
     d.innerHTML = `<td></td><td colspan="5">${r.e ? `<b class="down">${esc(r.e)}</b>\n\n` : ''}${esc(r.a || '(pas de réponse)')}${r.tl.length ? `\n\n<span class="muted">Outils : ${esc(r.tl.join(', '))}</span>` : ''}${r.src.length ? `\n<span class="muted">Sources : ${r.src.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//, '').slice(0, 60))}</a>`).join(' · ')}</span>` : ''}${r.m ? `\n<span class="muted">Modèle : ${esc(r.m)}</span>` : ''}</td>`;
     tr.after(d);
   });
   $('qmore').hidden = n <= qLimit;
 }
 function sTable(t) {
-  const f = $('fs').value.trim().toLowerCase();
-  let rows = DATA.searches.filter(r => t.days.includes(r.t.slice(0, 10)) && (!f || r.q.toLowerCase().includes(f))).reverse();
+  const f = $('fs').value.trim().toLowerCase(), set = new Set(t.days);
+  let rows = DATA.searches.filter(r => set.has(r.t.slice(0, 10)) && (!f || r.q.toLowerCase().includes(f))).reverse();
   const n = rows.length; rows = rows.slice(0, sLimit);
-  $('st').innerHTML = `<tr><th>Quand</th><th>Recherche</th><th class="r">Lignes trouvées</th><th>Cache</th></tr>` +
-    (rows.map(r => `<tr><td class="muted" style="white-space:nowrap">${r.t.slice(5, 16).replace('-', '/')}</td><td class="qtext">${esc(r.q)}${r.p ? ' <span class="muted">(suggestion)</span>' : ''}</td>
-      <td class="r ${r.n === 0 ? 'down' : ''}">${r.n == null ? '·' : fmt(r.n)}</td><td class="muted">${esc(r.c)}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">Aucune recherche.</td></tr>');
+  $('st').innerHTML = `<thead><tr><th>Quand</th><th>Recherche</th><th class="num">Lignes trouvées</th><th>Cache</th></tr></thead><tbody>` +
+    (rows.map(r => `<tr><td class="when">${when(r.t)}</td><td class="qtext">${esc(r.q)}${r.p ? ' <span class="muted">(suggestion)</span>' : ''}</td>
+      <td class="num ${r.n === 0 ? 'down' : ''}">${r.n == null ? '·' : fmt(r.n)}</td><td class="muted">${esc(r.c)}</td></tr>`).join('') || '<tr><td colspan="4" class="pn-empty">Aucune recherche.</td></tr>') + '</tbody>';
   $('smore').hidden = n <= sLimit;
 }
 
 // ---------------------------------------------------------------- render
 let T;
+function status() {
+  const days = T.days;
+  const shown = period && days.length === period ? `${period} derniers jours` : `depuis le ${new Date(days[0] + 'T12:00').toLocaleDateString('fr-FR')} (début des données)`;
+  $('sub').innerHTML = `<span><i class="pn-dot ${live ? 'is-live' : ''}"></i>${live ? 'Panneau actif' : 'Copie hors ligne'}</span><span>Données du ${esc(DATA.generated.replace(' ', ' à '))}</span><span>${shown}</span><span>${fmt(DATA.loupe.length)} questions et ${fmt(DATA.searches.length)} recherches au journal</span>`;
+}
 function render() {
   const days = span(period); T = totals(days);
   const P = period ? totals(span(period, 1)) : null;
-  kpis(T, P || {});
-  const shown = period && days.length === period ? `${period} derniers jours` : `depuis le ${new Date(days[0] + 'T12:00').toLocaleDateString('fr-FR')} (début des données)`;
-  $('sub').textContent = `Généré le ${DATA.generated.replace(' ', ' à ')} · ${shown} · ${DATA.loupe.length} questions et ${DATA.searches.length} recherches au journal`;
+  kpis(T, P || {}); status();
   $('pagesHint').textContent = `Sur la période (${days.length} jours).`;
   bars('pages', topOf(days, 'pages').map(([k, n]) => [k === '/' ? 'Accueil' : k.replace(/^\//, '').replace(/\.html$/, ''), n]));
   bars('refs', topOf(days, 'refs'));
-  drawAudience(T); drawLoupe(T); drawScatter(T); drawTools(T); heat(T); budgets(); providers(T); searches(T); qTable(T); sTable(T);
+  if (window.Chart) { drawAudience(T); drawLoupe(T); drawScatter(T); drawTools(T); }
+  heat(T); budgets(); providers(T); searches(T); qTable(T); sTable(T); grow();
 }
-$('period').innerHTML = PERIODS.map(([n, l]) => `<button data-n="${n}" class="${n === period ? 'on' : ''}">${l}</button>`).join('');
+$('period').innerHTML = PERIODS.map(([n, l]) => `<button type="button" data-n="${n}" class="${n === period ? 'active' : ''}">${l}</button>`).join('');
 $('period').onclick = e => { const b = e.target.closest('button'); if (!b) return; period = +b.dataset.n; try { localStorage.setItem('frl-panel-period', period); } catch (x) {}
-  $('period').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); qLimit = 25; sLimit = 25; render(); };
+  $('period').querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b)); qLimit = 25; sLimit = 25; render(); };
 $('fq').oninput = $('fp').onchange = () => qTable(T);
 $('fs').oninput = () => sTable(T);
 $('qmore').onclick = () => { qLimit += 100; qTable(T); };
 $('smore').onclick = () => { sLimit += 200; sTable(T); };
-$('theme').onclick = () => { const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-  r.dataset.theme = dark ? 'light' : 'dark'; try { localStorage.setItem('frl-panel-theme', r.dataset.theme); } catch (x) {} render(); };
-try { const t = localStorage.getItem('frl-panel-theme'); if (t) document.documentElement.dataset.theme = t; } catch (x) {}
-matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+$('themeToggle').onclick = () => {
+  const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('frl-panel-theme', r.dataset.theme); } catch (x) {}
+  render();
+};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+  try { if (localStorage.getItem('frl-panel-theme')) return; } catch (x) {}
+  document.documentElement.dataset.theme = e.matches ? 'dark' : 'light'; render();
+});
+
+// ---------------------------------------------------------------- tabs: highlight the section on screen
+const tabs = [...document.querySelectorAll('#tabs a')], secs = tabs.map(a => document.querySelector(a.getAttribute('href')));
+let spyQueued = false;
+function spy() {
+  spyQueued = false;
+  const y = parseFloat(css('--header-h')) + parseFloat(css('--bar-h')) + 40;
+  let on = 0; secs.forEach((s, i) => { if (s.getBoundingClientRect().top <= y) on = i; });
+  if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) on = secs.length - 1;
+  tabs.forEach((a, i) => a.classList.toggle('is-on', i === on));
+  const a = tabs[on], box = $('tabs');
+  if (a.offsetLeft < box.scrollLeft || a.offsetLeft + a.offsetWidth > box.scrollLeft + box.clientWidth) box.scrollTo({ left: a.offsetLeft - 16, behavior: 'smooth' });
+}
+addEventListener('scroll', () => { if (!spyQueued) { spyQueued = true; requestAnimationFrame(spy); } }, { passive: true });
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || e.target.matches('input, textarea, select')) return;
+  if (e.key === '/') { e.preventDefault(); $('journal').scrollIntoView(); $('fq').focus({ preventScroll: true }); }
+  else if ((e.key === 'r' || e.key === 'R') && !$('refresh').hidden && !$('refresh').disabled) $('refresh').click();
+});
+
 // ---------------------------------------------------------------- requests to public bodies (frl-demandes)
 const DM_LABEL = { a_valider: 'à relire', envoyee: 'envoyée', repondue: 'réponse reçue', refusee: 'refusée', close: 'close' };
 const DM_ORDER = { a_valider: 0, repondue: 1, envoyee: 2, close: 3, refusee: 4 };
-let DM = DATA.demandes || { demandes: [] };
-const live = DATA.live && location.protocol === 'http:' && location.hostname === '127.0.0.1';
+const DM_FILTERS = [['todo', 'À traiter', d => d.status === 'a_valider' || d.status === 'repondue'], ['envoyee', 'En attente de réponse', d => d.status === 'envoyee'],
+  ['done', 'Closes ou refusées', d => d.status === 'close' || d.status === 'refusee'], ['all', 'Toutes', () => true]];
+let DM = DATA.demandes || { demandes: [] }, dmFilter = null, dmOpen = null;   // dmOpen: refs whose letter is unfolded
 const fdate = t => t ? new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '·';
 async function dmCall(body) {
   const r = await fetch('/api/demandes', { method: body ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json', 'X-Panel-Token': DATA.live }, body: body ? JSON.stringify(body) : undefined });
   return r.json();
 }
-let dmRender = function () {
-  const rows = [...(DM.demandes || [])].sort((a, b) => (DM_ORDER[a.status] ?? 9) - (DM_ORDER[b.status] ?? 9) || String(b.requested || b.created).localeCompare(String(a.requested || a.created)));
-  const todo = rows.filter(d => d.status === 'a_valider').length, rep = rows.filter(d => d.status === 'repondue').length;
-  $('dmHint').innerHTML = `${todo} à relire, ${rep} réponse(s) à publier, ${rows.length} en tout. ${DM.envoi_auto ? '<b class="down">Envoi automatique activé.</b>' : 'Rien ne part sans votre validation.'} ${DM.envois_par_jour ? `${DM.envoyes_aujourdhui || 0} envoi(s) aujourd’hui sur ${DM.envois_par_jour} au plus.` : ''} ${live ? '' : '<b>Boutons inactifs : ouvrez le panneau avec frl_panel.bat.</b>'}`;
-  if (!rows.length) { $('dm').innerHTML = '<div class="empty">Aucune demande.</div>'; return; }
-  $('dm').innerHTML = `<div class="dm-list">${rows.map((d, i) => {
+const dmTimers = {};
+function dmRender() {
+  if (Object.keys(dmTimers).length) return;   // a letter is being edited: keep it on screen
+  const all = [...(DM.demandes || [])].sort((a, b) => (DM_ORDER[a.status] ?? 9) - (DM_ORDER[b.status] ?? 9) || String(b.requested || b.created).localeCompare(String(a.requested || a.created)));
+  const todo = all.filter(d => d.status === 'a_valider').length, rep = all.filter(d => d.status === 'repondue').length;
+  if (dmFilter == null) dmFilter = todo + rep ? 'todo' : 'all';
+  $('tabDm').textContent = todo + rep || '';
+  $('dmHint').innerHTML = `${todo} à relire, ${rep} réponse(s) à publier, ${all.length} en tout. ${DM.envoi_auto ? '<b class="down">Envoi automatique activé.</b>' : 'Rien ne part sans votre validation.'} ${DM.envois_par_jour ? `${DM.envoyes_aujourdhui || 0} envoi(s) aujourd’hui sur ${DM.envois_par_jour} au plus.` : ''} ${live ? '' : '<b>Boutons inactifs : ouvrez le panneau avec frl_panel.bat.</b>'}`;
+  $('dmFilters').innerHTML = DM_FILTERS.map(([k, l, f]) => `<button type="button" data-f="${k}" aria-pressed="${k === dmFilter}">${l}<span>${all.filter(f).length}</span></button>`).join('');
+  const rows = all.filter(DM_FILTERS.find(f => f[0] === dmFilter)[2]);
+  if (dmOpen == null) dmOpen = new Set(all.filter(d => d.status === 'a_valider').slice(0, 1).map(d => d.ref));
+  const words = t => String(t || '').trim().split(/\s+/).filter(Boolean).length;
+  if (!rows.length) { $('dm').innerHTML = `<div class="pn-empty">${all.length ? 'Rien dans ce filtre.' : 'Aucune demande.'}</div>`; return; }
+  $('dm').innerHTML = `<div class="pn-dm-list">${rows.map(d => {
     const to = d.to || {}, f = d.fields || {}, last = (d.replies || []).at(-1);
     const days = d.echeance ? Math.ceil((new Date(d.echeance + 'T23:59') - new Date()) / 864e5) : null;
     const warn = [];
     if (!to.email) warn.push('Pas d’adresse électronique officielle.');
     if (d.meme_organisme_30j) warn.push(`${d.meme_organisme_30j} autre(s) demande(s) déjà faite(s) à cette adresse.`);
-    return `<div class="dm ${d.status === 'a_valider' || d.status === 'repondue' ? 'is-todo' : ''}" data-i="${i}">
-      <div class="dm-top"><b>${esc(d.ref)} · ${esc(f.objet)}</b><span class="tag st-${esc(d.status)}">${DM_LABEL[d.status] || esc(d.status)}</span></div>
-      <div class="dm-meta">À <b>${esc(to.nom)}</b> &lt;${esc(to.email || 'pas d’adresse')}&gt;${to.fiche ? ` · <a href="${esc(to.fiche)}" target="_blank" rel="noopener">fiche officielle</a>` : ''} · demandée le ${fdate(d.requested || d.created)}${d.sent ? ` · envoyée le ${fdate(d.sent)}` : ''}${d.echeance && d.status === 'envoyee' ? ` · ${days >= 0 ? `réponse due d’ici ${days} jour(s)` : `sans réponse depuis ${-days} jour(s) : refus implicite, la CADA peut être saisie`}` : ''}</div>
-      ${warn.map(w => `<div class="dm-warn">${esc(w)}</div>`).join('')}
-      ${d.question ? `<div class="dm-meta">Question du lecteur : « ${esc(d.question)} »</div>` : ''}
-      ${d.status === 'a_valider' ? `<div class="dm-compose" data-ref="${esc(d.ref)}"><div class="dm-field"><label>À</label><span>${esc(to.nom)} &lt;${esc(to.email || 'pas d’adresse')}&gt;</span></div>
-        <div class="dm-field"><label>Objet</label><input data-subj value="${esc(d.subject)}" ${live ? '' : 'readonly'}></div>
+    return `<article class="pn-dm ${d.status === 'a_valider' || d.status === 'repondue' ? 'is-todo' : ''}" data-ref="${esc(d.ref)}">
+      <div class="pn-dm-top"><b>${esc(d.ref)} · ${esc(f.objet)}</b><span class="pn-tag st-${esc(d.status)}">${DM_LABEL[d.status] || esc(d.status)}</span></div>
+      <div class="pn-dm-meta">À <b>${esc(to.nom)}</b> &lt;${esc(to.email || 'pas d’adresse')}&gt;${to.fiche ? ` · <a href="${esc(to.fiche)}" target="_blank" rel="noopener">fiche officielle</a>` : ''} · demandée le ${fdate(d.requested || d.created)}${d.sent ? ` · envoyée le ${fdate(d.sent)}` : ''}${d.echeance && d.status === 'envoyee' ? ` · ${days >= 0 ? `réponse due d’ici ${days} jour(s)` : `sans réponse depuis ${-days} jour(s) : refus implicite, la CADA peut être saisie`}` : ''}</div>
+      ${warn.map(w => `<div class="pn-dm-warn">${esc(w)}</div>`).join('')}
+      ${d.question ? `<div class="pn-dm-meta">Question du lecteur : « ${esc(d.question)} »</div>` : ''}
+      ${d.status === 'a_valider' ? `<details class="pn-dm-letter" data-ref="${esc(d.ref)}" ${dmOpen.has(d.ref) ? 'open' : ''}><summary>Relire et modifier la lettre (${words(d.body)} mots)</summary><div class="pn-dm-compose" data-ref="${esc(d.ref)}"><div class="pn-dm-field"><label>À</label><span>${esc(to.nom)} &lt;${esc(to.email || 'pas d’adresse')}&gt;</span></div>
+        <div class="pn-dm-field"><label>Objet</label><input data-subj value="${esc(d.subject)}" ${live ? '' : 'readonly'}></div>
         <textarea data-body spellcheck="true" ${live ? '' : 'readonly'}>${esc(d.body)}</textarea>
-        ${DM.signature ? `<div class="dm-sig"><div class="dm-sig__lab">Signature, ajoutée à l’envoi</div><div class="dm-sig__paper">${DM.signature.html}</div></div>` : ''}
-        <div class="dm-cbar"><span data-saved>${d.modifiee ? 'Lettre modifiée par vous' : 'Lettre du modèle, modifiable'}</span><span data-words></span></div></div>` : `<details><summary>Lettre envoyée</summary><pre><b>${esc(d.subject)}</b>\n\n${esc(d.body)}</pre></details>`}
+        ${DM.signature ? `<div class="pn-dm-sig"><div class="pn-dm-sig__lab">Signature, ajoutée à l’envoi</div><div class="pn-dm-sig__paper">${DM.signature.html}</div></div>` : ''}
+        <div class="pn-dm-cbar"><span data-saved>${d.modifiee ? 'Lettre modifiée par vous' : 'Lettre du modèle, modifiable'}</span><span data-words></span></div></div></details>` : `<details><summary>Lettre envoyée</summary><pre><b>${esc(d.subject)}</b>\n\n${esc(d.body)}</pre></details>`}
       ${last ? `<details ${d.status === 'repondue' ? 'open' : ''}><summary>Réponse du ${fdate(last.date)} (${esc(last.from_domain)})${last.files?.length ? `, pièces : ${esc(last.files.join(', '))}` : ''}</summary><pre>${esc(last.text)}</pre>
-        ${d.status === 'repondue' ? `<div class="dm-meta">Texte publié sur la page des demandes (adresses, téléphones et signature retirés, à relire) :</div><textarea data-pub>${esc(last.public_text || d.reponse_anonymisee || '')}</textarea>` : last.public_text ? `<div class="dm-meta">Publié :</div><pre>${esc(last.public_text)}</pre>` : ''}</details>` : ''}
-      <div class="dm-actions">${({
-        a_valider: `<button class="go" data-act="valider" ${to.email ? '' : 'disabled'}>Envoyer à ${esc(to.email || '…')}</button><button data-act="refuser">Refuser</button><input data-to placeholder="Autre destinataire : nom officiel ou code Insee"><button data-act="destinataire">Changer</button>`,
-        repondue: `<button class="go" data-act="publier">Publier la réponse</button><button data-act="cloturer">Clôturer</button>`,
-        envoyee: `<button data-act="cloturer">Clôturer</button>`,
-      })[d.status] || ''}<span class="dm-msg"></span></div></div>`; }).join('')}</div>`;
-  $('dm').querySelectorAll('.dm-actions button').forEach(b => { if (!live) b.disabled = true; });
+        ${d.status === 'repondue' ? `<div class="pn-dm-meta">Texte publié sur la page des demandes (adresses, téléphones et signature retirés, à relire) :</div><textarea data-pub>${esc(last.public_text || d.reponse_anonymisee || '')}</textarea>` : last.public_text ? `<div class="pn-dm-meta">Publié :</div><pre>${esc(last.public_text)}</pre>` : ''}</details>` : ''}
+      <div class="pn-dm-actions">${({
+        a_valider: `<button type="button" class="go" data-act="valider" ${to.email ? '' : 'disabled'}>Envoyer à ${esc(to.email || '…')}</button><button type="button" data-act="refuser">Refuser</button><input data-to placeholder="Autre destinataire : nom officiel ou code Insee"><button type="button" data-act="destinataire">Changer</button>`,
+        repondue: `<button type="button" class="go" data-act="publier">Publier la réponse</button><button type="button" data-act="cloturer">Clôturer</button>`,
+        envoyee: `<button type="button" data-act="cloturer">Clôturer</button>`,
+      })[d.status] || ''}<span class="pn-dm-msg"></span></div></article>`; }).join('')}</div>`;
+  if (!live) $('dm').querySelectorAll('.pn-dm-actions button').forEach(b => { b.disabled = true; });
+  dmWire();
 }
+$('dmFilters').addEventListener('click', e => {
+  const b = e.target.closest('button[data-f]'); if (!b) return;
+  if (Object.keys(dmTimers).length) Object.keys(dmTimers).forEach(ref => dmSave(document.querySelector(`.pn-dm[data-ref="${CSS.escape(ref)}"]`)));
+  dmFilter = b.dataset.f; setTimeout(dmRender, Object.keys(dmTimers).length ? 600 : 0);
+});
 $('dm').addEventListener('click', async e => {
   const b = e.target.closest('button[data-act]'); if (!b || !live) return;
-  const box = b.closest('.dm'), d = [...(DM.demandes || [])].sort((a, c) => (DM_ORDER[a.status] ?? 9) - (DM_ORDER[c.status] ?? 9) || String(c.requested || c.created).localeCompare(String(a.requested || a.created)))[+box.dataset.i];
-  const msg = box.querySelector('.dm-msg'), act = b.dataset.act;
+  const box = b.closest('.pn-dm'), d = (DM.demandes || []).find(x => x.ref === box.dataset.ref);
+  if (!d) return;
+  const msg = box.querySelector('.pn-dm-msg'), act = b.dataset.act;
   if (act === 'destinataire' && !(box.querySelector('[data-to]')?.value || '').trim()) { msg.textContent = 'Tapez le nom officiel de l’organisme (ou le code Insee d’une commune).'; return; }
   if ((act === 'valider' || act === 'refuser') && !b.classList.contains('confirm')) {   // two clicks: no mail leaves by mistake
     b.classList.add('confirm'); const was = b.textContent; b.textContent = act === 'valider' ? 'Confirmer l’envoi' : 'Confirmer le refus';
@@ -482,9 +634,8 @@ $('dm').addEventListener('click', async e => {
   if (msg.textContent.startsWith('Erreur')) box.querySelectorAll('button').forEach(x => x.disabled = false);
 });
 // inline edit of the letter: saved 1 s after the last keystroke (frl-demandes modifier), flushed before sending
-const dmTimers = {};
 async function dmSave(box) {
-  const c = box.querySelector('.dm-compose'); if (!c || !live) return true;
+  const c = box && box.querySelector('.pn-dm-compose'); if (!c || !live) return true;
   clearTimeout(dmTimers[c.dataset.ref]); delete dmTimers[c.dataset.ref];
   const st = c.querySelector('[data-saved]'); st.textContent = 'Enregistrement…';
   try {
@@ -498,51 +649,55 @@ async function dmSave(box) {
 }
 function dmGrow(ta) { ta.style.height = 'auto'; ta.style.height = `${ta.scrollHeight + 2}px`; }
 function dmWire() {
-  document.querySelectorAll('.dm-compose').forEach(c => {
+  document.querySelectorAll('.pn-dm-letter').forEach(l => l.addEventListener('toggle', () => {
+    l.open ? dmOpen.add(l.dataset.ref) : dmOpen.delete(l.dataset.ref);
+    if (l.open) dmGrow(l.querySelector('[data-body]'));   // a folded textarea has no height yet
+  }));
+  document.querySelectorAll('.pn-dm-compose').forEach(c => {
     const ta = c.querySelector('[data-body]'), si = c.querySelector('[data-subj]'), w = c.querySelector('[data-words]');
     const count = () => { w.textContent = `${ta.value.trim().split(/\s+/).filter(Boolean).length} mots`; };
     dmGrow(ta); count();
     const edit = () => {
       dmGrow(ta); count(); c.querySelector('[data-saved]').textContent = 'Modification…';
-      clearTimeout(dmTimers[c.dataset.ref]); dmTimers[c.dataset.ref] = setTimeout(() => dmSave(c.closest('.dm')), 1000);
+      clearTimeout(dmTimers[c.dataset.ref]); dmTimers[c.dataset.ref] = setTimeout(() => dmSave(c.closest('.pn-dm')), 1000);
     };
     ta.oninput = edit; si.oninput = edit;
   });
 }
-const dmRender0 = dmRender;
-dmRender = () => { if (Object.keys(dmTimers).length) return; dmRender0(); dmWire(); };
 addEventListener('beforeunload', e => { if (Object.keys(dmTimers).length) { e.preventDefault(); e.returnValue = ''; } });
 dmRender();
 
-$('notes').innerHTML = (DATA.notes || []).map(n => `<div class="notes">${esc(n)}</div>`).join('');
+$('notes').innerHTML = (DATA.notes || []).map(n => `<div class="pn-note"><span>${esc(n)}</span></div>`).join('');
 // ---------------------------------------------------------------- « Actualiser »: new data without closing the window
 if (live) {
-  const btn = $('refresh'), hdr = { 'X-Panel-Token': DATA.live };
+  const btn = $('refresh'), lab = btn.querySelector('.pn-lab'), hdr = { 'X-Panel-Token': DATA.live };
+  const busy = on => { btn.disabled = on; btn.classList.toggle('is-busy', on); lab.textContent = on ? 'Mise à jour…' : 'Actualiser'; };
   btn.hidden = false;
   // a reload would lose a letter being edited: then say the data is ready instead of reloading
   const editing = () => Object.keys(dmTimers).length || (document.activeElement && document.activeElement.matches('textarea, input[type=text], input:not([type])'));
   const ready = () => {
     if (!editing()) { try { sessionStorage.setItem('frl-panel-scroll', String(scrollY)); } catch (x) {} return location.reload(); }
-    if (!$('fresh')) $('notes').insertAdjacentHTML('afterbegin', '<div class="notes" id="fresh">Nouvelles données prêtes.<button type="button" id="freshGo">Afficher</button></div>');
+    if (!$('fresh')) $('notes').insertAdjacentHTML('afterbegin', '<div class="pn-note" id="fresh"><span>Nouvelles données prêtes.</span><button type="button" id="freshGo">Afficher</button></div>');
     $('freshGo').onclick = () => location.reload();
   };
   const poll = async () => {
     let st;
-    try { st = await (await fetch('/api/state', { headers: hdr })).json(); } catch (x) { btn.disabled = false; btn.textContent = 'Actualiser'; return; }
-    if (st.busy) { btn.disabled = true; btn.textContent = 'Mise à jour…'; return setTimeout(poll, 1200); }
-    btn.disabled = false; btn.textContent = 'Actualiser';
+    try { st = await (await fetch('/api/state', { headers: hdr })).json(); } catch (x) { busy(false); return; }
+    if (st.busy) { busy(true); return setTimeout(poll, 1200); }
+    busy(false);
     if (st.generated && st.generated !== DATA.generated) ready();
-    else if ((st.notes || []).length && !(DATA.notes || []).includes(st.notes[0])) $('notes').insertAdjacentHTML('afterbegin', `<div class="notes">${esc(st.notes[0])}</div>`);
+    else if ((st.notes || []).length && !(DATA.notes || []).includes(st.notes[0])) $('notes').insertAdjacentHTML('afterbegin', `<div class="pn-note"><span>${esc(st.notes[0])}</span></div>`);
   };
   btn.onclick = async () => {
-    btn.disabled = true; btn.textContent = 'Mise à jour…';
+    busy(true);
     try { await fetch('/api/refresh', { method: 'POST', headers: hdr }); } catch (x) {}
     poll();
   };
   poll();
   try { const y = sessionStorage.getItem('frl-panel-scroll'); if (y) { sessionStorage.removeItem('frl-panel-scroll'); setTimeout(() => scrollTo(0, +y), 300); } } catch (x) {}
 }
-if (window.Chart) render(); else document.body.insertAdjacentHTML('afterbegin', '<div class="notes">Chart.js n’a pas pu être chargé (pas d’accès à Internet ?).</div>');
+if (!window.Chart) $('notes').insertAdjacentHTML('afterbegin', '<div class="pn-note"><span>Chart.js n’a pas pu être chargé (pas d’accès à Internet ?) : les graphiques sont absents, le reste fonctionne.</span></div>');
+render(); spy();
 </script>
 </body>
 </html>
