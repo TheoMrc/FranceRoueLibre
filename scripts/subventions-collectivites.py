@@ -291,7 +291,8 @@ def main():
                     quality['montant_nul'] += 1
                     continue
                 giver = clean(get('giver'), 140) or fallback[0]
-                giver_siren = siren_of(get('giver_id')) or fallback[1] or resolve(giver)
+                # no usable SIRET: the name written in the file, then the organisation that published it on data.gouv.fr
+                giver_siren = siren_of(get('giver_id')) or fallback[1] or resolve(giver) or resolve(org)
                 if not giver and not giver_siren:
                     quality['sans_attribuant'] += 1
                     continue
