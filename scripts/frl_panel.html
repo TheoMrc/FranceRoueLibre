@@ -248,7 +248,7 @@ body.pn { padding-top: var(--header-h); }
       <div class="section__head-row"><div class="section__head"><span class="eyebrow">Assistant</span><h2>La Loupe</h2><p class="lead">Qui répond, combien ça coûte, combien de temps ça prend.</p></div></div>
       <div class="pn-grid">
         <div class="panel pn-s8"><h3>Questions par jour et coût</h3><p class="pn-hint">Barres : qui a répondu. Ligne : coût du jour en euros (axe de droite).</p><div class="pn-chart tall"><canvas id="cLoupe"></canvas></div></div>
-        <div class="panel pn-s4"><h3>Budgets des modèles</h3><p class="pn-hint">Dépense cumulée d’après le journal, plafonds de server/assistant/settings.py.</p><div id="budgets"></div></div>
+        <div class="panel pn-s4"><h3>Budgets des modèles</h3><p class="pn-hint" id="budgetsHint"></p><div id="budgets"></div></div>
         <div class="panel pn-s7"><h3>Coût et durée de chaque réponse</h3><p class="pn-hint">Un point par question. Les réponses automatiques (gratuites, immédiates) ne sont pas tracées.</p><div class="pn-chart"><canvas id="cScatter"></canvas></div></div>
         <div class="panel pn-s5"><h3>Outils appelés</h3><p class="pn-hint">Nombre d’appels sur la période.</p><div class="pn-chart"><canvas id="cTools"></canvas></div></div>
         <div class="panel pn-s12"><h3>Par moteur de réponse</h3><p class="pn-hint">Sur la période choisie.</p><div class="table-wrap" id="prov"></div></div>
@@ -444,14 +444,21 @@ function budgets() {
       <div class="pn-gauge__track"><i style="width:${share}%;background:${color}"></i></div><div class="pn-gauge__foot">${foot}</div></div>`;
   };
   const rate = p => { const t0 = all.filter(r => r.p === p).map(r => r.t)[0]; return t0 ? spent(p) / Math.max(1, (new Date() - new Date(t0.replace(' ', 'T'))) / 864e5) : 0; };
-  const left = C.gemini_until ? Math.ceil((new Date(C.gemini_until + 'T23:59') - new Date()) / 864e5) : null;
-  const cCap = Math.min(C.claude_eur || Infinity, C.claude_usd || Infinity);
-  const today = all.filter(r => r.t.startsWith(iso(new Date()))).reduce((a, r) => a + r.c, 0);
+  // B: the caps really in force on the VPS and its ledger (frl-budget); without it, the defaults of settings.py and the journal
+  const B = DATA.budget, bc = (B && B.claude) || {}, bg = (B && B.gemini) || {};
+  const until = B ? bg.until : C.gemini_until;
+  const left = until ? Math.ceil((new Date(until + 'T23:59') - new Date()) / 864e5) : null;
+  const cCap = B ? bc.limit_eur : Math.min(C.claude_eur || Infinity, C.claude_usd || Infinity);
+  const day = p => all.filter(r => r.t.startsWith(iso(new Date())) && (!p || r.p === p)).reduce((a, r) => a + r.c, 0);
+  const cDay = B ? bc.daily_limit_eur : C.claude_daily_eur;
+  $('budgetsHint').textContent = B ? `Plafonds en vigueur sur le VPS et dépense de son registre, lus le ${B.read || '?'}.`
+    : 'VPS non lu : dépense d’après le journal, plafonds par défaut de server/assistant/settings.py (le VPS peut en avoir d’autres).';
   $('budgets').innerHTML =
-    g('Claude', spent('claude'), cCap, `Crédit Anthropic, sans date de fin. Rythme moyen : ${eur(rate('claude'), 3)} par jour.`, 'var(--c3)') +
-    g('Gemini', spent('gemini'), C.gemini_eur, `Crédits Google Cloud${left != null ? `, ${left > 0 ? `encore ${left} jour(s), jusqu'au ${new Date(C.gemini_until + 'T12:00').toLocaleDateString('fr-FR')}` : 'expirés'}` : ''}.`, 'var(--c1)') +
-    g("Aujourd'hui (les deux)", today, C.daily_eur, 'Plafond quotidien commun, contre un emballement.', 'var(--brand-gradient)') +
-    `<p class="pn-hint" style="margin:0">Ordre des moteurs par défaut : <b>${esc((C.order || '').replace(',', ' puis '))}</b>.</p>`;
+    g('Claude, au total', B ? bc.spent_eur : spent('claude'), cCap, `Crédit Anthropic, sans date de fin. Rythme moyen : ${eur(rate('claude'), 3)} par jour.${B && bc.refusal ? ` Arrêté : ${esc(bc.refusal)}.` : ''}`, 'var(--c3)') +
+    (cDay ? g("Claude, aujourd'hui", B ? bc.today_eur : day('claude'), cDay, 'Plafond quotidien de Claude seul.', 'var(--c3)') : '') +
+    g('Gemini', B ? bg.spent_eur : spent('gemini'), B ? bg.limit_eur : C.gemini_eur, `Crédits Google Cloud${left != null ? `, ${left > 0 ? `encore ${left} jour(s), jusqu'au ${new Date(until + 'T12:00').toLocaleDateString('fr-FR')}` : 'expirés'}` : ''}.`, 'var(--c1)') +
+    g("Aujourd'hui (les deux)", B ? B.today_eur : day(), B ? B.daily_limit_eur : C.daily_eur, 'Plafond quotidien commun, contre un emballement.', 'var(--brand-gradient)') +
+    `<p class="pn-hint" style="margin:0">Ordre des moteurs par défaut : <b>${esc(((B && B.order) ? B.order.join(',') : C.order || '').replace(',', ' puis '))}</b>.</p>`;
 }
 
 function providers(t) {

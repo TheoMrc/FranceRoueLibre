@@ -412,7 +412,9 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
-def print_usage() -> None:
+def print_usage(as_json: bool = False) -> None:
+    if as_json:   # read by scripts/frl_panel.py (frl-budget on the VPS): the caps really in force and the spending
+        return print(json.dumps(budget().summary() | {'order': S.ORDER}, ensure_ascii=False))
     rows = []
     path = S.STATE_DIR / 'spend.jsonl'
     if path.is_file():
@@ -421,6 +423,7 @@ def print_usage() -> None:
     for p in ('gemini', 'claude'):
         d = s[p]
         print(f'{p:7s} {d["spent_eur"]:8.3f} € sur {d["limit_eur"]:g} €'
+              + (f', aujourd’hui {d["today_eur"]:.3f} € sur {d["daily_limit_eur"]:g} €' if d['daily_limit_eur'] else '')
               + (f', jusqu’au {d["until"]}' if d['until'] else '') + (f'  [{d["refusal"]}]' if d['refusal'] else ''))
     print(f'aujourd’hui {s["today_eur"]:.3f} € (plafond {s["daily_limit_eur"]:g} €/jour) · registre : {path}')
     per_day = collections.defaultdict(lambda: [0, 0.0])
@@ -464,6 +467,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=8018)
     parser.add_argument('--usage', action='store_true')
+    parser.add_argument('--json', action='store_true', help='--usage : les plafonds et la dépense en JSON')
     parser.add_argument('--demandes', nargs='+', metavar='ACTION', help='liste | tout | voir REF | valider REF | deposee REF [--texte F avec le lien du formulaire] | refuser REF | destinataire REF --texte F | '
                                                                        'publier REF [--texte F] | cloturer REF')
     parser.add_argument('--mail', nargs='+', metavar='ACTION', help='boîte du site : liste [N] | lire UID | apercu UID | '
@@ -475,7 +479,7 @@ def main():
     parser.add_argument('--fake', action='store_true', help='fake models, no network call, no token (tests)')
     args = parser.parse_args()
     if args.usage:
-        return print_usage()
+        return print_usage(args.json)
     if args.demandes or args.mail or args.signalements:
         return admin_cli(args)
     if args.fake:

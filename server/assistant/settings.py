@@ -82,18 +82,22 @@ PDF_MAX_PAGES = _int('ASSISTANT_PDF_MAX_PAGES', 800)
 PDF_EXTRACT_CHARS = _int('ASSISTANT_PDF_EXTRACT_CHARS', 42000)
 
 # ---------------------------------------------------------------- hard spending caps (euros, see budget.py)
-# Claude: 50 € in all. Gemini: 100 € in all, and nothing after GEMINI_UNTIL (included, Paris time).
-CLAUDE_BUDGET_EUR = _float('CLAUDE_BUDGET_EUR', 50)
+# Claude: 150 € in all and 50 € a day. Gemini: 100 € in all, and nothing after GEMINI_UNTIL (included, Paris time).
+CLAUDE_BUDGET_EUR = _float('CLAUDE_BUDGET_EUR', 150)
 CLAUDE_UNTIL = _date('CLAUDE_UNTIL', '')
 GEMINI_BUDGET_EUR = _float('GEMINI_BUDGET_EUR', 100)
 GEMINI_UNTIL = _date('GEMINI_UNTIL', '2026-11-17')
 # Cap on the two providers together for one day, so that a burst of abuse cannot burn the whole budget at once.
 DAILY_BUDGET_EUR = _float('ASSISTANT_DAILY_EUR', 10)
+# Cap of one provider alone for one day (0: none, only the common cap above applies).
+CLAUDE_DAILY_EUR = _float('CLAUDE_DAILY_EUR', 50)
+GEMINI_DAILY_EUR = _float('GEMINI_DAILY_EUR', 0)
 # Prices are in US dollars; 1.0 counts one dollar as one euro, which overestimates the spending (safe side).
 USD_EUR = _float('ASSISTANT_USD_EUR', 1.0)
 # Which provider answers first; the next one takes over when a cap or the date stops it.
-# Never more than 90 $ of Claude in all (all of Théo's API credits), whatever CLAUDE_BUDGET_EUR says.
-CLAUDE_MAX_USD = 90
+# Never more than 150 $ of Claude in all, whatever CLAUDE_BUDGET_EUR says: Théo's API credits (about 100 € a month)
+# minus a margin for his other projects. To raise it, change this line: the environment alone cannot.
+CLAUDE_MAX_USD = 150
 CLAUDE_BUDGET_EUR = min(CLAUDE_BUDGET_EUR, CLAUDE_MAX_USD * USD_EUR)
 ORDER = [p for p in _str('ASSISTANT_ORDER', 'claude,gemini').lower().replace(' ', '').split(',') if p in ('gemini', 'claude')]
 

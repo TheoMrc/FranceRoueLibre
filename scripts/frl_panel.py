@@ -187,19 +187,46 @@ def num(v):
         return None
 
 
+BUDGET_CACHE = OUT / 'budget.json'
+
+
+def budget_live(offline: bool):
+    """The caps really in force on the VPS and the spending of its ledger (frl-budget), kept in _journal/budget.json.
+    (dict or None, note): None when the VPS never answered, the page then shows the defaults of settings.py."""
+    why = 'mode hors ligne'
+    if not offline:
+        try:
+            r = subprocess.run(['ssh', '-o', 'BatchMode=yes', 'biodevs-vps', 'frl-budget'], capture_output=True, timeout=60)
+            if r.returncode == 0 and r.stdout.strip():
+                data = json.loads(r.stdout.decode('utf-8'))
+                data['read'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M')
+                OUT.mkdir(exist_ok=True)
+                BUDGET_CACHE.write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
+                return data, None
+            why = r.stderr.decode('utf-8', 'replace').strip()[:200] or f'code {r.returncode}'
+        except (OSError, subprocess.SubprocessError, ValueError) as exc:
+            why = str(exc)[:200]
+    try:
+        return json.loads(BUDGET_CACHE.read_text(encoding='utf-8')), None if offline else f'Plafonds non relus sur le VPS ({why}) : dernière copie.'
+    except (OSError, ValueError):
+        return None, None if offline else f'Plafonds du VPS illisibles ({why}) : ceux de settings.py sont affichés, le VPS peut en avoir d’autres.'
+
+
 def caps():
-    """The spending caps written in server/assistant/settings.py (defaults; the VPS may override them)."""
+    """The spending caps written in server/assistant/settings.py: defaults only, shown when the VPS could not be read
+    (its environment file overrides them, see budget_live)."""
     s = (ROOT / 'server' / 'assistant' / 'settings.py').read_text(encoding='utf-8')
     get = lambda pat, d=None: (re.search(pat, s) or [None, d])[1]
     return {'claude_usd': num(get(r'CLAUDE_MAX_USD\s*=\s*([\d.]+)')),
             'claude_eur': num(get(r"_float\('CLAUDE_BUDGET_EUR',\s*([\d.]+)\)")),
+            'claude_daily_eur': num(get(r"_float\('CLAUDE_DAILY_EUR',\s*([\d.]+)\)")),
             'gemini_eur': num(get(r"_float\('GEMINI_BUDGET_EUR',\s*([\d.]+)\)")),
             'gemini_until': get(r"_date\('GEMINI_UNTIL',\s*'([\d-]*)'\)", ''),
             'daily_eur': num(get(r"_float\('ASSISTANT_DAILY_EUR',\s*([\d.]+)\)")),
             'order': get(r"_str\('ASSISTANT_ORDER',\s*'([a-z,]+)'\)", '')}
 
 
-def payload(stats, loupe, searches, notes, requests=None, generated=None):
+def payload(stats, loupe, searches, notes, requests=None, generated=None, budget=None):
     q = []
     for r in loupe:
         tools = [m.group(1) for m in re.finditer(r'(?:^|\| )([a-z_]+) \(', r.get('tools') or '')]
@@ -213,7 +240,7 @@ def payload(stats, loupe, searches, notes, requests=None, generated=None):
           'n': None if r.get('lines') in (None, '') else int(num(r.get('lines')) or 0), 'c': r.get('cache') or '',
           'p': bool(r.get('prefix'))} for r in searches]
     return {'generated': generated or dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'visits': stats, 'loupe': q, 'searches': s,
-            'caps': caps(), 'notes': [n for n in notes if n], 'demandes': requests or {'demandes': []}}
+            'caps': caps(), 'budget': budget, 'notes': [n for n in notes if n], 'demandes': requests or {'demandes': []}}
 
 
 DEMANDES_CACHE = OUT / 'demandes.json'
@@ -225,6 +252,7 @@ def build(offline: bool, token: str, quick: bool = False) -> dict:
     if quick:
         stats, _ = visits(True)
         loupe, searches, _ = journals(True)
+        live, _ = budget_live(True)
         try:
             requests = json.loads(DEMANDES_CACHE.read_text(encoding='utf-8'))
         except (OSError, ValueError):
@@ -233,19 +261,20 @@ def build(offline: bool, token: str, quick: bool = False) -> dict:
         generated = dt.datetime.fromtimestamp(stamp).strftime('%Y-%m-%d %H:%M:%S')
         notes = [] if offline else ['Données du dernier passage : mise à jour en cours, la page se recharge toute seule.']
     else:
-        with ThreadPoolExecutor(3) as pool:
+        with ThreadPoolExecutor(4) as pool:
             fv = pool.submit(visits, offline)
             fj = pool.submit(journals, offline)
+            fb = pool.submit(budget_live, offline)
             fd = pool.submit(frl_demandes, 'tout') if not offline else None
-            (stats, n1), (loupe, searches, n2) = fv.result(), fj.result()
+            (stats, n1), (loupe, searches, n2), (live, n4) = fv.result(), fj.result(), fb.result()
             requests, n3 = (fd.result() if fd else None), None
         if requests and requests.get('error'):
             n3, requests = f'Demandes non lues : {requests["error"]}', None
         elif requests:
             OUT.mkdir(exist_ok=True)
             DEMANDES_CACHE.write_text(json.dumps(requests, ensure_ascii=False), encoding='utf-8')
-        generated, notes = None, [n1, n2, n3]
-    data = payload(stats, loupe, searches, notes, requests, generated) | {'live': token}
+        generated, notes = None, [n1, n2, n3, n4]
+    data = payload(stats, loupe, searches, notes, requests, generated, live) | {'live': token}
     html = TEMPLATE.read_text(encoding='utf-8').replace(
         '/*__DATA__*/null', json.dumps(data, ensure_ascii=False).replace('</', '<\\/'))
     OUT.mkdir(exist_ok=True)

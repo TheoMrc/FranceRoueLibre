@@ -311,6 +311,9 @@ UNIT
   # frl-mail liste [N] | lire UID | apercu UID | repondre UID [--force] : the site's mailbox (reply text on stdin)
   printf '#!/bin/sh\nexec sudo -n env ASSISTANT_ENV_FILE=%s %s %s --mail "$@"\n' "$AENV" "$APY" "$DIR/server/assistant_api.py" | sudo -n tee /usr/local/bin/frl-mail > /dev/null
   sudo -n chmod 755 /usr/local/bin/frl-mail
+  # frl-budget : the caps really in force and the spending so far, in JSON (read by frl_panel.bat)
+  printf '#!/bin/sh\nexec sudo -n env STATE_DIRECTORY=/var/lib/francerouelibre-assistant ASSISTANT_ENV_FILE=%s %s %s --usage --json\n' "$AENV" "$APY" "$DIR/server/assistant_api.py" | sudo -n tee /usr/local/bin/frl-budget > /dev/null
+  sudo -n chmod 755 /usr/local/bin/frl-budget
   # frl-signalements liste | voir REF | relu REF [--texte F] | masquer REF | afficher REF : citizen reports
   printf '#!/bin/sh\nexec sudo -n env ASSISTANT_ENV_FILE=%s %s %s --signalements "$@"\n' "$AENV" "$APY" "$DIR/server/assistant_api.py" | sudo -n tee /usr/local/bin/frl-signalements > /dev/null
   sudo -n chmod 755 /usr/local/bin/frl-signalements

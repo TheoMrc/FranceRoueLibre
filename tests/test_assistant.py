@@ -27,8 +27,8 @@ class BudgetTest(unittest.TestCase):
     def tearDown(self):
         self.dir.cleanup()
 
-    def make(self, claude=1.0, gemini=1.0, until=None, daily=0):
-        return B.Budget(self.ledger, {'claude': (claude, None), 'gemini': (gemini, until)}, daily)
+    def make(self, claude=1.0, gemini=1.0, until=None, daily=0, daily_by=None):
+        return B.Budget(self.ledger, {'claude': (claude, None), 'gemini': (gemini, until)}, daily, daily_by)
 
     def test_prices(self):
         self.assertAlmostEqual(B.cost_usd('gemini', 'gemini-3.8-flash', prompt=1e6, output=1e6), 4.5)
@@ -64,8 +64,21 @@ class BudgetTest(unittest.TestCase):
         with self.assertRaises(B.BudgetError):
             b.reserve('claude', 0.3)
 
+    def test_daily_cap_of_one_provider(self):
+        b = self.make(claude=10, gemini=10, daily=5.0, daily_by={'claude': 1.0})
+        b.settle('claude', b.reserve('claude', 0.5), 0.8)
+        with self.assertRaises(B.BudgetError):
+            b.reserve('claude', 0.3)                       # Claude's own day is full...
+        b.reserve('gemini', 0.3)                           # ...Gemini still answers
+        self.assertIn('plafond du jour', b.refusal('claude', 0.3))
+        s = b.summary()
+        self.assertEqual((s['claude']['today_eur'], s['claude']['daily_limit_eur'], s['gemini']['daily_limit_eur']), (0.8, 1.0, 0))
+        again = self.make(claude=10, gemini=10, daily=5.0, daily_by={'claude': 1.0})   # a restart reads the ledger back
+        self.assertIn('plafond du jour', again.refusal('claude', 0.3))
+
     def test_defaults_match_the_request(self):
-        self.assertEqual((S.CLAUDE_BUDGET_EUR, S.GEMINI_BUDGET_EUR), (50, 100))
+        self.assertEqual((S.CLAUDE_BUDGET_EUR, S.CLAUDE_DAILY_EUR, S.GEMINI_BUDGET_EUR), (150, 50, 100))
+        self.assertLessEqual(S.CLAUDE_BUDGET_EUR, S.CLAUDE_MAX_USD * S.USD_EUR)
         self.assertEqual(S.GEMINI_UNTIL, dt.date(2026, 11, 17))
 
 
