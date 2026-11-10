@@ -178,33 +178,34 @@ def main():
     rejected_headers = collections.Counter()
     per_file = []
     resources = sorted(index['resources'], key=lambda r: (r.get('organization') or '', r['dataset'], r['resource']))
-    for res in resources:
+    for position, res in enumerate(resources, 1):
+        if position % 200 == 0:
+            print(f'  {position}/{len(resources)} fichiers, {len(rows_out)} lignes', flush=True)
         path = os.path.join(SRC, res['file'])
         if res.get('bytes') is None or not os.path.exists(path):
             files['inaccessibles'] += 1
             continue
         try:
-            text = decode(gzip.open(path, 'rb').read())
-        except (OSError, EOFError):
-            files['illisibles'] += 1
-            continue
-        first = text.split('\n', 1)[0]
-        delimiter = max(';,\t|', key=first.count)
-        try:
+            with gzip.open(path, 'rb') as handle:
+                head = handle.read(65536)        # the header decides: most files are not subsidy lists
+                first = decode(head).split('\n', 1)[0]
+                delimiter = max(';,\t|', key=first.count)
+                header = [norm(c) for c in next(csv.reader([first], delimiter=delimiter))]
+                col = {}
+                for field, names in ALIASES.items():
+                    for name in names:
+                        if name in header:
+                            col[field] = header.index(name)
+                            break
+                if 'amount' not in col or ('name' not in col and 'id' not in col):
+                    files['autres_formats'] += 1
+                    rejected_headers[res.get('organization') or '?'] += 1
+                    continue
+                text = decode(head + handle.read())
             reader = csv.reader(io.StringIO(text, newline=''), delimiter=delimiter)
-            header = [norm(c) for c in next(reader)]
-        except (csv.Error, StopIteration):
+            next(reader)
+        except (OSError, EOFError, csv.Error, StopIteration):
             files['illisibles'] += 1
-            continue
-        col = {}
-        for field, names in ALIASES.items():
-            for name in names:
-                if name in header:
-                    col[field] = header.index(name)
-                    break
-        if 'amount' not in col or ('name' not in col and 'id' not in col):
-            files['autres_formats'] += 1
-            rejected_headers[res.get('organization') or '?'] += 1
             continue
         files['lus'] += 1
         org = res.get('organization') or ''
