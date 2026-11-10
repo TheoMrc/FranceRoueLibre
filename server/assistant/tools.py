@@ -175,7 +175,9 @@ DECLARATIONS: List[dict] = [
      'description': 'Ouvre une page web précise trouvée par recherche_web (de préférence officielle : comptes, rapport, '
                     'budget, sur senat.fr, assemblee-nationale.fr, ccomptes.fr, gouv.fr, insee.fr) et en extrait ce qui '
                     'répond à la question, chiffres et intitulés exacts. À utiliser quand la recherche donne le bon '
-                    'document mais pas le chiffre. Deux pages au plus par question.',
+                    'document mais pas le chiffre. Les rapports PDF des organismes publics sont lus (pages les plus '
+                    'proches de la question : écris dans « question » les mots précis à y trouver) ; les PDF d’autres '
+                    'sites ne le sont pas. Deux pages au plus par question.',
      'parameters': {'type': 'OBJECT', 'properties': {'url': {'type': 'STRING', 'description': 'Adresse https complète'},
                                                      'question': {'type': 'STRING', 'description': 'Ce qu’il faut y trouver'}},
                     'required': ['url', 'question']}},
@@ -1017,7 +1019,10 @@ class Toolbox:
                 if self.pages >= 2:
                     return {'error': 'deux pages au plus par question : réponds avec ce que tu as'}
                 self.pages += 1
-                res = self.client.read_page(url, str(args.get('question') or self.question)[:400])
+                ask = str(args.get('question') or self.question)[:400]
+                res = self._read_pdf(url, ask)   # official PDF: a few pages chosen here; None: a web page
+                if res is None:
+                    res = self.client.read_page(url, ask)
                 for src in res.get('sources', []):
                     if src['url'] not in {x['url'] for x in self.sources}:
                         self.sources.append(src)
@@ -1042,6 +1047,23 @@ class Toolbox:
                 raise
             return {'error': f'{type(exc).__name__} : {str(exc)[:200]}'}
         return {'error': f'outil inconnu : {name}'}
+
+    def _read_pdf(self, url: str, question: str) -> Optional[dict]:
+        """A PDF is never handed whole to the provider's reader (hundreds of thousands of tokens, see pdf.py): on a
+        public body's site it is cut to the useful pages here, elsewhere it is not read. None: not a PDF."""
+        from . import pdf
+        read = getattr(self.client, 'read_pdf', None)
+        if not pdf.official(url) or read is None:
+            if pdf.looks_pdf(url) and read is not None:
+                return {'answer': 'PDF hors des sites publics lisibles ici : non lu. Cite-le comme source et réponds avec '
+                                  'ce que la recherche a donné.', 'lue': False, 'sources': []}
+            return None
+        try:
+            doc = pdf.extracts(url, question)
+        except pdf.PdfError as exc:
+            return {'answer': f'Document non lu ({exc}). Cite-le comme source et réponds avec ce que la recherche a donné.',
+                    'lue': False, 'sources': []}
+        return None if doc is None else read(url, question, doc)
 
     def _form_tool(self, name: str, args: dict) -> dict:
         """The report form of signalements.html: read it, fill it, change one field. Every change lands in

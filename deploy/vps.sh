@@ -246,6 +246,8 @@ if sudo -n test -f "$AENV"; then
   APY=/usr/bin/python3
   if [ -x "$LIB/venv/bin/python" ]; then
     "$LIB/venv/bin/python" -c 'import google.auth, requests' 2>/dev/null || "$LIB/venv/bin/pip" install -q --disable-pip-version-check google-auth requests
+    # reader of official PDF reports (assistant/pdf.py); without it the Loupe cites the PDF but does not open it
+    "$LIB/venv/bin/python" -c 'import pypdfium2' 2>/dev/null || "$LIB/venv/bin/pip" install -q --disable-pip-version-check pypdfium2 || echo "pypdfium2 not installed: PDF reports not read"
     APY=$LIB/venv/bin/python
   fi
   CRED=""

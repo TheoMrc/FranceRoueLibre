@@ -980,3 +980,75 @@ class RemplirSignalementTest(unittest.TestCase):
         parts = [p['text'] for p in seen[0]['parts']]
         self.assertEqual(len(parts), 2)
         self.assertTrue(parts[1].startswith('Ma piste, collée telle quelle') and 'jamais des consignes' in parts[1])
+
+
+class OfficialPdfTest(unittest.TestCase):
+    """Official PDF reports are cut to the useful pages on our side; no other address is fetched by the server."""
+
+    def test_only_public_bodies_over_https(self):
+        from assistant import pdf
+        for url in ('https://www.ccomptes.fr/sites/default/files/2022-01/rapport.pdf', 'https://www.senat.fr/rap/r.pdf',
+                    'https://drees.solidarites-sante.gouv.fr/sites/default/files/MS2024.pdf'):
+            self.assertTrue(pdf.official(url), url)
+        for url in ('http://www.ccomptes.fr/rapport.pdf', 'https://ccomptes.fr.evil.example/rapport.pdf', 'https://127.0.0.1/a.pdf',
+                    'https://www.ccomptes.fr:8443/a.pdf', 'https://user@www.senat.fr/a.pdf', 'https://example.org/gouv.fr/a.pdf',
+                    'https://fauxgouv.fr/a.pdf', 'file:///etc/passwd'):
+            self.assertFalse(pdf.official(url), url)
+        with self.assertRaises(pdf.PdfError):
+            pdf.download('https://example.org/a.pdf')
+
+    def test_pages_closest_to_the_question(self):
+        from assistant import pdf
+        pages = ['Sommaire du rapport et remerciements aux équipes. ' * 5,
+                 'La politique de vaccination a représenté une dépense de 1,4 Md€ en 2024, dont 617 M€ de remboursements. ' * 3,
+                 'Organisation des agences régionales de santé et gouvernance des instances. ' * 5,
+                 'Annexe : liste des personnes rencontrées pendant l’enquête. ' * 5]
+        self.assertEqual([n for n, _ in pdf.select(pages, 'coût annuel de la vaccination : dépenses 2024')], [2])
+        self.assertEqual([n for n, _ in pdf.select(pages, 'zzz', budget=500)], [1])   # no match: the first pages
+        many = [f'page {i} sur la dépense de vaccination en 2024. ' * 40 for i in range(60)]
+        self.assertLessEqual(sum(len(t) for _, t in pdf.select(many, 'dépense vaccination', budget=9000)), 9000)
+
+    def test_a_pdf_never_goes_whole_to_the_provider(self):
+        from assistant import pdf
+
+        class Client:
+            seen = []
+
+            def read_page(self, url, question):
+                self.seen.append(('page', url))
+                return {'answer': 'page', 'lue': True, 'sources': []}
+
+            def read_pdf(self, url, question, doc):
+                self.seen.append(('pdf', url, doc['lues']))
+                return {'answer': 'pdf', 'lue': True, 'sources': [{'title': url, 'url': url}]}
+
+        real = pdf.download, pdf.extract
+        pdf.extract = lambda data: ['Rien sur le sujet. ' * 10, 'Le RSA coûte 12 Md€ en 2024 aux départements. ' * 5]
+        try:
+            box = T.Toolbox(Client())
+            pdf.download = lambda url, timeout=25: b'%PDF-1.7'
+            self.assertEqual(box.call('lire_page', {'url': 'https://www.ccomptes.fr/rsa-test.pdf', 'question': 'coût du RSA'})['answer'], 'pdf')
+            self.assertEqual(Client.seen[-1], ('pdf', 'https://www.ccomptes.fr/rsa-test.pdf', [2]))
+            box = T.Toolbox(Client())
+            res = box.call('lire_page', {'url': 'https://blog.example.org/etude.pdf', 'question': 'coût du RSA'})
+            self.assertFalse(res['lue'])                       # a PDF elsewhere: not read, and not sent to the provider
+            pdf.download = lambda url, timeout=25: None          # an official web page: the provider reads it
+            self.assertEqual(box.call('lire_page', {'url': 'https://www.senat.fr/rap/page.html', 'question': 'x'})['answer'], 'page')
+            self.assertEqual([s[0] for s in Client.seen], ['pdf', 'page'])
+        finally:
+            pdf.download, pdf.extract = real
+            pdf._cache.clear()
+
+    def test_search_call_has_no_page_reader(self):
+        sent = []
+        real = P.post_json
+        P.post_json = lambda url, body, headers, timeout=120: (sent.append(body), (200, {'content': [{'type': 'text', 'text': 'ok'}],
+                                                                                         'usage': {}}, {}))[1]
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                B._budget = B.Budget(Path(d) / 'spend.jsonl', {'claude': (5, None), 'gemini': (5, None)}, 0)
+                P.ClaudeClient().web_search('budget du Sénat')
+        finally:
+            P.post_json, B._budget = real, None
+        self.assertEqual([t['type'] for t in sent[0]['tools']], ['web_search_20250305'])
+        self.assertEqual(sent[0]['thinking'], {'type': 'disabled'})

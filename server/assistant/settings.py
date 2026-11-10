@@ -72,6 +72,15 @@ CLAUDE_MODEL = _str('CLAUDE_MODEL', 'claude-haiku-5-5')
 CLAUDE_FALLBACK_MODEL = _str('CLAUDE_FALLBACK_MODEL')
 CLAUDE_EFFORT = _str('CLAUDE_EFFORT').lower()
 
+# Web searches of one recherche_web with Claude (10 $ per 1 000 searches: most of the price of the call). 2 by default;
+# 1 halves the price again, with fewer sources.
+CLAUDE_WEB_SEARCHES = _int('ASSISTANT_CLAUDE_SEARCHES', 2)
+# Official PDFs read on our side (assistant/pdf.py): more hosts (comma-separated), size, pages, characters sent to the model.
+PDF_HOSTS = [h.strip().lower() for h in _str('ASSISTANT_PDF_HOSTS').split(',') if h.strip()]
+PDF_MAX_MB = _int('ASSISTANT_PDF_MAX_MB', 40)
+PDF_MAX_PAGES = _int('ASSISTANT_PDF_MAX_PAGES', 800)
+PDF_EXTRACT_CHARS = _int('ASSISTANT_PDF_EXTRACT_CHARS', 42000)
+
 # ---------------------------------------------------------------- hard spending caps (euros, see budget.py)
 # Claude: 50 € in all. Gemini: 100 € in all, and nothing after GEMINI_UNTIL (included, Paris time).
 CLAUDE_BUDGET_EUR = _float('CLAUDE_BUDGET_EUR', 50)
