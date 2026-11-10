@@ -152,6 +152,14 @@ const SOURCES = [
     { path: 'fmi/PCPIPCH.json', url: 'https://www.imf.org/external/datamapper/api/v1/PCPIPCH' },
   ] },
 
+  // ---- Subsidies granted by local authorities and public bodies (regions, départements, communes, EPCI, ministries) ----
+  // No national file exists: each authority publishes its own "données essentielles des conventions de subvention"
+  // (décret 2017-779, SCDL schema), compulsory only above 23 000 €. Every CSV of every data.gouv.fr dataset that
+  // declares the schema, carries one of the tags or matches the word is downloaded; scripts/subventions-collectivites.py
+  // keeps the files whose columns are those of the schema and reports who publishes and who does not.
+  { id: 'subventions-collectivites', kind: 'datagouv-search', note: 'Subventions attribuées par les collectivités et organismes publics (data.gouv.fr, schéma SCDL « subventions »)',
+    queries: ['schema=scdl/subventions', 'tag=scdl', 'tag=subvention', 'tag=subventions', 'q=subvention', 'q=subventions'], maxBytes: 300 * 1048576 },
+
   // ---- Indemnities actually paid to local elected officials (accounts 653) ----
   { id: 'balances-653-communes-2017', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-communes-en-2017', where: 'startswith(compte,"653")', note: 'Comptes 653 (indemnités et frais des élus) des communes, 2017' },
   { id: 'balances-653-communes-2018', kind: 'ods', host: ECO, dataset: 'balances-comptables-des-communes-en-2018', where: 'startswith(compte,"653")', note: 'Comptes 653 (indemnités et frais des élus) des communes, 2018' },
@@ -302,6 +310,56 @@ async function fetchFiles(source) {
   return files;
 }
 
+// kind "datagouv-search": every CSV resource of every dataset returned by a list of data.gouv.fr API queries, under
+// sources/raw/<id>/<dataset id>--<resource id>.csv.gz, with index.json (dataset, organisation, page, resource).
+// A dead link or a file that is too large is recorded in index.json and never stops the others.
+async function fetchDatagouvSearch(source) {
+  const dir = path.join(OUT, source.id);
+  fs.mkdirSync(dir, { recursive: true });
+  const datasets = new Map();
+  for (const query of source.queries) {
+    let url = `https://www.data.gouv.fr/api/1/datasets/?page_size=100&${query}`;
+    while (url) {
+      const page = await getJson(url);
+      for (const item of page.data) if (!datasets.has(item.id)) datasets.set(item.id, item);
+      url = page.next_page;
+    }
+    console.log(`    ${query} : ${datasets.size} jeux de données cumulés`);
+  }
+  const todo = [];
+  for (const dataset of datasets.values()) {
+    for (const resource of dataset.resources || []) {
+      if ((resource.format || '').toLowerCase() !== 'csv' || !resource.url) continue;
+      todo.push({ dataset: dataset.id, slug: dataset.slug, title: dataset.title, organization: dataset.organization?.name || dataset.owner?.last_name || null, organizationId: dataset.organization?.id || null,
+        page: `https://www.data.gouv.fr/datasets/${dataset.slug}/`, resource: resource.id, resourceTitle: resource.title, url: resource.url, schema: resource.schema?.name || null,
+        modified: resource.last_modified, announced: resource.filesize || null, file: `${dataset.id}--${resource.id}.csv.gz` });
+    }
+  }
+  console.log(`    ${todo.length} fichiers CSV à télécharger`);
+  let next = 0, done = 0;
+  const one = async item => {
+    if (item.announced && item.announced > source.maxBytes) { item.error = 'fichier trop volumineux'; return; }
+    for (let attempt = 1; attempt <= 2 && item.bytes == null; attempt++) {
+      try {
+        const response = await fetch(item.url, { signal: AbortSignal.timeout(180000), headers: { 'user-agent': 'francerouelibre-fetch' } });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const buffer = Buffer.from(await response.arrayBuffer());
+        if (buffer.length > source.maxBytes) throw new Error('fichier trop volumineux');
+        fs.writeFileSync(path.join(dir, item.file), zlib.gzipSync(buffer, { level: 6 }));
+        item.bytes = buffer.length; item.sha256 = crypto.createHash('sha256').update(buffer).digest('hex'); delete item.error;
+      } catch (error) { item.error = error.message; if (attempt < 2) await sleep(1500); }
+    }
+  };
+  await Promise.all(Array.from({ length: 6 }, async () => {
+    while (next < todo.length) { await one(todo[next++]); if (++done % 100 === 0) console.log(`    ${done}/${todo.length}`); }
+  }));
+  const ok = todo.filter(item => item.bytes != null);
+  fs.writeFileSync(path.join(dir, 'index.json'), JSON.stringify({ downloadedAt: new Date().toISOString(), queries: source.queries, datasets: datasets.size, resources: todo }, null, 1));
+  console.log(`    ${ok.length} fichiers téléchargés, ${todo.length - ok.length} inaccessibles ou trop volumineux`);
+  if (!ok.length) throw new Error('aucun fichier téléchargé');
+  return [{ file: path.join(source.id, 'index.json'), url: 'https://www.data.gouv.fr/api/1/datasets/', bytes: ok.reduce((total, item) => total + item.bytes, 0), datasets: datasets.size, resources: ok.length }];
+}
+
 async function fetchInsee(source) {
   const url = `https://bdm.insee.fr/series/sdmx/data/SERIES_BDM/${source.idbank}`;
   const file = path.join(OUT, `${source.id}.xml.gz`);
@@ -320,7 +378,7 @@ for (const [index, source] of selected.entries()) {
   console.log(`${label} · ${source.note || source.dataset || source.slug || source.idbank}`);
   const started = Date.now();
   try {
-    const files = source.kind === 'ods' ? await fetchOds(source) : source.kind === 'datagouv' ? await fetchDatagouv(source) : source.kind === 'files' ? await fetchFiles(source) : await fetchInsee(source);
+    const files = source.kind === 'ods' ? await fetchOds(source) : source.kind === 'datagouv' ? await fetchDatagouv(source) : source.kind === 'files' ? await fetchFiles(source) : source.kind === 'datagouv-search' ? await fetchDatagouvSearch(source) : await fetchInsee(source);
     manifest[source.id] = { ...source, downloadedAt: new Date().toISOString(), files };
     saveManifest();
     console.log(`    ✓ ${mb(files.reduce((total, item) => total + item.bytes, 0))} en ${Math.round((Date.now() - started) / 1000)} s`);
