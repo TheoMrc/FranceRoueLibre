@@ -156,6 +156,20 @@ def add_associations(duck, add):
             add(1, year, amount, 0, clip(obj, 300) or clip(name, 200), clip(name, 160), siren, extra, dept)
 
 
+def add_collectivites(add):
+    """Grants published by regions, départements, communes and other public bodies (src 7), from the table written
+    by subventions-collectivites.py. who = beneficiary, extra = granting authority."""
+    path = f'{DERIVED}/subventions-collectivites.csv.gz'
+    if not os.path.exists(path):
+        return
+    import csv
+    import gzip
+    with gzip.open(path, 'rt', encoding='utf-8', newline='') as handle:
+        for r in csv.DictReader(handle):
+            add(7, int(r['annee']) if r['annee'] else None, float(r['montant']), 0, clip(r['objet'], 300) or clip(r['beneficiaire'], 200), clip(r['beneficiaire'], 160),
+                r['beneficiaire_siren'] or None, clip(f'Attribué par {r["attribuant"]}', 200) if r['attribuant'] else None, None)
+
+
 def main():
     probe = sqlite3.connect(':memory:')
     try:
@@ -219,15 +233,8 @@ def main():
             add(6, 2026, amount, 0, clip(label, 300), clip(programme, 160), None, clip(f'{kind} · {mission}', 200), None)
         flush()
     # 7. Grants published by local authorities and other public bodies (SCDL files)
-    path = f'{DERIVED}/subventions-collectivites.csv.gz'
-    if os.path.exists(path):
-        import csv
-        import gzip
-        with gzip.open(path, 'rt', encoding='utf-8', newline='') as handle:
-            for r in csv.DictReader(handle):
-                add(7, int(r['annee']) if r['annee'] else None, float(r['montant']), 0, clip(r['objet'], 300) or clip(r['beneficiaire'], 200), clip(r['beneficiaire'], 160),
-                    r['beneficiaire_siren'] or None, clip(f'Attribué par {r["attribuant"]}', 200) if r['attribuant'] else None, None)
-        flush()
+    add_collectivites(add)
+    flush()
     total = db.execute('SELECT count(*) FROM doc').fetchone()[0]
     print(f'· {total} lignes')
 
@@ -321,6 +328,25 @@ if __name__ == '__main__':
         add_associations(duckdb.connect(), lambda *row: batch.append(row))
         connection.executemany('INSERT INTO doc (src, year, amount, fw, title, who, siren, extra, dept) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', batch)
         print(f'· associations : {before} lignes remplacées par {len(batch)}')
+        finish(connection, connection.execute('SELECT count(*) FROM doc').fetchone()[0])
+    elif '--collectivites-only' in sys.argv:
+        # Replace only the grants of local authorities (src 7) of an existing index, from
+        # sources/derived/subventions-collectivites.csv.gz, without the raw files of the other sources.
+        # The index is the one that is online: put back together from its 45 MiB files, or copied from --from=<file>.
+        source = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--from=')), None)
+        with open(DB, 'wb') as out:
+            for part in ([source] if source else sorted(glob.glob(f'{OUT_DIR}/db/frl-search.sqlite3.[0-9][0-9][0-9]'))):
+                with open(part, 'rb') as handle:
+                    while block := handle.read(64 * 1048576):
+                        out.write(block)
+        connection = sqlite3.connect(DB)
+        connection.executescript('PRAGMA journal_mode = OFF; PRAGMA synchronous = OFF;')
+        before = connection.execute('SELECT count(*) FROM doc WHERE src = 7').fetchone()[0]
+        connection.execute('DELETE FROM doc WHERE src = 7')
+        batch = []
+        add_collectivites(lambda *row: batch.append(row))
+        connection.executemany('INSERT INTO doc (src, year, amount, fw, title, who, siren, extra, dept) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', batch)
+        print(f'· collectivités : {before} lignes remplacées par {len(batch)}')
         finish(connection, connection.execute('SELECT count(*) FROM doc').fetchone()[0])
     elif '--lexicon-only' in sys.argv:
         # Rebuild only the word lists next to the index (the index itself is left untouched).
