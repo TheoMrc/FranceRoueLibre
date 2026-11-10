@@ -370,7 +370,7 @@
       const inSentence = state.where?.type === 'dans_la_phrase';   // « Analyse les dépenses a Alès »: near words are noise
       const advice = !inSentence && (state.family || state.related.length) ? `<p class="sr-didyoumean is-near">Mots proches qui apparaissent dans les libellés : ${[...(state.family ? [`<a href="?q=${encodeURIComponent(state.family.q)}">toutes les formes de « ${esc(state.family.label)} »</a>`] : []), ...state.related.filter(r => r.lines).slice(0, 4).map(r => `<a href="?q=${encodeURIComponent(r.q)}">${esc(r.label)}</a> (${count(r.lines)} ligne${r.lines > 1 ? 's' : ''}${r.amount ? `, ${money(r.amount)}` : ''})`)].join(' · ')}.</p>` : '';
       return `${advice}<p class="sr-lead">${q} n’apparaît dans aucun libellé de dépense publique publié en données ouvertes.</p>
-        <p>Cela ne veut pas dire qu’aucun argent public n’y est consacré : les libellés sont courts, rédigés par chaque administration, et beaucoup de dépenses (salaires, subventions des collectivités, petits marchés) ne sont pas publiées ligne à ligne.${state.related.length && !inSentence ? ' Essayez un mot proche ci-dessous.' : ''}</p>
+        <p>Cela ne veut pas dire qu’aucun argent public n’y est consacré : les libellés sont courts, rédigés par chaque administration, et beaucoup de dépenses (salaires, petits marchés, subventions de la plupart des régions, départements et communes) ne sont pas publiées ligne à ligne. <a href="aides.html#collectivites">Voir quelles collectivités publient leurs subventions</a>.${state.related.length && !inSentence ? ' Essayez un mot proche ci-dessous.' : ''}</p>
         <div class="sr-hints" id="srHints" hidden></div>`;
     }
     const parts = [];
