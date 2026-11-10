@@ -261,6 +261,7 @@ def public_view(d: dict) -> dict:
             'documents': d['fields']['documents'], 'contexte': d['fields'].get('contexte'), 'envoyee': sent,
             'echeance': due, 'fiche': d['to'].get('fiche'), 'canal': d.get('mode') or 'courriel',
             'formulaire': d['to'].get('formulaire') if d.get('mode') == 'formulaire' else None,
+            'accuse': next((a['date'] for a in d.get('accuses', []) if a['type'] == 'automatique'), None),
             'reponses': [{'date': r['date'], 'texte': r['public_text'], 'pieces': r.get('public_files', [])}
                          for r in d.get('replies', []) if r.get('public_text')]}
 
@@ -447,34 +448,103 @@ def _text_of(msg) -> tuple:
     return re.sub(r'\n{3,}', '\n\n', cut).strip()[:8000], files
 
 
+AUTO_SUBJECT = re.compile(r'r[ée]ponse automatique|message automatique|accus[ée] de r[ée]ception|absen(?:ce|t)\b|'
+                          r'out of office|automatic reply|auto[- ]?reply|autoreply|ne pas r[ée]pondre', re.I)
+BOUNCE_FROM = re.compile(r'^(?:mailer-daemon|postmaster)@', re.I)
+NO_REPLY_FROM = re.compile(r'^(?:no-?reply|ne-?pas-?repondre|donotreply|noreply-[\w-]+)@', re.I)
+
+
+def _own_addresses() -> set:
+    return {a.lower() for a in (S.MAIL_FROM, S.MAIL_USER, S.MAIL_NOTIFY) if a}
+
+
+def classify(msg) -> str:
+    """own: a message of the site itself (the Bcc copy of a letter, a [Loupe] notification), never a reply;
+    rejet: a delivery failure; automatique: an acknowledgement or absence message; reponse: written by someone."""
+    sender = email.utils.parseaddr(str(msg.get('From', '')))[1].lower()
+    subject = str(msg.get('Subject', ''))
+    if sender in _own_addresses() or subject.lstrip().startswith('[Loupe]'):
+        return 'own'
+    if BOUNCE_FROM.match(sender) or msg.get_content_type() == 'multipart/report':
+        return 'rejet'
+    auto = (str(msg.get('Auto-Submitted') or 'no').strip().lower() != 'no'
+            or any(msg.get(h) for h in ('X-Autoreply', 'X-Autorespond', 'X-Auto-Reply'))
+            or str(msg.get('Precedence') or '').strip().lower() in ('auto_reply', 'bulk', 'junk')
+            or NO_REPLY_FROM.match(sender) or AUTO_SUBJECT.search(subject))
+    return 'automatique' if auto else 'reponse'
+
+
+def ingest(d: dict, msg, kind: str) -> bool:
+    """Stores a message about request d: a reply (status repondue, to be published) or, for an automatic message
+    or a delivery failure, a note that leaves the request waiting. False when there is nothing to store."""
+    if kind == 'own':
+        return False
+    text, files = _text_of(msg)
+    sender = email.utils.parseaddr(str(msg.get('From', '')))[1]
+    now = dt.datetime.now().isoformat(timespec='seconds')
+    if kind in ('automatique', 'rejet'):
+        d.setdefault('accuses', []).append({'date': now, 'type': kind, 'from_domain': sender.split('@')[-1],
+                                            'sujet': str(msg.get('Subject', ''))[:200], 'text': text[:1500]})
+    else:
+        d.setdefault('replies', []).append({'date': now, 'from_domain': sender.split('@')[-1], 'text': text,
+                                            'files': files, 'public_text': None})
+        d['status'] = 'repondue'
+    save(d)
+    return True
+
+
+def repair_own_replies() -> int:
+    """Before 2026-11-10 the site's own copies (Bcc of each letter, then the notifications quoting them) were taken
+    for replies: they are removed, and a request left without a real reply is waiting again."""
+    own = {a.split('@')[-1] for a in _own_addresses()}
+    fixed = 0
+    with _lock:
+        for d in all_requests():
+            reps = d.get('replies') or []
+            keep = [r for r in reps if (r.get('from_domain') or '').lower() not in own]
+            if len(keep) == len(reps):
+                continue
+            d['replies'] = keep
+            if d['status'] == 'repondue' and not keep:
+                d['status'] = 'envoyee'
+            d.setdefault('historique', []).append({'date': dt.datetime.now().isoformat(timespec='seconds'),
+                                                   'reponses_retirees': len(reps) - len(keep),
+                                                   'raison': 'copies envoyées par le site lui-même, pas des réponses'})
+            save(d)
+            fixed += 1
+    return fixed
+
+
 def poll_replies() -> int:
-    """Reads the unseen messages whose subject holds a request reference; stores them for validation."""
+    """Reads the unseen messages whose subject holds a request reference: replies are stored for publication,
+    acknowledgements and delivery failures are noted on the request, the site's own messages are left alone."""
     if not (S.MAIL_CONFIGURED and S.MAIL_IMAP_HOST):
         return 0
+    repair_own_replies()
     found = 0
     box = imaplib.IMAP4_SSL(S.MAIL_IMAP_HOST, S.MAIL_IMAP_PORT, ssl_context=ssl.create_default_context(), timeout=30)
     try:
         box.login(S.MAIL_USER, S.MAIL_PASSWORD)
         box.select('INBOX')
-        _, data = box.search(None, '(UNSEEN SUBJECT "FRL-")')
+        _, data = box.search(None, f'(UNSEEN SUBJECT "FRL-" NOT FROM "{S.MAIL_FROM}")')
         for num in (data[0] or b'').split():
-            _, parts = box.fetch(num, '(RFC822)')
+            _, parts = box.fetch(num, '(BODY.PEEK[])')   # peek: a message that is not about a request stays unread
             msg = email.message_from_bytes(parts[0][1], policy=email.policy.default)
             m = re.search(r'FRL-\d{4}-\d{4}', str(msg.get('Subject', '')))
-            d = load(m.group(0)) if m else None
-            if not d or d['status'] not in ('envoyee', 'repondue'):
-                continue
-            text, files = _text_of(msg)
-            sender = email.utils.parseaddr(str(msg.get('From', '')))[1]
-            d.setdefault('replies', []).append({'date': dt.datetime.now().isoformat(timespec='seconds'),
-                                                'from_domain': sender.split('@')[-1], 'text': text, 'files': files,
-                                                'public_text': None})
-            d['status'] = 'repondue'
-            save(d)
+            kind = classify(msg)
+            with _lock:
+                d = load(m.group(0)) if m else None
+                if not d or d['status'] not in ('envoyee', 'repondue') or not ingest(d, msg, kind):
+                    continue
             box.store(num, '+FLAGS', '\\Seen')
             found += 1
-            notify(f'Réponse à {d["ref"]}', f'{d["to"]["nom"]} a répondu :\n\n{text}\n\nPièces : {", ".join(files) or "aucune"}'
-                                            f'\n\nPublier : assistant_api.py --demandes publier {d["ref"]}')
+            if kind == 'reponse':
+                notify(f'Réponse à {d["ref"]}', f'{d["to"]["nom"]} a répondu :\n\n{d["replies"][-1]["text"]}\n\n'
+                                                f'Pièces : {", ".join(d["replies"][-1]["files"]) or "aucune"}'
+                                                f'\n\nÀ relire et publier dans le tableau de bord (frl_panel.bat).')
+            elif kind == 'rejet':
+                notify(f'Lettre {d["ref"]} non distribuée', f'La lettre à {d["to"]["nom"]} <{d["to"].get("email")}> '
+                                                           f'est revenue en erreur :\n\n{d["accuses"][-1]["text"][:800]}')
     finally:
         try:
             box.logout()

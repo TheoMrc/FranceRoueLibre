@@ -595,6 +595,9 @@ function dmRender() {
       <div class="pn-dm-top"><b>${esc(d.ref)} · ${esc(f.objet)}</b><span class="pn-tag st-${esc(d.status)}">${DM_LABEL[d.status] || esc(d.status)}</span></div>
       <div class="pn-dm-meta">À <b>${esc(to.nom)}</b> &lt;${esc(to.email || 'pas d’adresse')}&gt;${to.fiche ? ` · <a href="${esc(to.fiche)}" target="_blank" rel="noopener">fiche officielle</a>` : ''} · demandée le ${fdate(d.requested || d.created)}${d.sent ? ` · envoyée le ${fdate(d.sent)}` : ''}${d.echeance && d.status === 'envoyee' ? ` · ${days >= 0 ? `réponse due d’ici ${days} jour(s)` : `sans réponse depuis ${-days} jour(s) : refus implicite, la CADA peut être saisie`}` : ''}</div>
       ${warn.map(w => `<div class="pn-dm-warn">${esc(w)}</div>`).join('')}
+      ${(d.accuses || []).map(a => a.type === 'rejet'
+        ? `<details><summary class="pn-dm-warn">Lettre revenue en erreur le ${fdate(a.date)} (${esc(a.from_domain)}) : adresse à changer ?</summary><pre>${esc(a.text)}</pre></details>`
+        : `<details><summary class="muted" style="color:var(--c-muted)">Accusé de réception automatique du ${fdate(a.date)} (${esc(a.from_domain)}), en attente d’une vraie réponse</summary><pre>${esc(a.sujet)}\n\n${esc(a.text)}</pre></details>`).join('')}
       ${d.question ? `<div class="pn-dm-meta">Question du lecteur : « ${esc(d.question)} »</div>` : ''}
       ${d.status === 'a_valider' ? `<details class="pn-dm-letter" data-ref="${esc(d.ref)}" ${dmOpen.has(d.ref) ? 'open' : ''}><summary>Relire et modifier la lettre (${words(d.body)} mots)</summary><div class="pn-dm-compose" data-ref="${esc(d.ref)}"><div class="pn-dm-field"><label>À</label><span>${esc(to.nom)} &lt;${esc(to.email || 'pas d’adresse')}&gt;</span></div>
         <div class="pn-dm-field"><label>Objet</label><input data-subj value="${esc(d.subject)}" ${live ? '' : 'readonly'}></div>

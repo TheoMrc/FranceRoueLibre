@@ -589,6 +589,53 @@ class RequestsTest(unittest.TestCase):
         self.assertEqual(self.D.admin('deposee', r['ref'])['status'], 'envoyee')
         self.assertEqual(self.D.published()[0]['canal'], 'formulaire')
 
+    def mail(self, frm, subject, body='Bonjour,\n\nVoici les documents.', **headers):
+        from email.message import EmailMessage
+        m = EmailMessage(); m['From'] = frm; m['Subject'] = subject
+        for k, v in headers.items():
+            m[k.replace('_', '-')] = v
+        m.set_content(body)
+        return m
+
+    def test_own_copies_auto_replies_and_bounces_are_not_replies(self):
+        """Gironde and Reims: the Bcc copy of each letter, then the [Loupe] notification quoting it, landed in the
+        same mailbox with the reference in the subject and were published as « the administration replied »."""
+        S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND = True, False
+        D = self.D
+        ref = D.request_send(self.draft()['demande']['id'], 'lecteur')['ref']
+        D.admin('deposee', ref, 'https://www.hautmont.fr/contact')
+        subj = f'Demande de communication de documents administratifs [{ref}]'
+        self.assertEqual(D.classify(self.mail(S.MAIL_FROM, subj)), 'own')
+        self.assertEqual(D.classify(self.mail('autre@x.fr', f'[Loupe] Réponse à {ref}')), 'own')
+        self.assertEqual(D.classify(self.mail('accueil@reims-contact.fr', 'RE: ' + subj, Auto_Submitted='auto-replied')), 'automatique')
+        self.assertEqual(D.classify(self.mail('accueil@reims-contact.fr', 'Accusé de réception : ' + subj)), 'automatique')
+        self.assertEqual(D.classify(self.mail('noreply@blois.fr', 'RE: ' + subj)), 'automatique')
+        self.assertEqual(D.classify(self.mail('MAILER-DAEMON@ovh.net', 'Undelivered Mail: ' + subj)), 'rejet')
+        self.assertEqual(D.classify(self.mail('Jeanne Agent <j.agent@hautmont.fr>', 'RE: ' + subj)), 'reponse')
+        d = D.load(ref)
+        self.assertFalse(D.ingest(d, self.mail(S.MAIL_FROM, subj), 'own'))
+        D.ingest(d, self.mail('accueil@hautmont.fr', 'Accusé de réception'), 'automatique')
+        d = D.load(ref)
+        self.assertEqual((d['status'], len(d['accuses'])), ('envoyee', 1), 'an acknowledgement leaves it waiting')
+        self.assertTrue(D.published()[0]['accuse'])
+        D.ingest(d, self.mail('j.agent@hautmont.fr', 'RE: ' + subj), 'reponse')
+        self.assertEqual(D.load(ref)['status'], 'repondue')
+
+    def test_old_copies_taken_for_replies_are_removed(self):
+        S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND = True, False
+        D = self.D
+        ref = D.request_send(self.draft()['demande']['id'], 'lecteur')['ref']
+        D.admin('deposee', ref, 'https://www.hautmont.fr/contact')
+        d = D.load(ref)
+        d['status'] = 'repondue'
+        d['replies'] = [{'date': '2026-11-04T00:09:48', 'from_domain': S.MAIL_FROM.split('@')[-1], 'text': 'Madame, Monsieur,',
+                         'files': [], 'public_text': None}]
+        D.save(d)
+        self.assertEqual(D.repair_own_replies(), 1)
+        d = D.load(ref)
+        self.assertEqual((d['status'], d['replies']), ('envoyee', []))
+        self.assertEqual(D.repair_own_replies(), 0, 'done once')
+
     def test_request_sent_by_hand_through_a_form_is_followed_with_its_link(self):
         """Lycée Jacques Cartier: the Région Bretagne has no address in the directory; the team sends the letter
         through https://www.bretagne.bzh/contact/ and marks it so, with the form's link shown on the public page."""
