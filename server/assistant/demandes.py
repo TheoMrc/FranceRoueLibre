@@ -69,9 +69,70 @@ def _json_field(value):
 
 def _record(r: dict) -> dict:
     site = _json_field(r.get('site_internet')) or []
-    return {'nom': r.get('nom'), 'email': (r.get('adresse_courriel') or '').split(';')[0].strip() or None,
-            'formulaire': r.get('formulaire_contact'), 'site': site[0].get('valeur') if site else None,
-            'fiche': r.get('url_service_public'), 'siret': r.get('siret')}
+    addr = [a for a in (_json_field(r.get('adresse')) or []) if isinstance(a, dict)]
+    place = next((a for a in addr if a.get('type_adresse') == 'Adresse'), addr[0] if addr else {})
+    return with_prada({'nom': r.get('nom'), 'email': (r.get('adresse_courriel') or '').split(';')[0].strip() or None,
+                       'formulaire': r.get('formulaire_contact'), 'site': site[0].get('valeur') if site else None,
+                       'fiche': r.get('url_service_public'), 'siret': r.get('siret'), 'type': _kind(r) or None,
+                       'code_postal': place.get('code_postal') or None})
+
+
+# ------------------------------------------------------------------------------------------------------- PRADA
+# The person responsible for access to administrative documents (CADA's list, scripts/prada.py): the address meant
+# for these requests, used instead of the general contact when the body is found there without doubt.
+PRADA_FILE = Path(__file__).with_name('prada.json')
+PRADA_TYPES = {'mairie': ('Mairie', 'Collectivité territoriale'), 'cg': ('Conseil départemental', 'Collectivité territoriale'),
+               'cr': ('Conseil régional', 'Collectivité territoriale'),
+               'epci': ('Collectivité territoriale', 'Établissement public territorial')}
+_PREFIX = re.compile(r'^(?:mairie|commune|ville|conseil regional|conseil departemental|region|departement|'
+                     r'collectivite territoriale|collectivite)\s+(?:de la |de l |du |des |de |d )?')
+_prada = {'mtime': None, 'rows': []}
+
+
+def _prada_rows() -> list:
+    try:
+        mtime = PRADA_FILE.stat().st_mtime
+    except OSError:
+        return []
+    if _prada['mtime'] != mtime:
+        try:
+            _prada.update(mtime=mtime, rows=json.loads(PRADA_FILE.read_text(encoding='utf-8'))['lignes'])
+        except (OSError, ValueError, KeyError):
+            _prada.update(mtime=mtime, rows=[])
+    return _prada['rows']
+
+
+def _core(name: str) -> str:
+    """« Mairie - Reims », « Mairie de Reims », « Conseil régional de Bretagne » → « reims », « bretagne »."""
+    n = re.sub(r'\([^)]*\)', ' ', norm(name)).replace('’', ' ').replace("'", ' ')   # « (CD 33) »
+    n = n.split(' - ', 1)[1] if ' - ' in n else n
+    return re.sub(r'\s+', ' ', _PREFIX.sub('', re.sub(r'[^a-z0-9 ]', ' ', n).strip())).strip()
+
+
+def _dept(cp: str) -> str:
+    cp = re.sub(r'\D', '', str(cp or ''))
+    return cp[:3] if cp.startswith('97') else cp[:2]
+
+
+def prada_for(to: dict) -> Optional[dict]:
+    """The PRADA of this body (same name, same kind of body, same département), if exactly one address fits."""
+    kind = to.get('type') or next((k for k, w in (('mairie', 'mairie'), ('cr', 'conseil regional'), ('cg', 'conseil departemental'))
+                                   if norm(to.get('nom') or '').startswith(w)), None)
+    core, dept, types = _core(to.get('nom') or ''), _dept(to.get('code_postal')), PRADA_TYPES.get(kind)
+    if not core:
+        return None
+    found = [r for r in _prada_rows() if _core(r[1]) == core and (not types or r[0] in types)
+             and (not dept or not r[3] or _dept(r[3]) == dept)]
+    if len({r[2] for r in found}) != 1:
+        return None
+    return {'email': found[0][2], 'organisme': found[0][1]}
+
+
+def with_prada(to: dict) -> dict:
+    p = prada_for(to)
+    if not p or p['email'] == (to.get('email') or '').lower():
+        return to
+    return {**to, 'email': p['email'], 'email_annuaire': to.get('email'), 'prada': p['organisme']}
 
 
 def annuaire(code_insee: str = '', nom: str = '') -> list:
@@ -87,7 +148,7 @@ def annuaire(code_insee: str = '', nom: str = '') -> list:
     # body itself, « Métropole de Lyon - Rhône », comes last in the API's order
     url = ANNUAIRE + '?' + urllib.parse.urlencode({'where': where, 'limit': 8 if code_insee else 100, 'select': 'nom,'
                                                    'adresse_courriel,formulaire_contact,site_internet,url_service_public,'
-                                                   'siret,pivot'})
+                                                   'siret,pivot,adresse'})
     status, res, _ = get_json(url, timeout=15)
     if status != 200:
         raise NetworkError(f'annuaire : HTTP {status}')
@@ -591,7 +652,7 @@ def mail_test() -> dict:
 
 
 def admin(action: str, ref: str = '', text: str = '') -> dict:
-    """liste | tout | voir | valider | deposee (a letter pasted by hand in the body's contact form; text = the form's link) | refuser | modifier (JSON subject and body in text) | destinataire (name or INSEE code in text) | publier (the last reply, anonymized or the given text) | cloturer | test."""
+    """liste | tout | voir | valider | deposee (a letter pasted by hand in the body's contact form; text = the form's link) | prada (the body's PRADA as recipient) | refuser | modifier (JSON subject and body in text) | destinataire (name or INSEE code in text) | publier (the last reply, anonymized or the given text) | cloturer | test."""
     if action == 'test':
         return mail_test()
     if action == 'tout':  # every request in full, for the review panel (frl_panel.bat), with its deadline
@@ -602,6 +663,9 @@ def admin(action: str, ref: str = '', text: str = '') -> dict:
             view = {k: v for k, v in d.items() if k != 'reader'}
             if d['status'] == 'a_valider':  # the signature is added when sending: not shown in the editable text
                 view['body'] = strip_signature(d['body'])
+            p = prada_for(d['to']) if d['status'] == 'a_valider' else None
+            if p and p['email'] != (d['to'].get('email') or '').lower():
+                view['prada_suggeree'] = p
             rows.append({**view, 'echeance': public_view(d)['echeance'],
                          'meme_organisme_30j': sum(1 for x in all_requests() if x is not d and x['to'].get('email')
                                                    and x['to'].get('email') == d['to'].get('email')
@@ -663,6 +727,19 @@ def admin(action: str, ref: str = '', text: str = '') -> dict:
             save(d)
         return {'ok': True, 'ref': ref, 'status': d['status'], 'destinataire': to,
                 'autres': [c['nom'] for c in found if c is not to][:6]}
+    if action == 'prada':  # a request not sent yet goes to the body's PRADA (CADA's list) instead of its general contact
+        if d['status'] != 'a_valider':
+            return {'error': f'destinataire modifiable seulement avant l’envoi (demande {d["status"]})'}
+        to = with_prada(d['to'])
+        if to is d['to']:
+            return {'error': 'pas de PRADA trouvée sans ambiguïté pour cet organisme dans la liste de la CADA'}
+        with _lock:
+            d.setdefault('historique', []).append({'date': dt.datetime.now().isoformat(timespec='seconds'),
+                                                   'destinataire_precedent': d['to']})
+            d['to'] = to
+            d.pop('mode', None)   # an address now: the site e-mails the letter instead of a contact form
+            save(d)
+        return {'ok': True, 'ref': ref, 'status': d['status'], 'message': f'Destinataire : PRADA, {to["email"]}'}
     if action == 'deposee':  # sent by hand through the body's contact form: the request is followed like a mailed one
         if d['status'] != 'a_valider':
             return {'error': f'déjà traitée (demande {d["status"]})'}

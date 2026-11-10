@@ -636,6 +636,39 @@ class RequestsTest(unittest.TestCase):
         self.assertEqual((d['status'], d['replies']), ('envoyee', []))
         self.assertEqual(D.repair_own_replies(), 0, 'done once')
 
+    def test_prada_of_the_body_is_preferred_when_found_without_doubt(self):
+        """The CADA's list of PRADA: Reims' requests went to the general desk (accueil@reims-contact.fr)."""
+        D = self.D
+        old = D.PRADA_FILE, D._prada.copy()
+        f = Path(self.dir.name) / 'prada.json'
+        f.write_text(json.dumps({'lignes': [
+            ['Mairie', 'Mairie de Reims', 'prada@reims.fr', '51100', 'Reims'],
+            ['Conseil régional', 'Conseil régional de Bretagne', 'prada@bretagne.bzh', '35711', 'Rennes'],
+            ['Mairie', 'Mairie de Saint-Denis', 'prada@ville-saint-denis.fr', '93200', 'Saint-Denis'],
+            ['Mairie', 'Mairie de Saint-Denis', 'prada@saintdenis.re', '97400', 'Saint-Denis']]}), encoding='utf-8')
+        D.PRADA_FILE, D._prada['mtime'] = f, None
+        try:
+            to = D.with_prada({'nom': 'Mairie - Reims', 'email': 'accueil@reims-contact.fr', 'type': 'mairie', 'code_postal': '51100'})
+            self.assertEqual((to['email'], to['email_annuaire']), ('prada@reims.fr', 'accueil@reims-contact.fr'))
+            self.assertEqual(D.prada_for({'nom': 'Conseil régional - Bretagne', 'email': None})['email'], 'prada@bretagne.bzh')
+            self.assertEqual(D.prada_for({'nom': 'Mairie - Saint-Denis', 'type': 'mairie', 'code_postal': '97400'})['email'], 'prada@saintdenis.re')
+            self.assertIsNone(D.prada_for({'nom': 'Mairie - Saint-Denis', 'type': 'mairie'}), 'two towns, no département: no guess')
+            self.assertIsNone(D.prada_for({'nom': 'Mairie - Reims', 'type': 'mairie', 'code_postal': '13000'}))
+            self.assertIsNone(D.prada_for({'nom': 'Conseil départemental - Bretagne', 'type': 'cg'}), 'not the region')
+            # a request waiting for validation, with only a contact form, can be turned to the PRADA
+            S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND = True, False
+            D.annuaire = lambda code_insee='', nom='': [{'nom': 'Conseil régional - Bretagne', 'email': None,
+                'formulaire': 'https://www.bretagne.bzh/contact/', 'site': None, 'fiche': None, 'siret': None}]
+            ref = D.request_send(self.draft(organisme='Région Bretagne', code_insee='')['demande']['id'], 'lecteur')['ref']
+            self.assertEqual(D.load(ref)['mode'], 'formulaire')
+            self.assertEqual(D.admin('tout')['demandes'][0]['prada_suggeree']['email'], 'prada@bretagne.bzh')
+            self.assertTrue(D.admin('prada', ref)['ok'])
+            d = D.load(ref)
+            self.assertEqual((d['to']['email'], d.get('mode')), ('prada@bretagne.bzh', None), 'now e-mailed by the site')
+            self.assertIn('error', D.admin('prada', ref), 'already the PRADA')
+        finally:
+            D.PRADA_FILE, D._prada = old[0], old[1]
+
     def test_request_sent_by_hand_through_a_form_is_followed_with_its_link(self):
         """Lycée Jacques Cartier: the Région Bretagne has no address in the directory; the team sends the letter
         through https://www.bretagne.bzh/contact/ and marks it so, with the form's link shown on the public page."""
