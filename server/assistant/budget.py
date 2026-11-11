@@ -2,9 +2,10 @@
 
 * Three caps, all checked: one provider in all (CLAUDE_BUDGET_EUR, GEMINI_BUDGET_EUR), one provider for one day
   (CLAUDE_DAILY_EUR, GEMINI_DAILY_EUR), both providers together for one day (ASSISTANT_DAILY_EUR).
-* A provider with a monthly **envelope** (Claude: credits that arrive on the 9th) has it instead of the cap in all: so
-  many euros at a start date, so many more on each monthly day after it, minus what was spent since the start. What
-  is not spent one month stays available the next.
+* A provider with a monthly **envelope** (Claude) has it instead of the cap in all. It follows the credits as Anthropic
+  grants them: lots, each with an end date. So many euros at a start date, a new lot on each monthly day, and what is
+  left of a lot is lost when it ends (the credit of the 9th ends on the 11th of the next month: two days of overlap,
+  no real carry-over). The oldest lot is spent first, as Anthropic does.
 * Each call first **reserves** its worst case (whole prompt at the uncached price, the full output budget, the maximum
   number of web searches). The call is refused if the money already spent, plus what other calls in flight have
   reserved, plus this worst case, would go over the cap. So even many questions at once cannot overshoot it.
@@ -62,16 +63,60 @@ def now() -> dt.datetime:
     return dt.datetime.now(PARIS).replace(tzinfo=None)
 
 
-def refills(start: dt.datetime, until: dt.datetime, day: int) -> tuple:
-    """(how many monthly days fell after ``start`` and up to ``until``, the next one after ``until``)."""
-    n, y, m = 0, start.year, start.month
+def monthly_days(after: dt.datetime, until: dt.datetime, day: int) -> tuple:
+    """(the monthly days after ``after`` and up to ``until``, the next one after ``until``), at 0:00."""
+    found, y, m = [], after.year, after.month
     while True:
         d = dt.datetime(y, m, day)
         if d > until:
-            return n, d.date()
-        if d > start:
-            n += 1
+            return found, d
+        if d > after:
+            found.append(d)
         y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+
+
+class Envelope:
+    """Credits as lots [end or None, euros granted, euros left]. Events must come in time order (the ledger is)."""
+
+    def __init__(self, start: dt.datetime, eur: float, expires: Optional[dt.datetime], monthly: float, day: int,
+                 expire_day: int = 0):
+        self.start, self.monthly, self.day, self.expire_day = start, monthly, day, expire_day
+        self.lots = [[expires, eur, eur]]
+        self.cursor = start        # the monthly credits up to here are in the lots
+        self.debt = 0.0            # spent beyond the lots (a call that cost more than reserved): taken from the next credit
+
+    def _end(self, granted: dt.datetime) -> Optional[dt.datetime]:
+        """A monthly credit ends on expire_day of the next month (0: never)."""
+        if not self.expire_day:
+            return None
+        y, m = (granted.year + 1, 1) if granted.month == 12 else (granted.year, granted.month + 1)
+        return dt.datetime(y, m, self.expire_day)
+
+    def advance(self, t: dt.datetime) -> None:
+        if t > self.cursor:
+            for d in monthly_days(self.cursor, t, self.day)[0]:
+                paid = min(self.debt, self.monthly)
+                self.debt -= paid
+                self.lots.append([self._end(d), self.monthly, self.monthly - paid])
+            self.cursor = t
+        self.lots = [lot for lot in self.lots if lot[0] is None or lot[0] > t]
+
+    def spend(self, eur: float, t: dt.datetime) -> None:
+        if t < self.start:
+            return
+        self.advance(t)
+        for lot in sorted(self.lots, key=lambda lot: (lot[0] is None, lot[0] or dt.datetime.max)):
+            take = min(lot[2], eur)
+            lot[2] -= take
+            eur -= take
+        self.debt += max(0.0, eur)
+
+    def left(self, t: dt.datetime) -> float:
+        self.advance(t)
+        return sum(lot[2] for lot in self.lots) - self.debt
+
+    def next_credit(self, t: dt.datetime) -> dt.date:
+        return monthly_days(t, t, self.day)[1].date()
 
 
 def price(model: str) -> Optional[dict]:
@@ -111,9 +156,9 @@ class Budget:
         self.spent = defaultdict(float)     # provider -> euros since the start
         self.by_day = defaultdict(float)    # 'YYYY-MM-DD' -> euros, both providers
         self.by_day_of = defaultdict(float)  # ('YYYY-MM-DD', provider) -> euros
-        # provider -> {'start': datetime, 'eur': euros at the start, 'monthly': euros per month, 'day': day of the month}
-        self.envelopes = {p: e for p, e in (envelopes or {}).items() if e and e.get('monthly', 0) > 0}
-        self.since = defaultdict(float)     # provider -> euros since the start of its envelope
+        # provider -> Envelope, from {'start', 'eur', 'expires', 'monthly', 'day', 'expire_day'} (monthly 0: no envelope)
+        self.envelopes = {p: Envelope(e['start'], e['eur'], e.get('expires'), e['monthly'], e['day'], e.get('expire_day') or 0)
+                          for p, e in (envelopes or {}).items() if e and e.get('monthly', 0) > 0}
         self.reserved = defaultdict(float)  # provider -> euros of the calls in flight
         self._load()
 
@@ -132,29 +177,21 @@ class Budget:
                 self.by_day_of[(row.get('day', ''), row.get('provider', '?'))] += eur
                 env = self.envelopes.get(row.get('provider'))
                 try:
-                    if env and dt.datetime.fromisoformat(f'{row.get("day")}T{row.get("time") or "00:00:00"}') >= env['start']:
-                        self.since[row['provider']] += eur
+                    if env:
+                        env.spend(eur, dt.datetime.fromisoformat(f'{row.get("day")}T{row.get("time") or "00:00:00"}'))
                 except ValueError:
                     pass
 
-    def _envelope(self, provider: str) -> Optional[tuple]:
-        """(euros allowed since the start, date of the next monthly credit), or None without envelope."""
-        env = self.envelopes.get(provider)
-        if not env:
-            return None
-        n, nxt = refills(env['start'], now(), env['day'])
-        return env['eur'] + n * env['monthly'], nxt
-
     def _refusal(self, provider: str, extra: float = 0.0) -> Optional[str]:
         limit, until = self.limits.get(provider, (0.0, None))
-        env = self._envelope(provider)
+        env = self.envelopes.get(provider)
         if limit <= 0 and not env:
             return 'désactivé (budget nul)'
         if until and today() > until:
             return f'période terminée (jusqu’au {until.strftime("%d/%m/%Y")})'
         if env:
-            if self.since[provider] + self.reserved[provider] + extra > env[0]:
-                return f'budget du mois épuisé (prochain crédit le {env[1].strftime("%d/%m/%Y")})'
+            if self.reserved[provider] + extra > env.left(now()):
+                return f'budget du mois épuisé (prochain crédit le {env.next_credit(now()).strftime("%d/%m/%Y")})'
         elif self.spent[provider] + self.reserved[provider] + extra > limit:
             return f'budget épuisé ({limit:g} €)'
         day = today().isoformat()
@@ -187,8 +224,8 @@ class Budget:
             self.spent[provider] += eur
             self.by_day[row['day']] += eur
             self.by_day_of[(row['day'], provider)] += eur
-            if provider in self.envelopes and now.replace(tzinfo=None) >= self.envelopes[provider]['start']:
-                self.since[provider] += eur
+            if provider in self.envelopes:
+                self.envelopes[provider].spend(eur, now.replace(tzinfo=None))
             try:
                 self.ledger.parent.mkdir(parents=True, exist_ok=True)
                 with self.ledger.open('a', encoding='utf-8') as f:
@@ -201,12 +238,17 @@ class Budget:
             out = {}
             for p in PROVIDERS:
                 limit, until = self.limits.get(p, (0.0, None))
-                env = self._envelope(p)
-                if env:   # the gauge of the envelope: spent since its start, out of what it holds today
-                    e = self.envelopes[p]
-                    out[p] = {'spent_eur': round(self.since[p], 4), 'limit_eur': round(env[0], 2),
-                              'envelope': {'since': e['start'].isoformat(timespec='minutes'), 'start_eur': e['eur'],
-                                           'monthly_eur': e['monthly'], 'day': e['day'], 'next': env[1].isoformat(),
+                env = self.envelopes.get(p)
+                if env:   # the gauge of the envelope: what is spent of the lots still alive
+                    left = env.left(now())
+                    granted = sum(lot[1] for lot in env.lots)
+                    out[p] = {'spent_eur': round(granted - left, 4), 'limit_eur': round(granted, 2),
+                              'envelope': {'left_eur': round(left, 4), 'monthly_eur': env.monthly, 'day': env.day,
+                                           'expire_day': env.expire_day, 'next': env.next_credit(now()).isoformat(),
+                                           'since': env.start.isoformat(timespec='minutes'),
+                                           'lots': [{'eur': lot[1], 'left': round(lot[2], 4),
+                                                     'expires': lot[0].date().isoformat() if lot[0] else None}
+                                                    for lot in sorted(env.lots, key=lambda lot: (lot[0] is None, lot[0] or dt.datetime.max))],
                                            'total_spent_eur': round(self.spent[p], 4)}}
                 else:
                     out[p] = {'spent_eur': round(self.spent[p], 4), 'limit_eur': limit}
@@ -230,5 +272,6 @@ def budget() -> Budget:
                          {'claude': (S.CLAUDE_BUDGET_EUR, S.CLAUDE_UNTIL), 'gemini': (S.GEMINI_BUDGET_EUR, S.GEMINI_UNTIL)},
                          S.DAILY_BUDGET_EUR, {'claude': S.CLAUDE_DAILY_EUR, 'gemini': S.GEMINI_DAILY_EUR},
                          {'claude': {'start': S.CLAUDE_ENVELOPE_START, 'eur': S.CLAUDE_ENVELOPE_EUR,
-                                     'monthly': S.CLAUDE_MONTHLY_EUR, 'day': S.CLAUDE_MONTH_DAY}})
+                                     'expires': S.CLAUDE_ENVELOPE_EXPIRES, 'monthly': S.CLAUDE_MONTHLY_EUR,
+                                     'day': S.CLAUDE_MONTH_DAY, 'expire_day': S.CLAUDE_EXPIRE_DAY}})
     return _budget

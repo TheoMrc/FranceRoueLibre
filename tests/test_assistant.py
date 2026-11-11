@@ -76,38 +76,57 @@ class BudgetTest(unittest.TestCase):
         again = self.make(claude=10, gemini=10, daily=5.0, daily_by={'claude': 1.0})   # a restart reads the ledger back
         self.assertIn('plafond du jour', again.refusal('claude', 0.3))
 
-    def test_monthly_envelope_carries_over(self):
+    def test_monthly_envelope_follows_the_credits(self):
         D = dt.datetime
-        self.assertEqual(B.refills(D(2026, 11, 10, 16, 41), D(2026, 12, 8, 23, 0), 9), (0, dt.date(2026, 12, 9)))
-        self.assertEqual(B.refills(D(2026, 11, 10, 16, 41), D(2026, 12, 9, 0, 0), 9), (1, dt.date(2027, 1, 9)))
-        self.assertEqual(B.refills(D(2026, 11, 10, 16, 41), D(2027, 2, 20), 9), (3, dt.date(2027, 3, 9)))
-        self.assertEqual(B.refills(D(2026, 11, 5), D(2026, 11, 9, 8), 9), (1, dt.date(2026, 12, 9)))
-        env = {'claude': {'start': D(2026, 11, 10, 16, 41), 'eur': 2.0, 'monthly': 1.0, 'day': 9}}
+        self.assertEqual(B.monthly_days(D(2026, 11, 11, 10, 25), D(2026, 12, 8, 23), 9), ([], D(2026, 12, 9)))
+        self.assertEqual(B.monthly_days(D(2026, 11, 11, 10, 25), D(2027, 1, 9), 9), ([D(2026, 12, 9), D(2027, 1, 9)], D(2027, 2, 9)))
+        # 2 € until December 11, then 1 € on each 9th, each lost on the 11th of the next month
+        env = {'claude': {'start': D(2026, 11, 11, 10, 25), 'eur': 2.0, 'expires': D(2026, 12, 11), 'monthly': 1.0, 'day': 9,
+                          'expire_day': 11}}
         real = B.now
-        rows = [{'day': '2026-11-09', 'time': '10:00:00', 'provider': 'claude', 'eur': 50.0},    # before the start: not counted
-                {'day': '2026-11-10', 'time': '16:40:59', 'provider': 'claude', 'eur': 5.0},
-                {'day': '2026-11-10', 'time': '18:00:00', 'provider': 'claude', 'eur': 1.5}]
+        rows = [{'day': '2026-11-10', 'time': '10:00:00', 'provider': 'claude', 'eur': 50.0},    # before the start: not counted
+                {'day': '2026-11-11', 'time': '10:24:59', 'provider': 'claude', 'eur': 5.0},
+                {'day': '2026-11-11', 'time': '18:00:00', 'provider': 'claude', 'eur': 1.5}]
         self.ledger.write_text('\n'.join(json.dumps(r) for r in rows) + '\n', encoding='utf-8')
+
+        def make():
+            return B.Budget(self.ledger, {'claude': (1.0, None), 'gemini': (1.0, None)}, 0, None, env)   # the cap in all (1 €) is ignored
         try:
             B.now = lambda: D(2026, 11, 20, 12, 0)
-            b = B.Budget(self.ledger, {'claude': (1.0, None), 'gemini': (1.0, None)}, 0, None, env)   # the cap in all (1 €) is ignored
+            b = make()
             self.assertIsNone(b.refusal('claude', 0.4))
-            self.assertIn('prochain crédit le 09/12/2026', b.refusal('claude', 0.6))             # 1.5 + 0.6 > 2
+            self.assertIn('prochain crédit le 09/12/2026', b.refusal('claude', 0.6))             # 0.5 € left
             s = b.summary()['claude']
-            self.assertEqual((s['spent_eur'], s['limit_eur'], s['envelope']['next'], s['envelope']['total_spent_eur']),
-                             (1.5, 2.0, '2026-12-09', 56.5))
-            B.now = lambda: D(2026, 12, 9, 0, 5)                                                 # the monthly credit: 2 + 1
+            self.assertEqual((s['spent_eur'], s['limit_eur'], s['envelope']['left_eur'], s['envelope']['next'],
+                              s['envelope']['lots'], s['envelope']['total_spent_eur']),
+                             (1.5, 2.0, 0.5, '2026-12-09', [{'eur': 2.0, 'left': 0.5, 'expires': '2026-12-11'}], 56.5))
+            B.now = lambda: D(2026, 12, 9, 0, 5)                                                 # the new credit: 0.5 + 1
+            b = make()
             self.assertIsNone(b.refusal('claude', 1.4))
             self.assertIn('épuisé', b.refusal('claude', 1.6))
-            B.now = lambda: D(2027, 1, 9, 9, 0)                                                  # unspent euros carry over: 2 + 2
-            self.assertIsNone(b.refusal('claude', 2.4))
+            B.now = lambda: D(2026, 12, 10, 9, 0)
+            b.settle('claude', 0, 0.7)                                                           # the oldest lot first: 0.5 + 0.2
+            self.assertEqual([lot['left'] for lot in b.summary()['claude']['envelope']['lots']], [0.0, 0.8])
+            B.now = lambda: D(2026, 12, 11, 0, 5)                                                # what was left of November is lost
+            b = make()
+            self.assertEqual(b.summary()['claude']['envelope']['left_eur'], 0.8)
+            self.assertEqual(b.summary()['claude']['limit_eur'], 1.0)
+            B.now = lambda: D(2027, 2, 20, 9, 0)                                                 # no carry-over: only February's credit
+            b = make()
+            self.assertIsNone(b.refusal('claude', 0.9))
+            self.assertIn('prochain crédit le 09/03/2027', b.refusal('claude', 1.1))
+            never = B.Budget(self.ledger, {'claude': (1.0, None), 'gemini': (1.0, None)}, 0, None,
+                             {'claude': dict(env['claude'], expires=None, expire_day=0)})        # CLAUDE_EXPIRE_DAY=0: all carries over
+            self.assertIsNone(never.refusal('claude', 2.7))                                      # 2 + 3 credits - 2.2 spent = 2.8
+            self.assertIn('épuisé', never.refusal('claude', 2.9))
         finally:
             B.now = real
         b = B.Budget(self.ledger, {'claude': (1.0, None), 'gemini': (1.0, None)}, 0, None, {'claude': dict(env['claude'], monthly=0)})
         self.assertIn('budget épuisé (1 €)', b.refusal('claude'))                                 # no envelope: the cap in all
 
     def test_defaults_match_the_request(self):
-        self.assertEqual((S.CLAUDE_MONTHLY_EUR, S.CLAUDE_MONTH_DAY, S.CLAUDE_ENVELOPE_EUR), (90, 9, 150))
+        self.assertEqual((S.CLAUDE_MONTHLY_EUR, S.CLAUDE_MONTH_DAY, S.CLAUDE_EXPIRE_DAY, S.CLAUDE_ENVELOPE_EUR), (90, 9, 11, 88))
+        self.assertEqual(S.CLAUDE_ENVELOPE_EXPIRES, dt.datetime(2026, 12, 11))
         self.assertEqual((S.CLAUDE_BUDGET_EUR, S.CLAUDE_DAILY_EUR, S.GEMINI_BUDGET_EUR), (150, 50, 100))
         self.assertLessEqual(S.CLAUDE_BUDGET_EUR, S.CLAUDE_MAX_USD * S.USD_EUR)
         self.assertEqual(S.GEMINI_UNTIL, dt.date(2026, 11, 17))
