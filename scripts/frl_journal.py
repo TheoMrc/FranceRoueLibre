@@ -17,8 +17,18 @@ from urllib.parse import unquote_plus
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / '_journal'
 SEP = '@@RECHERCHES@@'
-REMOTE = ("sudo -n sh -c 'zcat -f /var/lib/francerouelibre-assistant/journal/*.jsonl* 2>/dev/null; echo " + SEP +
-          "; zcat -f /var/lib/francerouelibre/recherches/*.jsonl* 2>/dev/null'")
+LOUPE_DIR, SEARCH_DIR = '/var/lib/francerouelibre-assistant/journal', '/var/lib/francerouelibre/recherches'
+STATE = OUT / 'journal-etat.json'   # the day of the last full read: the next ones read only the files changed since
+# no keyboard for ssh: several of them at once from the panel's console window waited on it (timeouts after 60 s)
+SSH = ['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', 'biodevs-vps']
+
+
+def remote(since: str = '') -> str:
+    """The VPS command: every journal file, or only those modified since that day (a day's file is written all day
+    and compressed after midnight, so the files of `since` and later are all read)."""
+    pick = (lambda d: f"find {d} -maxdepth 1 -name '*.jsonl*' -newermt {since} -exec zcat -f {{}} + 2>/dev/null") if since \
+        else (lambda d: f'zcat -f {d}/*.jsonl* 2>/dev/null')
+    return f"sudo -n sh -c \"{pick(LOUPE_DIR)}; echo {SEP}; {pick(SEARCH_DIR)}\""
 LOUPE_COLS = ['t', 'heure_paris', 'id', 'reader', 'question', 'earlier', 'model', 'provider', 'saved', 'cost_eur', 'calls', 's', 'tools',
               'demande', 'error', 'vote', 'reply', 'sources']
 SEARCH_COLS = ['t', 'heure_paris', 'q', 'lines', 'cache', 'status', 's', 'prefix']
@@ -35,8 +45,21 @@ def local(t):
     return d.astimezone().strftime('%Y-%m-%d %H:%M:%S')
 
 
-def fetch():
-    r = subprocess.run(['ssh', '-o', 'BatchMode=yes', 'biodevs-vps', REMOTE], capture_output=True, timeout=120)
+def since_day() -> str:
+    """The day before the last successful read (one day of overlap: rows already kept are not doubled), or '' for all."""
+    try:
+        last = dt.date.fromisoformat(json.loads(STATE.read_text(encoding='utf-8'))['jour'])
+    except (OSError, ValueError, KeyError):
+        return ''
+    if not (OUT / 'loupe.csv').is_file() or not (OUT / 'recherches.csv').is_file():
+        return ''
+    return (last - dt.timedelta(days=1)).isoformat()
+
+
+def fetch(since: str = '', votes_out: dict = None):
+    """(questions, searches) from the VPS journals; since: only the files changed from that day. votes_out receives
+    every vote read, also those on answers of earlier days (save_all puts them on the rows already kept)."""
+    r = subprocess.run(SSH + [remote(since)], capture_output=True, stdin=subprocess.DEVNULL, timeout=120)
     if r.returncode not in (0, 1) or SEP.encode() not in r.stdout:
         sys.exit(f'Lecture impossible sur le VPS : {r.stderr.decode("utf-8", "replace")[:300]}')
     text = r.stdout.decode('utf-8', 'replace')
@@ -54,6 +77,8 @@ def fetch():
             answers.append(e)
         elif e.get('type') == 'vote':
             votes[e.get('id')] = e.get('vote')
+    if votes_out is not None:
+        votes_out.update(votes)
     loupe = [{'t': a.get('t'), 'heure_paris': local(a.get('t')), 'id': a.get('id'), 'reader': a.get('reader'), 'question': a.get('question'),
               'earlier': a.get('earlier'), 'model': a.get('model'), 'provider': a.get('provider'), 'saved': a.get('saved') or '',
               'cost_eur': a.get('cost_eur'), 'calls': a.get('calls'), 's': a.get('s'),
@@ -64,6 +89,20 @@ def fetch():
                  'status': e.get('status'), 's': e.get('s'), 'prefix': e.get('prefix')} for e in rows(search_raw)
                 if not deploy_test(e)]
     return sorted(loupe, key=lambda r: r['t'] or ''), sorted(searches, key=lambda r: r['t'] or '')
+
+
+def save_all(loupe: list, searches: list, votes: dict = None, full: bool = True) -> tuple:
+    """Adds the new rows to the two CSV; a vote read now on an answer kept earlier updates that answer."""
+    if votes:
+        seen = {r['id'] for r in loupe}
+        late = {k: v for k, v in votes.items() if k not in seen}
+        if late and (OUT / 'loupe.csv').is_file():
+            with open(OUT / 'loupe.csv', newline='', encoding='utf-8-sig') as h:
+                loupe = loupe + [{**r, 'vote': late[r['id']]} for r in csv.DictReader(h) if r.get('id') in late]
+    n1, t1 = save(OUT / 'loupe.csv', LOUPE_COLS, loupe, lambda r: r['id'])
+    n2, t2 = save(OUT / 'recherches.csv', SEARCH_COLS, searches, lambda r: f'{r["t"]}|{r["q"]}|{r["cache"]}')
+    STATE.write_text(json.dumps({'jour': dt.date.today().isoformat(), 'complet': full}), encoding='utf-8')
+    return n1, t1, n2, t2
 
 
 def deploy_test(e) -> bool:
@@ -103,8 +142,13 @@ def main():
     ap.add_argument('--days', type=int, default=14)
     ap.add_argument('--last', type=int, default=15)
     ap.add_argument('--no-save', action='store_true')
+    ap.add_argument('--tout', action='store_true', help='relire tous les journaux du VPS, pas seulement les jours récents')
     a = ap.parse_args()
-    loupe, searches = fetch()
+    votes = {}
+    since = '' if a.tout or a.no_save else since_day()
+    loupe, searches = fetch(since, votes)
+    if since:
+        print(f'Journaux du VPS lus depuis le {since} (--tout pour tout relire)')
     since = (dt.date.today() - dt.timedelta(days=a.days - 1)).isoformat()
     days = collections.defaultdict(lambda: {'q': 0, 'readers': set(), 'eur': 0.0, 'saved': 0, 'r': 0, 'empty': 0})
     for r in loupe:
@@ -130,8 +174,7 @@ def main():
     for r in searches[-a.last:]:
         print(f'{r["heure_paris"][5:16]}  {r["q"][:80]:80}  {r["lines"] or "?":>8} lignes  {r["cache"] or ""}')
     if not a.no_save:
-        n1, t1 = save(OUT / 'loupe.csv', LOUPE_COLS, loupe, lambda r: r['id'])
-        n2, t2 = save(OUT / 'recherches.csv', SEARCH_COLS, searches, lambda r: f'{r["t"]}|{r["q"]}|{r["cache"]}')
+        n1, t1, n2, t2 = save_all(loupe, searches, votes, full=not since)
         print(f'\n{OUT / "loupe.csv"} : {n1} nouvelle(s) question(s), {t1} en tout')
         print(f'{OUT / "recherches.csv"} : {n2} nouvelle(s) recherche(s), {t2} en tout')
 

@@ -456,7 +456,7 @@ function budgets() {
     : 'VPS non lu : dépense d’après le journal, plafonds par défaut de server/assistant/settings.py (le VPS peut en avoir d’autres).';
   $('budgets').innerHTML =
     g(E ? 'Claude, enveloppe en cours' : 'Claude, au total', B ? bc.spent_eur : spent('claude'), cCap, (E
-      ? `Reste ${eur(E.left_eur)} : ${E.lots.map(l => `${eur(l.left)}${l.expires ? ` à dépenser avant le ${frDate(l.expires)}` : ''}`).join(', ')}. Prochain crédit : ${eur(E.monthly_eur, 0)} le ${frDate(E.next)}${E.expire_day ? `, perdu s'il n'est pas dépensé le ${E.expire_day} du mois suivant` : ''}. ${eur(E.total_spent_eur)} dépensés depuis le début.`
+      ? `${E.left_eur != null ? `Reste ${eur(E.left_eur)}` : `Départ ${eur(E.start_eur, 0)} le ${frDate(E.since)}`}${(E.lots || []).length ? ' : ' : ''}${(E.lots || []).map(l => `${eur(l.left)}${l.expires ? ` à dépenser avant le ${frDate(l.expires)}` : ''}`).join(', ')}. Prochain crédit : ${eur(E.monthly_eur, 0)}${E.next ? ` le ${frDate(E.next)}` : ''}${E.expire_day ? `, perdu s'il n'est pas dépensé le ${E.expire_day} du mois suivant` : ''}. ${E.total_spent_eur != null ? `${eur(E.total_spent_eur)} dépensés depuis le début.` : ''}`
       : `Crédit Anthropic, sans date de fin. Rythme moyen : ${eur(rate('claude'), 3)} par jour.`) + (B && bc.refusal ? ` Arrêté : ${esc(bc.refusal)}.` : ''), 'var(--c3)') +
     (cDay ? g("Claude, aujourd'hui", B ? bc.today_eur : day('claude'), cDay, 'Plafond quotidien de Claude seul.', 'var(--c3)') : '') +
     g('Gemini', B ? bg.spent_eur : spent('gemini'), B ? bg.limit_eur : C.gemini_eur, `Crédits Google Cloud${left != null ? `, ${left > 0 ? `encore ${left} jour(s), jusqu'au ${new Date(until + 'T12:00').toLocaleDateString('fr-FR')}` : 'expirés'}` : ''}.`, 'var(--c1)') +
@@ -525,15 +525,24 @@ function status() {
   const shown = period && days.length === period ? `${period} derniers jours` : `depuis le ${new Date(days[0] + 'T12:00').toLocaleDateString('fr-FR')} (début des données)`;
   $('sub').innerHTML = `<span><i class="pn-dot ${live ? 'is-live' : ''}"></i>${live ? 'Panneau actif' : 'Copie hors ligne'}</span><span>Données du ${esc(DATA.generated.replace(' ', ' à '))}</span><span>${shown}</span><span>${fmt(DATA.loupe.length)} questions et ${fmt(DATA.searches.length)} recherches au journal</span>`;
 }
+// each block on its own: a block that fails (data of another shape) shows its error and leaves the others drawn
+function safe(name, el, fn) {
+  try { fn(); } catch (err) {
+    console.error(name, err);
+    const box = el && $(el);
+    if (box) box.innerHTML = `<div class="pn-note"><span>Bloc « ${esc(name)} » non affiché : ${esc(err.message)}</span></div>`;
+  }
+}
 function render() {
   const days = span(period); T = totals(days);
   const P = period ? totals(span(period, 1)) : null;
-  kpis(T, P || {}); status();
+  safe('indicateurs', 'kpis', () => kpis(T, P || {})); safe('état', 'sub', status);
   $('pagesHint').textContent = `Sur la période (${days.length} jours).`;
-  bars('pages', topOf(days, 'pages').map(([k, n]) => [k === '/' ? 'Accueil' : k.replace(/^\//, '').replace(/\.html$/, ''), n]));
-  bars('refs', topOf(days, 'refs'));
-  if (window.Chart) { drawAudience(T); drawLoupe(T); drawScatter(T); drawTools(T); }
-  heat(T); budgets(); providers(T); searches(T); qTable(T); sTable(T); grow();
+  safe('pages', 'pages', () => bars('pages', topOf(days, 'pages').map(([k, n]) => [k === '/' ? 'Accueil' : k.replace(/^\//, '').replace(/\.html$/, ''), n])));
+  safe('sites', 'refs', () => bars('refs', topOf(days, 'refs')));
+  if (window.Chart) { safe('audience', null, () => drawAudience(T)); safe('questions', null, () => drawLoupe(T)); safe('coût et durée', null, () => drawScatter(T)); safe('outils', null, () => drawTools(T)); }
+  safe('activité', 'heat', () => heat(T)); safe('budgets', 'budgets', budgets); safe('moteurs', 'prov', () => providers(T));
+  safe('recherches', 'topq', () => searches(T)); safe('questions', 'qt', () => qTable(T)); safe('dernières recherches', 'st', () => sTable(T)); grow();
 }
 $('period').innerHTML = PERIODS.map(([n, l]) => `<button type="button" data-n="${n}" class="${n === period ? 'active' : ''}">${l}</button>`).join('');
 $('period').onclick = e => { const b = e.target.closest('button'); if (!b) return; period = +b.dataset.n; try { localStorage.setItem('frl-panel-period', period); } catch (x) {}

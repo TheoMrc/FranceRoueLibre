@@ -37,7 +37,7 @@ def visits(offline: bool):
     cache = OUT / 'stats.json'
     if not offline:
         try:
-            r = subprocess.run(['ssh', '-o', 'BatchMode=yes', 'biodevs-vps', 'sudo -n frl-stats --json'],
+            r = subprocess.run(J.SSH + ['sudo -n frl-stats --json'], stdin=subprocess.DEVNULL,
                                capture_output=True, timeout=300)
             if r.returncode == 0 and r.stdout.strip():
                 data = json.loads(r.stdout.decode('utf-8'))
@@ -62,9 +62,9 @@ def journals(offline: bool):
         note = 'Journaux non rafraîchis (mode hors ligne).'
     else:
         try:
-            loupe, searches = J.fetch()
-            J.save(OUT / 'loupe.csv', J.LOUPE_COLS, loupe, lambda r: r['id'])
-            J.save(OUT / 'recherches.csv', J.SEARCH_COLS, searches, lambda r: f'{r["t"]}|{r["q"]}|{r["cache"]}')
+            votes, since = {}, J.since_day()   # only the journal files changed since the day before the last read
+            loupe, searches = J.fetch(since, votes)
+            J.save_all(loupe, searches, votes, full=not since)
         except SystemExit as exc:  # fetch() exits with a message when the VPS cannot be read
             note = f'Journaux non rafraîchis ({str(exc)[:160]}) : CSV déjà enregistrés.'
         except (OSError, subprocess.SubprocessError) as exc:
@@ -92,7 +92,7 @@ def frl_demandes(action: str, ref: str = '', text: str = '') -> dict:
     else:
         remote = f'frl-demandes {action} {ref}'.strip()
     try:
-        r = subprocess.run(['ssh', '-o', 'BatchMode=yes', 'biodevs-vps', remote], input=text.encode('utf-8'),
+        r = subprocess.run(J.SSH + [remote], input=text.encode('utf-8'),
                            capture_output=True, timeout=120)
         out = r.stdout.decode('utf-8', 'replace')
         return json.loads(out[out.index('{'):]) if '{' in out else {'error': (out or r.stderr.decode('utf-8', 'replace'))[:300]}
@@ -196,7 +196,7 @@ def budget_live(offline: bool):
     why = 'mode hors ligne'
     if not offline:
         try:
-            r = subprocess.run(['ssh', '-o', 'BatchMode=yes', 'biodevs-vps', 'frl-budget'], capture_output=True, timeout=60)
+            r = subprocess.run(J.SSH + ['frl-budget'], capture_output=True, stdin=subprocess.DEVNULL, timeout=60)
             if r.returncode == 0 and r.stdout.strip():
                 data = json.loads(r.stdout.decode('utf-8'))
                 data['read'] = dt.datetime.now().strftime('%Y-%m-%d %H:%M')
