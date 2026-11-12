@@ -255,7 +255,10 @@ def step_journal(accept: bool) -> None:
         with open(j / name, newline='', encoding='utf-8-sig') as h:
             return list(csv.DictReader(h))
     searches = sorted({r['q'].strip() for r in rows('recherches.csv') if r.get('q', '').strip()})
-    questions = sorted({r['question'].strip() for r in rows('loupe.csv') if r.get('question', '').strip()}) if (j / 'loupe.csv').is_file() else []
+    # the 1 500 questions asked last (distinct): replaying the whole journal took more than ten minutes once it passed
+    # 5 000 questions, and this step runs before every deployment
+    asked = [r['question'].strip() for r in rows('loupe.csv') if r.get('question', '').strip()] if (j / 'loupe.csv').is_file() else []
+    questions = sorted(list(dict.fromkeys(reversed(asked)))[:1500])
     photo = {'lieux': {}, 'faq': {}, 'auto': {}}
     for q in searches:
         r = places.find(q)
