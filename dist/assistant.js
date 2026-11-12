@@ -329,7 +329,7 @@
       return { now, url: d.url, source: d.source };
     } catch (e) { return null; }
   }
-  const euros = v => Math.round(v).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g, '\u202f') + '\u00a0€';
+  const euros = v => Math.round(v).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g, '\u00a0') + '\u00a0€';
   async function donNote(kind) {
     const d = new Date(), today = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
     if (!status?.donate || status.credits === false || read(localStorage, DON, '') === today) return;
