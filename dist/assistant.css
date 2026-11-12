@@ -304,6 +304,12 @@
 .ai-form[hidden] { display: none; }
 .ai-credits { border-top: 1px solid var(--c-line); padding: .8rem .95rem .9rem; background: var(--c-bg); font-size: .85rem; line-height: 1.45; color: var(--c-ink); animation: ai-in .4s var(--ai-ease) both; }
 .ai-credits p { margin: 0 0 .6rem; }
+/* a word about the donations, as a short message of the Loupe (assistant.js, donNote) */
+.ai-msg--don .ai-card { flex: 0 1 auto; background: transparent; border: 1px dashed var(--c-line); box-shadow: none; }
+.ai-msg--don .ai-text p { margin: 0 0 .45rem; font-size: .88rem; color: var(--c-ink); }
+.ai-don { display: inline-flex; align-items: center; gap: .35rem; padding: .28rem .7rem; border-radius: 999px; border: 1px solid var(--c-line); font-size: .78rem; font-weight: 600; text-decoration: none; color: var(--c-ink); background: var(--c-surface); transition: border-color .2s, color .2s, transform .25s var(--ai-spring); }
+.ai-don svg { color: var(--ai-red); flex: none; }
+.ai-don:hover { border-color: var(--ai-red); color: var(--ai-red); transform: translateY(-1px); }
 /* the visible « human » check: a box to draw a loop in, with the mouse or the finger (assistant.js, drawLoop) */
 .ai-human { border-top: 1px solid var(--c-line); padding: .75rem .85rem .6rem; background: var(--c-bg); animation: ai-in .4s var(--ai-ease) both; }
 .ai-human.is-leaving { opacity: 0; transform: translateY(8px); transition: opacity .25s .25s, transform .25s .25s; }

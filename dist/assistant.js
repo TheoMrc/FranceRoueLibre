@@ -305,7 +305,25 @@
     if (Date.now() - (m.at || 0) > 55 * 60 * 1000) return '';
     return `<span class="ai-vote" title="Cette réponse est-elle utile ?"><button type="button" data-vote="1" aria-label="Réponse utile">${VOTE_UP}</button><button type="button" data-vote="-1" aria-label="Réponse fausse ou inutile">${VOTE_DOWN}</button></span>`;
   }
+  /* A word about the donations, said by the Loupe as a short message after an answer: when the reader found an answer
+     useful (👍), or after the third answer written by a model. Once a day at most in this browser, whatever the
+     reason, and never kept in the discussion (it is not sent back to the model, nor shown again from the history). */
+  const DON = 'frl-loupe-don', PAID = 'frl-loupe-payantes';
+  const DON_TEXT = { merci: 'Utile ? La Loupe ne tient que par les dons.',
+                     centimes: 'Chaque réponse coûte quelques centimes. Zéro pub, zéro subvention : juste vous.' };
+  function donNote(kind) {
+    const d = new Date(), today = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+    if (!status?.donate || status.credits === false || read(localStorage, DON, '') === today) return;
+    if (!write(localStorage, DON, today)) return;   // no storage (private mode): never shown rather than at every answer
+    const el = document.createElement('div');
+    el.className = 'ai-msg ai-msg--bot ai-msg--don';
+    el.innerHTML = `<div class="ai-av">${LOGO()}</div><div class="ai-card"><div class="ai-text"><p>${esc(DON_TEXT[kind])}</p><a class="ai-don" href="${esc(status.donate)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.5-4.6-10-9.3C.3 8.300 2 4.500 5.600 4.500c2 0 3.400 1 4.400 2.300 1-1.300 2.400-2.300 4.400-2.300 3.600 0 5.300 3.800 3.600 7.200C19.500 16.400 12 21 12 21z"/></svg>Soutenir sur Tipeee</a></div></div>`;
+    const was = nearBottom();
+    log.appendChild(el);
+    if (was) el.scrollIntoView({ block: 'end', behavior: reduce.matches ? 'auto' : 'smooth' });
+  }
   function sendVote(m, vote, el) {
+    if (vote > 0) setTimeout(() => donNote('merci'), 500);
     m.vote = vote; saveStore();
     el.classList.add('is-done');
     el.innerHTML = vote > 0 ? 'Merci !' : 'Merci, la réponse sera relue.';
@@ -546,6 +564,11 @@
     live.textContent = m.error ? `Erreur : ${m.error}` : `Réponse : ${m.text.replace(/[*#[\]]/g, '').slice(0, 600)}`;
     delete m.running;
     c.messages.push(m); c.updated = Date.now(); saveStore();
+    if (!m.error && m.text && m.provider && m.provider !== 'faq' && m.provider !== 'demo') {   // an answer written by a model
+      const n = (read(sessionStorage, PAID, 0) || 0) + 1;
+      write(sessionStorage, PAID, n);
+      if (n >= 3) setTimeout(() => donNote('centimes'), 700);
+    }
     busy = null;
     setBusy(false);
     if (panel.hidden) fab.classList.add('has-news');
