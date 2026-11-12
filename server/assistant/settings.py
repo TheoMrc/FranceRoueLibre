@@ -107,7 +107,7 @@ try:
 except ValueError:
     raise SystemExit('CLAUDE_ENVELOPE_START et CLAUDE_ENVELOPE_EXPIRES : dates attendues au format AAAA-MM-JJ[THH:MM]')
 # Cap of one provider alone for one day (0: none, only the common cap above applies).
-CLAUDE_DAILY_EUR = _float('CLAUDE_DAILY_EUR', 50)
+CLAUDE_DAILY_EUR = _float('CLAUDE_DAILY_EUR', 15)   # the busiest days cost 9 to 13 € before the web search got cheaper
 GEMINI_DAILY_EUR = _float('GEMINI_DAILY_EUR', 0)
 # Prices are in US dollars; 1.0 counts one dollar as one euro, which overestimates the spending (safe side).
 USD_EUR = _float('ASSISTANT_USD_EUR', 1.0)
@@ -123,6 +123,8 @@ MAX_STEPS = _int('ASSISTANT_MAX_STEPS', 8)                 # model calls for one
 MAX_OUTPUT_TOKENS = _int('ASSISTANT_MAX_OUTPUT_TOKENS', 4000)
 MAX_QUESTION_CHARS = _int('ASSISTANT_MAX_QUESTION_CHARS', 1500)
 MAX_HISTORY = _int('ASSISTANT_MAX_HISTORY', 10)            # previous messages kept (text only)
+# Invisible « human » check before a question goes to a model (assistant/humain.py). 0: off (tests, local scripts).
+HUMAN_CHECK = _str('ASSISTANT_HUMAN_CHECK', '1') != '0'
 PER_IP_HOUR = _int('ASSISTANT_PER_IP_HOUR', 15)
 PER_IP_DAY = _int('ASSISTANT_PER_IP_DAY', 40)
 DAILY_QUESTIONS = _int('ASSISTANT_DAILY_QUESTIONS', 500)   # all visitors together

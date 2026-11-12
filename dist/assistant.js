@@ -2,6 +2,9 @@
    says a model is configured: on the static preview without the API nothing appears; once the budgets are spent, the
    question box gives way to a message and the donation link (Tipeee). While the server is busy the question waits in
    line and the panel shows its place.
+   Before a question goes to a model the server wants a « human » check (server/assistant/humain.py), invisible: this
+   file solves a small computation in the background and reads how the question was written (rhythm of the typing,
+   pointer, touches; never the keys). Only when that is too thin does a box ask the reader to draw a loop.
    Conversations are kept in this browser (localStorage, « Historique ») and sent with each question; the server keeps
    nothing. Test the animations without spending a token: assistant_demo.bat (or assistant_api.py --fake).
    The model button shows the models' logos from dist/img/ai/ (gemini.svg, claude.svg: Icons8, credited in mentions.html). */
@@ -458,9 +461,28 @@
     setBusy(true);
     try {
       const script = hooks?.script || null;
-      const r = pre || script ? { ok: true, status: 202 } : await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history.slice(-11), provider, ...(hooks?.form ? { signalement: hooks.form } : {}), ...(hooks?.piste ? { piste: hooks.piste } : {}) }) });
-      const data = script ? { job: 'demo' } : pre || await r.json().catch(() => ({}));
+      /* The question goes with the pass or the proof at hand. A free answer needs neither; for the others the server
+         may ask to check (again): « defi », a new challenge to solve, or « boucle », the loop drawn by the reader. */
+      let r = { ok: true, status: 202 }, data = script ? { job: 'demo' } : pre, loop = null;
+      for (let tries = 0; !pre && !script; tries++) {
+        r = await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: history.slice(-11), provider, ...(hooks?.form ? { signalement: hooks.form } : {}), ...(hooks?.piste ? { piste: hooks.piste } : {}), ...humanFields(loop) }) });
+        data = await r.json().catch(() => ({}));
+        if (data.passe) { human.passe = data.passe; human.challenge = null; write(sessionStorage, PASSE, data.passe); }
+        if (r.status !== 403 || !data.verifier || tries >= 4 || !crypto?.subtle) break;
+        human.passe = null; try { sessionStorage.removeItem(PASSE); } catch (e) { /* private mode */ }
+        v.think('Vérification');
+        if (data.defi) setChallenge(data.defi); else if (!human.challenge || human.challenge.pending) await prepare();
+        if (data.verifier === 'boucle') {
+          v.think(null);
+          loop = await drawLoop(data.error);
+          if (!loop) throw new Error('Question annulée : la vérification n’a pas été faite.');
+          v.think('Vérification');
+        }
+        for (let i = 0; i < 400 && !proofReady() && !busy.stopped; i++) await sleep(50);   // 20 s at most
+        if (busy.stopped) throw new Error('Question annulée.');
+        v.think('Réflexion');
+      }
       if (data.credits === false) { m.donate = data.donate; noCredits(data); }
       if (!r.ok || !data.job) throw new Error(data.error || (r.status === 503 || r.status === 502 || r.status === 504
         ? 'La Loupe est très demandée en ce moment : réessayez dans quelques minutes.' : `Erreur ${r.status}`));
@@ -529,6 +551,138 @@
     if (panel.hidden) fab.classList.add('has-news');
     if (panel.hidden && quietAsk && !m.error) notifyAnswer();
     quietAsk = false;
+  }
+
+  // ------------------------------------------------------------------------------------------------ human check
+  const PASSE = 'frl-loupe-passe';
+  const human = { challenge: null, at: 0, counter: null, passe: read(sessionStorage, PASSE, null),
+                  frappe: [], lastKey: 0, pointeur: [], lastMove: 0, touches: 0, defilements: 0, lastScroll: 0 };
+  const zeroBits = bytes => { let n = 0; for (const b of bytes) { if (b === 0) { n += 8; continue; } return n + Math.clz32(b) - 24; } return n; };
+  /* the proof of work: the number whose SHA-256 with the challenge starts with enough zero bits */
+  async function work(c) {
+    if (!crypto?.subtle) return;
+    const enc = new TextEncoder();
+    for (let i = 0; ; i++) {
+      if (human.challenge !== c) return;           // a newer challenge replaced it
+      const h = new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(`${c.nonce}:${i}`)));
+      if (zeroBits(h) >= c.difficulty) { human.counter = i; return; }
+    }
+  }
+  function setChallenge(c) { human.challenge = c; human.counter = null; human.at = performance.now(); work(c); }
+  /* asked as soon as the Loupe opens, so the work is done long before the question is written */
+  async function prepare() {
+    if (!status?.human || human.passe || (human.challenge && performance.now() - human.at < 15 * 60e3)) return;
+    human.challenge = { pending: true }; human.at = performance.now();
+    try {
+      const r = await fetch(API + 'defi', { cache: 'no-store' });
+      if (!r.ok) throw new Error(r.status);
+      setChallenge(await r.json());
+    } catch (e) { human.challenge = null; }
+  }
+  const proofReady = () => human.challenge && human.counter !== null && performance.now() - human.at > 1100;
+  const signals = () => ({ frappe: human.frappe.slice(-40), pointeur: human.pointeur.slice(-60), touches: human.touches, defilements: human.defilements });
+  function humanFields(loop) {
+    if (!status?.human) return {};
+    if (human.passe && !loop) return { passe: human.passe };
+    if (!proofReady()) return {};
+    const c = human.challenge;
+    return { preuve: { nonce: c.nonce, ts: c.ts, sig: c.sig, counter: human.counter, signaux: signals(), ...(loop ? { boucle: loop } : {}) } };
+  }
+  /* how the question was written, no content: gaps between inputs, a thin trace of the pointer, touches, scrolls */
+  function watch() {
+    input.addEventListener('input', () => {
+      const t = performance.now();
+      if (human.lastKey) human.frappe.push(Math.round(t - human.lastKey));
+      if (human.frappe.length > 80) human.frappe.shift();
+      human.lastKey = t;
+    });
+    addEventListener('pointermove', e => {
+      const t = performance.now();
+      if (e.pointerType === 'touch' || t - human.lastMove < 40) return;
+      human.lastMove = t;
+      human.pointeur.push([Math.round(1000 * e.clientX / innerWidth), Math.round(1000 * e.clientY / innerHeight), Math.round(t)]);
+      if (human.pointeur.length > 120) human.pointeur.shift();
+    }, { passive: true });
+    addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') human.touches++; }, { passive: true });
+    addEventListener('scroll', () => { const t = performance.now(); if (t - human.lastScroll > 300) { human.lastScroll = t; human.defilements++; } }, { passive: true, capture: true });
+  }
+  /* The visible check, only when the signals were too thin: a box where the reader draws a loop, with the mouse or
+     the finger. Resolves with the trace ([x, y, ms] on a 0–1000 grid), or null if the reader gives up. */
+  function drawLoop(message) {
+    return new Promise(done => {
+      const box = document.createElement('div');
+      box.className = 'ai-human';
+      box.innerHTML = `
+        <div class="ai-human__head"><strong>Une petite vérification</strong><span>${esc(message || 'Tracez une boucle dans le cadre, à la souris ou au doigt.')}</span></div>
+        <div class="ai-human__pad" role="img" aria-label="Zone de vérification : tracez une boucle">
+          <canvas width="1000" height="360"></canvas>
+          <svg class="ai-human__hint" viewBox="0 0 200 72" aria-hidden="true"><path pathLength="100" d="M22 50C40 12 78 8 96 34S150 66 172 28"/><circle r="5"><animateMotion dur="2.6s" repeatCount="indefinite" path="M22 50C40 12 78 8 96 34S150 66 172 28"/></circle></svg>
+          <div class="ai-human__ring" aria-hidden="true"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5"/><circle cx="18" cy="18" r="15.5" class="ai-human__fg"/></svg><span>0 %</span></div>
+        </div>
+        <p class="ai-human__foot">Sans Google ni cookie : seul ce tracé est envoyé, pour écarter les robots. Une question tapée au clavier passe aussi. <button type="button" class="ai-link">Annuler</button></p>`;
+      form.before(box);
+      const pad = box.querySelector('.ai-human__pad'), cv = box.querySelector('canvas'), ctx = cv.getContext('2d');
+      const ring = box.querySelector('.ai-human__fg'), txt = box.querySelector('.ai-human__ring span');
+      let trace = [], t0 = 0, over = false;
+      const end = result => {
+        if (over) return;
+        over = true; clearInterval(poll);
+        box.classList.add('is-leaving');
+        setTimeout(() => { box.remove(); done(result); }, reduce.matches ? 0 : result ? 520 : 180);
+      };
+      const poll = setInterval(() => { if (!busy || busy.stopped) end(null); }, 200);   // the stop button gives up too
+      box.querySelector('.ai-link').addEventListener('click', () => end(null));
+      function score() {   // the same measures as the server (signalements._trace_ok), with a margin
+        if (trace.length < 2) return 0;
+        let len = 0, turns = 0, prev = null;
+        for (let i = 1; i < trace.length; i++) {
+          const dx = trace[i][0] - trace[i - 1][0], dy = trace[i][1] - trace[i - 1][1];
+          len += Math.hypot(dx, dy);
+          if (Math.abs(dx) + Math.abs(dy) < 4) continue;
+          const s = `${dx > 0}${dy > 0}`;
+          if (prev !== null && s !== prev) turns++;
+          prev = s;
+        }
+        const dur = trace[trace.length - 1][2] - trace[0][2];
+        return Math.min(1, Math.min(len / 1400, 1) * .5 + Math.min(turns / 6, 1) * .3 + Math.min(trace.length / 40, 1) * .1 + Math.min(dur / 900, 1) * .1);
+      }
+      function paint() {
+        ctx.clearRect(0, 0, cv.width, cv.height);
+        ctx.lineWidth = 9; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        const g = ctx.createLinearGradient(0, 0, cv.width, cv.height);
+        g.addColorStop(0, '#0e7490'); g.addColorStop(1, '#2563eb');
+        ctx.strokeStyle = g;
+        ctx.beginPath();
+        trace.forEach(([x, y], i) => { const X = x * cv.width / 1000, Y = y * cv.height / 1000; if (i) ctx.lineTo(X, Y); else ctx.moveTo(X, Y); });
+        ctx.stroke();
+      }
+      function move(e) {
+        if (over) return;
+        const r = cv.getBoundingClientRect();
+        if (!trace.length) t0 = performance.now();
+        const p = [Math.round(1000 * (e.clientX - r.left) / r.width), Math.round(1000 * (e.clientY - r.top) / r.height), Math.round(performance.now() - t0)];
+        if (p[0] < 0 || p[1] < 0 || p[0] > 1000 || p[1] > 1000) return;
+        const last = trace[trace.length - 1];
+        if (last && Math.abs(last[0] - p[0]) + Math.abs(last[1] - p[1]) < 3) return;
+        trace.push(p);
+        if (trace.length > 1500) trace.shift();
+        pad.classList.add('is-drawing');
+        paint();
+        const s = score();
+        ring.style.strokeDashoffset = String(97.4 * (1 - s));
+        txt.textContent = s >= 1 ? '✓' : `${Math.round(100 * s)} %`;
+        if (s >= 1) { pad.classList.add('is-ok'); live.textContent = 'Vérification réussie.'; end(trace); }
+      }
+      pad.addEventListener('pointermove', move);
+      pad.addEventListener('pointerdown', e => { pad.setPointerCapture?.(e.pointerId); move(e); });
+      /* fingers again through touch events: some browsers send no pointermove for a finger that draws (points seen
+         twice are dropped by move) */
+      const finger = e => { const t = e.touches[0]; if (t) move(t); if (e.cancelable) e.preventDefault(); };
+      pad.addEventListener('touchstart', finger, { passive: false });
+      pad.addEventListener('touchmove', finger, { passive: false });
+      live.textContent = 'Vérification : tracez une boucle dans le cadre, ou annulez et tapez votre question au clavier.';
+      log.scrollTop = log.scrollHeight;
+    });
   }
 
   /* An answer prepared while the panel stays closed (a commune or a SIREN searched on a phone): a notification on
@@ -600,7 +754,7 @@
     if (open === !panel.hidden) return;
     write(sessionStorage, UI, { open });
     if (open) {
-      panel.hidden = false; fab.hidden = true; fab.classList.remove('has-news'); clearAnswer();
+      panel.hidden = false; fab.hidden = true; fab.classList.remove('has-news'); clearAnswer(); prepare();
       panel.classList.remove('is-closing');
       headLogo.classList.remove('is-drawn'); void headLogo.offsetWidth; headLogo.classList.add('is-drawn');
       lockPage(true); fit();
@@ -615,6 +769,7 @@
   }
   function autosize() { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 140) + 'px'; }
 
+  input.addEventListener('focus', prepare);
   form.addEventListener('submit', e => {
     e.preventDefault();
     if (busy) { busy.stopped = true; if (busy.job) fetch(`${API}job/${busy.job}/cancel`, { method: 'POST' }).catch(() => {}); return; }
@@ -675,6 +830,7 @@
     if (matchMedia('(max-width: 680px)').matches) input.placeholder = 'Votre question…';
     syncModel(false);
     renderLog();
+    if (status.human) watch();
     if (status.credits === false) noCredits({ error: status.credits_message, donate: status.donate });
     /* other parts of the page (the site search box) can open the Loupe with a question already asked */
     window.FRLLoupe = { ready: true,

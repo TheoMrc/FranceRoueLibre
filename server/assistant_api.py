@@ -12,6 +12,9 @@ POST /api/assistant/demande      {"job": id, "id": draft}  the reader asks the s
 GET  /api/assistant/demandes     -> the published requests and their replies (page demandes.html)
 POST /api/assistant/admin        {"action": "liste"|"voir"|"valider"|"refuser"|"publier"|"cloturer", "ref", "texte"}
                                   127.0.0.1 only, never through nginx, with MAIL_ADMIN_TOKEN (--demandes below)
+GET  /api/assistant/defi         -> a challenge for the invisible « human » check of the Loupe (assistant/humain.py);
+                                    ask then takes "preuve" {nonce, ts, sig, counter, signaux | boucle} or "passe", and
+                                    answers 403 {"verifier": "defi" | "boucle"} when the page must check (again)
 GET  /api/assistant/signalement/defi  -> a challenge for the « human » check of signalements.html
 POST /api/assistant/signalement/relecture  {same fields, "preuve" or "passe", "consigne"?}  -> the Loupe's version and its jeton
 POST /api/assistant/signalement  {"titre", "description", "siren", "lieu", "montant", "liens", "email", "charte", "jeton" | "preuve"}
@@ -55,7 +58,7 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from assistant import boite, demandes, signalements  # noqa: E402
+from assistant import boite, charabia, demandes, humain, signalements  # noqa: E402
 from assistant import faq  # noqa: E402
 from assistant import fiche  # noqa: E402
 from assistant import journal  # noqa: E402
@@ -119,7 +122,7 @@ def admit(ip: str) -> str | None:
             return BUSY
         if any(j['ip'] == ip and not j['done'] for j in JOBS.values()):
             return 'Une question est déjà en cours : attendez sa réponse.'
-        q = HITS[ip]
+        q = HITS[humain.ip_key(ip)]   # an IPv6 /64 block counts as one address
         while q and now - q[0] > 86400:
             q.popleft()
         if len(q) >= S.PER_IP_DAY:
@@ -144,7 +147,7 @@ def status() -> dict:
     lack = credits_info()
     return {'enabled': configured, 'credits': lack is None, 'credits_message': lack['error'] if lack else None,
             'donate': S.DONATE_URL, 'queue': len(QUEUE), 'demo': DEMO['on'], 'providers': providers,
-            'limits': {'per_hour': S.PER_IP_HOUR, 'per_day': S.PER_IP_DAY, 'question_chars': S.MAX_QUESTION_CHARS}}
+            'human': S.HUMAN_CHECK, 'limits': {'per_hour': S.PER_IP_HOUR, 'per_day': S.PER_IP_DAY, 'question_chars': S.MAX_QUESTION_CHARS}}
 
 
 def run_job(job: dict, messages: list, provider: str | None, form: dict | None = None) -> None:
@@ -261,6 +264,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(200, {'resultats': signalements.search(q, 8)})
         if url.path == '/api/assistant/signalement/defi':
             return self.send(200, signalements.challenge())
+        if url.path == '/api/assistant/defi':
+            return self.send(200, humain.challenge())
         if url.path.startswith('/api/assistant/job/'):
             jid = url.path.rsplit('/', 1)[-1]
             job = JOBS.get(jid)
@@ -399,14 +404,21 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(202, {'job': saved_job(self.client_ip(), None, messages, auto)})
         if body.get('auto'):  # opened by the site itself (a commune, a SIREN): only the answers that cost nothing
             return self.send(200, {'job': None, 'free': False})
+        ip = self.client_ip()
+        # not one understandable word (« fgbdgyaeuhijfbehzui »): a fixed answer, no model (assistant/charabia.py)
+        junk = None if form else charabia.answer(messages)
+        if junk:
+            return self.send(202, {'job': saved_job(ip, None, messages, junk)})
         lack = credits_info()
         if lack:
             return self.send(402, lack)
-        ip = self.client_ip()
+        human, more = humain.admit(body, ip)   # invisible check, once per reader and per two hours (assistant/humain.py)
+        if not human:
+            return self.send(403, more)
         refused = admit(ip)
         if refused:
             return self.send(429 if refused != BUSY else 503, {'error': refused, 'busy': refused == BUSY})
-        return self.send(202, {'job': enqueue(ip, messages, provider, form)})
+        return self.send(202, {'job': enqueue(ip, messages, provider, form)} | more)
 
     def log_message(self, *args):  # nginx logs the requests (without query strings)
         pass
@@ -496,6 +508,7 @@ def main():
     print('assistant: ' + ', '.join(f'{p["label"]} {"prêt" if p["available"] else p["reason"]}' for p in st['providers']),
           flush=True)
     start_workers()
+    charabia.warm()
     if S.MAIL_CONFIGURED and S.MAIL_IMAP_HOST:  # replies to the requests, every 15 minutes
         threading.Thread(target=demandes.poller, args=(threading.Event(),), daemon=True).start()
     ThreadingHTTPServer.daemon_threads = True

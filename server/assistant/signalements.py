@@ -205,7 +205,7 @@ def _trace_ok(trace) -> Optional[str]:
     return None
 
 
-def verify_human(proof: dict, trace: bool = True) -> Optional[str]:
+def verify_human(proof: dict, trace: bool = True, min_age: Optional[float] = None, difficulty: Optional[int] = None) -> Optional[str]:
     """None when the answer to the challenge holds, else why not (shown to the reader)."""
     try:
         nonce, ts, sig, counter = str(proof['nonce']), int(proof['ts']), str(proof['sig']), str(proof['counter'])
@@ -215,9 +215,9 @@ def verify_human(proof: dict, trace: bool = True) -> Optional[str]:
     if not hmac.compare_digest(expected, sig):
         return 'vérification expirée : rechargez la page'
     age = time.time() - ts
-    if age < CHALLENGE_MIN or age > CHALLENGE_MAX:
+    if age < (CHALLENGE_MIN if min_age is None else min_age) or age > CHALLENGE_MAX:
         return 'vérification expirée : rechargez la page' if age > CHALLENGE_MAX else 'un peu trop rapide : relisez votre texte'
-    if not re.fullmatch(r'\d{1,12}', counter) or _leading_zero_bits(hashlib.sha256(f'{nonce}:{counter}'.encode()).digest()) < DIFFICULTY:
+    if not re.fullmatch(r'\d{1,12}', counter) or _leading_zero_bits(hashlib.sha256(f'{nonce}:{counter}'.encode()).digest()) < (difficulty or DIFFICULTY):
         return 'vérification incomplète : rechargez la page'
     bad = _trace_ok(proof.get('trace')) if trace else None
     if bad:

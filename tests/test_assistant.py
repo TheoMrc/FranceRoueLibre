@@ -127,7 +127,7 @@ class BudgetTest(unittest.TestCase):
     def test_defaults_match_the_request(self):
         self.assertEqual((S.CLAUDE_MONTHLY_EUR, S.CLAUDE_MONTH_DAY, S.CLAUDE_EXPIRE_DAY, S.CLAUDE_ENVELOPE_EUR), (90, 9, 11, 88))
         self.assertEqual(S.CLAUDE_ENVELOPE_EXPIRES, dt.datetime(2026, 12, 11))
-        self.assertEqual((S.CLAUDE_BUDGET_EUR, S.CLAUDE_DAILY_EUR, S.GEMINI_BUDGET_EUR), (150, 50, 100))
+        self.assertEqual((S.CLAUDE_BUDGET_EUR, S.CLAUDE_DAILY_EUR, S.GEMINI_BUDGET_EUR), (150, 15, 100))
         self.assertLessEqual(S.CLAUDE_BUDGET_EUR, S.CLAUDE_MAX_USD * S.USD_EUR)
         self.assertEqual(S.GEMINI_UNTIL, dt.date(2026, 11, 17))
 
@@ -1284,3 +1284,93 @@ class OfficialPdfTest(unittest.TestCase):
             P.post_json, B._budget = real, None
         self.assertEqual([t['type'] for t in sent[0]['tools']], ['web_search_20250305'])
         self.assertEqual(sent[0]['thinking'], {'type': 'disabled'})
+
+
+class GibberishTest(unittest.TestCase):
+    """A message without one understandable word gets a fixed answer, no model; typos, names and communes go through."""
+
+    @classmethod
+    def setUpClass(cls):
+        from assistant import charabia
+        cls.C = charabia
+        charabia._load()
+
+    def test_random_typing_is_refused(self):
+        for text in ('fgbdgyaeuhijfbehzui', 'dbejou', 'dbzayuiodbzhauodib', '4fez4f4efez44f5ez45fze', 'azerty', 'qsdfgh',
+                     'aaaaaa', 'jkljkl mlkmlk', 'gzdyuagzd uyagdzuya'):
+            self.assertTrue(self.C.is_gibberish(text), text)
+        res = self.C.answer([{'role': 'user', 'text': 'fgbdgyaeuhijfbehzui'}])
+        self.assertEqual((res['provider'], res['saved']), ('faq', 'charabia'))
+        self.assertIn('Pour aller plus loin', res['reply'])
+
+    def test_real_questions_go_through(self):
+        for text in ('Bordaux', 'combein coute la mairei', 'Zemmour', 'Xertigny', 'bpifrance', 'ok', 'et 2023 ?', '33980',
+                     'subvension assos', 'LVMH', 'lvmh', 'bjr', 'x', '??', 'Plus1zest', 'A380', 'begle', 'nantere',
+                     'Quel est le budjet de Marseile', 'fgbdgyaeuhijfbehzui Bordeaux', 'Привет'):
+            self.assertFalse(self.C.is_gibberish(text), text)
+        self.assertIsNone(self.C.answer([{'role': 'user', 'text': 'dette de la France'}]))
+
+    def test_nothing_refused_without_the_lexicon(self):
+        saved = dict(self.C._voc)
+        self.C._voc.clear()
+        try:
+            self.assertFalse(self.C.is_gibberish('fgbdgyaeuhijfbehzui'))   # still loading, or static preview
+        finally:
+            self.C._voc.update(saved)
+
+
+class HumanCheckTest(unittest.TestCase):
+    """The invisible check of the Loupe: proof of work + signals, a pass for the next questions, the loop when in doubt."""
+
+    def solve(self, c):
+        import hashlib
+        from assistant import signalements as G
+        i = 0
+        while G._leading_zero_bits(hashlib.sha256(f"{c['nonce']}:{i}".encode()).digest()) < c['difficulty']:
+            i += 1
+        return i
+
+    def test_ipv6_block_counts_as_one_address(self):
+        from assistant import humain as H
+        self.assertEqual(H.ip_key('2a01:e0a:1:2:aaaa:bbbb:cccc:dddd'), H.ip_key('2a01:e0a:1:2::1'))
+        self.assertNotEqual(H.ip_key('2a01:e0a:1:2::1'), H.ip_key('2a01:e0a:1:3::1'))
+        self.assertEqual((H.ip_key('82.1.2.3'), H.ip_key('::ffff:82.1.2.3')), ('82.1.2.3', '82.1.2.3'))
+
+    def test_signals(self):
+        from assistant import humain as H
+        self.assertTrue(H.signals_ok({'frappe': [120, 95, 210, 80, 160, 340, 90]}))
+        self.assertFalse(H.signals_ok({'frappe': [50] * 12}))                                     # a metronome
+        self.assertFalse(H.signals_ok({'pointeur': [[i * 10, i * 10, i * 16] for i in range(30)]}))  # a ruler
+        self.assertTrue(H.signals_ok({'pointeur': [[100 + i * 9 + i % 3, 200 + i * 4 + i * i % 5, i * 16 + i % 4 * 3] for i in range(30)]}))
+        self.assertTrue(H.signals_ok({'touches': 2, 'defilements': 1}))
+        self.assertFalse(H.signals_ok({}) or H.signals_ok(None) or H.signals_ok({'frappe': 'x', 'pointeur': [[1]]}))
+
+    def test_proof_then_pass(self):
+        from assistant import humain as H
+        old = H.MIN_AGE, S.HUMAN_CHECK
+        H.MIN_AGE, S.HUMAN_CHECK = 0, True
+        typed = {'frappe': [120, 95, 210, 80, 160, 340, 90]}
+        try:
+            ok, more = H.admit({}, '1.2.3.4')
+            self.assertEqual((ok, more['verifier']), (False, 'defi'))
+            c = more['defi']
+            n = self.solve(c)
+            ok, more = H.admit({'preuve': dict(c, counter=n, signaux={})}, '1.2.3.4')            # no signal: the loop, challenge kept
+            self.assertEqual((ok, more['verifier'], 'defi' in more), (False, 'boucle', False))
+            ok, more = H.admit({'preuve': dict(c, counter=n, boucle=[[0, 0, 0], [5, 5, 10]])}, '1.2.3.4')
+            self.assertEqual((ok, more['verifier']), (False, 'boucle'))                           # a loop too small
+            ok, more = H.admit({'preuve': dict(c, counter=n + 1, signaux=typed)}, '1.2.3.4')
+            self.assertEqual((ok, more['verifier']), (False, 'defi'))                             # work not done
+            ok, more = H.admit({'preuve': dict(c, counter=n, signaux=typed)}, '1.2.3.4')
+            self.assertTrue(ok and more['passe'])
+            self.assertFalse(H.admit({'preuve': dict(c, counter=n, signaux=typed)}, '1.2.3.4')[0])   # a challenge serves once
+            self.assertEqual(H.admit({'passe': more['passe']}, '1.2.3.4'), (True, {}))
+            self.assertFalse(H.admit({'passe': more['passe']}, '9.9.9.9')[0])                     # tied to the address
+            self.assertFalse(H.admit({'passe': more['passe'][:-1] + 'x'}, '1.2.3.4')[0])
+            for _ in range(H.PASS_USES - 1):
+                self.assertTrue(H.admit({'passe': more['passe']}, '1.2.3.4')[0])
+            self.assertFalse(H.admit({'passe': more['passe']}, '1.2.3.4')[0])                     # spent: checked again
+            S.HUMAN_CHECK = False
+            self.assertEqual(H.admit({}, '1.2.3.4'), (True, {}))
+        finally:
+            H.MIN_AGE, S.HUMAN_CHECK = old
