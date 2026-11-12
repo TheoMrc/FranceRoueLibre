@@ -309,17 +309,49 @@
      useful (👍), or after the third answer written by a model. Once a day at most in this browser, whatever the
      reason, and never kept in the discussion (it is not sent back to the model, nor shown again from the history). */
   const DON = 'frl-loupe-don', PAID = 'frl-loupe-payantes';
-  const DON_TEXT = { merci: 'Utile ? La Loupe ne tient que par les dons.',
-                     centimes: 'Chaque réponse coûte quelques centimes. Zéro pub, zéro subvention : juste vous.' };
-  function donNote(kind) {
+  const CENTIMES = 'Chaque réponse coûte quelques centimes. ';
+  const DON_TEXT = { merci: ['Utile ? La Loupe ne tient que par les dons.'],
+                     centimes: [CENTIMES + 'Zéro pub, zéro subvention. Et ici, on n’emprunte pas pour boucler le mois.',
+                                CENTIMES + 'Pas de pub, pas de subvention, pas de déficit autorisé.',
+                                CENTIMES + 'Pour une fois, c’est vous qui décidez où va votre argent.',
+                                CENTIMES + 'Le seul budget public que vous pouvez voter vous-même.',
+                                'dette'] };
+  /* The debt counter of the « dette » message: the estimate of horloge-de-la-dette-publique.com, whose four parameters
+     are downloaded by scripts/dette-horloge.py (data/horloge-dette.json) and computed here at the instant shown.
+     A straight line between a start and a projected end: an estimate, credited as such under the figure. */
+  async function debtClock() {
+    try {
+      const r = await fetch(siteUrl('data/horloge-dette.json'));
+      const d = await r.json();
+      const t0 = new Date(d.debut).getTime(), t1 = new Date(d.fin).getTime();
+      if (!r.ok || !(t1 > t0) || !(d.valeur_fin_eur > d.valeur_debut_eur)) return null;
+      const now = () => d.valeur_debut_eur + (d.valeur_fin_eur - d.valeur_debut_eur) * Math.min(1, Math.max(0, (Date.now() - t0) / (t1 - t0)));
+      return { now, url: d.url, source: d.source };
+    } catch (e) { return null; }
+  }
+  const euros = v => Math.round(v).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g, '\u202f') + '\u00a0€';
+  async function donNote(kind) {
     const d = new Date(), today = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
     if (!status?.donate || status.credits === false || read(localStorage, DON, '') === today) return;
     if (!write(localStorage, DON, today)) return;   // no storage (private mode): never shown rather than at every answer
+    const texts = DON_TEXT[kind];
+    let text = texts[Math.floor(Math.random() * texts.length)], clock = null;
+    if (text === 'dette') {
+      clock = await debtClock();
+      if (!clock) text = texts[Math.floor(Math.random() * (texts.length - 1))];   // no figure: one of the sentences
+    }
     const el = document.createElement('div');
     el.className = 'ai-msg ai-msg--bot ai-msg--don';
-    el.innerHTML = `<div class="ai-av">${LOGO()}</div><div class="ai-card"><div class="ai-text"><p>${esc(DON_TEXT[kind])}</p><a class="ai-don" href="${esc(status.donate)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.5-4.6-10-9.3C.3 8.300 2 4.500 5.600 4.500c2 0 3.400 1 4.400 2.300 1-1.300 2.400-2.300 4.400-2.300 3.600 0 5.300 3.800 3.600 7.200C19.500 16.400 12 21 12 21z"/></svg>Soutenir sur Tipeee</a></div></div>`;
+    const body = clock
+      ? `<p>Faites un don pour ralentir la dette nationale :</p><p class="ai-don__clock" aria-hidden="true">${euros(clock.now())}</p><p class="ai-don__src">Estimation en direct : <a href="${esc(clock.url)}" target="_blank" rel="noopener">${esc(clock.source)}</a></p>`
+      : `<p>${esc(text)}</p>`;
+    el.innerHTML = `<div class="ai-av">${LOGO()}</div><div class="ai-card"><div class="ai-text">${body}<a class="ai-don" href="${esc(status.donate)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.5-4.6-10-9.3C.3 8.3 2 4.5 5.6 4.500c2 0 3.400 1 4.400 2.300 1-1.300 2.400-2.300 4.400-2.300 3.600 0 5.300 3.800 3.600 7.200C19.500 16.400 12 21 12 21z"/></svg>Soutenir sur Tipeee</a></div></div>`;
     const was = nearBottom();
     log.appendChild(el);
+    if (clock && !reduce.matches) {   // the figure runs while the message is on screen
+      const num = el.querySelector('.ai-don__clock');
+      const tick = setInterval(() => { if (!el.isConnected) return clearInterval(tick); num.textContent = euros(clock.now()); }, 100);
+    }
     if (was) el.scrollIntoView({ block: 'end', behavior: reduce.matches ? 'auto' : 'smooth' });
   }
   function sendVote(m, vote, el) {

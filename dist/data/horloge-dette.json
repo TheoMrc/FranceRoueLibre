@@ -1,0 +1,10 @@
+{
+ "source": "Horloge de la dette publique",
+ "url": "https://horloge-de-la-dette-publique.com/",
+ "telecharge": "2026-11-12",
+ "debut": "2026-01-01",
+ "fin": "2026-12-31",
+ "valeur_debut_eur": 3460500000000.0,
+ "valeur_fin_eur": 3650500000000.0,
+ "note": "Estimation de ce site : droite entre la dette au début de la période et sa projection pour la fin, recalée sur l’Insee à chaque publication. Pas un chiffre officiel."
+}

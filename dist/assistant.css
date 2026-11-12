@@ -307,6 +307,9 @@
 /* a word about the donations, as a short message of the Loupe (assistant.js, donNote) */
 .ai-msg--don .ai-card { flex: 0 1 auto; background: transparent; border: 1px dashed var(--c-line); box-shadow: none; }
 .ai-msg--don .ai-text p { margin: 0 0 .45rem; font-size: .88rem; color: var(--c-ink); }
+.ai-msg--don .ai-text p.ai-don__clock { margin: 0 0 .15rem; font: 700 1.12rem var(--font-display, inherit); font-variant-numeric: tabular-nums; letter-spacing: -.01em; white-space: nowrap; color: var(--ai-red); }
+.ai-msg--don .ai-text p.ai-don__src { margin: 0 0 .5rem; font-size: .68rem; color: var(--c-muted); }
+.ai-don__src a { color: inherit; }
 .ai-don { display: inline-flex; align-items: center; gap: .35rem; padding: .28rem .7rem; border-radius: 999px; border: 1px solid var(--c-line); font-size: .78rem; font-weight: 600; text-decoration: none; color: var(--c-ink); background: var(--c-surface); transition: border-color .2s, color .2s, transform .25s var(--ai-spring); }
 .ai-don svg { color: var(--ai-red); flex: none; }
 .ai-don:hover { border-color: var(--ai-red); color: var(--ai-red); transform: translateY(-1px); }
