@@ -13,8 +13,14 @@
   pages       chaque page de dist/ ouverte à 390 et 1366 px (Playwright, si installé) : erreurs JavaScript,
               défilement horizontal, fichiers introuvables
 
+Rapidité : les tests unitaires et les pages tournent en même temps que le reste, les pages s'ouvrent six à la fois, et
+une étape déjà passée dont rien n'a changé depuis (code, tests, données, pages : taille et date de chaque fichier) n'est
+pas rejouée. Relancer sans avoir rien modifié répond donc tout de suite ; --tout rejoue tout quand même. Le journal ne
+recalcule que les recherches et questions nouvelles tant que le code et les données n'ont pas bougé.
+
 Options :
   --vite              sans les pages ni les tests Node
+  --tout              rejoue chaque étape, même inchangée depuis son dernier passage réussi
   --accepter          enregistre la photo du journal telle quelle (après avoir lu les changements)
   --payant N          en plus, N questions de tests/loupe-eval.json au vrai modèle (≈ 0,003 € chacune avec Haiku)
   --seulement ETAPE   une seule étape
@@ -24,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import hashlib
 import json
 import os
 import shutil
@@ -31,6 +38,7 @@ import socket
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import traceback
 from pathlib import Path
@@ -45,10 +53,62 @@ sys.path.insert(0, str(ROOT / 'server'))
 FAILS: list = []
 
 
+_out = threading.local()   # a step run beside the others keeps its lines together and prints them when it ends
+_print_lock = threading.Lock()
+
+
+def out(line: str = '') -> None:
+    buf = getattr(_out, 'lines', None)
+    if buf is None:
+        with _print_lock:
+            print(line, flush=True)
+    else:
+        buf.append(line)
+
+
 def say(ok: bool, step: str, text: str = '') -> None:
-    print(f'{"OK " if ok else "NON"} {step:10s} {text}', flush=True)
+    out(f'{"OK " if ok else "NON"} {step:10s} {text}')
     if not ok:
         FAILS.append(step)
+
+
+# ================================================================ nothing changed: not played again
+CACHE = ROOT / '.check-cache.json'   # {step: fingerprint of its inputs at its last pass}, never versioned
+SKIP_DIRS = {'__pycache__', 'node_modules', '.git', 'db', 'raw', 'derived'}   # db: the search index cut in pieces
+INPUTS = {   # what each step reads: a change in any of these files plays the step again
+    'unitaires': ['server', 'scripts', 'tests', 'dist', 'sources', 'serve.mjs', 'build-data.mjs'],
+    'lieux': ['server/assistant', 'tests/lieux.json', 'dist/data/web/communes-lookup.json', 'scripts/check.py'],
+    'loupe': ['server', 'tests/loupe-scenarios.json', 'dist/data', 'scripts/check.py'],
+    'donnees': ['server/assistant', 'dist/data', 'scripts/check.py'],
+    'pages': ['dist', 'scripts/check-pages.mjs', 'scripts/check.py', 'serve.mjs', 'server/search_api.py'],
+}
+
+
+def fingerprint(paths: list) -> str:
+    """Name, size and date of every file under these paths (not their content: a thousand files in a blink)."""
+    h = hashlib.sha1()
+    for rel in paths:
+        base = ROOT / rel
+        files = [base] if base.is_file() else sorted(f for f in base.rglob('*') if f.is_file()
+                                                     and not SKIP_DIRS & set(f.relative_to(ROOT).parts)) if base.is_dir() else []
+        for f in files:
+            st = f.stat()
+            h.update(f'{f.relative_to(ROOT).as_posix()}|{st.st_size}|{st.st_mtime_ns}\n'.encode())
+    return h.hexdigest()
+
+
+def cache_read() -> dict:
+    try:
+        return json.loads(CACHE.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return {}
+
+
+def cache_write(done: dict) -> None:
+    try:
+        CACHE.write_text(json.dumps({**cache_read(), **done}, indent=0), encoding='utf-8')
+    except OSError:
+        pass
 
 
 # ================================================================ no network but this machine
@@ -93,7 +153,7 @@ def step_unitaires(fast: bool) -> None:
     tail = (r.stderr or r.stdout).strip().splitlines()[-1:] or ['']
     say(r.returncode == 0, 'unitaires', f'Python : {tail[0]}')
     if r.returncode:
-        print('\n'.join((r.stderr or '').splitlines()[-40:]))
+        out('\n'.join((r.stderr or '').splitlines()[-40:]))
     if fast:
         return
     node = shutil.which('node')
@@ -101,12 +161,14 @@ def step_unitaires(fast: bool) -> None:
         say(True, 'unitaires', 'Node absent : tests JavaScript sautés')
         return
     files = sorted(str(p.relative_to(ROOT)) for p in (ROOT / 'tests').glob('*.test.mjs'))
-    r = subprocess.run([node, '--test', *files], cwd=ROOT, capture_output=True, text=True, encoding='utf-8', errors='replace')
+    # two tests run a Python parser: with this interpreter, not a « python » that is not on the PATH of the PC
+    r = subprocess.run([node, '--test', *files], cwd=ROOT, capture_output=True, text=True, encoding='utf-8', errors='replace',
+                       env={**os.environ, 'PYTHON': sys.executable, 'PYTHONIOENCODING': 'utf-8'})
     passed = next((l for l in r.stdout.splitlines() if l.startswith('# pass')), '')
     failed = next((l for l in r.stdout.splitlines() if l.startswith('# fail')), '')
     say(r.returncode == 0, 'unitaires', f'Node : {passed[2:]}, {failed[2:]}')
     if r.returncode:
-        print('\n'.join(l for l in r.stdout.splitlines() if 'not ok' in l or 'Error' in l)[:4000])
+        out('\n'.join(l for l in r.stdout.splitlines() if 'not ok' in l or 'Error' in l)[:4000])
 
 
 # ================================================================ places
@@ -122,7 +184,7 @@ def step_lieux() -> None:
             bad.append(f'« {q} » : {r["type"] or "rien"} {got!r}, attendu {want_type or "?"} {want!r}')
     say(not bad, 'lieux', f'{len(cases) - len(bad)}/{len(cases)} cas')
     for b in bad:
-        print('    ', b)
+        out(f'     {b}')
 
 
 # ================================================================ the Loupe, scripted model
@@ -217,7 +279,7 @@ def step_loupe() -> None:
     tools.Toolbox.call = real_call
     say(not bad, 'loupe', f'{n} conversations rejouées (Claude et Gemini), 0 € dépensé')
     for b in bad[:30]:
-        print('    ', b)
+        out(f'     {b}')
 
 
 # ================================================================ data files
@@ -237,11 +299,11 @@ def step_donnees() -> None:
             bad.append(f'{rel} : {exc}')
     say(not bad, 'donnees', f'{len(tools.FILES)} fichiers de la Loupe lus')
     for b in bad:
-        print('    ', b)
+        out(f'     {b}')
 
 
 # ================================================================ real queries of the journal (PC only)
-def step_journal(accept: bool) -> None:
+def step_journal(accept: bool, tout: bool = False) -> None:
     import csv
     j = ROOT / '_journal'
     if not (j / 'recherches.csv').is_file():
@@ -259,15 +321,34 @@ def step_journal(accept: bool) -> None:
     # 5 000 questions, and this step runs before every deployment
     asked = [r['question'].strip() for r in rows('loupe.csv') if r.get('question', '').strip()] if (j / 'loupe.csv').is_file() else []
     questions = sorted(list(dict.fromkeys(reversed(asked)))[:1500])
+    # what the same code and data answered at the last pass is kept: only the new searches and questions are computed
+    memo_path, key = j / 'check-memo.json', fingerprint(['server/assistant', 'dist/data/web', 'dist/data/site-index.json', 'scripts/check.py'])
+    try:
+        memo = json.loads(memo_path.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        memo = {}
+    if memo.get('cle') != key or tout:
+        memo = {'cle': key, 'lieux': {}, 'faq': {}, 'auto': {}}
+    new = 0
     photo = {'lieux': {}, 'faq': {}, 'auto': {}}
     for q in searches:
-        r = places.find(q)
-        photo['lieux'][q] = f'{r["type"]} {r["communes"][0]["insee"] if r["communes"] else (r["departement"] or {}).get("code", "")}'.strip()
+        if q not in memo['lieux']:
+            r = places.find(q)
+            memo['lieux'][q] = f'{r["type"]} {r["communes"][0]["insee"] if r["communes"] else (r["departement"] or {}).get("code", "")}'.strip()
+            new += 1
+        photo['lieux'][q] = memo['lieux'][q]
     for q in questions:
-        hit = faq.find([{'role': 'user', 'text': q}])
-        photo['faq'][q] = (hit or {}).get('saved') or (hit or {}).get('id') if hit else None
-        auto = fiche.answer([{'role': 'user', 'text': q}])
-        photo['auto'][q] = (auto or {}).get('reply', '')[:60] if auto else None
+        if q not in memo['faq'] or q not in memo['auto']:
+            hit = faq.find([{'role': 'user', 'text': q}])
+            memo['faq'][q] = (hit or {}).get('saved') or (hit or {}).get('id') if hit else None
+            auto = fiche.answer([{'role': 'user', 'text': q}])
+            memo['auto'][q] = (auto or {}).get('reply', '')[:60] if auto else None
+            new += 1
+        photo['faq'][q], photo['auto'][q] = memo['faq'][q], memo['auto'][q]
+    try:   # questions that left the last 1 500 are dropped with them
+        memo_path.write_text(json.dumps({'cle': key, **photo}, ensure_ascii=False, indent=0), encoding='utf-8')
+    except OSError:
+        pass
     path = j / 'check-photo.json'
     old = json.loads(path.read_text(encoding='utf-8')) if path.is_file() else None
     changes = []
@@ -278,11 +359,11 @@ def step_journal(accept: bool) -> None:
                     changes.append(f'{part} « {q} » : {old[part][q]!r} → {v!r}')
     if accept or not old:
         path.write_text(json.dumps(photo, ensure_ascii=False, indent=0), encoding='utf-8')
-    say(True, 'journal', f'{len(searches)} recherches et {len(questions)} questions réelles ; '
+    say(True, 'journal', f'{len(searches)} recherches et {len(questions)} questions réelles ({new} nouvelles rejouées) ; '
                          f'{len(changes)} changement(s) depuis la dernière photo' + (' (photo mise à jour)' if accept or not old else
                                                                                    ' : à relire, puis --accepter' if changes else ''))
     for c in changes[:60]:
-        print('    ', c)
+        out(f'     {c}')
 
 
 # ================================================================ pages
@@ -301,7 +382,7 @@ def step_pages() -> None:
     lines = r.stdout.strip().splitlines()
     say(r.returncode == 0, 'pages', lines[-1] if lines else r.stderr[-300:])
     for l in lines[:-1][:60]:
-        print('    ', l)
+        out(f'     {l}')
 
 
 @contextlib.contextmanager
@@ -341,6 +422,7 @@ def step_payant(n: int) -> None:
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--vite', action='store_true')
+    ap.add_argument('--tout', action='store_true')
     ap.add_argument('--accepter', action='store_true')
     ap.add_argument('--payant', type=int, default=0)
     ap.add_argument('--seulement', default='')
@@ -349,15 +431,41 @@ def main():
         sys.stdout.reconfigure(encoding='utf-8', errors='replace')
     offline()
     steps = {'unitaires': lambda: step_unitaires(a.vite), 'lieux': step_lieux, 'loupe': step_loupe,
-             'donnees': step_donnees, 'journal': lambda: step_journal(a.accepter), 'pages': step_pages}
+             'donnees': step_donnees, 'journal': lambda: step_journal(a.accepter, a.tout), 'pages': step_pages}
     started = time.time()
-    for name, fn in steps.items():
-        if (a.seulement and name != a.seulement) or (a.vite and name == 'pages'):
-            continue
+    wanted = [n for n in steps if not (a.seulement and n != a.seulement) and not (a.vite and n == 'pages')]
+    known, prints, passed = cache_read(), {}, {}
+    for name in list(wanted):   # same inputs as at its last pass: the step is not played again
+        if name in INPUTS:
+            prints[name] = fingerprint(INPUTS[name]) + ('|vite' if a.vite and name == 'unitaires' else '')
+            if not a.tout and known.get(name) == prints[name]:
+                say(True, name, 'inchangé depuis le dernier passage réussi, pas rejoué (--tout pour le rejouer)')
+                wanted.remove(name)
+
+    def run(name: str, beside: bool = False) -> None:
+        before = len(FAILS)
+        if beside:
+            _out.lines = []
         try:
-            fn()
+            steps[name]()
         except Exception:  # noqa: BLE001
             say(False, name, 'exception :\n' + traceback.format_exc(limit=6))
+        if beside:
+            with _print_lock:
+                print('\n'.join(_out.lines), flush=True)
+        if name in prints and name not in FAILS[before:] and name not in FAILS:
+            passed[name] = prints[name]
+
+    # the steps that only wait for another program (tests, a browser) run beside the ones played here
+    beside = [threading.Thread(target=run, args=(n, True)) for n in wanted if n in ('unitaires', 'pages')]
+    for t in beside:
+        t.start()
+    for name in wanted:
+        if name not in ('unitaires', 'pages'):
+            run(name)
+    for t in beside:
+        t.join()
+    cache_write(passed)
     if a.payant:
         socket.socket.connect, socket.create_connection, socket.getaddrinfo = _real_connect, _real_create, _real_getaddr
         step_payant(a.payant)

@@ -19,3 +19,4 @@ deploy/*.env
 
 note.md
 dist/data/search/frl-search.new.sqlite3
+.check-cache.json
