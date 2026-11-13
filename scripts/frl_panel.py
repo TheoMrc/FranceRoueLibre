@@ -80,20 +80,21 @@ def journals(offline: bool):
 
 
 REF = re.compile(r'^FRL-\d{4}-\d{4}$')
-ACTIONS = ('valider', 'deposee', 'prada', 'envoyer_prada', 'refuser', 'modifier', 'destinataire', 'publier', 'cloturer')
+ACTIONS = ('valider', 'deposee', 'prada', 'envoyer_prada', 'refuser', 'modifier', 'destinataire', 'publier', 'cloturer',
+           'piece', 'mots', 'completer')
 
 
 def frl_demandes(action: str, ref: str = '', text: str = '') -> dict:
     """Runs frl-demandes on the VPS (server/assistant_api.py --demandes) and returns its JSON."""
-    if action != 'tout' and (action not in ACTIONS or not REF.match(ref)):
+    if action != 'tout' and (action not in ACTIONS or not (REF.match(ref) or (action == 'completer' and not ref))):
         return {'error': 'action ou référence refusée'}
-    if action in ('publier', 'destinataire', 'modifier', 'deposee') and text.strip():
+    if action in ('publier', 'destinataire', 'modifier', 'deposee', 'piece', 'mots') and text.strip():
         remote = f't=$(mktemp) && cat > "$t" && frl-demandes {action} {ref} --texte "$t"; rm -f "$t"'
     else:
         remote = f'frl-demandes {action} {ref}'.strip()
     try:
         r = subprocess.run(J.SSH + [remote], input=text.encode('utf-8'),
-                           capture_output=True, timeout=120)
+                           capture_output=True, timeout=900 if action == 'completer' else 120)
         out = r.stdout.decode('utf-8', 'replace')
         return json.loads(out[out.index('{'):]) if '{' in out else {'error': (out or r.stderr.decode('utf-8', 'replace'))[:300]}
     except (OSError, subprocess.SubprocessError, ValueError) as exc:

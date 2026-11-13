@@ -10,6 +10,8 @@ POST /api/assistant/job/<id>/cancel
 POST /api/assistant/demande      {"job": id, "id": draft}  the reader asks the site to send the request drafted under
                                   that answer (assistant/demandes.py): sent, or waiting for the site's validation
 GET  /api/assistant/demandes     -> the published requests and their replies (page demandes.html)
+GET  /api/assistant/demandes/piece/<ref>/<file>  -> a document received with a published reply (attachment, or the
+                                  copy of a linked document)
 POST /api/assistant/admin        {"action": "liste"|"voir"|"valider"|"refuser"|"publier"|"cloturer", "ref", "texte"}
                                   127.0.0.1 only, never through nginx, with MAIL_ADMIN_TOKEN (--demandes below)
 GET  /api/assistant/defi         -> a challenge for the invisible « human » check of the Loupe (assistant/humain.py);
@@ -49,12 +51,13 @@ import argparse
 import collections
 import json
 import secrets
+import shutil
 import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote, unquote, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -250,8 +253,34 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def send_file(self, path: Path, content_type: str, name: str, inline: bool) -> None:
+        """A document received from a public body (demandes.py): never interpreted as a page of the site."""
+        size = path.stat().st_size
+        ascii_name = name.encode('ascii', 'ignore').decode().replace('"', '').replace('\\', '') or 'document'
+        self.send_response(200)
+        self.send_header('Content-Type', content_type)
+        self.send_header('Content-Length', str(size))
+        self.send_header('Content-Disposition', f'{"inline" if inline else "attachment"}; filename="{ascii_name}"; '
+                                                f"filename*=UTF-8''{quote(name)}")
+        self.send_header('Cache-Control', 'public, max-age=86400')
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        if not inline:   # (the browser's PDF reader does not open a sandboxed document)
+            self.send_header('Content-Security-Policy', "default-src 'none'; sandbox")
+        self.send_header('X-Robots-Tag', 'noindex')
+        self.end_headers()
+        with path.open('rb') as f:
+            shutil.copyfileobj(f, self.wfile, 256 * 1024)
+
     def do_GET(self):
         url = urlparse(self.path)
+        if url.path.startswith('/api/assistant/demandes/piece/'):  # a document of a published reply (or key = its SHA-256)
+            parts = url.path.split('/')[5:]
+            found = demandes.piece_file(parts[0], unquote(parts[1]), (parse_qs(url.query).get('k') or [''])[0]) \
+                if len(parts) == 2 else None
+            if not found:
+                return self.send(404, {'error': 'document introuvable'})
+            path, meta, ctype = found
+            return self.send_file(path, ctype, meta['nom'], '.' + meta['type'] in demandes.INLINE_TYPES)
         if url.path == '/api/assistant/status':
             return self.send(200, status())
         if url.path == '/api/assistant/demandes':
@@ -473,7 +502,7 @@ def admin_cli(args) -> None:
                                  data=json.dumps({'action': action, 'ref': ref, 'texte': text}).encode(),
                                  headers={'Content-Type': 'application/json', 'X-Admin-Token': S.MAIL_ADMIN_TOKEN})
     try:
-        with urllib.request.urlopen(req, timeout=60) as r:
+        with urllib.request.urlopen(req, timeout=900 if action == 'completer' else 60) as r:   # completer downloads documents
             print(json.dumps(json.loads(r.read()), ensure_ascii=False, indent=1))
     except OSError as exc:
         print(f'service injoignable ou refus : {exc} (MAIL_ADMIN_TOKEN renseigné ?)')
@@ -484,7 +513,7 @@ def main():
     parser.add_argument('--port', type=int, default=8018)
     parser.add_argument('--usage', action='store_true')
     parser.add_argument('--json', action='store_true', help='--usage : les plafonds et la dépense en JSON')
-    parser.add_argument('--demandes', nargs='+', metavar='ACTION', help='liste | tout | voir REF | valider REF | deposee REF [--texte F avec le lien du formulaire] | refuser REF | destinataire REF --texte F | '
+    parser.add_argument('--demandes', nargs='+', metavar='ACTION', help='liste | tout | voir REF | completer [REF] (pièces jointes, copies des documents en lien, positions) | piece REF --texte F (nom du fichier : retenue ou publiée) | mots REF --texte F | valider REF | deposee REF [--texte F avec le lien du formulaire] | refuser REF | destinataire REF --texte F | '
                                                                        'publier REF [--texte F] | cloturer REF')
     parser.add_argument('--mail', nargs='+', metavar='ACTION', help='boîte du site : liste [N] | lire UID | apercu UID | '
                                                                    'repondre UID [--force] (texte de la réponse sur stdin)')

@@ -842,6 +842,67 @@ class RequestsTest(unittest.TestCase):
         self.assertNotIn('Dupont', text)
         self.assertEqual(self.D.published()[0]['echeance'], '2026-12-03')
 
+    def test_documents_of_a_reply_are_kept_and_served_once_published(self):
+        """Cherbourg, FRL-2026-0014: the reply came with a PDF and three links to PDFs; only the file names were kept."""
+        S.MAIL_CONFIGURED, S.MAIL_AUTO_SEND = True, False
+        D = self.D
+        ref = D.request_send(self.draft()['demande']['id'], 'lecteur')['ref']
+        D.admin('deposee', ref, 'https://www.hautmont.fr/contact')
+        pdf = b'%PDF-1.7 comptes 2022'
+        m = self.mail('Jeanne Agent <j.agent@hautmont.fr>', f'RE: [{ref}]',
+                      'Bonjour,\n\nLes comptes : https://www.hautmont.fr/budget/CA 2023.pdf et '
+                      'https://www.hautmont.fr/budget/CA_2024.pdf.\nAilleurs : https://exemple.org/autre.pdf\n')
+        m.add_attachment(pdf, maintype='application', subtype='pdf', filename='CA 2022 CEC SUBVENTIONS.pdf')
+        m.add_attachment(b'MZ programme', maintype='application', subtype='octet-stream', filename='outil.exe')
+        m.add_attachment(b'<html>pas un pdf</html>', maintype='application', subtype='pdf', filename='faux.pdf')
+        D.ingest(D.load(ref), m, 'reponse')
+        d = D.load(ref)
+        pieces = d['replies'][0]['pieces']
+        self.assertEqual([p['nom'] for p in pieces], ['CA 2022 CEC SUBVENTIONS.pdf'], 'only real documents are kept')
+        self.assertEqual(pieces[0]['fichier'], 'CA-2022-CEC-SUBVENTIONS.pdf')
+        self.assertEqual((D.pieces_dir(ref) / pieces[0]['fichier']).read_bytes(), pdf)
+        self.assertEqual(D.links_of(d['replies'][0]['text']), ['https://www.hautmont.fr/budget/CA_2024.pdf', 'https://exemple.org/autre.pdf'])
+        # copies of the linked documents: the body's own site only, unless the site asks for that request by name
+        asked, old = [], D.download
+        D.download = lambda url, limit=0, timeout=0: (asked.append(url) or (b'%PDF-1.4 ' + url.encode(), url))
+        try:
+            d['to']['site'] = 'https://www.hautmont.fr/'
+            D.save(d)
+            self.assertEqual(D.mirror_links(ref)['copies'], 1)
+            self.assertEqual(asked, ['https://www.hautmont.fr/budget/CA_2024.pdf'])
+            self.assertEqual(D.mirror_links(ref)['copies'], 0, 'a copy is made once')
+            self.assertEqual(D.complete(ref)['copies'], 1, 'asked by name: any public host')
+        finally:
+            D.download = old
+        d = D.load(ref)
+        copy = d['replies'][0]['pieces'][1]
+        self.assertEqual((copy['origine'], copy['url'], copy['fichier']), ('lien', 'https://www.hautmont.fr/budget/CA_2024.pdf', 'CA_2024.pdf'))
+        # nothing is served before the reply is published, except with the document's SHA-256 (review panel)
+        self.assertIsNone(D.piece_file(ref, pieces[0]['fichier']))
+        self.assertIsNotNone(D.piece_file(ref, pieces[0]['fichier'], pieces[0]['sha256']))
+        self.assertEqual(D.admin('tout')['demandes'][0]['pieces'][0]['lien'].split('?k=')[1], pieces[0]['sha256'])
+        D.admin('piece', ref, 'autre.pdf')   # held back by the site
+        D.admin('publier', ref)
+        view = D.published()[0]
+        self.assertEqual([p['nom'] for p in view['reponses'][0]['pieces']], ['CA 2022 CEC SUBVENTIONS.pdf', 'CA_2024.pdf'])
+        self.assertEqual(view['reponses'][0]['pieces'][0]['href'], f'api/assistant/demandes/piece/{ref}/CA-2022-CEC-SUBVENTIONS.pdf')
+        path, meta, ctype = D.piece_file(ref, 'CA-2022-CEC-SUBVENTIONS.pdf')
+        self.assertEqual((path.read_bytes(), ctype), (pdf, 'application/pdf'))
+        self.assertIsNone(D.piece_file(ref, 'autre.pdf'))
+        self.assertIsNone(D.piece_file(ref, '../' + ref + '.json'))
+        self.assertIsNone(D.piece_file('FRL-2026-9999', 'x.pdf'))
+        # the whole exchange is published: the letter, the sendings, the level of the body
+        self.assertIn('L. 300-1', view['lettre']['texte'])
+        self.assertEqual((view['niveau'], view['envois'][0]['role']), ('commune', 'formulaire'))
+        self.assertEqual(D.admin('mots', ref, 'cantine, #restauration scolaire, cantine')['mots'], ['cantine', 'restauration scolaire'])
+
+    def test_download_refuses_private_hosts(self):
+        D = self.D
+        for url in ('http://127.0.0.1:8018/api/assistant/status', 'http://localhost/x.pdf', 'file:///etc/passwd',
+                    'https://user@exemple.org/x.pdf', 'http://169.254.169.254/latest/x.pdf', 'https://exemple.org:8443/x.pdf'):
+            with self.assertRaises(D.NetworkError, msg=url):
+                D.download(url)
+
     def test_without_mailbox_the_reader_copies(self):
         S.MAIL_CONFIGURED = False
         draft = self.draft()['demande']

@@ -9,6 +9,9 @@ l'administration, articles L. 300-1 and following) to the body that holds them.
 * the reader either copies it and sends it himself, or asks FranceRoueLibre to send it from MAIL_FROM. With
   MAIL_AUTO_SEND=0 (default) it then waits for the site's validation (``assistant_api.py --demandes``);
 * replies are read from the mailbox (IMAP) and published only once validated; the agents' names are not published;
+* the documents received are kept: the attachments of each reply and a copy of the documents its links point to
+  (STATE_DIR/demandes/pieces/<ref>/, with their size, SHA-256 and source address), served once the reply is published
+  by GET /api/assistant/demandes/piece/<ref>/<file>;
 * one file per request in STATE_DIR/demandes/<ref>.json; GET /api/assistant/demandes lists the published ones
   (page demandes.html).
 """
@@ -18,16 +21,21 @@ import datetime as dt
 import email
 import email.policy
 import email.utils
+import hashlib
 import html
 import imaplib
+import ipaddress
 import json
 import re
 import secrets
 import smtplib
+import socket
 import ssl
 import threading
 import unicodedata
+import urllib.error
 import urllib.parse
+import urllib.request
 from email.message import EmailMessage
 from pathlib import Path
 from typing import Optional
@@ -74,7 +82,17 @@ def _record(r: dict) -> dict:
     return with_prada({'nom': r.get('nom'), 'email': (r.get('adresse_courriel') or '').split(';')[0].strip() or None,
                        'formulaire': r.get('formulaire_contact'), 'site': site[0].get('valeur') if site else None,
                        'fiche': r.get('url_service_public'), 'siret': r.get('siret'), 'type': _kind(r) or None,
-                       'code_postal': place.get('code_postal') or None})
+                       'code_postal': place.get('code_postal') or None,
+                       'insee': r.get('code_insee_commune') or None, **_coord(place)})
+
+
+def _coord(place: dict) -> dict:
+    """The body's position in the directory (its address), for the map of the requests; nothing when it is missing."""
+    try:
+        lat, lon = float(place.get('latitude')), float(place.get('longitude'))
+    except (TypeError, ValueError):
+        return {}
+    return {'lat': round(lat, 4), 'lon': round(lon, 4)} if -90 <= lat <= 90 and -180 <= lon <= 180 and (lat or lon) else {}
 
 
 # ------------------------------------------------------------------------------------------------------- PRADA
@@ -160,7 +178,7 @@ def annuaire(code_insee: str = '', nom: str = '') -> list:
     # body itself, « Métropole de Lyon - Rhône », comes last in the API's order
     url = ANNUAIRE + '?' + urllib.parse.urlencode({'where': where, 'limit': 8 if code_insee else 100, 'select': 'nom,'
                                                    'adresse_courriel,formulaire_contact,site_internet,url_service_public,'
-                                                   'siret,pivot,adresse'})
+                                                   'siret,pivot,adresse,code_insee_commune'})
     status, res, _ = get_json(url, timeout=15)
     if status != 200:
         raise NetworkError(f'annuaire : HTTP {status}')
@@ -350,16 +368,37 @@ def prepare(organisme: str, code_insee: str = '', objet: str = '', documents: st
                     'dans ta réponse : dis en une phrase à qui elle s’adresse et pourquoi, et le délai d’un mois.'}
 
 
+# The level of the body written to, from its kind in the directory: the filter and the map of demandes.html.
+LEVELS = {'mairie': 'commune', 'epci': 'interco', 'cg': 'departement', 'cr': 'region'}
+_LEVEL_WORDS = (('commune', ('mairie', 'commune', 'ville')), ('interco', ('metropole', 'communaute', 'agglomeration')),
+                ('departement', ('conseil departemental', 'departement')), ('region', ('conseil regional', 'region')))
+
+
+def level(to: dict) -> str:
+    """commune | interco | departement | region | autre (State services, operators, social security...)."""
+    if to.get('type'):
+        return LEVELS.get(to['type'], 'autre')
+    name = norm(to.get('nom') or '')
+    return next((k for k, words in _LEVEL_WORDS if name.startswith(words)), 'autre')
+
+
 def public_view(d: dict) -> dict:
-    sent = d.get('sent')
+    sent, to = d.get('sent'), d['to']
     due = (dt.datetime.fromisoformat(sent) + dt.timedelta(days=DELAY_DAYS)).date().isoformat() if sent else None
-    return {'ref': d['ref'], 'status': d['status'], 'organisme': d['to']['nom'], 'objet': d['fields']['objet'],
+    return {'ref': d['ref'], 'status': d['status'], 'organisme': to['nom'], 'objet': d['fields']['objet'],
             'documents': d['fields']['documents'], 'contexte': d['fields'].get('contexte'), 'envoyee': sent,
-            'echeance': due, 'fiche': d['to'].get('fiche'), 'canal': d.get('mode') or 'courriel',
-            'formulaire': d['to'].get('formulaire') if d.get('mode') == 'formulaire' else None,
+            'echeance': due, 'fiche': to.get('fiche'), 'canal': d.get('mode') or 'courriel',
+            'formulaire': to.get('formulaire') if d.get('mode') == 'formulaire' else None,
             'destinataires': sorted({e['role'] for e in envois(d)}),
             'accuse': next((a['date'] for a in d.get('accuses', []) if a['type'] == 'automatique'), None),
-            'reponses': [{'date': r['date'], 'texte': r['public_text'], 'pieces': r.get('public_files', [])}
+            # the whole exchange, in order: the letter as it left, each sending, the automatic messages, the replies
+            'lettre': {'objet': d.get('subject'), 'texte': strip_signature(d.get('body') or '')} if d.get('body') else None,
+            'envois': [{'date': e['date'], 'role': e['role']} for e in envois(d)],
+            'evenements': [{'date': a['date'], 'type': a['type']} for a in d.get('accuses', [])],
+            'niveau': level(to), 'mots': d.get('mots') or [],
+            'lieu': {k: v for k, v in (('cp', to.get('code_postal')), ('dep', _dept(to.get('code_postal')) or None),
+                                       ('insee', to.get('insee')), ('lat', to.get('lat')), ('lon', to.get('lon'))) if v},
+            'reponses': [{'date': r['date'], 'texte': r['public_text'], 'pieces': public_pieces(d['ref'], r)}
                          for r in d.get('replies', []) if r.get('public_text')]}
 
 
@@ -643,7 +682,8 @@ def ingest(d: dict, msg, kind: str) -> bool:
         d.setdefault('accuses', []).append(note)
     else:
         d.setdefault('replies', []).append({'date': now, 'from_domain': sender.split('@')[-1], 'text': text,
-                                            'files': files, 'public_text': None})
+                                            'files': files, 'public_text': None,
+                                            'pieces': [m for m in (store_piece(d, n, data) for n, data in attachments(msg)) if m]})
         d['status'] = 'repondue'
     save(d)
     return True
@@ -701,6 +741,11 @@ def poll_replies() -> int:
                     continue
             box.store(num, '+FLAGS', '\\Seen')
             found += 1
+            if kind == 'reponse':   # a copy of the documents the reply links to, outside the lock (network)
+                try:
+                    mirror_links(d['ref'])
+                except (OSError, ValueError):
+                    pass
             if kind == 'reponse':
                 notify(f'Réponse à {d["ref"]}', f'{d["to"]["nom"]} a répondu :\n\n{d["replies"][-1]["text"]}\n\n'
                                                 f'Pièces : {", ".join(d["replies"][-1]["files"]) or "aucune"}'
@@ -721,11 +766,320 @@ def poll_replies() -> int:
 
 
 def poller(stop: threading.Event, every: int = 900) -> None:
-    while not stop.wait(every):
+    first = True
+    while not stop.wait(5 if first else every):
+        first = False
         try:
             poll_replies()
         except (OSError, imaplib.IMAP4.error, ValueError):
             pass
+        try:   # replies stored before the documents were kept, bodies without a position: done once each
+            complete()
+        except (OSError, imaplib.IMAP4.error, ValueError, NetworkError):
+            pass
+
+
+# ------------------------------------------------------------------------------------------------------- documents
+# What a body sends is kept with the request: the attachments of its reply and a copy of the documents its links point
+# to (a page of a town's site moves or disappears). Each file keeps its size, its SHA-256 and, for a copy, its address
+# and the date it was fetched. A file is served to all once its reply is published, unless the site holds it back.
+PIECE_MAX = 25 * 1024 * 1024    # one attachment
+LINK_MAX = 60 * 1024 * 1024     # one linked document (budget documents of a large town weigh 20 to 50 MB)
+PIECES_PER_REPLY = 12
+LINKS_PER_REPLY = 8
+PIECE_TYPES = {'.pdf': 'application/pdf', '.csv': 'text/csv', '.txt': 'text/plain', '.json': 'application/json',
+               '.xml': 'application/xml', '.zip': 'application/zip', '.png': 'image/png', '.jpg': 'image/jpeg',
+               '.jpeg': 'image/jpeg', '.doc': 'application/msword', '.xls': 'application/vnd.ms-excel',
+               '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+               '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+               '.odt': 'application/vnd.oasis.opendocument.text', '.ods': 'application/vnd.oasis.opendocument.spreadsheet'}
+# the first bytes a file of each kind must start with: a « .pdf » that is something else is not kept
+_MAGIC = {'.pdf': (b'%PDF-',), '.zip': (b'PK',), '.docx': (b'PK',), '.xlsx': (b'PK',), '.odt': (b'PK',), '.ods': (b'PK',),
+          '.png': (b'\x89PNG',), '.jpg': (b'\xff\xd8',), '.jpeg': (b'\xff\xd8',), '.doc': (b'\xd0\xcf\x11\xe0',),
+          '.xls': (b'\xd0\xcf\x11\xe0',)}
+LINK_TYPES = ('.pdf', '.csv', '.zip', '.doc', '.docx', '.xls', '.xlsx', '.odt', '.ods')   # links worth a copy
+INLINE_TYPES = ('.pdf', '.png', '.jpg', '.jpeg')   # opened in the browser; the rest is downloaded
+_URL = re.compile(r'https?://[^\s<>"\'\]\[)]+')
+
+
+def pieces_dir(ref: str) -> Path:
+    _path(ref)   # checks the reference
+    d = _dir() / 'pieces' / ref
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _ext(name: str) -> str:
+    return Path(str(name or '')).suffix.lower()
+
+
+def _safe_name(name: str) -> str:
+    """A file name for the disk and the address: plain letters, digits, dot, dash, underscore."""
+    stem, ext = Path(str(name or 'piece')).stem, _ext(name)
+    stem = re.sub(r'[^A-Za-z0-9_]+', '-', ''.join(c for c in unicodedata.normalize('NFD', stem)
+                                                  if unicodedata.category(c) != 'Mn')).strip('-')[:70]
+    return (stem or 'piece') + ext
+
+
+def attachments(msg) -> list:
+    """[(file name, bytes)] of a message: its attached files, not the images of a signature shown in the text."""
+    out = []
+    for part in msg.walk():
+        name = part.get_filename()
+        if not name or part.is_multipart():
+            continue
+        if part.get_content_disposition() != 'attachment' and part.get_content_maintype() == 'image':
+            continue
+        try:
+            data = part.get_payload(decode=True)
+        except (LookupError, ValueError):
+            data = None
+        if data:
+            out.append((str(name), data))
+    return out[:PIECES_PER_REPLY]
+
+
+def store_piece(d: dict, name: str, data: bytes, origine: str = 'courriel', url: Optional[str] = None,
+                limit: int = PIECE_MAX) -> Optional[dict]:
+    """Writes one document of request d and returns its description, None when it is not kept (kind of file not
+    accepted, too large, or not what its extension says). The same file twice is stored once."""
+    ext = _ext(name)
+    if ext not in PIECE_TYPES or not data or len(data) > limit:
+        return None
+    if ext in _MAGIC and not data.startswith(_MAGIC[ext]):
+        return None
+    digest = hashlib.sha256(data).hexdigest()
+    known = [p for r in d.get('replies', []) for p in r.get('pieces') or []]
+    same = next((p for p in known if p.get('sha256') == digest), None)
+    folder = pieces_dir(d['ref'])
+    if same and (folder / same['fichier']).is_file():
+        return None if origine == 'lien' else {**same, 'nom': str(name)[:160]}
+    taken = {p['fichier'] for p in known} | {f.name for f in folder.iterdir()}
+    safe = _safe_name(name)
+    stored = next(n for n in (safe if i == 0 else f'{Path(safe).stem}-{i + 1}{ext}' for i in range(500)) if n not in taken)
+    tmp = folder / (stored + '.tmp')
+    tmp.write_bytes(data)
+    tmp.replace(folder / stored)
+    meta = {'nom': str(name)[:160], 'fichier': stored, 'taille': len(data), 'type': ext[1:], 'sha256': digest,
+            'origine': origine, 'date': dt.datetime.now().isoformat(timespec='seconds')}
+    if url:
+        meta['url'] = url
+    return meta
+
+
+def public_pieces(ref: str, reply: dict) -> list:
+    """The documents of a published reply, as the page lists them (the ones held back by the site are left out)."""
+    return [{'nom': p['nom'], 'taille': p['taille'], 'type': p['type'], 'origine': p.get('origine', 'courriel'),
+             'url': p.get('url'), 'date': p.get('date'), 'sha256': p.get('sha256'),
+             'href': f'api/assistant/demandes/piece/{ref}/{urllib.parse.quote(p["fichier"])}'}
+            for p in reply.get('pieces') or [] if not p.get('masquee')]
+
+
+def piece_file(ref: str, fichier: str, key: str = '') -> Optional[tuple]:
+    """(path, description, content type) of a document that may be served: its reply is published and the site does
+    not hold it back, or the caller gives its SHA-256 (the review panel, before publication)."""
+    try:
+        d = load(ref)
+    except ValueError:
+        return None
+    if not d or not re.fullmatch(r'[A-Za-z0-9._-]{1,120}', fichier or '') or '..' in fichier:
+        return None
+    shown = d['status'] in ('envoyee', 'repondue', 'close')
+    for r in d.get('replies', []):
+        for p in r.get('pieces') or []:
+            if p['fichier'] != fichier:
+                continue
+            public = shown and bool(r.get('public_text')) and not p.get('masquee')
+            if not public and not (key and secrets.compare_digest(key, p.get('sha256') or '')):
+                return None
+            path = pieces_dir(ref) / fichier
+            return (path, p, PIECE_TYPES.get('.' + p['type'], 'application/octet-stream')) if path.is_file() else None
+    return None
+
+
+# -- copies of the documents a reply links to
+def _public_host(host: str) -> bool:
+    """True when every address of this host is on the public Internet (never the server itself or its network)."""
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except (OSError, UnicodeError):
+        return False
+    ips = {i[4][0] for i in infos}
+    return bool(ips) and all(ipaddress.ip_address(ip.split('%')[0]).is_global for ip in ips)
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *a, **k):   # redirections are followed by hand, each address checked
+        return None
+
+
+def download(url: str, limit: int = LINK_MAX, timeout: float = 45) -> tuple:
+    """(bytes, final address) of a public document, or raises NetworkError. http(s) only, public hosts only, at most
+    three redirections, never more than `limit` bytes."""
+    opener = urllib.request.build_opener(_NoRedirect)
+    for _ in range(4):
+        u = urllib.parse.urlsplit(url)
+        if u.scheme not in ('http', 'https') or not u.hostname or u.username or (u.port not in (None, 80, 443)):
+            raise NetworkError('adresse refusée')
+        if not _public_host(u.hostname):
+            raise NetworkError('hôte refusé')
+        req = urllib.request.Request(url, headers={'User-Agent': f'FranceRoueLibre/1.0 (+{S.SITE_URL}/{PAGE})',
+                                                   'Accept': '*/*'})
+        try:
+            with opener.open(req, timeout=timeout) as r:
+                size = int(r.headers.get('Content-Length') or 0)
+                if size > limit:
+                    raise NetworkError('document trop volumineux')
+                data = r.read(limit + 1)
+                if len(data) > limit:
+                    raise NetworkError('document trop volumineux')
+                return data, url
+        except urllib.error.HTTPError as e:
+            target = e.headers.get('Location') if e.code in (301, 302, 303, 307, 308) else None
+            if not target:
+                raise NetworkError(f'HTTP {e.code}') from e
+            url = urllib.parse.urljoin(url, target)
+        except (urllib.error.URLError, socket.timeout, TimeoutError, ConnectionError, ssl.SSLError) as e:
+            raise NetworkError(type(e).__name__) from e
+    raise NetworkError('trop de redirections')
+
+
+def _site(host: str) -> str:
+    """« www.cherbourg.fr » → « cherbourg.fr »: the last two labels (three for « gouv.fr » and the like)."""
+    labels = (host or '').lower().strip('.').split('.')
+    n = 3 if len(labels) > 2 and '.'.join(labels[-2:]) in ('gouv.fr', 'asso.fr', 'com.fr', 'co.uk') else 2
+    return '.'.join(labels[-n:])
+
+
+def links_of(text: str) -> list:
+    """The addresses of documents (PDF, spreadsheet, archive...) written in a reply, in order, once each."""
+    seen, out = set(), []
+    for u in _URL.findall(text or ''):
+        u = u.rstrip('.,;:!?»”’')
+        if _ext(urllib.parse.urlsplit(u).path) in LINK_TYPES and u not in seen:
+            seen.add(u)
+            out.append(u)
+    return out[:LINKS_PER_REPLY]
+
+
+def mirror_links(ref: str, any_host: bool = False) -> dict:
+    """Keeps a copy of the documents the replies of a request link to. Without any_host, only the documents hosted by
+    the body itself (the domain of its reply or of its site). {'copies': n, 'erreurs': [...]}."""
+    d = load(ref)
+    if not d:
+        return {'copies': 0, 'erreurs': ['demande inconnue']}
+    own = {_site(urllib.parse.urlsplit(d['to'].get('site') or '').hostname or '')} - {''}
+    todo = []
+    for i, r in enumerate(d.get('replies', [])):
+        done = {p.get('url') for p in r.get('pieces') or []} | set(r.get('liens_refuses') or [])
+        for u in links_of(r.get('text')):
+            host = urllib.parse.urlsplit(u).hostname or ''
+            if u not in done and (any_host or _site(host) in own | {_site(r.get('from_domain') or '')}):
+                todo.append((i, u))
+    copies, errors, fetched = 0, [], []
+    for i, u in todo:
+        try:
+            data, _ = download(u)
+        except NetworkError as exc:
+            errors.append(f'{u} : {exc}')
+            continue
+        fetched.append((i, u, data))
+    with _lock:   # the request may have changed while the documents were fetched
+        d = load(ref)
+        for i, u, data in fetched:
+            if not d or i >= len(d.get('replies', [])):
+                continue
+            name = urllib.parse.unquote(Path(urllib.parse.urlsplit(u).path).name) or 'document'
+            meta = store_piece(d, name, data, origine='lien', url=u, limit=LINK_MAX)
+            if meta:
+                d['replies'][i].setdefault('pieces', []).append(meta)
+                copies += 1
+            else:   # not the kind of file its address says, or the same document as an attachment: not asked again
+                d['replies'][i].setdefault('liens_refuses', []).append(u)
+        if d and fetched:
+            save(d)
+    return {'copies': copies, 'erreurs': errors}
+
+
+def _reply_messages(ref: str) -> list:
+    """The messages of the mailbox written by someone about this request, oldest first (read or not, left as they are)."""
+    box = imaplib.IMAP4_SSL(S.MAIL_IMAP_HOST, S.MAIL_IMAP_PORT, ssl_context=ssl.create_default_context(), timeout=30)
+    out = []
+    try:
+        box.login(S.MAIL_USER, S.MAIL_PASSWORD)
+        box.select('INBOX', readonly=True)
+        _, data = box.search(None, f'(SUBJECT "{ref}" NOT FROM "{S.MAIL_FROM}")')
+        for num in (data[0] or b'').split():
+            _, parts = box.fetch(num, '(BODY.PEEK[])')
+            raw = next((p for p in parts or [] if isinstance(p, tuple)), None)
+            if not raw:
+                continue
+            msg = email.message_from_bytes(raw[1], policy=email.policy.default)
+            if classify(msg) == 'reponse':
+                out.append(msg)
+    finally:
+        try:
+            box.logout()
+        except (OSError, imaplib.IMAP4.error):
+            pass
+    return out
+
+
+def complete(ref: str = '') -> dict:
+    """Catches up what older requests lack, once each: the attachments of the replies stored before the documents were
+    kept (read again from the mailbox), the copies of the linked documents, the position of the body for the map.
+    With a reference, that request only, tried again, and linked documents from any public host."""
+    done = {'pieces': 0, 'copies': 0, 'positions': 0, 'erreurs': []}
+    for d in ([load(ref)] if ref else all_requests()):
+        if not d or d['status'] == 'brouillon':
+            continue
+        r_ref = d['ref']
+        if any(r.get('pieces') is None or (ref and r.get('files') and not r.get('pieces')) for r in d.get('replies', [])):
+            msgs = []
+            if S.MAIL_CONFIGURED and S.MAIL_IMAP_HOST:
+                try:
+                    msgs = _reply_messages(r_ref)
+                except (OSError, imaplib.IMAP4.error) as exc:
+                    done['erreurs'].append(f'{r_ref} : boîte illisible ({type(exc).__name__})')
+                    msgs = None
+            if msgs is not None:
+                with _lock:
+                    d = load(r_ref)
+                    texts = [_text_of(m)[0] for m in msgs]
+                    for i, r in enumerate(d.get('replies', [])):
+                        if r.get('pieces'):
+                            continue
+                        m = next((m for m, t in zip(msgs, texts) if t == r.get('text')), msgs[i] if i < len(msgs) else None)
+                        r['pieces'] = [p for p in (store_piece(d, n, data) for n, data in attachments(m)) if p] if m else []
+                        done['pieces'] += len(r['pieces'])
+                    save(d)
+        if any(links_of(r.get('text')) and not r.get('liens_cherches') for r in d.get('replies', [])) or ref:
+            res = mirror_links(r_ref, any_host=bool(ref))
+            done['copies'] += res['copies']
+            done['erreurs'] += res['erreurs']
+            with _lock:
+                d = load(r_ref)
+                for r in d.get('replies', []):
+                    r['liens_cherches'] = True
+                save(d)
+        to = d['to']
+        if not to.get('lat') and (ref or not to.get('position_cherchee')):
+            found = None
+            try:
+                rows = (annuaire(code_insee=to['insee']) if to.get('insee') and level(to) == 'commune'
+                        else annuaire(nom=to.get('nom') or ''))
+                found = next((c for c in rows if norm(c['nom']) == norm(to.get('nom') or '') and c.get('lat')
+                              and (not to.get('code_postal') or c.get('code_postal') == to.get('code_postal'))), None)
+            except NetworkError as exc:
+                done['erreurs'].append(f'{r_ref} : annuaire indisponible ({exc})')
+            with _lock:
+                d = load(r_ref)
+                d['to']['position_cherchee'] = True
+                if found:
+                    d['to'].update(lat=found['lat'], lon=found['lon'], **({'insee': found['insee']} if found.get('insee') else {}))
+                    done['positions'] += 1
+                save(d)
+    return {'ok': True, **done}
 
 
 # ------------------------------------------------------------------------------------------------------- moderation
@@ -758,7 +1112,7 @@ def mail_test() -> dict:
 
 
 def admin(action: str, ref: str = '', text: str = '') -> dict:
-    """liste | tout | voir | valider | deposee (a letter pasted by hand in the body's contact form; text = the form's link) | prada (the body's PRADA as recipient, before sending) | envoyer_prada (the validated letter again, to the PRADA) | refuser | modifier (JSON subject and body in text) | destinataire (name or INSEE code in text) | publier (the last reply, anonymized or the given text) | cloturer | test."""
+    """liste | tout | voir | completer [REF] (attachments, copies of linked documents, positions) | piece (text = file name: held back or shown) | mots (text = keywords) | valider | deposee (a letter pasted by hand in the body's contact form; text = the form's link) | prada (the body's PRADA as recipient, before sending) | envoyer_prada (the validated letter again, to the PRADA) | refuser | modifier (JSON subject and body in text) | destinataire (name or INSEE code in text) | publier (the last reply, anonymized or the given text) | cloturer | test."""
     if action == 'test':
         return mail_test()
     if action == 'tout':  # every request in full, for the review panel (frl_panel.bat), with its deadline
@@ -778,10 +1132,19 @@ def admin(action: str, ref: str = '', text: str = '') -> dict:
                          'meme_organisme_30j': sum(1 for x in all_requests() if x['ref'] != d['ref'] and x['to'].get('email')
                                                    and x['to'].get('email') == d['to'].get('email')
                                                    and x['status'] not in ('brouillon', 'refusee')),
-                         'reponse_anonymisee': anonymize(d['replies'][-1]['text']) if d.get('replies') else None})
+                         'reponse_anonymisee': anonymize(d['replies'][-1]['text']) if d.get('replies') else None,
+                         # each document of the last reply with a link that opens it before publication (its SHA-256 as key)
+                         'pieces': [{**p, 'lien': f'{S.SITE_URL}/api/assistant/demandes/piece/{d["ref"]}/'
+                                                  f'{urllib.parse.quote(p["fichier"])}?k={p["sha256"]}'}
+                                    for p in (d['replies'][-1].get('pieces') or [])] if d.get('replies') else []})
         return {'demandes': rows, 'signature': {'texte': signature_text(), 'html': signature_html(f'{S.SITE_URL}/logo-512.png')},
                 'delai_jours': DELAY_DAYS, 'envoi_auto': bool(S.MAIL_AUTO_SEND),
                 'envois_par_jour': S.MAIL_DAILY, 'envoyes_aujourdhui': _sent_today()}
+    if action == 'completer':  # attachments, copies of linked documents and positions that older requests lack
+        try:
+            return complete(ref)
+        except ValueError:
+            return {'error': 'référence invalide'}
     if action == 'liste':
         return {'demandes': [{'ref': d['ref'], 'status': d['status'], 'organisme': d['to']['nom'],
                               'objet': d['fields']['objet'], 'reponses': len(d.get('replies', []))}
@@ -835,6 +1198,23 @@ def admin(action: str, ref: str = '', text: str = '') -> dict:
             save(d)
         return {'ok': True, 'ref': ref, 'status': d['status'], 'destinataire': to,
                 'autres': [c['nom'] for c in found if c is not to][:6]}
+    if action == 'piece':  # a document of a reply held back from the page, or shown again: text = its stored file name
+        with _lock:
+            d = load(ref)
+            p = next((p for r in d.get('replies', []) for p in r.get('pieces') or [] if p['fichier'] == text.strip()), None)
+            if not p:
+                return {'error': 'pièce inconnue'}
+            p['masquee'] = not p.get('masquee')
+            save(d)
+        return {'ok': True, 'ref': ref, 'status': d['status'],
+                'message': f'{p["nom"]} : {"non publiée" if p["masquee"] else "publiée avec la réponse"}'}
+    if action == 'mots':  # keywords shown and searched on the page: text = « subventions, associations » (8 at most)
+        words = [re.sub(r'\s+', ' ', w).strip(' #')[:40] for w in re.split(r'[,;\n]', text)]
+        with _lock:
+            d = load(ref)
+            d['mots'] = list(dict.fromkeys(w for w in words if w))[:8]
+            save(d)
+        return {'ok': True, 'ref': ref, 'status': d['status'], 'mots': d['mots']}
     if action == 'envoyer_prada':  # a request already sent to the general contact: the same letter, as validated, to
         return send_to_prada(ref)   # the body's PRADA too (CADA's list), which handles these requests
     if action == 'prada':  # a request not sent yet goes to the body's PRADA (CADA's list) instead of its general contact

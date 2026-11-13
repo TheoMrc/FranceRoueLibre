@@ -31,6 +31,7 @@
   </script>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./demandes.css">
   <script defer src="./common.js"></script>
   <script defer src="./demandes.js"></script>
   <script defer src="./nav.js"></script>
@@ -90,12 +91,36 @@
         <p class="hero__lead">Quand une donnée manque dans les publications ouvertes, la Loupe propose d’écrire à l’administration qui la détient. Toute personne peut demander un document administratif existant (budget, compte, délibération, convention, marché) : l’administration a un mois pour répondre. Voici les demandes envoyées par le site et les réponses reçues.</p>
       </div></div>
     </section>
-    <section class="section" aria-labelledby="dmTitle">
+    <section class="section dm-section" aria-labelledby="dmTitle" data-full>
       <div class="container">
-        <div class="section__head"><span class="eyebrow">Suivi</span><h2 id="dmTitle">Les demandes envoyées</h2><p class="lead">Chaque demande avec sa date d’envoi, l’échéance d’un mois et la réponse de l’administration quand elle arrive.</p></div>
-        <div class="callout"><strong>La règle.</strong> Le droit d’accès aux documents administratifs (code des relations entre le public et l’administration, articles L. 300-1 et suivants) vaut pour tout document qui existe déjà, pas pour une question ou une explication. Sans réponse au bout d’un mois, la demande est réputée refusée ; on peut alors saisir gratuitement la <a href="https://www.cada.fr/particulier/comment-saisir-la-cada" target="_blank" rel="noopener noreferrer">Commission d’accès aux documents administratifs</a> dans les deux mois. Les lettres suivent un modèle courtois fixe, relu avant envoi ; les réponses sont publiées sans le nom des agents.</div>
-        <div class="dm-filters" id="dmFilters" role="group" aria-label="Filtrer par état"></div>
-        <div id="dmList" class="dm-list"><p class="note">Chargement…</p></div>
+        <div class="section__head"><span class="eyebrow">Suivi</span><h2 id="dmTitle">Les demandes envoyées</h2><p class="lead">Chaque demande avec la lettre envoyée, l’échéance d’un mois, la réponse complète de l’administration et les documents qu’elle a transmis, à télécharger.</p></div>
+        <div class="dm-stats" id="dmStats" aria-live="polite"></div>
+        <div class="dm-tools">
+          <label class="dm-q"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><span class="sr-only">Chercher dans les demandes</span><input id="dmQ" type="search" placeholder="Chercher : une commune, subventions, bornes de recharge, un document…" autocomplete="off" enterkeyhint="search"></label>
+          <label class="dm-sort">Trier <select id="dmSort"><option value="recent">les plus récentes</option><option value="reponse">dernières réponses</option><option value="echeance">échéance la plus proche</option></select></label>
+        </div>
+        <div class="dm-layout">
+          <aside class="dm-side" id="dmSide" aria-label="Carte et filtres">
+            <div class="dm-map" id="dmMap">
+              <svg id="dmMapSvg" viewBox="0 0 424 400" role="group" aria-label="Carte des organismes auxquels une demande a été envoyée"></svg>
+              <div class="dm-tip" id="dmTip" role="status" hidden></div>
+              <p class="dm-map__legend"><span class="dm-map__key" aria-hidden="true"></span>Un point par lieu d’envoi, cliquez pour filtrer. Département ou région sollicités : territoire teinté. Outre-mer et organismes nationaux : hors de la carte.</p>
+              <div class="dm-off" id="dmOff" hidden></div>
+            </div>
+            <div class="dm-facets" id="dmFacets">
+              <div class="dm-facet" id="dmStates" hidden></div>
+              <div class="dm-facet" id="dmLevels" hidden></div>
+              <div class="dm-facet" id="dmThemes" hidden></div>
+            </div>
+          </aside>
+          <div class="dm-main">
+            <button type="button" class="dm-fold" id="dmMapToggle" aria-expanded="true" aria-controls="dmSide"><span>Masquer la carte et les filtres</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/></svg></button>
+            <p class="dm-count" id="dmCount" aria-live="polite"></p>
+            <ul id="dmList" class="dm-list"><li class="dm-empty">Chargement…</li></ul>
+            <button type="button" class="dm-morebtn" id="dmMore" hidden></button>
+          </div>
+        </div>
+        <details class="dm-rule"><summary>La règle : un mois pour répondre</summary><p>Le droit d’accès aux documents administratifs (code des relations entre le public et l’administration, articles L. 300-1 et suivants) vaut pour tout document qui existe déjà, pas pour une question ou une explication. Sans réponse au bout d’un mois, la demande est réputée refusée ; on peut alors saisir gratuitement la <a href="https://www.cada.fr/particulier/comment-saisir-la-cada" target="_blank" rel="noopener noreferrer">Commission d’accès aux documents administratifs</a> dans les deux mois. Les lettres suivent un modèle courtois fixe, relu avant envoi ; les réponses sont publiées sans le nom des agents. Les documents reçus sont conservés tels quels ; quand une réponse renvoie vers un document en ligne, le site en garde une copie avec son adresse d’origine.</p></details>
         <p class="note">Pour proposer une demande, posez votre question à la Loupe (bouton « Poser une question ») : si la donnée n’est pas publiée, elle prépare la lettre. Une erreur, une réponse qui manque : <a href="mailto:stonks@francerouelibre.fr">stonks@francerouelibre.fr</a>.</p>
       </div>
     </section>
